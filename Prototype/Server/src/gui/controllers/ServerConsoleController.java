@@ -39,20 +39,28 @@ public class ServerConsoleController {
 	 */
 	@FXML
 	public void btnStart(Event event) {
+		if(BistroServerGUI.server != null && BistroServerGUI.server.isListening()) {
+			displayMessageToConsole("Server is already running and listening on port " + ServerPortFrameController.listeningPort);
+			return;
+		}
 		displayMessageToConsole("Starting server...");
 		try {
 			BistroServerGUI.server = new BistroServer(ServerPortFrameController.listeningPort,this);
 		} catch (Exception e) {
 			e.printStackTrace();
-			displayMessageToConsole("Error starting server: " + e.getMessage() + "\n");
+			displayMessageToConsole("Error starting server: " + e.getMessage());
 		}
-		try {
-			BistroServerGUI.server.listen();
-			displayMessageToConsole("Server started and listening on port " + ServerPortFrameController.listeningPort);
-		} catch (Exception e) {
-			e.printStackTrace();
-			displayMessageToConsole("Error: Could not listen on port " + ServerPortFrameController.listeningPort );
-		}
+		Thread startServerThread = new Thread(new Runnable() {
+			public void run() {
+				try {
+					BistroServerGUI.server.listen();
+				} catch (Exception e) {
+					e.printStackTrace();
+					Platform.runLater(() -> displayMessageToConsole("Error: Could not listen on port " + ServerPortFrameController.listeningPort));
+				}
+			}
+		});
+		startServerThread.start();
 	}
 	
 	/*
@@ -64,7 +72,7 @@ public class ServerConsoleController {
 	@FXML
 	public void btnStop(Event event) {
 		displayMessageToConsole("Stopping server...");
-
+		// Stop the server in a separate thread to avoid blocking the UI
 		Thread stopServerThread = new Thread(new Runnable() {
 			public void run() {
 				try {
@@ -99,6 +107,9 @@ public class ServerConsoleController {
 	@FXML
 	public void btnSend(Event event) {
 		String cmd= txtCommand.getText();
+		if(BistroServerGUI.server == null && BistroServerGUI.server.isListening()) {
+			displayMessageToConsole("Server is not running. Please start the server first.");
+		}
 		switch(cmd.trim().toLowerCase()) {
 		case "/start":
 			btnStart(event);

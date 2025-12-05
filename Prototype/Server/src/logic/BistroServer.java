@@ -84,7 +84,7 @@ public class BistroServer extends AbstractServer {
 	
 	protected void serverStarted() {
 		System.out.println("Server started");
-		serverConsole.displayMessageToConsole("Server started\n");
+		serverConsole.displayMessageToConsole("Server started");
 		boolean isConnectToDB = BistroDataBase_Controller.openConnection();
 		if(isConnectToDB) {
 			serverConsole.displayMessageToConsole("Connected to database successfully");
@@ -102,7 +102,6 @@ public class BistroServer extends AbstractServer {
 
 	public void showAllConnections() {
 		// TODO Auto-generated method stub
-		
 	}
 	
 	
