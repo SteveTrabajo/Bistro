@@ -8,6 +8,9 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import logic.BistroServer;
 import logic.BistroServerGUI;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.function.Consumer;
 
 /*
  * Controller class for the Server Console Frame.
@@ -33,6 +36,31 @@ public class ServerConsoleController {
 
 	@FXML
 	private TextField txtCommand; // Command input field
+
+	// Map-based command handlers
+	private final Map<String, Consumer<Event>> commandHandlers = new HashMap<>();
+
+	// Initialize is called by JavaFX after FXML injection
+	@FXML
+	public void initialize() {
+		// Populate the command handlers map
+		commandHandlers.put("/start", e -> btnStart(e));
+		commandHandlers.put("/stop", e -> btnStop(e));
+		commandHandlers.put("/clear", e -> btnClear(e));
+		commandHandlers.put("/connections", e -> {
+			if (BistroServerGUI.server == null || !BistroServerGUI.server.isListening()) {
+				displayMessageToConsole("Server is not running. Please start the server first.");
+			} else {
+				BistroServerGUI.server.showAllConnections();
+			}
+		});
+		commandHandlers.put("/help", e -> displayMessageToConsole("Available commands:\n" 
+				+ "/start - Start the server\n"
+				+ "/stop - Stop the server\n"
+				+ "/clear - Clear the console log\n"
+				+ "/connections - Show all active client connections\n"
+				+ "/help - Show this help message"));
+	}
 
 	/*
 	 * Method to handle the Start button click event. Starts the Bistro server and
@@ -112,48 +140,14 @@ public class ServerConsoleController {
 
 		String cmd = cmdRaw.trim().toLowerCase();
 
-		switch (cmd) {
-		case "/start":
-			// Can be used even when server is not running
-			btnStart(event);
-			break;
-
-		case "/stop":
-			if (BistroServerGUI.server == null || !BistroServerGUI.server.isListening()) {
-				displayMessageToConsole("Server is not running. Please start the server first.");
-			} else {
-				btnStop(event);
-			}
-			break;
-
-		case "/clear":
-			btnClear(event);
-			break;
-
-		case "/connections":
-			if (BistroServerGUI.server == null || !BistroServerGUI.server.isListening()) {
-				displayMessageToConsole("Server is not running. Please start the server first.");
-			} else {
-				BistroServerGUI.server.showAllConnections();
-			}
-			break;
-
-		case "/help":
-			displayMessageToConsole("Available commands:\n" 
-					+ "/start - Start the server\n"
-					+ "/stop - Stop the server\n" 
-					+ "/clear - Clear the console log\n"
-					+ "/connections - Show all active client connections\n" 
-					+ "/help - Show this help message");
-			break;
-
-		case "":
+		// Look up the handler in the map and execute it if present
+		Consumer<Event> handler = commandHandlers.get(cmd);
+		if (handler != null) {
+			handler.accept(event);
+		} else if (cmd.isEmpty()) {
 			displayMessageToConsole("No command entered. Type /help for a list of available commands.");
-			break;
-
-		default:
+		} else {
 			displayMessageToConsole("Unknown command: " + cmdRaw + ". Type /help for a list of available commands.");
-			break;
 		}
 
 		txtCommand.clear();
