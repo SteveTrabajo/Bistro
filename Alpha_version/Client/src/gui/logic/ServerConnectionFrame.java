@@ -51,7 +51,7 @@ public class ServerConnectionFrame {
 			intPort = Integer.parseInt(port); // converts the port to integer
 			try {
 				// Attempts to create a client instance and connect to the server.
-				BistroClientGUI.client = new BistroClient(ip, intPort);
+				BistroClientGUI.client = BistroClient.getInstance(ip, intPort);
 				System.out.println("IP Entered Successfully");
 				BistroClientGUI.client.notifyServerOnConnection(); // Notify successful connection
 				// Load the home screen if the connection is successful.
@@ -109,18 +109,17 @@ public class ServerConnectionFrame {
 	
 	
 	/*
-	 * Method to display an error message or messages in a label with a specified
-	 * color.
+	 * Method to display an error message in a label with a specified color.
 	 * 
-	 * @param lblError The label to display the error message / message .
+	 * @param lbl The label to display the message.
 	 * 
-	 * @param message The error message to be displayed.
+	 * @param message The message to display.
 	 * 
-	 * @param color The color of the error message text.
+	 * @param color The color of the message text.
 	 */
-	public void display(Label lblError, String message, Color color) {
-		lblError.setText(message); // Sets the error message in the label
-		lblError.setTextFill(color); // Sets the text color for the error message
+	public void display(Label lbl, String message, Color color) {
+		lbl.setText(message); // Sets the error message in the label
+		lbl.setTextFill(color); // Sets the text color for the error message
 	}
 	
 }

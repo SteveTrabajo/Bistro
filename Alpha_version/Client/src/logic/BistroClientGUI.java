@@ -6,6 +6,8 @@ import gui.logic.ServerConnectionFrame;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.application.Platform;
+import javafx.event.Event;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
@@ -19,10 +21,14 @@ import javafx.stage.Stage;
  */
 
 public class BistroClientGUI extends Application {
+	
+	//****************************** Instance variables ******************************
 
 	public static BistroClient client; // Static client instance for server communication
 
 	private static Stage primaryStage; // Primary stage for the application
+	
+	//******************************** Main Method ***********************************
 	
 	/*
 	 * Main method to launch the JavaFX application.
@@ -32,7 +38,8 @@ public class BistroClientGUI extends Application {
 	public static void main(String[] args) {
 		launch(args); // Launch the JavaFX application
 	}
-
+	//******************************** Start Method **********************************
+	
 	/*
 	 * Method to start the JavaFX application and establish a connection to the
 	 * server.
@@ -49,7 +56,17 @@ public class BistroClientGUI extends Application {
 		connectionFrame.start(primaryStage); // Start the connection frame
 		primaryStage.centerOnScreen(); // Center the primary stage on the screen
 	}
-
+	
+	//****************************** Static Methods ******************************
+	public static void switchScreen(FXMLLoader loader, Parent root, Event event, String string) {
+		Stage currentStage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+		Scene newScene = new Scene(root);
+		currentStage.setTitle(string);
+		currentStage.setScene(newScene);
+		currentStage.centerOnScreen();
+		currentStage.show();
+	}
+	
 	/**
      * Called by BistroClient when the server disconnects.
      * Blurs the entire UI, blocks interaction, and shows an exit dialog.

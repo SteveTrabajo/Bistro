@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -19,10 +20,16 @@ import ocsf.client.*;
  */
 
 public class BistroClient extends AbstractClient {
+	
+	//****************************** Instance variables ******************************
+	
+	public static BistroClient clientInstance;
 
 	public static Message messageFromServer;
+	
 	public static boolean awaitResponse = false;
-
+	
+	//******************************** Constructors ***********************************
 	/*
 	 * Constructor to initialize the BistroClient with the server's host and port
 	 * 
@@ -32,7 +39,7 @@ public class BistroClient extends AbstractClient {
 	 * 
 	 * @throws Exception If there is an error connecting to the server
 	 */
-	public BistroClient(String host, int port) throws Exception {
+	private BistroClient(String host, int port) throws Exception {
 		super(host, port);
 		try {
 			openConnection(); // Attempt to open a connection
@@ -40,7 +47,27 @@ public class BistroClient extends AbstractClient {
 			throw new Exception("Could not connect to server at " + host + ":" + port, e);
 		}
 	}
-
+	
+	/*
+	 * Method to get the singleton instance of BistroClient.
+	 * 
+	 * @param host The server's hostname or IP address
+	 * 
+	 * @param port The server's port number
+	 * 
+	 * @return The singleton instance of BistroClient
+	 * 
+	 * @throws Exception If there is an error connecting to the server
+	 */
+	public static synchronized BistroClient getInstance(String host, int port) throws Exception {
+		if (clientInstance == null) {
+			clientInstance = new BistroClient(host, port);
+		}
+		return clientInstance;
+	}
+	
+	//********************************Instance methods ********************************
+	
 	/*
 	 * Method to handle messages received from the server.
 	 * 
@@ -75,97 +102,70 @@ public class BistroClient extends AbstractClient {
 			System.exit(0);
 		}
 	}
-
-	/*
-	 * Method to switch the current screen to a new screen.
-	 * 
-	 * @param loader The FXMLLoader for the new screen.
-	 * 
-	 * @param root The root node of the new screen.
-	 * 
-	 * @param event The event that triggered the screen switch.
-	 * 
-	 * @param string The title for the new screen.
-	 */
-	public void switchScreen(FXMLLoader loader, Parent root, Event event, String string) {
-		Stage currentStage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
-		Scene newScene = new Scene(root);
-		currentStage.setTitle(string);
-		currentStage.setScene(newScene);
-		currentStage.centerOnScreen();
-		currentStage.show();
-
-	}
 	
-	
-
-	/*
-	 * Method to notify the server when the client is exiting.
-	 */
-	public void notifyServerOnExit() {
-		try {
-			sendToServer(new Message("disconnect", null));
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("Error: Could not notify server on exit." + e);
-		}
-		try {
-			this.closeConnection();
-			System.out.println("Client Disconnected from server successfully.");
-		} catch (Exception e) {
-			System.out.println("Error while closing connection: " + e.getMessage());
-		}
-	}
-	
-	
-	/*
-	 * Method to notify the server when the client successfully connects.
-	 */
-	public void notifyServerOnConnection() {
-		try {
-			handleMessageFromClientUI(new Message("connect", null));
-			if (messageFromServer.getId().equals("connectionDisplayed")) {
-				System.out.println("Connected to server and connection displayed.");
-			}
-		} catch (Exception e) {
-			e.printStackTrace(); // Handle errors during connection notification
-			System.out.println("Error: Could not notify server on connection." + e);
-		}
-	}
-
-	
-	// Server connection closed or lost handling
-	@Override
-    protected void connectionClosed() {
-        notifyServerDisconnected("The connection to the server was closed, please exit the application.");
-    }
-
-    @Override
-    protected void connectionException(Exception exception) {
-        notifyServerDisconnected("A connection error occurred, please exit the application.");
-    }
-
-    private void notifyServerDisconnected(String message) {
-        // This is called from the client's thread � we must switch to JavaFX thread
-        Platform.runLater(() -> {
-            BistroClientGUI.showServerDisconnected(message);
-        });
-    }
+//	/*
+//	 * Method to notify the server when the client is exiting.
+//	 */
+//	public void notifyServerOnExit() {
+//		try {
+//			sendToServer(new Message("disconnect", null));
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			System.out.println("Error: Could not notify server on exit." + e);
+//		}
+//		try {
+//			this.closeConnection();
+//			System.out.println("Client Disconnected from server successfully.");
+//		} catch (Exception e) {
+//			System.out.println("Error while closing connection: " + e.getMessage());
+//		}
+//	}
+//	
+//	/*
+//	 * Method to notify the server when the client successfully connects.
+//	 */
+//	public void notifyServerOnConnection() {
+//		try {
+//			handleMessageFromClientUI(new Message("connect", null));
+//			if (messageFromServer.getId().equals("connectionDisplayed")) {
+//				System.out.println("Connected to server and connection displayed.");
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace(); // Handle errors during connection notification
+//			System.out.println("Error: Could not notify server on connection." + e);
+//		}
+//	}
+//
+//	// Server connection closed or lost handling
+//	@Override
+//    protected void connectionClosed() {
+//        notifyServerDisconnected("The connection to the server was closed, please exit the application.");
+//    }
+//
+//    @Override
+//    protected void connectionException(Exception exception) {
+//        notifyServerDisconnected("A connection error occurred, please exit the application.");
+//    }
+//
+//    private void notifyServerDisconnected(String message) {
+//        // This is called from the client's thread � we must switch to JavaFX thread
+//        Platform.runLater(() -> {
+//            BistroClientGUI.showServerDisconnected(message);
+//        });
+//    }
     
-	/*
-	 * Method to display an error message in a label with a specified color.
-	 * 
-	 * @param lblError The label to display the error message.
-	 * 
-	 * @param message The error message to be displayed.
-	 * 
-	 * @param color The color of the error message text.
-	 */
-	public void display(Label lblError, String message, Color color) {
-		lblError.setText(message); // Sets the error message in the label.
-		lblError.setTextFill(color); // Sets the text color for the error message.
+    
+    public Object getCurrentUser() {
+		// TODO Auto-generated method stub
+		return null;
 	}
-
+    
+    public boolean logoutUser() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+    
+    
 	/*
 	 * Method to terminate the client and close the connection.
 	 */
@@ -178,5 +178,6 @@ public class BistroClient extends AbstractClient {
 		}
 		System.exit(0); // Exit the program
 	}
+
 
 }
