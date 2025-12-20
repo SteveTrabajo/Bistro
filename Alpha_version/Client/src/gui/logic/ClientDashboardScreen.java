@@ -6,6 +6,8 @@ import javafx.scene.control.Label;
 
 public class ClientDashboardScreen {
 	
+	private 
+	
 	@FXML
 	private Button btnNewResvation;
 	
@@ -33,8 +35,10 @@ public class ClientDashboardScreen {
 	@FXML
 	private Label lblTopSubTitle;
 	
-	
-	
+	@FXML
+	public void initialize() {
+		checkSignedInUser();
+	}
 	
 	
 }
