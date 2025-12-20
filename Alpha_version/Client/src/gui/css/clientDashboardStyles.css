@@ -1,0 +1,145 @@
+.root {
+    -fx-font-family: "Lexend";
+}
+
+/* Background */
+.mem-root {
+     -fx-background-color: radial-gradient(
+        center 50% 52.5%,
+        radius 100%,
+        #0E355C 0%,
+        #100E48 90%
+    );
+}
+
+/* Top bar */
+.mem-topbar { }
+
+.mem-title {
+    -fx-text-fill: white;
+    -fx-font-size: 42px;
+    -fx-font-weight: 700;
+}
+
+.mem-subtitle {
+    -fx-text-fill: #bfdbfe;
+    -fx-font-size: 16px;
+}
+
+.mem-signout {
+    -fx-background-color: rgba(255,255,255,0.12);
+    -fx-text-fill: white;
+    -fx-background-radius: 12px;
+    -fx-padding: 10 18;
+    -fx-border-color: rgba(255,255,255,0.18);
+    -fx-border-radius: 12px;
+}
+.mem-signout:hover { -fx-background-color: rgba(255,255,255,0.18); }
+.mem-signout:pressed { -fx-scale-x: 0.98; -fx-scale-y: 0.98; }
+
+/* Cards */
+.mem-grid { }
+
+.mem-card {
+    -fx-background-color: white;
+    -fx-background-radius: 18px;
+    -fx-padding: 22 22 18 22;
+    -fx-pref-width: 360px;
+    -fx-min-height: 170px;
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.35), 18, 0.2, 0, 10);
+}
+
+.mem-cardTitle {
+    -fx-text-fill: #0f172a;
+    -fx-font-size: 22px;
+    -fx-font-weight: 700;
+    -fx-padding: 6 0 0 0;
+}
+
+.mem-cardDesc {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 14px;
+}
+
+/* Icon box */
+.mem-iconBox {
+    -fx-min-width: 64px; -fx-min-height: 64px;
+    -fx-max-width: 64px; -fx-max-height: 64px;
+    -fx-background-radius: 16px;
+    -fx-alignment: center;
+}
+
+/* colors (like the screenshot) */
+.mem-blue   { -fx-background-color: #2563eb; }
+.mem-purple { -fx-background-color: #7c3aed; }
+.mem-green  { -fx-background-color: #16a34a; }
+.mem-indigo { -fx-background-color: #4f46e5; }
+.mem-orange { -fx-background-color: #ea580c; }
+.mem-red    { -fx-background-color: #dc2626; }
+
+/* Bottom stats bar */
+.mem-statsBar {
+    -fx-background-color: rgba(255,255,255,0.14);
+    -fx-background-radius: 18px;
+    -fx-min-height: 110px;
+}
+
+.mem-statBlock {
+    -fx-alignment: center;
+}
+
+.mem-statValue {
+    -fx-text-fill: white;
+    -fx-font-size: 32px;
+    -fx-font-weight: 700;
+}
+
+.mem-statLabel {
+    -fx-text-fill: #bfdbfe;
+    -fx-font-size: 14px;
+}
+
+/* Button card wrapper */
+.mem-card-button {
+    -fx-background-color: transparent; /* חשוב! שלא יהיה כפתור אפור */
+    -fx-padding: 0;                    /* שלא ישנה לנו מידות */
+    -fx-cursor: hand;
+}
+
+.mem-card-button .content { /* מבטל padding פנימי של Button */
+    -fx-padding: 0;
+}
+
+.mem-card-button:focused {
+    -fx-background-color: transparent;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+/* The “card” itself (הגרפיק שבתוך הכפתור) */
+.mem-card-content {
+    -fx-background-color: white;
+    -fx-background-radius: 18px;
+    -fx-padding: 22 22 18 22;
+    -fx-pref-width: 360px;
+    -fx-min-height: 170px;
+
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.30), 18, 0.18, 0, 10);
+
+    /* חשוב לאנימציה */
+    -fx-scale-x: 1;
+    -fx-scale-y: 1;
+}
+
+/* Hover grow + shadow */
+.mem-card-button:hover .mem-card-content {
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.42), 24, 0.22, 0, 14);
+}
+
+/* Press feedback */
+.mem-card-button:pressed .mem-card-content {
+    -fx-scale-x: 0.99;
+    -fx-scale-y: 0.99;
+}

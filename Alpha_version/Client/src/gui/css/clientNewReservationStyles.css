@@ -1,0 +1,357 @@
+.root {
+    -fx-font-family: "Lexend";
+}
+
+/* background like your app */
+.reservation-root {
+      /* Radial gradient background */
+    -fx-background-color: radial-gradient(
+        center 50% 52.5%,
+        radius 100%,
+        #0E355C 0%,
+        #100E48 90%
+    );
+}
+
+/* top */
+.nav-back {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(255,255,255,0.92);
+    -fx-font-size: 16px;
+    -fx-padding: 8 10;
+    -fx-cursor: hand;
+}
+.nav-back:hover { -fx-text-fill: white; }
+
+.page-hero-title {
+    -fx-text-fill: white;
+    -fx-font-size: 44px;
+    -fx-font-weight: 700;
+}
+
+/* cards */
+.card {
+    -fx-background-color: white;
+    -fx-background-radius: 18px;
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.30), 18, 0.18, 0, 10);
+}
+
+.reservation-card {
+    -fx-pref-width: 520px;
+    -fx-min-height: 560px;
+}
+
+.legend-card {
+    -fx-pref-width: 520px;
+    -fx-min-height: 260px;
+    -fx-padding: 16;
+}
+
+.card-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #0f172a;
+}
+
+.muted-label {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 14px;
+}
+
+/* pill */
+.pill-blue {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: white;
+    -fx-padding: 6 16;
+    -fx-background-radius: 999px;
+    -fx-font-weight: 600;
+}
+
+/* form */
+.field-label {
+    -fx-text-fill: #334155;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+}
+
+.field-input {
+    -fx-background-color: white;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 10 12;
+    -fx-font-size: 14px;
+}
+
+.text-field:focused, .combo-box:focused, .date-picker:focused {
+    -fx-border-color: #2563eb;
+    -fx-border-width: 1.5px;
+}
+
+/* times area */
+.times-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 14px;
+    -fx-background-radius: 14px;
+    -fx-padding: 10;
+}
+
+.times-grid { 
+    -fx-hgap: 12;
+    -fx-vgap: 12;
+}
+
+/* time slot button */
+.time-slot {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #0f172a;
+    -fx-background-radius: 12px;
+    -fx-padding: 10 0;
+    -fx-pref-width: 105px;
+    -fx-cursor: hand;
+}
+
+.time-slot:hover {
+    -fx-background-color: #e2e8f0;
+}
+
+/* כשהוא נבחר */
+.time-slot:selected {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: white;
+}
+
+/* תפוס */
+.time-slot:disabled {
+    -fx-background-color: #f8fafc;
+    -fx-text-fill: #94a3b8;
+    -fx-opacity: 0.8;
+}
+
+/* confirm button */
+.btn-wide { -fx-max-width: 9999px; -fx-pref-height: 52px; }
+
+.btn-primary {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: white;
+    -fx-background-radius: 14px;
+    -fx-font-size: 15px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+.btn-primary:hover { -fx-background-color: #1d4ed8; }
+.btn-primary:pressed { -fx-scale-x: 0.98; -fx-scale-y: 0.98; }
+
+
+.legend-box {
+    -fx-padding: 16;
+}
+/* legend dots */
+.legend-dot {
+    -fx-min-width: 14px;
+    -fx-min-height: 14px;
+    -fx-background-radius: 4px;
+}
+
+.legend-text {
+    -fx-text-fill: #334155;
+    -fx-font-size: 14px;
+}
+.muted-strike {
+    -fx-text-fill: #94a3b8;
+    -fx-strikethrough: true;
+}
+
+
+/* ---------- DatePicker (field) ---------- */
+.date-picker {
+    -fx-background-color: white;
+    -fx-border-color: #cbd5e1;
+    -fx-border-width: 1px;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+}
+
+.date-picker:focused,
+.date-picker:showing {
+    -fx-border-color: #2563eb;
+    -fx-border-width: 1.5px;
+}
+
+/* הטקסט בתוך השדה */
+.date-picker .text-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 10 12;
+    -fx-font-size: 14px;
+    -fx-text-fill: #0f172a;
+    -fx-prompt-text-fill: #94a3b8;
+}
+
+/* כפתור הקלנדר בצד */
+.date-picker .arrow-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0 12px 12px 0;
+    -fx-padding: 0 12 0 12;
+    -fx-cursor: hand;
+}
+
+.date-picker .arrow-button:hover {
+    -fx-background-color: rgba(37, 99, 235, 0.10);
+}
+
+.date-picker .arrow-button:pressed {
+    -fx-background-color: rgba(37, 99, 235, 0.18);
+}
+
+/* החץ עצמו */
+.date-picker .arrow {
+    -fx-background-color: #64748b;
+}
+
+/* ---------- Popup calendar ---------- */
+.date-picker-popup {
+    -fx-background-color: white;
+    -fx-background-radius: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.25), 18, 0.2, 0, 10);
+    -fx-padding: 10;
+}
+
+/* header למעלה (חודש/שנה) */
+.date-picker-popup .month-year-pane {
+    -fx-background-color: transparent;
+    -fx-padding: 8 10 10 10;
+}
+
+.date-picker-popup .month-year-pane .label {
+    -fx-text-fill: #0f172a;
+    -fx-font-weight: 700;
+}
+
+/* חצים של מעבר חודש */
+.date-picker-popup .spinner .button {
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+    -fx-background-radius: 10px;
+}
+.date-picker-popup .spinner .button:hover {
+    -fx-background-color: rgba(37, 99, 235, 0.10);
+}
+
+/* ימי השבוע */
+.date-picker-popup .day-name-cell {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+/* תאים רגילים */
+.date-picker-popup .day-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #0f172a;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+}
+
+/* hover על יום */
+.date-picker-popup .day-cell:hover {
+    -fx-background-color: rgba(37, 99, 235, 0.10);
+}
+
+/* היום שנבחר */
+.date-picker-popup .day-cell:selected {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: white;
+}
+
+/* היום של היום (לא נבחר) */
+.date-picker-popup .day-cell:today {
+    -fx-border-color: rgba(37, 99, 235, 0.45);
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+}
+
+/* ימים מחוץ לחודש */
+.date-picker-popup .day-cell:disabled {
+    -fx-text-fill: #cbd5e1;
+    -fx-opacity: 1.0;
+}
+
+
+/* ================= ScrollBar ================= */
+
+.scroll-bar {
+    -fx-background-color: rgb(0, 0, 0);;
+}
+
+/* המסילה (הרקע) */
+.scroll-bar:vertical .track,
+.scroll-bar:horizontal .track {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+/* הידית (החלק שנגרר) */
+.scroll-bar:vertical .thumb,
+.scroll-bar:horizontal .thumb {
+    -fx-background-color: rgba(196, 196, 196, 0.6); /* slate */
+    -fx-background-radius: 15px;
+}
+
+/* hover */
+.scroll-bar:vertical .thumb:hover,
+.scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: rgba(37, 99, 235, 0.8); /* כחול */
+}
+
+/* לחיצה */
+.scroll-bar:vertical .thumb:pressed,
+.scroll-bar:horizontal .thumb:pressed {
+    -fx-background-color: #2563eb;
+}
+
+/* גודל ברירת מחדל */
+.scroll-bar:vertical {
+    -fx-pref-width: 12px;
+}
+
+.scroll-bar:horizontal {
+    -fx-pref-height: 12px;
+}
+
+/* ביטול חיצים */
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-prfer-width: 5px;
+}
+
+
+/* Form */
+.confirm-form { -fx-padding: 8px 0 0 0; }
+
+.confirm-label {
+    -fx-text-fill: #334155;
+    -fx-font-size: 14px;
+}
+
+.confirm-input {
+    -fx-background-color: white;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 12px 14px;
+    -fx-font-size: 14px;
+}
+
+.confirm-input:focused {
+    -fx-border-color: #2563eb;
+    -fx-border-width: 1.5px;
+}
