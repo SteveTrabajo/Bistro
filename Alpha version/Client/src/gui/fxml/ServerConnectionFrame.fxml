@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane styleClass="connect-root" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="SeverConnectionFrame">
+<StackPane styleClass="connect-root" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.ServerConnectionFrame">
    <children>
       <BorderPane prefHeight="720" prefWidth="1280">
          <top>
@@ -97,7 +97,7 @@
                         <Insets bottom="16" left="0" right="32" top="0" />
                      </padding>
                      <children>
-                        <Hyperlink fx:id="lnkExit" onAction="#Exit" styleClass="connect-link" text="Exit" />
+                        <Hyperlink fx:id="lnkExit" onAction="#lnkExit" styleClass="connect-link" text="Exit" />
                      </children>
                   </HBox>
                </right>
