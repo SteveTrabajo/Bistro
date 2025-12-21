@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane styleClass="connect-root" stylesheets="@/gui/css/ServerConnectionFrameStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.ServerConnectionFrame">
+<StackPane styleClass="connect-root" stylesheets="@../../gui/css/ServerConnectionFrameStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.ServerConnectionFrame">
    <children>
       <BorderPane prefHeight="720" prefWidth="1280">
          <top>
@@ -25,7 +25,7 @@
                <children>
                   <ImageView fitHeight="179.0" fitWidth="179.0">
                      <image>
-                        <Image url="@/resources/bistro_logo.png" />
+                        <Image url="@../../resources/bistro_logo.png" />
                      </image>
                   </ImageView>
                   <Label styleClass="connect-subtitle" text="Welcome" />

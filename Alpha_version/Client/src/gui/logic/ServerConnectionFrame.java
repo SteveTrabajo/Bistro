@@ -46,7 +46,7 @@ public class ServerConnectionFrame {
 		// Validate the input fields
 		String errorMessage = InputCheck.isValidPortAndIP(ip, port);
 		if (!errorMessage.equals("")) {
-			display(lblError, errorMessage.trim(), Color.RED); // input is empty
+			BistroClientGUI.display(lblError, errorMessage.trim(), Color.RED); // input is empty
 		} else {
 			intPort = Integer.parseInt(port); // converts the port to integer
 			try {
@@ -62,7 +62,7 @@ public class ServerConnectionFrame {
 				// Handles connection errors
 				System.out.println("Error: Can't setup connection! \nThe error message: ");
 				e.printStackTrace();
-				display(lblError, "Can't setup connection", Color.RED); // Displays an error message.
+				BistroClientGUI.display(lblError, "Can't setup connection", Color.RED); // Displays an error message.
 			}
 		}
 	}
@@ -108,18 +108,6 @@ public class ServerConnectionFrame {
 	}
 	
 	
-	/*
-	 * Method to display an error message in a label with a specified color.
-	 * 
-	 * @param lbl The label to display the message.
-	 * 
-	 * @param message The message to display.
-	 * 
-	 * @param color The color of the message text.
-	 */
-	public void display(Label lbl, String message, Color color) {
-		lbl.setText(message); // Sets the error message in the label
-		lbl.setTextFill(color); // Sets the text color for the error message
-	}
+	
 	
 }

@@ -63,4 +63,29 @@ public class InputCheck {
 		}
 		return errorMessage;
 	}
+	
+	
+	private static final String USERNAME_REGEX = "^[a-zA-Z0-9_]{3,15}$";
+	private static final Pattern USERNAME_PATTERN = Pattern.compile(USERNAME_REGEX);
+	/*
+	 * Validates if the given username meets the specified criteria.
+	 * 
+	 * @param username The username to validate.
+	 * 
+	 * @return An error message if there are validation issues, otherwise an empty string.
+	 */
+	public static String isValidUsername(String username) {
+		String errorMessage = "";
+		if (username.trim().isEmpty()) {
+			errorMessage += "You must enter a username\n";
+		}
+		else if (username.length() < 4 || username.length() > 15) {
+			errorMessage += "Username must be between 3 and 15 characters long\n";
+		}
+		else if (!username.matches(USERNAME_REGEX)) {
+			errorMessage += "Username can only contain letters, digits, and underscores\n";
+		}
+		return errorMessage;
+	}
+	
 }

@@ -12,7 +12,9 @@ import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.scene.effect.GaussianBlur;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -65,6 +67,20 @@ public class BistroClientGUI extends Application {
 		currentStage.setScene(newScene);
 		currentStage.centerOnScreen();
 		currentStage.show();
+	}
+	
+	/*
+	 * Method to display an error message in a label with a specified color.
+	 * 
+	 * @param lbl The label to display the message.
+	 * 
+	 * @param message The message to display.
+	 * 
+	 * @param color The color of the message text.
+	 */
+	public static void display(Label lbl, String message, Color color) {
+		lbl.setText(message); // Sets the error message in the label
+		lbl.setTextFill(color); // Sets the text color for the error message
 	}
 	
 	/**
