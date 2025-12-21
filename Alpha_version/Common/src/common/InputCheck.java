@@ -88,4 +88,24 @@ public class InputCheck {
 		return errorMessage;
 	}
 	
+	private static final String PHONE_REGEX = "^\\d{10}$ or ^[0-9]{10}$";
+	private static final Pattern PHONE_PATTERN = Pattern.compile(PHONE_REGEX);
+	private static final String EMAIL_REGEX = "^[\\w.-]+@[\\w.-]+\\.\\w{2,}$";
+	private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
+	
+	public static String isValidGuestInfo(String phoneNumber, String emailAddress) {
+		String errorMessage = "";
+		if ((phoneNumber.trim().isEmpty()) && (emailAddress.trim().isEmpty())) {
+			errorMessage += "You must enter a phone number, an email address or both\n";
+		} else {
+			if (!phoneNumber.trim().isEmpty() && !PHONE_PATTERN.matcher(phoneNumber).matches()) {
+				errorMessage += "Phone number must be exactly 10 digits\n";
+			}
+			if (!emailAddress.trim().isEmpty() && !EMAIL_PATTERN.matcher(emailAddress).matches()) {
+				errorMessage += "Invalid email address format\n";
+			}
+		}
+		return errorMessage;
+	}
+	
 }

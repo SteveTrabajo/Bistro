@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
@@ -20,7 +21,7 @@ public class ClientLoginScreen {
 	@FXML
 	private Button btnGuest;
 	@FXML
-	private Button btnEmployee;
+	private Hyperlink lnkEmployee;
 	@FXML
 	private TextField txtUsername;
 	@FXML
@@ -39,7 +40,7 @@ public class ClientLoginScreen {
 			BistroClientGUI.display(lblError, errorMessage.trim(), Color.RED);
 		} else {
 			// Proceed with sign-in logic before calling the switchScreen method TODO
-			BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard");
+			BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
 		}
 		
 	}
@@ -52,7 +53,15 @@ public class ClientLoginScreen {
 	
 	@FXML
 	public void btnGuest(Event event) {
-		
+		String phoneNumber = txtPhoneNumber.getText();
+		String emailAddress = txtEmailAddress.getText();
+		String errorMessage = InputCheck.isValidGuestInfo(phoneNumber, emailAddress);
+		if (!errorMessage.equals("")) {
+			BistroClientGUI.display(lblError, errorMessage.trim(), Color.RED);
+		} else {
+			// Proceed with sign-in logic before calling the switchScreen method TODO
+			BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
+		}
 	}
 
 }
