@@ -57,7 +57,7 @@
                     <children>
 
                         <!-- LEFT CARD -->
-                        <VBox spacing="16.0">
+                        <VBox maxHeight="650.0" minHeight="550.0" prefHeight="550.0" spacing="16.0">
                             <padding>
                                 <Insets bottom="18" left="18" right="18" top="18" />
                             </padding>
@@ -81,7 +81,7 @@
                                        </image>
                                     </ImageView>
                                  </graphic></Label>
-                                        <DatePicker fx:id="datePicker" styleClass="field-input" />
+                                        <DatePicker id="datePicker" fx:id="datePicker" styleClass="field-input" />
                                     </children>
                                 </VBox>
 
@@ -96,7 +96,7 @@
                                        </image>
                                     </ImageView>
                                  </graphic></Label>
-                                        <ComboBox fx:id="dinersCombo" promptText="2 People" styleClass="field-input" />
+                                        <ComboBox id="dinersAmountComboBox" fx:id="dinersCombo" promptText="2 People" styleClass="field-input" />
                                     </children>
                                 </VBox>
 
@@ -112,9 +112,9 @@
                                     </ImageView>
                                  </graphic></Label>
 
-                                        <ScrollPane fx:id="timesScroll" fitToWidth="true" hbarPolicy="NEVER" prefHeight="208.0" prefWidth="484.0" styleClass="times-scroll">
+                                        <ScrollPane fx:id="timesScroll" fitToWidth="true" hbarPolicy="NEVER" prefHeight="190.0" prefWidth="484.0" styleClass="times-scroll">
                                  <content>
-                                    <GridPane styleClass="times-grid">
+                                    <GridPane id="timeSlotsGridPane" styleClass="times-grid">
                                       <columnConstraints>
                                         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
