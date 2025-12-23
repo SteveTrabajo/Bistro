@@ -1,12 +1,18 @@
 package gui.logic;
 
+import java.awt.event.ActionEvent;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.GridPane;
 
 public class NewReservationScreen {
@@ -65,7 +71,59 @@ public class NewReservationScreen {
 	}
 	
 	
+	private void generateTimeSlots(List<String> availableTimeSlots) {
+		timeSlotsGridPane.getChildren().clear();
+		
+		ToggleGroup timeSlotToggleGroup = new ToggleGroup();
+		int col = 0;
+		int row = 0;
+		for (String timeSlot : availableTimeSlots) {
+			
+			ToggleButton timeSlotButton = new ToggleButton(timeSlot);
+			timeSlotButton.setToggleGroup(timeSlotToggleGroup);
+			// can set this in CSS later TODO
+			timeSlotButton.setPrefWidth(104); 
+			timeSlotButton.setPrefHeight(37);
+			
+			// Handle click
+			timeSlotButton.setOnAction(event -> {
+				selectedTimeSlot = timeSlot;
+				System.out.println("Selected time slot: " + selectedTimeSlot);
+				//TODO - highlight selected button
+			});
+			timeSlotsGridPane.add(timeSlotButton, col, row);
+			col++;
+			if (col >= 4) { // 4 columns per row
+				col = 0;
+				row++;
+			}
+		}
+	}
 	
+	// Temporary helper to fake data until you connect your Server
+	private List<String> generateDefaultTimeSlots() {
+	    List<String> times = new ArrayList<>();
+	    times.add("11:00"); times.add("11:30");
+	    times.add("12:00"); times.add("12:30");
+	    times.add("13:00"); times.add("13:30");
+	    times.add("18:00"); times.add("18:30");
+	    return times;
+	}
 	
+	@FXML
+	void onConfirmClick(ActionEvent event) {
+	    LocalDate date = datePicker.getValue();
+	    String diners = dinersAmountComboBox.getValue();
+	    
+	    if (selectedTimeSlot == null) {
+	        // Show Error Alert
+	        Alert alert = new Alert(Alert.AlertType.WARNING);
+	        alert.setContentText("Please select a time slot.");
+	        alert.showAndWait();
+	        return;
+	    }
 
+	    System.out.println("Booking confirmed for: " + date + " at " + selectedTimeSlot + " (" + diners + ")");
+	    //TODO Send data to server and db
+	}
 }

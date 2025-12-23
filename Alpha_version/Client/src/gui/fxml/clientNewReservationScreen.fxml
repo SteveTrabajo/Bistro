@@ -31,7 +31,7 @@
                     </padding>
 
                     <left>
-                        <Button fx:id="btnBack" onAction="#onBack" styleClass="nav-back" text="Back">
+                        <Button id="btnBack" fx:id="btnBack" onAction="#onBack" styleClass="nav-back" text="Back">
                      <graphic>
                         <ImageView fitHeight="18.0" fitWidth="9.0">
                            <image>
@@ -152,7 +152,7 @@
                                     </children>
                                 </VBox>
       
-                                <Button fx:id="confirmBtn" disable="true" onAction="#onConfirm" text="Confirm Reservation">
+                                <Button id="btnConfirmReservation" fx:id="confirmBtn" disable="true" onAction="#onConfirm" text="Confirm Reservation">
                            <styleClass>
                               <String fx:value="btn-primary" />
                               <String fx:value="btn-wide" />

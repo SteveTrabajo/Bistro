@@ -2,8 +2,7 @@ package gui.logic;
 
 import java.io.IOException;
 
-import entities.Guest;
-import entities.Member;
+import entities.User;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -62,10 +61,10 @@ public class ClientDashboardScreen {
 	@FXML
 	public void initialize() {
 		Object user = BistroClientGUI.client.getCurrentUser();
-		if (user instanceof Guest) {
+		if (user instanceof User) {
 			SetDashboardAsGuest();
 		} else {
-			SetDashboardAsMember((Member)user);
+			SetDashboardAsMember((User)user);
 		}
 		return;
 	}
@@ -85,9 +84,9 @@ public class ClientDashboardScreen {
 		becomeMemberVbox.setManaged(true);
 	}
 	
-	public void SetDashboardAsMember(Member member) {
+	public void SetDashboardAsMember(User member) {
 		lblWelcome.setText("Welcome, " + member.getFirstName() + " " + member.getLastName() + "!");
-		lblTopSubTitle.setText("Member ID: " + member.getMemberID());
+		lblTopSubTitle.setText("Member ID: " + member.getID());
 		btnEditPersonalDetails.setVisible(true);
 		btnEditPersonalDetails.setManaged(true);
 		loyalpointVbox.setVisible(true);
