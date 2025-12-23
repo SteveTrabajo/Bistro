@@ -23,7 +23,7 @@ public class ClientLoginScreen {
 	@FXML
 	private Hyperlink lnkEmployee;
 	@FXML
-	private TextField txtUsername;
+	private TextField txtMemberID;
 	@FXML
 	private TextField txtPhoneNumber;
 	@FXML
@@ -34,15 +34,20 @@ public class ClientLoginScreen {
 	
 	@FXML
 	public void btnSignIn(Event event) {
-		String username = txtUsername.getText();
-		String errorMessage = InputCheck.isValidUsername(username);
+		String id = txtMemberID.getText();
+		String errorMessage = InputCheck.isValidID(id);
 		if (!errorMessage.equals("")) {
 			BistroClientGUI.display(lblError, errorMessage.trim(), Color.RED);
-		} else {
-			// Proceed with sign-in logic before calling the switchScreen method TODO
-			BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
 		}
-		
+		else {
+			int memberID = Integer.parseInt(id);
+			if(BistroClientGUI.client.isMemberIDExists(memberID)) {
+				BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
+			} else {
+				BistroClientGUI.display(lblError, "Member ID does not exist.", Color.RED);
+				return;
+			}
+		}
 	}
 	
 	@FXML

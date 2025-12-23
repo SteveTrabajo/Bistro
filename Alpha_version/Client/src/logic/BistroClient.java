@@ -106,6 +106,35 @@ public class BistroClient extends AbstractClient {
 		}
 	}
 	
+	
+    
+    
+    public Object getCurrentUser() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+    
+    public boolean logoutUser() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public boolean isMemberIDExists(int memberID) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+    
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	//TODO: check if method below are neccessary:
 	/*
 	 * Method to notify the server when the client is exiting.
 	 */
@@ -157,9 +186,9 @@ public class BistroClient extends AbstractClient {
         });
     }
     
-    /*
-	 * Method to terminate the client and close the connection.
-	 */
+   /*
+	* Method to terminate the client and close the connection.
+	*/
 	public void quit() {
 		try {
 			closeConnection(); // Close the connection
@@ -169,18 +198,5 @@ public class BistroClient extends AbstractClient {
 		}
 		System.exit(0); // Exit the program
 	}
-    
-    
-    public Object getCurrentUser() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-    
-    public boolean logoutUser() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-    
-
 
 }

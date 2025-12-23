@@ -65,28 +65,35 @@ public class InputCheck {
 	}
 	
 	
-	private static final String USERNAME_REGEX = "^[a-zA-Z0-9_]{3,15}$";
-	private static final Pattern USERNAME_PATTERN = Pattern.compile(USERNAME_REGEX);
+	
 	/*
-	 * Validates if the given username meets the specified criteria.
+	 * Validates if the given ID string is valid according to specified rules.
 	 * 
-	 * @param username The username to validate.
+	 * @param id The ID string to validate.
 	 * 
-	 * @return An error message if there are validation issues, otherwise an empty string.
+	 * @return An error message if the ID is invalid, otherwise an empty string.
 	 */
-	public static String isValidUsername(String username) {
+	public static String isValidID(String id) {
+		int intID;
 		String errorMessage = "";
-		if (username.trim().isEmpty()) {
-			errorMessage += "You must enter a username\n";
+		if (id.trim().isEmpty()) {
+			errorMessage += "You must enter an ID\n";
 		}
-		else if (username.length() < 4 || username.length() > 15) {
-			errorMessage += "Username must be between 3 and 15 characters long\n";
+		else if (id.length() < 4 || id.length() > 15) {
+			errorMessage += "ID must be between 3 and 15 characters long\n";
 		}
-		else if (!username.matches(USERNAME_REGEX)) {
-			errorMessage += "Username can only contain letters, digits, and underscores\n";
+		try {
+			intID = Integer.parseInt(id);
+			if (intID < 0) {
+				errorMessage += "ID must be a positive number\n";
+			}
+		} catch (NumberFormatException e) {
+			errorMessage += "ID must contain only digits\n";
 		}
 		return errorMessage;
 	}
+	
+	
 	
 	private static final String PHONE_REGEX = "^\\d{10}$ or ^[0-9]{10}$";
 	private static final Pattern PHONE_PATTERN = Pattern.compile(PHONE_REGEX);

@@ -69,8 +69,7 @@ public class BistroClientGUI extends Application {
             String path = "/gui/fxml/" + fxmlName + ".fxml";
             
             // 2. Load the FXML
-            //TODO make sure BistroClient.class is correct
-            FXMLLoader loader = new FXMLLoader(BistroClient.class.getResource(path));
+            FXMLLoader loader = new FXMLLoader(BistroClientGUI.class.getResource(path));
             Parent root = loader.load();
             
             // 3. Get the current Stage (Window) from the event that triggered this
