@@ -1,7 +1,6 @@
 package entities;
 
 import java.util.List;
-import common.UserType;
 
 public class User {
 	//============================== Attributes =============================//

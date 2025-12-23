@@ -9,6 +9,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import logic.BistroClientGUI;
+
+import java.util.ArrayList;
+
 import common.InputCheck;
 import javafx.event.Event;
 
@@ -31,6 +34,7 @@ public class ClientLoginScreen {
 	@FXML
 	private Label lblError;
 	
+	ArrayList<String> userLoginData = new ArrayList<String>();
 	
 	@FXML
 	public void btnSignIn(Event event) {
@@ -40,8 +44,9 @@ public class ClientLoginScreen {
 			BistroClientGUI.display(lblError, errorMessage.trim(), Color.RED);
 		}
 		else {
-			int memberID = Integer.parseInt(id);
-			if(BistroClientGUI.client.isMemberIDExists(memberID)) {
+			userLoginData.add(id);
+			BistroClientGUI.client.getUserCTRL().signInUser(userLoginData);
+			if() {
 				BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
 			} else {
 				BistroClientGUI.display(lblError, "Member ID does not exist.", Color.RED);

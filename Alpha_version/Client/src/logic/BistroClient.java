@@ -12,9 +12,9 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.List;
 
-import common.Message;
 import entities.User;
 import ocsf.client.*;
+import massages.*;
 
 /*
  * This class represents a client that connects to a Bistro server.
@@ -24,15 +24,16 @@ public class BistroClient extends AbstractClient {
 	
 	//****************************** Instance variables ******************************
 	
-	public static BistroClient clientInstance;
+	private static BistroClient clientInstance;
 
 	public static Message messageFromServer;
 	
 	public static boolean awaitResponse = false;
 	
-	public static User loggedInUser;
+	private final User_Controller userCTRL; //final to ensure there is only one instance associated with the client
 	
 	//******************************** Constructors ***********************************
+	
 	/*
 	 * Constructor to initialize the BistroClient with the server's host and port
 	 * 
@@ -49,6 +50,7 @@ public class BistroClient extends AbstractClient {
 		} catch (IOException e) {
 			throw new Exception("Could not connect to server at " + host + ":" + port, e);
 		}
+		this.userCTRL = new User_Controller(this);
 	}
 	
 	/*
@@ -80,8 +82,16 @@ public class BistroClient extends AbstractClient {
 	protected void handleMessageFromServer(Object msg) {
 		BistroClient.messageFromServer = (Message) msg; // Update static message variable
 		awaitResponse = false; // Set response status to false
+		switch(messageFromServer.getId()) {
+		case "REQ_TO_LOGIN_APPROVED":
+			userCTRL.setLoggedInUser((User) messageFromServer.getData());
+			break;
+		default:
+			// TODO: Handle other message types as needed
+			break;
+		}
 	}
-
+	
 	/*
 	 * Method to handle messages sent from the client UI to the server.
 	 * 
@@ -105,34 +115,6 @@ public class BistroClient extends AbstractClient {
 			System.exit(0);
 		}
 	}
-	
-	
-    
-    
-    public Object getCurrentUser() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-    
-    public boolean logoutUser() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	public boolean isMemberIDExists(int memberID) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-    
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	//TODO: check if method below are neccessary:
 	/*
@@ -197,6 +179,16 @@ public class BistroClient extends AbstractClient {
 			System.out.println("Error: Could not close connection properly." + e);
 		}
 		System.exit(0); // Exit the program
+	}
+	
+	//****************************** Getters and Setters ******************************
+	/*
+	 * Getter for the User_Controller associated with this client.
+	 * 
+	 * @return The User_Controller instance.
+	 */
+	public User_Controller getUserCTRL() {
+		return this.userCTRL;
 	}
 
 }
