@@ -57,11 +57,11 @@
 								<Label styleClass="loginD-cardHint" text="Welcome back!" />
 								<VBox spacing="6" styleClass="loginD-form">
 									<children>
-										<Label styleClass="loginD-label" text="Member Code (Username)" />
-										<TextField id="txtUsername" fx:id="memberCodeField" promptText="Enter your member code" styleClass="loginD-input" />
+										<Label styleClass="loginD-label" text="Member ID:" />
+										<TextField id="txtUsername" fx:id="memberCodeField" promptText="Enter your member ID" styleClass="loginD-input" />
 									</children>
 								</VBox>
-								<Button id="btnSignIn" fx:id="btnSignIn" maxWidth="414.0" minWidth="414.0" onAction="#onSignIn" prefHeight="45.0" prefWidth="414.0" text="Sign In">
+								<Button fx:id="btnSignIn" maxWidth="414.0" minWidth="414.0" onAction="#btnSignIn" prefHeight="45.0" prefWidth="414.0" text="Sign In">
 									<styleClass>
 										<String fx:value="btn-wide" />
 										<String fx:value="btn-primary" />
@@ -72,7 +72,7 @@
 										<Label styleClass="loginD-orText" text="╾ or ╾" />
 									</children>
 								</HBox>
-								<Button id="btnScanQR" maxHeight="45.0" maxWidth="414.0" minHeight="45.0" minWidth="414.0" onAction="#onScanQr" prefHeight="45.0" prefWidth="414.0" text="Scan QR Code">
+								<Button fx:id="btnScanQR" maxHeight="45.0" maxWidth="414.0" minHeight="45.0" minWidth="414.0" onAction="#btnScanQR" prefHeight="45.0" prefWidth="414.0" text="Scan QR Code">
 									<styleClass>
 										<String fx:value="btn-wide" />
 										<String fx:value="btn-outline-soft" />
@@ -104,19 +104,19 @@
 									<children>
 										<VBox spacing="6">
 											<children>
-												<Label styleClass="loginD-label" text="Phone Number" />
-												<TextField id="txtPhoneNumber" fx:id="guestPhoneField" promptText="Enter phone number" styleClass="loginD-input" />
+												<Label styleClass="loginD-label" text="Phone Number:" />
+												<TextField fx:id="txtPhoneNumber" promptText="Enter phone number" styleClass="loginD-input" />
 											</children>
 										</VBox>
 										<VBox spacing="6">
 											<children>
-												<Label styleClass="loginD-label" text="Email" />
-												<TextField id="txtEmailAddress" fx:id="guestEmailField" promptText="Enter email address" styleClass="loginD-input" />
+												<Label styleClass="loginD-label" text="Email:" />
+												<TextField fx:id="txtEmailAddress" promptText="Enter email address" styleClass="loginD-input" />
 											</children>
 										</VBox>
 									</children>
 								</VBox>
-								<Button id="btnGuest" maxWidth="-Infinity" minWidth="414.0" onAction="#onContinueGuest" prefWidth="414.0" text="Continue as Guest">
+								<Button fx:id="btnGuest" maxWidth="-Infinity" minWidth="414.0" onAction="#btnGuest" prefWidth="414.0" text="Continue as Guest">
 									<styleClass>
 										<String fx:value="btn-wide" />
 										<String fx:value="btn-primary" />
@@ -145,10 +145,13 @@
 								<Insets bottom="16" left="0" right="32" top="0" />
 							</padding>
 							<children>
-								<Hyperlink id="btnEmployee" onAction="#onEmployeeAdminLogin" styleClass="loginD-link" text="Employee &amp; Manager Login" />
+								<Hyperlink fx:id="lnkEmployee" onAction="#lnkEmployee" styleClass="loginD-link" text="Employee &amp; Manager Login" />
 							</children>
 						</HBox>
 					</right>
+               <center>
+                  <Label fx:id="lblError" textFill="RED" BorderPane.alignment="CENTER" />
+               </center>
 				</BorderPane>
 			</bottom>
 		</BorderPane>

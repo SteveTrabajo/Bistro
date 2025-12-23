@@ -2,8 +2,13 @@ package entities;
 
 import java.util.List;
 
+/*
+ * This class represents a user in the Bistro system.
+ */
 public class User {
-	//============================== Attributes =============================//
+	
+	//*************************** Instance variables ***************************//
+	
 	private UserType userType;
 	private String phoneNumber;
 	private String id;
@@ -15,7 +20,7 @@ public class User {
 	private String address;
 	private List<Order> orderHistory;
 	
-	//============================== Constructors =============================//
+	//****************************** Constructors ******************************//
 	
 	/* 
 	 * constructor for GUEST user
@@ -71,7 +76,7 @@ public class User {
 		this.userType = userType;
 	}
 	
-	//============================== Getters and Setters =============================//
+	//****************************** Getters And Setters ******************************//
 	
 	public void setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
@@ -128,4 +133,9 @@ public class User {
 	public String getPassword() {
 		return password;
 	}
+	
+	public UserType getUserType() {
+		return userType;
+	}
 }
+//End of User class

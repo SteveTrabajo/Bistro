@@ -1,7 +1,6 @@
 package gui.logic;
 
 import java.io.IOException;
-
 import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -18,8 +17,11 @@ import logic.BistroClient;
 import logic.BistroClientGUI;
 import common.InputCheck;
 
+/*
+ * This class represents the server connection screen controller.
+ */
 public class ServerConnectionFrame {
-	
+	//****************************** FXML Variables *****************************
 	@FXML
 	private Button btnConnect;
 	
@@ -35,7 +37,17 @@ public class ServerConnectionFrame {
 	@FXML
 	private Label lblError;	
 	
+	//****************************** FXML Methods *****************************
 	
+	/*
+	 * Handles the connect button click event.
+	 * Validates the IP address and port inputs.
+	 * If valid, attempts to create a BistroClient instance and connect to the server.
+	 * On successful connection, switches to the client login screen.
+	 * Displays error messages for invalid inputs or connection failures.
+	 * 
+	 * @param event The event triggered by clicking the connect button.
+	 */
 	@FXML
 	public void btnConnect(Event event) {
 		String ip; // holds the entered IP address
@@ -64,6 +76,12 @@ public class ServerConnectionFrame {
 		}
 	}
 	
+	/*
+	 * Handles the exit hyperlink click event.
+	 * Safely exits the Bistro Client application.
+	 * 
+	 * @param event The event triggered by clicking the exit hyperlink.
+	 */
 	@FXML
 	public void lnkExit(Event event) {
 		BistroClientGUI.safeExit();
@@ -83,13 +101,13 @@ public class ServerConnectionFrame {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
+		// Create the scene and set up the stage
 		Scene scene = new Scene(root);
 		primaryStage.setTitle("Server Connection");
 		primaryStage.setScene(scene);
 		primaryStage.centerOnScreen();
 		primaryStage.show();
-
+		// Set the close request handler to notify the server on exit
 		primaryStage.setOnCloseRequest(_ -> {
 			try {
 				if (BistroClientGUI.client != null) {
@@ -103,8 +121,5 @@ public class ServerConnectionFrame {
 			}
 		});
 	}
-	
-	
-	
-	
 }
+// End of ServerConnectionFrame class
