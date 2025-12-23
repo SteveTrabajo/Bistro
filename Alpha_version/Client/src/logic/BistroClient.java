@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.List;
 
 import common.Message;
+import entities.User;
 import ocsf.client.*;
 
 /*
@@ -28,6 +29,8 @@ public class BistroClient extends AbstractClient {
 	public static Message messageFromServer;
 	
 	public static boolean awaitResponse = false;
+	
+	public static User loggedInUser;
 	
 	//******************************** Constructors ***********************************
 	/*
@@ -66,7 +69,7 @@ public class BistroClient extends AbstractClient {
 		return clientInstance;
 	}
 	
-	//********************************Instance methods ********************************
+	//******************************** Instance methods ********************************
 	
 	/*
 	 * Method to handle messages received from the server.
@@ -103,56 +106,69 @@ public class BistroClient extends AbstractClient {
 		}
 	}
 	
-//	/*
-//	 * Method to notify the server when the client is exiting.
-//	 */
-//	public void notifyServerOnExit() {
-//		try {
-//			sendToServer(new Message("disconnect", null));
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			System.out.println("Error: Could not notify server on exit." + e);
-//		}
-//		try {
-//			this.closeConnection();
-//			System.out.println("Client Disconnected from server successfully.");
-//		} catch (Exception e) {
-//			System.out.println("Error while closing connection: " + e.getMessage());
-//		}
-//	}
-//	
-//	/*
-//	 * Method to notify the server when the client successfully connects.
-//	 */
-//	public void notifyServerOnConnection() {
-//		try {
-//			handleMessageFromClientUI(new Message("connect", null));
-//			if (messageFromServer.getId().equals("connectionDisplayed")) {
-//				System.out.println("Connected to server and connection displayed.");
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace(); // Handle errors during connection notification
-//			System.out.println("Error: Could not notify server on connection." + e);
-//		}
-//	}
-//
-//	// Server connection closed or lost handling
-//	@Override
-//    protected void connectionClosed() {
-//        notifyServerDisconnected("The connection to the server was closed, please exit the application.");
-//    }
-//
-//    @Override
-//    protected void connectionException(Exception exception) {
-//        notifyServerDisconnected("A connection error occurred, please exit the application.");
-//    }
-//
-//    private void notifyServerDisconnected(String message) {
-//        // This is called from the client's thread � we must switch to JavaFX thread
-//        Platform.runLater(() -> {
-//            BistroClientGUI.showServerDisconnected(message);
-//        });
-//    }
+	/*
+	 * Method to notify the server when the client is exiting.
+	 */
+	public void notifyServerOnExit() {
+		try {
+			sendToServer(new Message("disconnect", null));
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Error: Could not notify server on exit." + e);
+		}
+		try {
+			this.closeConnection();
+			System.out.println("Client Disconnected from server successfully.");
+		} catch (Exception e) {
+			System.out.println("Error while closing connection: " + e.getMessage());
+		}
+	}
+	
+	/*
+	 * Method to notify the server when the client successfully connects.
+	 */
+	public void notifyServerOnConnection() {
+		try {
+			handleMessageFromClientUI(new Message("connect", null));
+			if (messageFromServer.getId().equals("connectionDisplayed")) {
+				System.out.println("Connected to server and connection displayed.");
+			}
+		} catch (Exception e) {
+			e.printStackTrace(); // Handle errors during connection notification
+			System.out.println("Error: Could not notify server on connection." + e);
+		}
+	}
+
+	// Server connection closed or lost handling
+	@Override
+    protected void connectionClosed() {
+        notifyServerDisconnected("The connection to the server was closed, please exit the application.");
+    }
+
+    @Override
+    protected void connectionException(Exception exception) {
+        notifyServerDisconnected("A connection error occurred, please exit the application.");
+    }
+
+    private void notifyServerDisconnected(String message) {
+        // This is called from the client's thread � we must switch to JavaFX thread
+        Platform.runLater(() -> {
+            BistroClientGUI.showServerDisconnected(message);
+        });
+    }
+    
+    /*
+	 * Method to terminate the client and close the connection.
+	 */
+	public void quit() {
+		try {
+			closeConnection(); // Close the connection
+		} catch (IOException e) {
+			e.printStackTrace(); // Handle errors during disconnection
+			System.out.println("Error: Could not close connection properly." + e);
+		}
+		System.exit(0); // Exit the program
+	}
     
     
     public Object getCurrentUser() {
@@ -165,19 +181,6 @@ public class BistroClient extends AbstractClient {
 		return false;
 	}
     
-    
-	/*
-	 * Method to terminate the client and close the connection.
-	 */
-	public void quit() {
-		try {
-			closeConnection(); // Close the connection
-		} catch (IOException e) {
-			e.printStackTrace(); // Handle errors during disconnection
-			System.out.println("Error: Could not close connection properly." + e);
-		}
-		System.exit(0); // Exit the program
-	}
 
 
 }
