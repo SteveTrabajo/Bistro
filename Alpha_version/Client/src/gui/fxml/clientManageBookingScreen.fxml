@@ -19,7 +19,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane styleClass="reservation-root" stylesheets="@clientNewReservationStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bistro.app.controllers.TableReservationController">
+<StackPane styleClass="reservation-root" stylesheets="@../../gui/css/clientNewReservationStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.ManageBookingScreen">
 
     <children>
         <BorderPane prefHeight="720" prefWidth="1280">
@@ -56,9 +56,97 @@
                     </padding>
 
                     <children>
+                  <VBox prefHeight="597.0" prefWidth="388.0" spacing="20.0">
+                     <children>
+                        <VBox minHeight="193.0" prefHeight="193.0" spacing="14">
+                           <padding>
+                              <Insets bottom="18.0" left="18.0" right="18.0" top="18.0" />
+                           </padding>
+                           <children>
+                              <Label styleClass="card-title" text="Find Order" />
+                              <VBox spacing="14" styleClass="legend-box">
+                                 <children>
+                                    <Label styleClass="field-label" text="Confirmation Code" />
+                                    <HBox prefHeight="100.0" prefWidth="200.0" spacing="15.0" styleClass="confirm-form">
+                                       <children>
+                                          <TextField prefHeight="44.0" prefWidth="236.0" promptText="Enter your order confirmation code">
+                                             <styleClass>
+                                                <String fx:value="confirm-label" />
+                                                <String fx:value="confirm-input" />
+                                             </styleClass>
+                                          </TextField>
+                                          <Button mnemonicParsing="false" prefHeight="42.0" prefWidth="79.0" styleClass="btn-primary" text="Check" />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                           </children>
+                           <styleClass>
+                              <String fx:value="legend-card" />
+                              <String fx:value="card" />
+                           </styleClass>
+                        </VBox>
+      
+                              <!-- RIGHT CARD -->
+                              <VBox minHeight="193.0" prefHeight="279.0" prefWidth="388.0" spacing="14">
+                                  <padding>
+                                      <Insets bottom="18.0" left="18.0" right="18.0" top="18.0" />
+                                  </padding>
+      
+                                  <children>
+                                      <Label styleClass="card-title" text="Available Time Slots" />
+      
+                                      <VBox spacing="14" styleClass="legend-box">
+                                          <children>
+                                              <HBox alignment="CENTER_LEFT" spacing="10">
+                                                  <children>
+                                          <ImageView fitHeight="17.0" fitWidth="17.0">
+                                             <image>
+                                                <Image url="@resources/material-symbols--square-rounded%20(1).png" />
+                                             </image>
+                                          </ImageView>
+                                                      <Label styleClass="legend-text" text="Selected" />
+                                                  </children>
+                                              </HBox>
+      
+                                              <HBox alignment="CENTER_LEFT" spacing="10">
+                                                  <children>
+                                          <ImageView fitHeight="17.0" fitWidth="17.0">
+                                             <image>
+                                                <Image url="@resources/si--square-duotone.png" />
+                                             </image>
+                                          </ImageView>
+                                                      <Label styleClass="legend-text" text="Available" />
+                                                  </children>
+                                              </HBox>
+      
+                                              <HBox alignment="CENTER_LEFT" spacing="10">
+                                                  <children>
+                                          <ImageView fitHeight="17.0" fitWidth="17.0" opacity="0.54">
+                                             <image>
+                                                <Image url="@resources/si--square-duotone.png" />
+                                             </image>
+                                          </ImageView>
+                                                      <Label text="Fully Booked">
+                                             <styleClass>
+                                                <String fx:value="legend text" />
+                                                <String fx:value="muted-strike" />
+                                             </styleClass></Label>
+                                                  </children>
+                                              </HBox>
+                                          </children>
+                                      </VBox>
+                                  </children>
+                           <styleClass>
+                              <String fx:value="legend-card" />
+                              <String fx:value="card" />
+                           </styleClass>
+                              </VBox>
+                     </children>
+                  </VBox>
 
                         <!-- LEFT CARD -->
-                        <VBox spacing="16.0">
+                        <VBox disable="true" spacing="16.0">
                             <padding>
                                 <Insets bottom="18" left="18" right="18" top="18" />
                             </padding>
@@ -165,94 +253,6 @@
                         <String fx:value="card" />
                      </styleClass>
                         </VBox>
-                  <VBox prefHeight="597.0" prefWidth="388.0" spacing="20.0">
-                     <children>
-      
-                              <!-- RIGHT CARD -->
-                              <VBox minHeight="193.0" prefHeight="193.0" spacing="14">
-                                  <padding>
-                                      <Insets bottom="18.0" left="18.0" right="18.0" top="18.0" />
-                                  </padding>
-      
-                                  <children>
-                                      <Label styleClass="card-title" text="Available Time Slots" />
-      
-                                      <VBox spacing="14" styleClass="legend-box">
-                                          <children>
-                                              <HBox alignment="CENTER_LEFT" spacing="10">
-                                                  <children>
-                                          <ImageView fitHeight="17.0" fitWidth="17.0">
-                                             <image>
-                                                <Image url="@resources/material-symbols--square-rounded%20(1).png" />
-                                             </image>
-                                          </ImageView>
-                                                      <Label styleClass="legend-text" text="Selected" />
-                                                  </children>
-                                              </HBox>
-      
-                                              <HBox alignment="CENTER_LEFT" spacing="10">
-                                                  <children>
-                                          <ImageView fitHeight="17.0" fitWidth="17.0">
-                                             <image>
-                                                <Image url="@resources/si--square-duotone.png" />
-                                             </image>
-                                          </ImageView>
-                                                      <Label styleClass="legend-text" text="Available" />
-                                                  </children>
-                                              </HBox>
-      
-                                              <HBox alignment="CENTER_LEFT" spacing="10">
-                                                  <children>
-                                          <ImageView fitHeight="17.0" fitWidth="17.0" opacity="0.54">
-                                             <image>
-                                                <Image url="@resources/si--square-duotone.png" />
-                                             </image>
-                                          </ImageView>
-                                                      <Label text="Fully Booked">
-                                             <styleClass>
-                                                <String fx:value="legend text" />
-                                                <String fx:value="muted-strike" />
-                                             </styleClass></Label>
-                                                  </children>
-                                              </HBox>
-                                          </children>
-                                      </VBox>
-                                  </children>
-                           <styleClass>
-                              <String fx:value="legend-card" />
-                              <String fx:value="card" />
-                           </styleClass>
-                              </VBox>
-                        <VBox minHeight="193.0" prefHeight="193.0" spacing="14">
-                           <padding>
-                              <Insets bottom="18.0" left="18.0" right="18.0" top="18.0" />
-                           </padding>
-                           <children>
-                              <Label styleClass="card-title" text="Find Order" />
-                              <VBox spacing="14" styleClass="legend-box">
-                                 <children>
-                                    <Label styleClass="field-label" text="Confirmation Code" />
-                                    <HBox prefHeight="100.0" prefWidth="200.0" spacing="15.0" styleClass="confirm-form">
-                                       <children>
-                                          <TextField prefHeight="44.0" prefWidth="236.0" promptText="Enter your order confirmation code">
-                                             <styleClass>
-                                                <String fx:value="confirm-label" />
-                                                <String fx:value="confirm-input" />
-                                             </styleClass>
-                                          </TextField>
-                                          <Button mnemonicParsing="false" prefHeight="42.0" prefWidth="79.0" styleClass="btn-primary" text="Check" />
-                                       </children>
-                                    </HBox>
-                                 </children>
-                              </VBox>
-                           </children>
-                           <styleClass>
-                              <String fx:value="legend-card" />
-                              <String fx:value="card" />
-                           </styleClass>
-                        </VBox>
-                     </children>
-                  </VBox>
 
                     </children>
                 </HBox>
