@@ -1,10 +1,10 @@
 package gui.logic;
 
-import java.awt.event.ActionEvent;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -14,6 +14,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.GridPane;
+import logic.BistroClientGUI;
 
 public class NewReservationScreen {
 	
@@ -34,15 +35,10 @@ public class NewReservationScreen {
 	public void initialize() {
 		setupDinersAmountComboBox();
 		setupDatePicker();
-		
-		
-		generateTimeSlots(generateDefaultTimeSlots());
 	}
 
-	
+	//TODO connect to server to get real available time slots and make sure the timeslots are updated based on the selected date and fit the database
 	private void setupDatePicker() {
-		datePicker.setValue(java.time.LocalDate.now());
-		
 		// code to prevent selecting past dates
 		datePicker.setDayCellFactory(picker -> new DateCell() {
 	        @Override
@@ -52,14 +48,12 @@ public class NewReservationScreen {
 	        }
 	    });
 		
-		//TODO - add listener to update available time slots when date changes
 		datePicker.valueProperty().addListener((obs, oldDate, newDate) -> {
 	        System.out.println("Date changed to: " + newDate);
-	        //TODO - load available time slots from server based on selected date and diners amount
 	        generateTimeSlots(generateDefaultTimeSlots());
 	        });
-		//TODO highlight selected time slot
-		//TODO - load available time slots from server based on selected date and diners amount
+		
+		datePicker.setValue(LocalDate.now());
 	}
 
 	
@@ -87,9 +81,13 @@ public class NewReservationScreen {
 			
 			// Handle click
 			timeSlotButton.setOnAction(event -> {
-				selectedTimeSlot = timeSlot;
-				System.out.println("Selected time slot: " + selectedTimeSlot);
-				//TODO - highlight selected button
+			    // Check if the button is currently ON or OFF
+			    if (timeSlotButton.isSelected()) {
+			        selectedTimeSlot = timeSlot;
+			    } else {
+			        selectedTimeSlot = null; // Clear the selection if they uncheck it
+			    }
+			    System.out.println("Selected time slot: " + selectedTimeSlot);
 			});
 			timeSlotsGridPane.add(timeSlotButton, col, row);
 			col++;
@@ -111,7 +109,7 @@ public class NewReservationScreen {
 	}
 	
 	@FXML
-	void onConfirmClick(ActionEvent event) {
+	void onConfirmClick(Event event) {
 	    LocalDate date = datePicker.getValue();
 	    String diners = dinersAmountComboBox.getValue();
 	    
@@ -125,5 +123,11 @@ public class NewReservationScreen {
 
 	    System.out.println("Booking confirmed for: " + date + " at " + selectedTimeSlot + " (" + diners + ")");
 	    //TODO Send data to server and db
+	}
+	
+	@FXML
+	void btnBack(Event event) {
+	    System.out.println("Back button clicked.");
+	    BistroClientGUI.switchScreen(event, "ClientDashboardScreen", "Error returning to Client Dashboard Screen.");
 	}
 }
