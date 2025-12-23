@@ -31,6 +31,9 @@ public class NewReservationScreen {
 	
 	private String selectedTimeSlot = null;
 	
+	/*
+	 * Initializes the New Reservation Screen by setting up the diners amount combo box and date picker.
+	 */
 	@FXML
 	public void initialize() {
 		setupDinersAmountComboBox();
@@ -38,6 +41,9 @@ public class NewReservationScreen {
 	}
 
 	//TODO connect to server to get real available time slots and make sure the timeslots are updated based on the selected date and fit the database
+	/*
+	 * Sets up the date picker to prevent selecting past dates and handles date changes.
+	 */
 	private void setupDatePicker() {
 		// code to prevent selecting past dates
 		datePicker.setDayCellFactory(picker -> new DateCell() {
@@ -56,7 +62,9 @@ public class NewReservationScreen {
 		datePicker.setValue(LocalDate.now());
 	}
 
-	
+	/*
+	 * Sets up the diners amount combo box with options from 1 to 12 people.
+	 */
 	private void setupDinersAmountComboBox() {
 		for (int i = 1; i <= 12; i++) {
 			dinersAmountComboBox.getItems().add(i + " People");
@@ -64,7 +72,11 @@ public class NewReservationScreen {
 		dinersAmountComboBox.getSelectionModel().selectFirst();		
 	}
 	
-	
+	/*
+	 * Generates time slot buttons based on the provided list of available time slots.
+	 * 
+	 * @param availableTimeSlots List of available time slots to generate buttons for.
+	 */
 	private void generateTimeSlots(List<String> availableTimeSlots) {
 		timeSlotsGridPane.getChildren().clear();
 		
@@ -108,6 +120,11 @@ public class NewReservationScreen {
 	    return times;
 	}
 	
+	/*
+	 * Handles the confirm button click event to finalize the reservation.
+	 * 
+	 * @param event The event triggered by clicking the confirm button.
+	 */
 	@FXML
 	void onConfirmClick(Event event) {
 	    LocalDate date = datePicker.getValue();
@@ -125,6 +142,11 @@ public class NewReservationScreen {
 	    //TODO Send data to server and db
 	}
 	
+	/*
+	 * Handles the back button click event to return to the Client Dashboard Screen.
+	 * 
+	 * @param event The event triggered by clicking the back button.
+	 */
 	@FXML
 	void btnBack(Event event) {
 	    System.out.println("Back button clicked.");

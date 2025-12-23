@@ -2,10 +2,8 @@ package common;
 
 import java.util.regex.Pattern;
 
-//import javafx.scene.paint.Color;
-
 public class InputCheck {
-	
+	// Regex pattern for validating IPv4 addresses
 	private static final String IPv4_REGEX = 
 	        "^((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.|$)){4}$";
 	private static final Pattern IPv4_PATTERN = Pattern.compile(IPv4_REGEX);
@@ -94,7 +92,16 @@ public class InputCheck {
 	}
 	
 	
-	
+	/*
+	 * Validates the guest's phone number and email address.
+	 * 
+	 * @param phoneNumber The phone number to validate.
+	 * 
+	 * @param emailAddress The email address to validate.
+	 * 
+	 * @return An error message if there are validation issues, otherwise an empty string.
+	 */
+	// Regex patterns for phone number and email validation
 	private static final String PHONE_REGEX = "^\\d{10}$ or ^[0-9]{10}$";
 	private static final Pattern PHONE_PATTERN = Pattern.compile(PHONE_REGEX);
 	private static final String EMAIL_REGEX = "^[\\w.-]+@[\\w.-]+\\.\\w{2,}$";
