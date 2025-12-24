@@ -103,9 +103,10 @@ public class CodeManager {
                 
                 // If the cache is completely empty after load, trigger an immediate refill
                 // so the first user doesn't wait.
-                if (loadedCount < MAX_CODES) {
-                     refillHotCache(REFILL_BATCH_SIZE);
-                }
+                if (hotCodeCache.isEmpty() && loadedCount < MAX_CODES) {
+                    System.out.println("[CodeManager] Cache is empty after startup, pre-filling now...");
+                    refillHotCache(REFILL_BATCH_SIZE);
+               }
                 
                 System.out.println("[CodeManager] Recovery complete. Loaded " + loadedCount + " active codes.");
                 return;
@@ -154,10 +155,7 @@ public class CodeManager {
         return assignedCodeString;
     }
 
-    public int lookupUserId(String code) throws SQLException {
-        // Always prefer DB for lookup as assignedMap might not be complete after restart
-        return repository.getUserIdByCode(code);
-    }
+
 
     /**
      * Scans the bitmap sequentially to find free codes.
@@ -208,9 +206,7 @@ public class CodeManager {
             assignedMap.remove(code);
             clearIndexUsed(index);
             
-            // 3. Make available immediately (Optional: Add to front or back of cache)
-            // Adding to front makes it available immediately (LIFO-ish for this item)
-            // Adding to back preserves order. Let's add to back.
+            // Adding to back preserves order. 
             hotCodeCache.offer(index); 
             
         } catch (NumberFormatException ex) {
@@ -222,19 +218,15 @@ public class CodeManager {
      * Warning: This only clears codes tracked in memory since startup.
      * Use with caution if precise full-history cleanup is needed.
      */
-    public List<String> releaseCodesForUser(int userId) throws SQLException {
-        List<String> released = new ArrayList<>();
-        // Note: entrySet iteration is not atomic with respect to the map, but acceptable here.
+    public String releaseCodeForUser(int userId) throws SQLException {
         for (Map.Entry<String, Integer> e : assignedMap.entrySet()) {
             if (e.getValue() == userId) {
                 String code = e.getKey();
-                releaseCode(code); // This modifies the map we are iterating? 
-                // ConcurrentHashMap allows safe iteration while modifying, 
-                // but releaseCode removes keys.
-                released.add(code);
+                releaseCode(code); 
+                return code;
             }
         }
-        return released;
+        return null;
     }
 
     public ConcurrentLinkedDeque<Integer> getHotCodeCache() { return hotCodeCache; }
