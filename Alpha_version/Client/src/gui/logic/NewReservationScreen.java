@@ -1,8 +1,12 @@
 package gui.logic;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -15,29 +19,62 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.GridPane;
 import logic.BistroClientGUI;
+import enums.*;
 
 public class NewReservationScreen {
 	
 	@FXML
 	private DatePicker datePicker;
+	
 	@FXML
 	private ComboBox<String> dinersAmountComboBox;
+	
 	@FXML
 	private GridPane timeSlotsGridPane;
+	
 	@FXML
 	private Button btnConfirmReservation;
+	
 	@FXML
 	private Button btnBack;
 	
 	private String selectedTimeSlot = null;
+	
 	
 	/*
 	 * Initializes the New Reservation Screen by setting up the diners amount combo box and date picker.
 	 */
 	@FXML
 	public void initialize() {
-		setupDinersAmountComboBox();
+		setupDinersAmountComboBox(); //
 		setupDatePicker();
+		// Start with default time slots for local date and 1 diner:
+		dinersAmountComboBox.valueProperty().addListener((obs, oldV, newV) -> refreshTimeSlots());
+		datePicker.valueProperty().addListener((obs, oldDate, newDate) -> refreshTimeSlots());
+		datePicker.setValue(LocalDate.now());// Set default date to today
+	}
+	
+	private void refreshTimeSlots() {
+		LocalDate date = datePicker.getValue();
+		int diners = parseDiners(dinersAmountComboBox.getValue());
+		//TODO connect to server to get real available time slots
+		List<String> slots = BistroClientGUI.client.getReservationCTRL().AskAvailableTimeSlots(date, diners);
+		selectedTimeSlot = null;
+		btnConfirmReservation.setDisable(true);
+		generateTimeSlots(slots);
+	}
+
+	
+	private int parseDiners(String value) {
+		if (value != null && value.contains(" ")) {
+			String numberPart = value.split(" ")[0];
+			try {
+				return Integer.parseInt(numberPart);
+			} catch (NumberFormatException e) {
+				e.printStackTrace();
+			}
+		}
+		return 1; // Default to 1 if parsing fails
 	}
 
 	//TODO connect to server to get real available time slots and make sure the timeslots are updated based on the selected date and fit the database
@@ -53,10 +90,10 @@ public class NewReservationScreen {
 	            setDisable(empty || date.isBefore(LocalDate.now()));
 	        }
 	    });
-		
+		// change date for time slots:
 		datePicker.valueProperty().addListener((obs, oldDate, newDate) -> {
 	        System.out.println("Date changed to: " + newDate);
-	        generateTimeSlots(generateDefaultTimeSlots());
+	        generateTimeSlots(generateDefaultTimeSlots()); 
 	        });
 		
 		datePicker.setValue(LocalDate.now());
@@ -66,10 +103,11 @@ public class NewReservationScreen {
 	 * Sets up the diners amount combo box with options from 1 to 12 people.
 	 */
 	private void setupDinersAmountComboBox() {
+		// Populate combo box with options from 1 to 12
 		for (int i = 1; i <= 12; i++) {
 			dinersAmountComboBox.getItems().add(i + " People");
 		}
-		dinersAmountComboBox.getSelectionModel().selectFirst();		
+		dinersAmountComboBox.getSelectionModel().selectFirst(); // Select default value to 1 Person
 	}
 	
 	/*
@@ -79,18 +117,16 @@ public class NewReservationScreen {
 	 */
 	private void generateTimeSlots(List<String> availableTimeSlots) {
 		timeSlotsGridPane.getChildren().clear();
-		
 		ToggleGroup timeSlotToggleGroup = new ToggleGroup();
 		int col = 0;
 		int row = 0;
 		for (String timeSlot : availableTimeSlots) {
-			
 			ToggleButton timeSlotButton = new ToggleButton(timeSlot);
+			timeSlotButton.setId("btnTimeSlot");
+			//Ensure only one can be selected at a time
 			timeSlotButton.setToggleGroup(timeSlotToggleGroup);
-			// can set this in CSS later TODO
 			timeSlotButton.setPrefWidth(104); 
 			timeSlotButton.setPrefHeight(37);
-			
 			// Handle click
 			timeSlotButton.setOnAction(event -> {
 			    // Check if the button is currently ON or OFF
@@ -101,6 +137,7 @@ public class NewReservationScreen {
 			    }
 			    System.out.println("Selected time slot: " + selectedTimeSlot);
 			});
+			// Add to grid
 			timeSlotsGridPane.add(timeSlotButton, col, row);
 			col++;
 			if (col >= 4) { // 4 columns per row
@@ -139,7 +176,7 @@ public class NewReservationScreen {
 	    }
 
 	    System.out.println("Booking confirmed for: " + date + " at " + selectedTimeSlot + " (" + diners + ")");
-	    //TODO Send data to server and db
+	    //TODO : send reservation data to server and handle response
 	}
 	
 	/*

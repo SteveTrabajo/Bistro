@@ -10,10 +10,14 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
 
 import comms.*;
 import entities.User;
+import enums.DaysOfWeek;
 import ocsf.client.*;
 
 /*
@@ -53,7 +57,7 @@ public class BistroClient extends AbstractClient {
 			throw new Exception("Could not connect to server at " + host + ":" + port, e);
 		}
 		this.userCTRL = new User_Controller(this);
-		this.reservationCTRL = new Reservation_Controller();
+		this.reservationCTRL = new Reservation_Controller(this);
 	}
 	
 	/*
@@ -86,9 +90,10 @@ public class BistroClient extends AbstractClient {
 		BistroClient.messageFromServer = (Message) msg; // Update static message variable
 		awaitResponse = false; // Set response status to false
 		switch(messageFromServer.getId()) {
-		case "REQ_TO_LOGIN_APPROVED":
+		case "ASK_TO_LOGIN_APPROVED":
 			userCTRL.setLoggedInUser((User) messageFromServer.getData());
 			break;
+			
 		default:
 			// TODO: Handle other message types as needed
 			break;
@@ -194,9 +199,8 @@ public class BistroClient extends AbstractClient {
 		return this.userCTRL;
 	}
 
-	public Object getReservationCTRL() {
-		// TODO Auto-generated method stub
-		return null;
+	public Reservation_Controller getReservationCTRL() {
+		return this.reservationCTRL;
 	}
-
+	
 }

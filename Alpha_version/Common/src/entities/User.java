@@ -2,6 +2,8 @@ package entities;
 
 import java.util.List;
 
+import enums.UserType;
+
 /*
  * This class represents a user in the Bistro system.
  */

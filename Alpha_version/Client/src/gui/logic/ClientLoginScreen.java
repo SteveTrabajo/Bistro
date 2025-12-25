@@ -14,6 +14,7 @@ import java.util.Map;
 import common.InputCheck;
 import javafx.event.Event;
 import entities.*;
+import enums.UserType;
 
 /*
  * This class represents the client login screen controller.

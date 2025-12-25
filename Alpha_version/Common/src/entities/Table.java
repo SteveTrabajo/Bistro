@@ -2,22 +2,22 @@ package entities;
 
 public class Table {
 	//****************************** Instance variables ******************************/
-	private int tableNumber;
+	private int tableID;
 	private int capacity;
 	private boolean isAvailable;
 	//******************************** Constructors ***********************************//
 	public Table(int tableNumber, int capacity, boolean isAvailable) {
-		this.tableNumber = tableNumber;
+		this.tableID = tableNumber;
 		this.capacity = capacity;
 		this.isAvailable = isAvailable;
 	}
 	//******************************** Getters And Setters ***********************************//
-	public int getTableNumber() {
-		return tableNumber;
+	public int getTableID() {
+		return tableID;
 	}
 	
-	public void setTableNumber(int tableNumber) {
-		this.tableNumber = tableNumber;
+	public void setTableID(int tableNumber) {
+		this.tableID = tableNumber;
 	}
 	
 	public int getCapacity() {

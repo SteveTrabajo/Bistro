@@ -2,7 +2,7 @@ package gui.logic;
 
 import java.io.IOException;
 import entities.User;
-import entities.UserType;
+import enums.UserType;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -91,14 +91,7 @@ public class ClientDashboardScreen {
 	 * Method to edit the Join Waiting List button text based on user's waiting list status.
 	 */
 	private void editJoinWaitingListButton() {
-		boolean isOnWaitingList = BistroClientGUI.client.getReservationCTRL().isUserOnWaitingList(
-				BistroClientGUI.client.getUserCTRL().getLoggedInUser());
-		if (isOnWaitingList) {
-			btnJoinWaitingList.setText("Waiting List Status");
-		} else {
-			btnJoinWaitingList.setText("Join Waiting List");
-		}
-		
+		//TODO: implement method to check if user is on waiting list	
 	}
 
 	/*

@@ -5,7 +5,7 @@ import java.util.Map;
 
 import comms.*;
 import entities.User;
-import entities.UserType;
+import enums.UserType;
 
 /*
  * This class represents the controller for user-related operations in the BistroClient.

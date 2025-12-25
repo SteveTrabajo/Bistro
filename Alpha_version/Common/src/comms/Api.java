@@ -37,6 +37,13 @@ public final class Api {
     public static final String REPLY_ORDERS_UPDATE_INVALID_CONFIRM_CODE = "orders.updateStatus.invalidConfirmCode";
     public static final String REPLY_ORDERS_GET_BY_CODE_RESULT          = "orders.getByCode.result";
 
+    // == Resturant subject == //
+// Requests
+    public static final String ASK_AVAIL_HOURS = "restaurant.availableHours";
+    
+// Responses
+    public static final String REPLAY_AVAIL_HOURS_RES= "restaurant.availableHours.result";
+    
 
     
     // == System responses == //
