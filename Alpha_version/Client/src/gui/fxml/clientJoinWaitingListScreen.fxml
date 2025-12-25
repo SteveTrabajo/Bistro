@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane styleClass="wl-root" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bistro.app.controllers.WaitingListJoinController">
+
+    <children>
+        <BorderPane prefHeight="720" prefWidth="1280">
+
+            <top>
+                <BorderPane>
+                    <padding>
+                        <Insets bottom="8" left="28" right="28" top="18" />
+                    </padding>
+
+                    <left>
+                        <Button fx:id="btnBack" onAction="#btnBack" styleClass="nav-back" text="Back">
+                     <graphic>
+                        <ImageView fitHeight="16.0" fitWidth="8.0">
+                           <image>
+                              <Image url="@resources/backIcon.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></Button>
+                    </left>
+
+                    <center>
+                        <Label styleClass="page-title" text="Join Waiting List" BorderPane.alignment="CENTER" />
+                    </center>
+                </BorderPane>
+            </top>
+
+            <center>
+                <StackPane BorderPane.alignment="CENTER">
+                    <children>
+
+                        <VBox alignment="TOP_CENTER" spacing="18" styleClass="wl-card">
+                            <padding>
+                                <Insets bottom="26" left="34" right="34" top="22" />
+                            </padding>
+
+                            <!-- Joining as -->
+                            <HBox alignment="CENTER" spacing="10">
+                                <children>
+                                    <Label styleClass="muted" text="Joining as:" />
+                                    <Label fx:id="lblUser" styleClass="pill" text="Member" />
+                                </children>
+                            </HBox>
+
+                            <Label styleClass="section-title" text="Number of Diners" />
+
+                            <!-- Counter row -->
+                            <HBox alignment="CENTER" spacing="18">
+                                <children>
+                                    <Button fx:id="btnMinus" onAction="#btnMinus" styleClass="counter-btn" text="–" />
+                                    <Label fx:id="lblDinersAmount" styleClass="counter-value" text="2" />
+                                    <Button fx:id="btnPlus" onAction="#btnPlus" styleClass="counter-btn" text="+" />
+                                </children>
+                            </HBox>
+
+                            <Label styleClass="hint" text="Select 1-12 diners" />
+
+                            <!-- Info line (light blue) -->
+                            <StackPane styleClass="info-pill">
+                                <padding>
+                                    <Insets bottom="14" left="16" right="16" top="14" />
+                                </padding>
+                                <children>
+                                    <Label styleClass="info-text" text="We'll notify you using your registered contact information." />
+                                </children>
+                            </StackPane>
+
+                            <Button fx:id="btnCheckAvail" onAction="#btnCheckAvail" text="Check Availability">
+                        <styleClass>
+                           <String fx:value="btn-primary" />
+                           <String fx:value="btn-wide" />
+                        </styleClass></Button>
+
+                            <!-- Footer help box -->
+                            <StackPane styleClass="help-box">
+                                <padding>
+                                    <Insets bottom="18" left="18" right="18" top="18" />
+                                </padding>
+                                <children>
+                                    <Label styleClass="help-text" text="We'll check for available tables and either seat you immediately or add you to&#10;our waiting list." />
+                                </children>
+                            </StackPane>
+
+                        </VBox>
+
+                    </children>
+                </StackPane>
+            </center>
+         <bottom>
+            <BorderPane BorderPane.alignment="CENTER">
+               <left>
+                  <HBox alignment="BOTTOM_LEFT">
+                     <children>
+                        <Label styleClass="footer-label" text="© 2025 Bistro · All rights reserved · v1.0.0" textFill="WHITE" />
+                     </children>
+                     <padding>
+                        <Insets bottom="16" left="24" right="0" top="0" />
+                     </padding>
+                  </HBox>
+               </left>
+            </BorderPane>
+         </bottom>
+
+        </BorderPane>
+    </children>
+   <stylesheets>
+      <URL value="@../css/waiting_list_join.css" />
+      <URL value="@clientJoinWaitingListStyles.css" />
+   </stylesheets>
+</StackPane>

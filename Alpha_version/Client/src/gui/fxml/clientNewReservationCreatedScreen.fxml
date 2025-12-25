@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane styleClass="rc-root" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bistro.app.controllers.ReservationConfirmedController">
+
+    <children>
+        <BorderPane prefHeight="720" prefWidth="1280">
+
+            <center>
+                <StackPane BorderPane.alignment="CENTER">
+                    <children>
+
+                        <VBox alignment="TOP_CENTER" spacing="18" styleClass="rc-card">
+                            <padding>
+                                <Insets bottom="28" left="34" right="34" top="28" />
+                            </padding>
+
+                            <!-- green check circle -->
+                            <StackPane styleClass="rc-check-circle">
+                                <children>
+                                    <Label styleClass="rc-check-mark" text="✓" />
+                                </children>
+                            </StackPane>
+
+                            <!-- title/subtitle -->
+                            <VBox alignment="CENTER" spacing="6">
+                                <children>
+                                    <Label styleClass="rc-title" text="Reservation Confirmed!" />
+                                    <Label styleClass="rc-subtitle" text="Your table has been reserved" />
+                                </children>
+                            </VBox>
+
+                            <!-- details box -->
+                            <VBox spacing="12" styleClass="rc-details">
+                                <padding>
+                                    <Insets bottom="16" left="18" right="18" top="16" />
+                                </padding>
+
+                                <children>
+                                    <Label styleClass="rc-details-title" text="Reservation Details" />
+
+                                    <HBox spacing="6">
+                                        <children>
+                                            <Label styleClass="rc-key" text="Date:" />
+                                            <Label fx:id="lblDate" styleClass="rc-val" text="Tuesday, January 2" />
+                                        </children>
+                                    </HBox>
+
+                                    <HBox spacing="6">
+                                        <children>
+                                            <Label styleClass="rc-key" text="Time:" />
+                                            <Label fx:id="lblHour" styleClass="rc-val" text="11:30" />
+                                        </children>
+                                    </HBox>
+
+                                    <HBox spacing="6">
+                                        <children>
+                                            <Label styleClass="rc-key" text="Party Size:" />
+                                            <Label fx:id="lblDinersAmount" styleClass="rc-val" text="2 People" />
+                                        </children>
+                                    </HBox>
+
+                                    <HBox spacing="6">
+                                        <children>
+                                            <Label styleClass="rc-key" text="Confirmation Code:" />
+                                            <Label fx:id="lblConfirmCode" styleClass="rc-code" text="R-5942" />
+                                        </children>
+                                    </HBox>
+
+                                </children>
+                            </VBox>
+
+                            <!-- buttons -->
+                            <HBox alignment="CENTER" spacing="14">
+                                <children>
+                                    <Button fx:id="btnBack" onAction="#btnBack" styleClass="rc-btn-primary" text="Back to Dashboard" />
+
+                                    <Button fx:id="btnNewReserve" onAction="#btnNewReserve" styleClass="rc-btn-outline" text="Make Another Reservation" />
+                                </children>
+                            </HBox>
+
+                        </VBox>
+
+                    </children>
+                </StackPane>
+            </center>
+         <bottom>
+            <BorderPane BorderPane.alignment="CENTER">
+               <left>
+                  <HBox alignment="BOTTOM_LEFT">
+                     <children>
+                        <Label styleClass="footer-label" text="© 2025 Bistro · All rights reserved · v1.0.0" textFill="WHITE" />
+                     </children>
+                     <padding>
+                        <Insets bottom="16" left="24" right="0" top="0" />
+                     </padding>
+                  </HBox>
+               </left>
+            </BorderPane>
+         </bottom>
+
+        </BorderPane>
+    </children>
+   <stylesheets>
+      <URL value="@../css/reservation_confirmed.css" />
+      <URL value="@clientNewReservationCreatedStyles.css" />
+   </stylesheets>
+</StackPane>

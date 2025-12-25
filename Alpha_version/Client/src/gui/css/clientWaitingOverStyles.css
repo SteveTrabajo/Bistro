@@ -1,0 +1,71 @@
+.ready-root{
+    -fx-background-color: linear-gradient(to bottom right, #020617, #1e3a8a);
+    -fx-font-family: "Lexend";
+}
+
+.ready-card{
+    -fx-pref-width: 720px;
+    -fx-max-width: 720px;
+    -fx-max-height: 610px;
+    -fx-background-color: white;
+    -fx-background-radius: 18px;
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.30), 18, 0.18, 0, 10);
+}
+
+.check-circle{
+    -fx-min-width: 74px;
+    -fx-min-height: 74px;
+    -fx-max-width: 74px;
+    -fx-max-height: 74px;
+    -fx-background-color: #22c55e;
+    -fx-background-radius: 999px;
+}
+.check-mark{
+    -fx-text-fill: white;
+    -fx-font-size: 26px;
+    -fx-font-weight: 900;
+}
+
+.title{
+    -fx-text-fill:#0f172a;
+    -fx-font-size: 34px;
+    -fx-font-weight: 900;
+}
+
+.subtitle{
+    -fx-text-fill:#334155;
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+}
+
+.ring-wrap{
+    -fx-min-width: 280px;
+    -fx-min-height: 280px;
+    -fx-max-width: 280px;
+    -fx-max-height: 280px;
+}
+
+.ring{
+    -fx-fill: transparent;
+    -fx-stroke: #2563eb;
+    -fx-stroke-width: 26;
+}
+
+.ring-number{
+    -fx-text-fill:#2563eb;
+    -fx-font-size: 78px;
+    -fx-font-weight: 900;
+}
+
+.btn-primary{
+    -fx-min-width: 160px;
+    -fx-background-color:#2563eb;
+    -fx-text-fill:white;
+    -fx-font-size: 14px;
+    -fx-font-weight: 900;
+    -fx-background-radius: 14px;
+    -fx-padding: 12 16;
+    -fx-cursor: hand;
+}
+.btn-primary:hover{ -fx-background-color:#1d4ed8; }
+.btn-primary:pressed{ -fx-scale-x:0.985; -fx-scale-y:0.985; }
