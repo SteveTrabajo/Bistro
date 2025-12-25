@@ -6,6 +6,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +19,7 @@ import entities.Order;
  */
 public class BistroDataBase_Controller {
 	// Database connection parameters:
-	private static final String JDBC_URL = "jdbc:mysql://localhost:3306/bistro_prototype?allowLoadLocalInfile=true&serverTimezone=Asia/Jerusalem&useSSL=false&allowPublicKeyRetrieval=true";
+	private static final String JDBC_URL = "jdbc:mysql://localhost:3306/bistro?allowLoadLocalInfile=true&serverTimezone=Asia/Jerusalem&useSSL=false&allowPublicKeyRetrieval=true";
 	private static final String JDBC_USER = "root";
 	private static final String JDBC_PASS = "Aa123456";
 
@@ -75,38 +77,53 @@ public class BistroDataBase_Controller {
 	 * @param ConfCode The confirmation code of the order to retrieve.
 	 * @return The Order object if found, otherwise null.
 	 */
-	public static Order getOrderByConfirmationCode(int ConfCode) {
-		String orderQuery = "SELECT "
-				+ "order_number,"
-				+ " order_date,"
-				+ " number_of_guests,"
-				+ " confirmation_code,"
-				+ " member_id,"
-				+ " date_of_placing_order"
-				+ " FROM orders WHERE confirmation_code = ?";
-		// Ensure we have a connection
-		try (PreparedStatement pst = conn.prepareStatement(orderQuery)) {
-			pst.setInt(1, ConfCode); // Set the confirmation code parameter
-			try (ResultSet rs = pst.executeQuery()) { // Execute the query
-				if (!rs.next()) {
-					return null;
-				}
-				// Extract order details from the result set
-				int order_number = rs.getInt("order_number");
-				Date order_date = rs.getDate("order_date");
-				int number_of_guests = rs.getInt("number_of_guests");
-				int confirmation_code = rs.getInt("confirmation_code");
-				int member_id = rs.getInt("member_id");
-				Date date_of_placing_order = rs.getDate("date_of_placing_order");
-				// Create and return the Order object
-				return new Order(order_number, order_date, number_of_guests, confirmation_code, member_id,
-						date_of_placing_order);
-			}
-		} catch (SQLException ex) {
-			System.out.println("SQLException: " + ex.getMessage());
-			return null;
-		}
+	public static Order getOrderByConfirmationCode(int confCode) {
+
+	    if (conn == null && !openConnection()) {
+	        System.out.println("getOrderByConfirmationCode: No DB connection available.");
+	        return null;
+	    }
+
+	    String orderQuery =
+	            "SELECT order_number, order_date, order_time, number_of_guests, confirmation_code, member_id, " +
+	            "date_of_placing_order, order_active, wait_list " +
+	            "FROM orders WHERE confirmation_code = ?";
+
+	    try (PreparedStatement pst = conn.prepareStatement(orderQuery)) {
+	        pst.setInt(1, confCode);
+
+	        try (ResultSet rs = pst.executeQuery()) {
+	            if (!rs.next()) return null;
+
+	            int orderNumber = rs.getInt("order_number");
+	            Date sqlOrderDate = rs.getDate("order_date");
+	            Time sqlOrderTime = rs.getTime("order_time");
+	            int dinersAmount = rs.getInt("number_of_guests");
+	            int confirmationCode = rs.getInt("confirmation_code");
+	            int memberId = rs.getInt("member_id");
+	            Date sqlPlacedDate = rs.getDate("date_of_placing_order");
+	            boolean orderActive = rs.getBoolean("order_active");
+	            boolean waitList = rs.getBoolean("wait_list");
+
+	            return new Order(
+	                    orderNumber,
+	                    (sqlOrderDate == null) ? null : sqlOrderDate.toLocalDate(),
+	                    (sqlOrderTime == null) ? null : sqlOrderTime.toLocalTime(),
+	                    dinersAmount,
+	                    confirmationCode,
+	                    memberId,
+	                    orderActive,
+	                    waitList,
+	                    (sqlPlacedDate == null) ? null : sqlPlacedDate.toLocalDate()
+	            );
+	        }
+	    } catch (SQLException ex) {
+	        System.out.println("SQLException in getOrderByConfirmationCode: " + ex.getMessage());
+	        ex.printStackTrace();
+	        return null;
+	    }
 	}
+
 	
 	
 	/*
@@ -116,35 +133,40 @@ public class BistroDataBase_Controller {
 	 * @return true if the update was successful, false otherwise.
 	 */
 	public static boolean updateOrder(Order orderUpdateData) {
-		// Ensure we have a connection
-		if (conn == null && !openConnection()) {
-			System.out.println("updateOrder: No DB connection available.");
-			return false;
-		}
-		// SQL update query
-		String updateQuery = "UPDATE orders SET order_date = ?, number_of_guests = ? WHERE confirmation_code = ?";
-		// Prepare and execute the update statement
-		try (PreparedStatement pst = conn.prepareStatement(updateQuery)) {
-			// Use values from the Order object
-			pst.setDate(1, orderUpdateData.getOrderDate()); // java.sql.Date
-			pst.setInt(2, orderUpdateData.getDinersAmount()); // int
-			pst.setInt(3, orderUpdateData.getConfirmationCode()); // int
-			// Execute the update
-			int rowsAffected = pst.executeUpdate();
-			// Check if any rows were updated
-			if (rowsAffected > 0) {
-				System.out.println("Order updated successfully, confirmation code: " + orderUpdateData.getConfirmationCode());
-				return true;
-			} else {
-				System.out.println("No order found with confirmation code: " + orderUpdateData.getConfirmationCode());
-				return false;
-			}
-		} catch (SQLException ex) {
-			System.out.println("SQLException in updateOrder: " + ex.getMessage());
-			ex.printStackTrace();
-			return false;
-		}
+
+	    if (conn == null && !openConnection()) {
+	        System.out.println("updateOrder: No DB connection available.");
+	        return false;
+	    }
+
+	    String updateQuery =
+	            "UPDATE orders SET order_date = ?, number_of_guests = ? WHERE confirmation_code = ?";
+
+	    try (PreparedStatement pst = conn.prepareStatement(updateQuery)) {
+
+	        pst.setDate(1, orderUpdateData.getOrderDate() == null ? null : Date.valueOf(orderUpdateData.getOrderDate()));
+	        pst.setInt(2, orderUpdateData.getDinersAmount());
+	        pst.setInt(3, orderUpdateData.getConfirmationCode());
+
+	        int rowsAffected = pst.executeUpdate();
+
+	        if (rowsAffected > 0) {
+	            System.out.println("Order updated successfully, confirmation code: " +
+	                    orderUpdateData.getConfirmationCode());
+	            return true;
+	        } else {
+	            System.out.println("No order found with confirmation code: " +
+	                    orderUpdateData.getConfirmationCode());
+	            return false;
+	        }
+
+	    } catch (SQLException ex) {
+	        System.out.println("SQLException in updateOrder: " + ex.getMessage());
+	        ex.printStackTrace();
+	        return false;
+	    }
 	}
+
 	
 	
 	/*
@@ -153,53 +175,80 @@ public class BistroDataBase_Controller {
 	 * @return A list of all Order objects in the database.
 	 */
 	public static List<Order> getAllOrders() {
-		List<Order> allOrders = new ArrayList<>(); // List to hold all orders
-		String orderQuery = "SELECT * from orders"; // SQL query to select all orders
-		// Prepare and execute the query
-		try (PreparedStatement pst = conn.prepareStatement(orderQuery)) {
-			try (ResultSet rs = pst.executeQuery()) {
-				while (rs.next()) {
-					int order_number = rs.getInt("order_number");
-					Date order_date = rs.getDate("order_date");
-					int number_of_guests = rs.getInt("number_of_guests");
-					int confirmation_code = rs.getInt("confirmation_code");
-					int member_id = rs.getInt("member_id");
-					Date date_of_placing_order = rs.getDate("date_of_placing_order");
-					// Create Order object and add to the list
-					Order currentOrder = new Order(order_number, order_date, number_of_guests, confirmation_code,
-							member_id, date_of_placing_order);
-					// Add the current order to the list
-					allOrders.add(currentOrder);
-				}
-			}
-			return allOrders;
-		} catch (SQLException ex) {
-			System.out.println("SQLException in getAllOrders: " + ex.getMessage());
-			ex.printStackTrace();
-			return null;
-		}
+
+	    if (conn == null && !openConnection()) {
+	        System.out.println("getAllOrders: No DB connection available.");
+	        return null;
+	    }
+
+	    List<Order> allOrders = new ArrayList<>();
+
+	    String orderQuery =
+	            "SELECT order_number, order_date, order_time, number_of_guests, confirmation_code, member_id, " +
+	            "date_of_placing_order, order_active, wait_list " +
+	            "FROM orders";
+
+	    try (PreparedStatement pst = conn.prepareStatement(orderQuery);
+	         ResultSet rs = pst.executeQuery()) {
+
+	        while (rs.next()) {
+	            int orderNumber = rs.getInt("order_number");
+	            Date sqlOrderDate = rs.getDate("order_date");
+	            Time sqlOrderTime = rs.getTime("order_time");
+	            int dinersAmount = rs.getInt("number_of_guests");
+	            int confirmationCode = rs.getInt("confirmation_code");
+	            int memberId = rs.getInt("member_id");
+	            Date sqlPlacedDate = rs.getDate("date_of_placing_order");
+	            boolean orderActive = rs.getBoolean("order_active");
+	            boolean waitList = rs.getBoolean("wait_list");
+
+	            Order currentOrder = new Order(
+	                    orderNumber,
+	                    (sqlOrderDate == null) ? null : sqlOrderDate.toLocalDate(),
+	                    (sqlOrderTime == null) ? null : sqlOrderTime.toLocalTime(),
+	                    dinersAmount,
+	                    confirmationCode,
+	                    memberId,
+	                    orderActive,
+	                    waitList,
+	                    (sqlPlacedDate == null) ? null : sqlPlacedDate.toLocalDate()
+	            );
+
+	            allOrders.add(currentOrder);
+	        }
+
+	        return allOrders;
+
+	    } catch (SQLException ex) {
+	        System.out.println("SQLException in getAllOrders: " + ex.getMessage());
+	        ex.printStackTrace();
+	        return null;
+	    }
 	}
 
 
-	public static boolean isDateAvailable(Date date, int i) {
-		String dateQuery = "SELECT * FROM orders WHERE order_date = ? AND confirmation_code != ?";
-		try (PreparedStatement pst = conn.prepareStatement(dateQuery)) {
-			pst.setDate(1, date); // Set the date parameter
-			pst.setInt(2, i); // Set the confirmation code parameter to exclude
-			try (ResultSet rs = pst.executeQuery()) { // Execute the query
-				if (rs.next()) {
-					// Date is taken by another order
-					return false;
-				} else {
-					// Date is available
-					return true;
-				}
-			}
-		} catch (SQLException ex) {
-			System.out.println("SQLException in isDateAvailable: " + ex.getMessage());
-			ex.printStackTrace();
-			return false;
-		}
+
+	public static boolean isDateAvailable(LocalDate date, int excludeConfCode) {
+
+	    if (conn == null && !openConnection()) {
+	        System.out.println("isDateAvailable: No DB connection available.");
+	        return false;
+	    }
+
+	    String dateQuery = "SELECT 1 FROM orders WHERE order_date = ? AND confirmation_code != ? LIMIT 1";
+
+	    try (PreparedStatement pst = conn.prepareStatement(dateQuery)) {
+	        pst.setDate(1, date == null ? null : Date.valueOf(date));
+	        pst.setInt(2, excludeConfCode);
+
+	        try (ResultSet rs = pst.executeQuery()) {
+	            return !rs.next(); // if found -> not available
+	        }
+	    } catch (SQLException ex) {
+	        System.out.println("SQLException in isDateAvailable: " + ex.getMessage());
+	        ex.printStackTrace();
+	        return false;
+	    }
 	}
 }
 // End of BistroDataBase_Controller.java

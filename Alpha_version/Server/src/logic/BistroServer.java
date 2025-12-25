@@ -2,7 +2,7 @@ package logic;
 
 import java.util.List;
 
-import common.Message;
+import comms.Message;
 import entities.Order;
 import gui.controllers.ServerConsoleController;
 import ocsf.server.AbstractServer;
