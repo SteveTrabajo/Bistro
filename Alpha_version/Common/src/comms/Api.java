@@ -1,18 +1,45 @@
 package comms;
 
+/**
+ * Shared API contract between Client and Server.
+ * Message IDs are namespaced as: <subject>.<action>
+ *
+ * Naming convention for constants:
+ *   ASK_*   = client -> server requests
+ *   REPLY_* = server -> client responses
+ */
+
 public final class Api {
-	// Requests
-	public static final String ASK_TO_LOGIN = "user.login";
-	public static final String ASK_ORDERS_LIST = "orders.list";
-	public static final String ASK_ORDERS_UPDATE_STATUS = "orders.updateStatus";
-	public static final String ASK_ORDERS_GET_BY_CODE = "orders.getByCode";
-	public static final String ASK_CONNECTION_CONNECT = "connection.connect";
-	public static final String ASK_CONNECTION_DISCONNECT = "connection.disconnect";
-	// Responses
-	public static final String REPLY_ORDERS_LIST_RESULT = "orders.list.result";
-	public static final String REPLY_ORDERS_UPDATE_OK = "orders.updateStatus.ok";
-	public static final String REPLY_ORDERS_UPDATE_DATE_NOT_AVAILABLE = "orders.updateStatus.dateNotAvailable";
-	public static final String REPLY_ORDERS_UPDATE_INVALID_CONFIRM_CODE = "orders.updateStatus.invalidConfirmCode";
-	public static final String REPLY_ORDERS_GET_BY_CODE_RESULT = "orders.getByCode.result";
-	public static final String REPLY_UNKNOWN_COMMAND = "system.unknownCommand";
+    private Api() {}
+
+    // == Connection subject == // 
+    
+// Requests
+    public static final String ASK_CONNECTION_CONNECT    = "connection.connect";
+    public static final String ASK_CONNECTION_DISCONNECT = "connection.disconnect";
+    
+// Responses
+    public static final String REPLY_CONNECTION_CONNECT_OK = "connection.connect.ok";
+
+
+    
+    // == Orders subject == //
+    
+// Requests
+    public static final String ASK_ORDERS_LIST          = "orders.list";
+    public static final String ASK_ORDERS_UPDATE_STATUS = "orders.updateStatus";
+    public static final String ASK_ORDERS_GET_BY_CODE   = "orders.getByCode";
+    
+// Responses
+    public static final String REPLY_ORDERS_LIST_RESULT                 = "orders.list.result";
+    public static final String REPLY_ORDERS_UPDATE_OK                   = "orders.updateStatus.ok";
+    public static final String REPLY_ORDERS_UPDATE_DATE_NOT_AVAILABLE   = "orders.updateStatus.dateNotAvailable";
+    public static final String REPLY_ORDERS_UPDATE_INVALID_CONFIRM_CODE = "orders.updateStatus.invalidConfirmCode";
+    public static final String REPLY_ORDERS_GET_BY_CODE_RESULT          = "orders.getByCode.result";
+
+
+    
+    // == System responses == //
+    
+    public static final String REPLY_UNKNOWN_COMMAND = "system.unknownCommand";
 }
