@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane styleClass="success-root" stylesheets="@clientCheckInTableSuccesStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bistro.app.controllers.CheckInSuccessController">
+
+    <children>
+        <BorderPane prefHeight="720" prefWidth="1280">
+
+            <center>
+                <StackPane BorderPane.alignment="CENTER">
+                    <children>
+
+                        <VBox alignment="TOP_CENTER" spacing="18" styleClass="success-card">
+                            <padding>
+                                <Insets bottom="26" left="32" right="32" top="26" />
+                            </padding>
+
+                            <!-- Green check circle -->
+                            <StackPane styleClass="check-circle">
+                                <children>
+                                    <Label styleClass="check-mark" text="✓" />
+                                </children>
+                            </StackPane>
+
+                            <VBox alignment="CENTER" spacing="6">
+                                <children>
+                                    <Label styleClass="success-title" text="Check-in Successful!" />
+                                    <Label styleClass="success-sub" text="Welcome to Bistro" />
+                                </children>
+                            </VBox>
+
+                            <!-- Blue table card -->
+                            <VBox alignment="CENTER" spacing="10" styleClass="table-card">
+                                <padding>
+                                    <Insets bottom="18" left="18" right="18" top="18" />
+                                </padding>
+                                <children>
+                                    <Label styleClass="table-small" text="Your Table Number" />
+                                    <Label fx:id="tableNumberLabel" styleClass="table-number" text="22" />
+                                    <Label styleClass="table-small" text="Please proceed to your table" />
+                                </children>
+                            </VBox>
+
+                            <!-- Details -->
+                            <VBox spacing="10" styleClass="details-box">
+                                <padding>
+                                    <Insets bottom="14" left="16" right="16" top="14" />
+                                </padding>
+                                <children>
+                                    <Label styleClass="details-title" text="Reservation Details:" />
+
+                                    <HBox>
+                                        <children>
+                                            <Label styleClass="details-key" text="Confirmation Code: " />
+                                            <Label fx:id="lblConfirmCode" styleClass="details-val" text="R-1234" />
+                                        </children>
+                                    </HBox>
+
+                                    <HBox>
+                                        <children>
+                                            <Label styleClass="details-key" text="Table: " />
+                                            <Label fx:id="lblTableNum" styleClass="details-val" text="22" />
+                                        </children>
+                                    </HBox>
+
+                                    <HBox>
+                                        <children>
+                                            <Label styleClass="details-key" text="Status: " />
+                                            <Label fx:id="lblStat" styleClass="details-ok" text="Checked In" />
+                                        </children>
+                                    </HBox>
+                                </children>
+                            </VBox>
+
+                            <!-- Buttons -->
+                            <HBox alignment="CENTER" spacing="12">
+                                <children>
+                                    <Button fx:id="btnBack" onAction="#btnBack" text="Back to Dashboard">
+                              <styleClass>
+                                 <String fx:value="btn-primary" />
+                                 <String fx:value="btn-wide" />
+                              </styleClass></Button>
+                                </children>
+                            </HBox>
+
+                        </VBox>
+
+                    </children>
+                </StackPane>
+            </center>
+         <bottom>
+            <BorderPane BorderPane.alignment="CENTER">
+               <left>
+                  <HBox alignment="BOTTOM_LEFT">
+                     <children>
+                        <Label styleClass="footer-label" text="© 2025 Bistro · All rights reserved · v1.0.0" textFill="WHITE" />
+                     </children>
+                     <padding>
+                        <Insets bottom="16" left="24" right="0" top="0" />
+                     </padding>
+                  </HBox>
+               </left>
+            </BorderPane>
+         </bottom>
+
+        </BorderPane>
+    </children>
+</StackPane>
