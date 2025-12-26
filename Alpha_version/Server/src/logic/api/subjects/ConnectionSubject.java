@@ -3,7 +3,7 @@ package logic.api.subjects;
 import comms.Api;
 import comms.Message;
 import logic.api.Router;
-import logic.api.ServerContext;
+import logic.ServerLogger;
 
 /**
  * API handlers related to client connections.
@@ -15,15 +15,15 @@ public final class ConnectionSubject {
     /**
      * Registers connection-related handlers.
      */
-    public static void register(Router router, ServerContext ctx) {
+    public static void register(Router router) {
 
         router.on("connection", "connect", (msg, client) -> {
-            ctx.log("Client connected: " + client);
+        	ServerLogger.log("Client connected: " + client);
             client.sendToClient(new Message(Api.REPLY_CONNECTION_CONNECT_OK, null));
         });
 
         router.on("connection", "disconnect", (msg, client) -> {
-            ctx.log("Client disconnected: " + client);
+            ServerLogger.log("Client disconnected: " + client);
             client.close();
         });
     }

@@ -14,14 +14,12 @@ import ocsf.server.ConnectionToClient;
  */
 public class BistroServer extends AbstractServer {
 
-	private ServerConsoleController serverConsole; // Reference to the server console controller
-
 	/*
 	 * Constructor for BistroServer class
 	 */
 	public BistroServer(int port, ServerConsoleController serverConsoleController) {
 		super(port);
-		this.serverConsole = serverConsoleController;
+		ServerLogger.setConsole(serverConsoleController);
 	}
 
 	/*
@@ -40,8 +38,7 @@ public class BistroServer extends AbstractServer {
 			String messageToDisplay;
 			// Log the received message:
 			messageToDisplay = "Message received: " + messageId + " from: " + client;
-			System.out.print(messageToDisplay + "\n");
-			serverConsole.displayMessageToConsole(messageToDisplay);
+			ServerLogger.log(messageToDisplay);
 			// Handle different message IDs:
 			try {
 				switch (messageId) {
@@ -54,7 +51,7 @@ public class BistroServer extends AbstractServer {
 					// Log the action:
 					messageToDisplay = client + " requested the full orders list. Total orders sent: "
 							+ allOrders.size();
-					serverConsole.displayMessageToConsole(messageToDisplay);
+					ServerLogger.log(messageToDisplay);
 					return;
 
 				// case client requests to update an order status.
@@ -68,7 +65,7 @@ public class BistroServer extends AbstractServer {
 						// Log the action:
 						messageToDisplay = client + " attempted to update order with confirmation code: "
 								+ orderToUpdate.getConfirmationCode() + " but the date is already taken.";
-						serverConsole.displayMessageToConsole(messageToDisplay);
+						ServerLogger.log(messageToDisplay);
 						return;
 					}
 					boolean updateStatus = BistroDataBase_Controller.updateOrder(orderToUpdate);
@@ -79,13 +76,13 @@ public class BistroServer extends AbstractServer {
 						// Log the action:
 						messageToDisplay = client + " updated order with confirmation code: "
 								+ orderToUpdate.getConfirmationCode() + " Successfully.";
-						serverConsole.displayMessageToConsole(messageToDisplay);
+						ServerLogger.log(messageToDisplay);
 					} else {
 						// Currently we only know "update failed", treat it as invalid code:
 						client.sendToClient(new Message("invalidConfirmCode", null));
 						// Log the action:
 						messageToDisplay = client + " attempted to update order with invalid confirmation code";
-						serverConsole.displayMessageToConsole(messageToDisplay);
+						ServerLogger.log(messageToDisplay);
 					}
 					return;
 
@@ -97,20 +94,20 @@ public class BistroServer extends AbstractServer {
 					client.sendToClient(new Message("orderByConfirmationCode", order));
 					// Log the action:
 					messageToDisplay = client + " requested order with confirmation code: " + confirmationCode;
-					serverConsole.displayMessageToConsole(messageToDisplay);
+					ServerLogger.log(messageToDisplay);
 					return;
 
 				case "connect":
 					// Log the connection:
 					messageToDisplay = client + " has connected.";
-					serverConsole.displayMessageToConsole(messageToDisplay);
+					ServerLogger.log(messageToDisplay);
 					client.sendToClient(new Message("connectionDisplayed", null));
 					return;
 
 				case "disconnect":
 					// Log the disconnection:
 					messageToDisplay = client + " has disconnected.";
-					serverConsole.displayMessageToConsole(messageToDisplay);
+					ServerLogger.log(messageToDisplay);
 					client.close(); // Close the client connection
 					return;
 
@@ -119,7 +116,7 @@ public class BistroServer extends AbstractServer {
 					client.sendToClient(new Message("unknownCommand", "Unknown command: " + messageId));
 					// Log the action:
 					messageToDisplay = client + " sent an unknown command: " + messageId;
-					serverConsole.displayMessageToConsole(messageToDisplay);
+					ServerLogger.log(messageToDisplay);
 					return;
 				}
 			} catch (Exception e) {
@@ -132,13 +129,12 @@ public class BistroServer extends AbstractServer {
 	 * Method called when the server starts listening for client connections.
 	 */
 	protected void serverStarted() {
-		System.out.println("Server started");
-		serverConsole.displayMessageToConsole("Server started, listening for connections on port " + getPort());
+		ServerLogger.log("Server started, listening for connections on port " + getPort());
 		boolean isConnectToDB = BistroDataBase_Controller.openConnection();
 		if (isConnectToDB) {
-			serverConsole.displayMessageToConsole("Connected to database successfully");
+			ServerLogger.log("Connected to database successfully");
 		} else {
-			serverConsole.displayMessageToConsole("Failed to connect to database");
+			ServerLogger.log("Failed to connect to database");
 		}
 	}
 
@@ -146,8 +142,7 @@ public class BistroServer extends AbstractServer {
 	 * Method called when the server stops to close the database connection.
 	 */
 	protected void serverStopped() {
-		System.out.println("Server stopped");
-		serverConsole.displayMessageToConsole("Server stopped");
+		ServerLogger.log("Server stopped");
 		BistroDataBase_Controller.closeConnection();
 	}
 
@@ -157,10 +152,10 @@ public class BistroServer extends AbstractServer {
 	 */
 	public void showAllConnections() {
 		Thread[] clientList = this.getClientConnections(); // Thread array of all clients
-		serverConsole.displayMessageToConsole("Number of connected clients: " + clientList.length);
+		ServerLogger.log("Number of connected clients: " + clientList.length);
 		// Display each client's information
 		for (Thread client : clientList) {
-			serverConsole.displayMessageToConsole("Client: " + client.toString());
+			ServerLogger.log("Client: " + client.toString());
 		}
 	}
 }

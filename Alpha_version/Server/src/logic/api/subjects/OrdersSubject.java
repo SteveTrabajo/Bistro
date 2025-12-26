@@ -7,7 +7,7 @@ import comms.Message;
 import entities.Order;
 import logic.BistroDataBase_Controller;
 import logic.api.Router;
-import logic.api.ServerContext;
+
 
 /**
  * API handlers related to orders.
@@ -19,7 +19,7 @@ public final class OrdersSubject {
     /**
      * Registers all order-related handlers.
      */
-    public static void register(Router router, ServerContext ctx) {
+    public static void register(Router router) {
 
         // Get all orders
         router.on("orders", "list", (msg, client) -> {
