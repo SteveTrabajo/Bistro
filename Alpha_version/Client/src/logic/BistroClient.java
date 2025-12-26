@@ -97,8 +97,12 @@ public class BistroClient extends AbstractClient {
 		case "ASK_TO_LOGIN_APPROVED":
 			userCTRL.setLoggedInUser((User) messageFromServer.getData());
 			break;
-		case "REPLAY_ACTIVE_ORDERS_RES":
-			reservationCTRL.setActiveReservations((Map<LocalDate, TreeMap<LocalTime,List <Order>>>) messageFromServer.getData());
+		case "REPLY_ORDER_BY_DATE_RESULT": //TODO: change case name or delete if not needed
+			reservationCTRL.setReservationsByDate((Map<LocalTime, List<Order>>) messageFromServer.getData());
+			break;
+			
+		case "REPLY_NEW_RSERVATION_CREATED":
+			reservationCTRL.setConfirmationCode((String) messageFromServer.getData());
 			break;
 			
 		default:

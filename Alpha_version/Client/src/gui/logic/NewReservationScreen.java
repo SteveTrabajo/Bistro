@@ -49,22 +49,31 @@ public class NewReservationScreen {
 		setupDinersAmountComboBox(); //
 		setupDatePicker();
 		// Start with default time slots for local date and 1 diner:
+		//TODO to check again
 		dinersAmountComboBox.valueProperty().addListener((obs, oldV, newV) -> refreshTimeSlots());
 		datePicker.valueProperty().addListener((obs, oldDate, newDate) -> refreshTimeSlots());
 		datePicker.setValue(LocalDate.now());// Set default date to today
 	}
 	
+	//TODO to change
 	private void refreshTimeSlots() {
-		LocalDate date = datePicker.getValue();
+		LocalDate date = datePicker.getValue() , currentDate = LocalDate.now();
 		int diners = parseDiners(dinersAmountComboBox.getValue());
-		//TODO connect to server to get real available time slots
-		List<String> slots = BistroClientGUI.client.getReservationCTRL().AskAvailableTimeSlots(date, diners);
+		List<String> slots;
+		BistroClientGUI.client.getReservationCTRL().askReservationsByDate(date); //ask server for reservations on that date
+		//condition to check if the selected date is today
+		if (date.isEqual(currentDate)) {
+			
+		}
+		//TODO to change
+		slots = BistroClientGUI.client.getReservationCTRL().receiveAvailableTimeSlots(LocalTime.now(), diners, date.isEqual(currentDate));
 		selectedTimeSlot = null;
 		btnConfirmReservation.setDisable(true);
 		generateTimeSlots(slots);
 	}
 
 	
+	//TODO to change
 	private int parseDiners(String value) {
 		if (value != null && value.contains(" ")) {
 			String numberPart = value.split(" ")[0];
@@ -108,6 +117,11 @@ public class NewReservationScreen {
 			dinersAmountComboBox.getItems().add(i + " People");
 		}
 		dinersAmountComboBox.getSelectionModel().selectFirst(); // Select default value to 1 Person
+		//when diners amount changes refresh time slots
+		dinersAmountComboBox.valueProperty().addListener((obs, oldV, newV) -> {
+		    System.out.println("Diners amount changed to: " + newV);
+		    refreshTimeSlots();
+		});
 	}
 	
 	/*
@@ -122,7 +136,6 @@ public class NewReservationScreen {
 		int row = 0;
 		for (String timeSlot : availableTimeSlots) {
 			ToggleButton timeSlotButton = new ToggleButton(timeSlot);
-			timeSlotButton.setId("btnTimeSlot");
 			//Ensure only one can be selected at a time
 			timeSlotButton.setToggleGroup(timeSlotToggleGroup);
 			timeSlotButton.setPrefWidth(104); 
@@ -174,9 +187,11 @@ public class NewReservationScreen {
 	        alert.showAndWait();
 	        return;
 	    }
-
-	    System.out.println("Booking confirmed for: " + date + " at " + selectedTimeSlot + " (" + diners + ")");
-	    //TODO : send reservation data to server and handle response
+	    BistroClientGUI.client.getReservationCTRL().createNewReservation(date, selectedTimeSlot, parseDiners(diners));
+	    if(!BistroClientGUI.client.getReservationCTRL().getConfirmationCode().isEmpty()) {
+	    	System.out.println("Booking confirmed for: " + date + " at " + selectedTimeSlot + " (" + diners + ")");
+		    BistroClientGUI.switchScreen(event, "clientNewReservationCreatedScreen", "Error loading Reservation Confirmation Screen.");
+	    } 
 	}
 	
 	/*
