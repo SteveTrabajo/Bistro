@@ -17,7 +17,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import entities.Order;
-
+import entities.User;
+import enums.UserType;
 
 /*
  * BistroDataBase_Controller manages a simple JDBC connection pool (no external dependencies)
@@ -329,5 +330,88 @@ public class BistroDataBase_Controller {
 		} finally {
 			release(conn);
 		}
+	}
+
+	
+	//get user info by his user type (we need in db to add address, barcode,pass for admin) we need to talk with client side
+	public static User getUserInfo(String phoneNum, String Email)
+	{
+		if((phoneNum == null || phoneNum.isEmpty()) && (Email == null || Email.isEmpty()))
+		{
+			return null;
+		}
+		String userQuery = "SELECT "
+							+ "u.user_id, "
+							+ "u.name, "
+							+ "u.type, "
+							+ "m.member_code, "
+							+ "m.f_name "
+							+ "m.l_name "
+							+ "FROM users u "
+							+ "LEFT JOIN members m "
+							+ "ON u.user_id = m.user_id "
+							+ "WHERE "
+							+ "(u.phoneNumber = ? OR ? IS NULL) "
+							+ "AND (u.email = ? OR ? IS NULL)";
+		
+		Connection conn = null;
+		try {
+			conn = borrow();
+
+			try (PreparedStatement pst = conn.prepareStatement(userQuery)) {
+				pst.setString(1, phoneNum);
+		        pst.setString(2, phoneNum);
+		        pst.setString(3, Email);
+		        pst.setString(4, Email);
+
+		        try (ResultSet rs = pst.executeQuery()) {
+					if (!rs.next()) {
+						return null;
+					}
+					String userID = String.valueOf(rs.getInt("user_id"));
+					String typeValue = rs.getString("type");
+					UserType type = null;
+					if (typeValue != null) {
+					    type = UserType.valueOf(typeValue.toUpperCase());
+					}
+					
+					User user;
+					switch (type) {
+				    case GUEST:
+				        user = new User(phoneNum, Email,type );
+				        break;
+
+				    case MEMBER:
+				        user = new User(userID, rs.getString("barcode"),rs.getString("f_name"),rs.getString("l_name"),rs.getString("address"),
+				        		phoneNum,Email,type );
+				     
+				        break;
+				       
+				   
+				    case MANAGER:
+				        user = new User(Email, rs.getString("password"),rs.getString("f_name"),rs.getString("l_name"),
+		        				rs.getString("address"),phoneNum,Email,type );
+				        break;
+				        
+				        
+				    case EMPLOYEE:
+				        user = new User(Email, rs.getString("password"),rs.getString("f_name"),rs.getString("l_name"),
+		        				rs.getString("address"),phoneNum,Email,type);
+				        break;
+					}
+				}
+				
+			}
+
+		} catch (SQLException ex) {
+			ex.printStackTrace();
+			
+		} finally {
+			release(conn);
+		}
+	}
+				
+
+		return ;
 	}
 }
