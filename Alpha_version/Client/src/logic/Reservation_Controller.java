@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import comms.Api;
 import comms.Message;
 import entities.Order;
 import enums.DaysOfWeek;
@@ -108,7 +109,7 @@ public class Reservation_Controller {
 		reservationData.add(date);
 		reservationData.add(selectedTimeSlot);
 		reservationData.add(diners);
-		client.handleMessageFromClientUI(new Message(api.ASK_CREATE_RESERVATION,reservationData));
+		client.handleMessageFromClientUI(new Message(Api.ASK_CREATE_RESERVATION,reservationData));
 		
 	}
 
