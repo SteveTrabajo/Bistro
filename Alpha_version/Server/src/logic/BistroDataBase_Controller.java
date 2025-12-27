@@ -1,14 +1,16 @@
 package logic;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -172,8 +174,11 @@ public class BistroDataBase_Controller {
 				+ " order_date,"
 				+ " number_of_guests,"
 				+ " confirmation_code,"
-				+ " member_id,"
-				+ " date_of_placing_order"
+				+ " user_id,"
+				+ " date_of_placing_order,"
+				+ " order_time,"
+				+ " order_active,"
+				+ " wait_list"
 				+ " FROM orders WHERE confirmation_code = ?";
 
 		Connection conn = null;
@@ -189,15 +194,19 @@ public class BistroDataBase_Controller {
 					}
 
 					int order_number = rs.getInt("order_number");
-					Date order_date = rs.getDate("order_date");
+					LocalDate order_date = rs.getDate("order_date").toLocalDate();
 					int number_of_guests = rs.getInt("number_of_guests");
 					int confirmation_code = rs.getInt("confirmation_code");
-					int member_id = rs.getInt("member_id");
-					Date date_of_placing_order = rs.getDate("date_of_placing_order");
+					int user_id = rs.getInt("user_id");
+					LocalDate date_of_placing_order = rs.getDate("date_of_placing_order").toLocalDate();
+					LocalTime order_time = rs.getTime("order_time").toLocalTime();
+					boolean order_active = rs.getBoolean("order_active");
+					boolean wait_list = rs.getBoolean("wait_list");
+					
 
-					return new Order(order_number, order_date, number_of_guests, confirmation_code, member_id,
-							date_of_placing_order);
-				}
+					return new Order(order_number, order_date, order_time, number_of_guests, confirmation_code,
+							user_id, order_active, wait_list, date_of_placing_order);
+				}  
 			}
 
 		} catch (SQLException ex) {
@@ -221,7 +230,7 @@ public class BistroDataBase_Controller {
 			conn = borrow();
 
 			try (PreparedStatement pst = conn.prepareStatement(updateQuery)) {
-				pst.setDate(1, orderUpdateData.getOrderDate());
+				pst.setDate(1, java.sql.Date.valueOf(orderUpdateData.getOrderDate()));
 				pst.setInt(2, orderUpdateData.getDinersAmount());
 				pst.setInt(3, orderUpdateData.getConfirmationCode());
 
@@ -266,14 +275,17 @@ public class BistroDataBase_Controller {
 
 				while (rs.next()) {
 					int order_number = rs.getInt("order_number");
-					Date order_date = rs.getDate("order_date");
+					LocalDate order_date = rs.getDate("order_date").toLocalDate();
 					int number_of_guests = rs.getInt("number_of_guests");
 					int confirmation_code = rs.getInt("confirmation_code");
-					int member_id = rs.getInt("member_id");
-					Date date_of_placing_order = rs.getDate("date_of_placing_order");
+					int user_id = rs.getInt("user_id");
+					LocalDate date_of_placing_order = rs.getDate("date_of_placing_order").toLocalDate();
+					LocalTime order_time = rs.getTime("order_time").toLocalTime();
+					boolean order_active = rs.getBoolean("order_active");
+					boolean wait_list = rs.getBoolean("wait_list");
 
-					Order currentOrder = new Order(order_number, order_date, number_of_guests, confirmation_code,
-							member_id, date_of_placing_order);
+					Order currentOrder = new Order(order_number, order_date, order_time, number_of_guests, confirmation_code,
+							user_id, order_active, wait_list, date_of_placing_order);
 
 					allOrders.add(currentOrder);
 				}
@@ -293,7 +305,7 @@ public class BistroDataBase_Controller {
 	/*
 	 * Checks if a date is available (no other order has that date, excluding a confirmation code).
 	 */
-	public static boolean isDateAvailable(Date date, int confirmationCodeToExclude) {
+	public static boolean isDateAvailable(LocalDate date, int confirmationCodeToExclude) {
 		String dateQuery = "SELECT * FROM orders WHERE order_date = ? AND confirmation_code != ?";
 
 		Connection conn = null;
@@ -301,7 +313,7 @@ public class BistroDataBase_Controller {
 			conn = borrow();
 
 			try (PreparedStatement pst = conn.prepareStatement(dateQuery)) {
-				pst.setDate(1, date);
+				pst.setDate(1, java.sql.Date.valueOf(date));
 				pst.setInt(2, confirmationCodeToExclude);
 
 				try (ResultSet rs = pst.executeQuery()) {

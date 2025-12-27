@@ -13,7 +13,7 @@ public class Order implements Serializable {
     private LocalTime orderHour;
     private int dinersAmount;
     private int confirmationCode;
-    private int memberId;
+    private int userId;
     private boolean orderActive;
     private boolean waitList;
     private LocalDate dateOfPlacingOrder;
@@ -22,14 +22,14 @@ public class Order implements Serializable {
     }
 
     public Order(int orderNumber, LocalDate orderDate, LocalTime orderHour, int dinersAmount,
-                 int confirmationCode, int memberId, boolean orderActive, boolean waitList, LocalDate dateOfPlacingOrder) {
+                 int confirmationCode, int userId, boolean orderActive, boolean waitList, LocalDate dateOfPlacingOrder) {
 
         this.orderNumber = orderNumber;
         this.orderDate = orderDate;
         this.orderHour = orderHour;
         this.dinersAmount = dinersAmount;
         this.confirmationCode = confirmationCode;
-        this.memberId = memberId;
+        this.userId = userId;
         this.orderActive = orderActive;
         this.waitList = waitList;
         this.dateOfPlacingOrder = dateOfPlacingOrder;
@@ -50,8 +50,8 @@ public class Order implements Serializable {
     public int getConfirmationCode() { return confirmationCode; }
     public void setConfirmationCode(int confirmationCode) { this.confirmationCode = confirmationCode; }
 
-    public int getMemberId() { return memberId; }
-    public void setMemberId(int memberId) { this.memberId = memberId; }
+    public int getMemberId() { return userId; }
+    public void setMemberId(int memberId) { this.userId = memberId; }
 
     public boolean isOrderActive() { return orderActive; }
     public void setOrderActive(boolean orderActive) { this.orderActive = orderActive; }
@@ -72,7 +72,7 @@ public class Order implements Serializable {
                 ", orderHour=" + orderHour +
                 ", dinersAmount=" + dinersAmount +
                 ", confirmationCode=" + confirmationCode +
-                ", memberId=" + memberId +
+                ", memberId=" + userId +
                 ", orderActive=" + orderActive +
                 ", waitList=" + waitList +
                 ", dateOfPlacingOrder=" + dateOfPlacingOrder +
