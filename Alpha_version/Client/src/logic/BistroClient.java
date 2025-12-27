@@ -8,7 +8,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import logic.api.ClientRouter;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -19,9 +18,10 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import comms.*;
-import entities.Order;
-import entities.User;
-import enums.DaysOfWeek;
+import entities.*;
+import enums.*;
+import logic.api.*;
+import logic.api.subjects.*;
 import ocsf.client.*;
 
 /*
@@ -44,6 +44,10 @@ public class BistroClient extends AbstractClient {
 	
 	private final Reservation_Controller reservationCTRL;
 	
+	private final WaitingList_Controller waitingListCTRL;
+	
+	private final Table_Controller tableCTRL;
+	
 	//******************************** Constructors ***********************************
 	
 	/*
@@ -65,6 +69,9 @@ public class BistroClient extends AbstractClient {
 		this.router = new ClientRouter();
 		this.userCTRL = new User_Controller(this);
 		this.reservationCTRL = new Reservation_Controller(this);
+		this.waitingListCTRL = new WaitingList_Controller(this);
+		this.tableCTRL = new Table_Controller(this);
+		registerHandlers(); // Register message handlers
 	}
 	
 	/*
@@ -99,29 +106,28 @@ public class BistroClient extends AbstractClient {
 			return this.reservationCTRL;
 		}
 		
+		public WaitingList_Controller getWaitingListCTRL() {
+			return this.waitingListCTRL;
+		}
+		
+		public Table_Controller getTableCTRL() {
+			return this.tableCTRL;
+		}
+		
+		
+		
 	
 	//******************************** Instance methods ********************************
 	/*
 	 * Method to register message handlers for different message types.
 	 */
 	private void registerHandlers() {
-		// Handler for login approval messages
-		router.on("ASK_TO_LOGIN", "APPROVED", msg -> {
-			User user = (User) msg.getData();
-			Platform.runLater(() -> userCTRL.setLoggedInUser(user));
-		});
-		
-		// Handler for user on waiting list status messages
-		router.on("REPLY_USER_ON", "WAITING", msg -> {
-			boolean onWaiting = (boolean) msg.getData();
-			Platform.runLater(() -> reservationCTRL.setUserOnWaitingList(onWaiting));
-		});
-		
-		// Handler for new reservation creation messages
-		router.on("REPLY_NEW_RSERVATION", "CREATED", msg -> {
-			String confirmationCode = (String) msg.getData();
-			Platform.runLater(() -> reservationCTRL.setConfirmationCode(confirmationCode));
-		});
+		// Register API subjects
+		UserSubject.register(router);
+		OrderSubject.register(router);
+		OrderSubject.register(router);
+		WaitListSubject.register(router);
+		TablesSubject.register(router);
 	}
 
 	/*

@@ -29,7 +29,6 @@ public class Reservation_Controller {
 	private  final BistroClient client;
 	private Map<LocalTime,List<Order>> reservationsByDate;
 	private String confirmationCode; 
-	private boolean userOnWaitingList;
 	private boolean userReservationReady;
 	//******************************** Constructors ***********************************//
 	
@@ -113,10 +112,7 @@ public class Reservation_Controller {
 		
 	}
 
-	public void askUserOnWaitingList(Object userVerificationID) { // verficationID can be memberID or phone number/email for guest
-		client.handleMessageFromClientUI(new Message("ASK_USER_ON_WAITING", userVerificationID));
-		return;
-	}
+	
 
 	
 	

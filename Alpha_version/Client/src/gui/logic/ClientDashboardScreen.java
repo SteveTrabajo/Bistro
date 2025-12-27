@@ -104,8 +104,8 @@ public class ClientDashboardScreen {
 			data = (Object) BistroClientGUI.client.getUserCTRL().getLoggedInUser().getID();
 			break;
 		}
-		BistroClientGUI.client.getReservationCTRL().askUserOnWaitingList(data);
-		if (BistroClientGUI.client.getReservationCTRL().getUserOnWaitingList()) {
+		BistroClientGUI.client.getWaitingListCTRL().askUserOnWaitingList(data);
+		if (BistroClientGUI.client.getWaitingListCTRL().isUserOnWaitingList()) {
 			btnJoinWaitingList.setText("Waiting List Status");
 		} else {
 			btnJoinWaitingList.setText("Join Waiting List");

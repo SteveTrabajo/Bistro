@@ -40,6 +40,7 @@ public final class Api {
     public static final String ASK_ORDERS_GET_BY_CODE   = "orders.getByCode";
     
 // Responses
+    public static final String REPLY_CREATE_RESERVATION_OK       = "orders.createReservation.ok";
     public static final String REPLY_ORDERS_LIST_RESULT                 = "orders.list.result";
     public static final String REPLY_ORDERS_UPDATE_OK                   = "orders.updateStatus.ok";
     public static final String REPLY_ORDERS_UPDATE_DATE_NOT_AVAILABLE   = "orders.updateStatus.dateNotAvailable";
@@ -53,7 +54,15 @@ public final class Api {
 // Responses
     public static final String REPLAY_AVAIL_HOURS_RES= "restaurant.availableHours.result";
     
-
+    // == WaitList subject == //
+  // Requests
+    public static final String ASK_WAITLIST_ADD_USER    = "waitlist.addUser";
+    public static final String ASK_WAITLIST_REMOVE_USER = "waitlist.removeUser";
+    public static final String ASK_WAITLIST_IS_USER_ON  = "waitlist.isUserOn";
+ // Responses
+    public static final String REPLY_WAITLIST_ADD_USER_OK    = "waitlist.addUser.ok";
+    public static final String REPLY_WAITLIST_REMOVE_USER_OK = "waitlist.removeUser.ok";
+    public static final String REPLY_WAITLIST_IS_USER_ON_RESULT  = "waitlist.isUserOn.result";
     
     // == System responses == //
     
