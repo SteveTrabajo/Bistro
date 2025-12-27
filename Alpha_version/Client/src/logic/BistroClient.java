@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import logic.api.ClientRouter;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -32,6 +33,8 @@ public class BistroClient extends AbstractClient {
 	//****************************** Instance variables ******************************
 	
 	private static BistroClient clientInstance;
+	
+	private final ClientRouter router;
 
 	public static Message messageFromServer;
 	
@@ -59,6 +62,7 @@ public class BistroClient extends AbstractClient {
 		} catch (IOException e) {
 			throw new Exception("Could not connect to server at " + host + ":" + port, e);
 		}
+		this.router = new ClientRouter();
 		this.userCTRL = new User_Controller(this);
 		this.reservationCTRL = new Reservation_Controller(this);
 	}
@@ -81,35 +85,62 @@ public class BistroClient extends AbstractClient {
 		return clientInstance;
 	}
 	
-	//******************************** Instance methods ********************************
+	//****************************** Getters and Setters ******************************
+		/*
+		 * Getter for the User_Controller associated with this client.
+		 * 
+		 * @return The User_Controller instance.
+		 */
+		public User_Controller getUserCTRL() {
+			return this.userCTRL;
+		}
+
+		public Reservation_Controller getReservationCTRL() {
+			return this.reservationCTRL;
+		}
+		
 	
+	//******************************** Instance methods ********************************
+	/*
+	 * Method to register message handlers for different message types.
+	 */
+	private void registerHandlers() {
+		// Handler for login approval messages
+		router.on("ASK_TO_LOGIN", "APPROVED", msg -> {
+			User user = (User) msg.getData();
+			Platform.runLater(() -> userCTRL.setLoggedInUser(user));
+		});
+		
+		// Handler for user on waiting list status messages
+		router.on("REPLY_USER_ON", "WAITING", msg -> {
+			boolean onWaiting = (boolean) msg.getData();
+			Platform.runLater(() -> reservationCTRL.setUserOnWaitingList(onWaiting));
+		});
+		
+		// Handler for new reservation creation messages
+		router.on("REPLY_NEW_RSERVATION", "CREATED", msg -> {
+			String confirmationCode = (String) msg.getData();
+			Platform.runLater(() -> reservationCTRL.setConfirmationCode(confirmationCode));
+		});
+	}
+
 	/*
 	 * Method to handle messages received from the server.
 	 * 
 	 * @param msg The message received from the server.
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void handleMessageFromServer(Object msg) {
-		BistroClient.messageFromServer = (Message) msg; // Update static message variable
-		awaitResponse = false; // Set response status to false
-		switch(messageFromServer.getId()) {
-		case "ASK_TO_LOGIN_APPROVED":
-			userCTRL.setLoggedInUser((User) messageFromServer.getData());
-			break;
-		case "REPLY_ORDER_BY_DATE_RESULT": //TODO: change case name or delete if not needed
-			reservationCTRL.setReservationsByDate((Map<LocalTime, List<Order>>) messageFromServer.getData());
-			break;
-		case "REPLY_USER_ON_WAITING":
-			reservationCTRL.setUserOnWaitingList((boolean) messageFromServer.getData());
-			break;
-		case "REPLY_NEW_RSERVATION_CREATED":
-			reservationCTRL.setConfirmationCode((String) messageFromServer.getData());
-			break;
-			
-		default:
-			// TODO: Handle other message types as needed
-			break;
+		if(msg instanceof Message) {
+			try {
+				boolean handled = router.dispatch((Message) msg);
+				if (!handled) {
+					System.out.println("No handler found for message ID: " + ((Message) msg).getId());
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.out.println("Error handling message from server: " + e.getMessage());
+			}
 		}
 	}
 	
@@ -200,20 +231,6 @@ public class BistroClient extends AbstractClient {
 			System.out.println("Error: Could not close connection properly." + e);
 		}
 		System.exit(0); // Exit the program
-	}
-	
-	//****************************** Getters and Setters ******************************
-	/*
-	 * Getter for the User_Controller associated with this client.
-	 * 
-	 * @return The User_Controller instance.
-	 */
-	public User_Controller getUserCTRL() {
-		return this.userCTRL;
-	}
-
-	public Reservation_Controller getReservationCTRL() {
-		return this.reservationCTRL;
 	}
 	
 }

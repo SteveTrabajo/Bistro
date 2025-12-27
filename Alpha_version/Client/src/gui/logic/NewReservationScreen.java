@@ -104,7 +104,6 @@ public class NewReservationScreen {
 	        System.out.println("Date changed to: " + newDate);
 	        generateTimeSlots(generateDefaultTimeSlots()); 
 	        });
-		
 		datePicker.setValue(LocalDate.now());
 	}
 

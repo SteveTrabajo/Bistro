@@ -24,14 +24,11 @@ public final class Api {
 
     // == Login subject == //
 // Requests
-    public static final String ASK_LOGIN_MEMBER = "login.member";
-    public static final String ASK_LOGIN_GUEST  = "login.guest";
+    public static final String ASK_LOGIN_USER = "login.user";
     
 // Responses
-    public static final String REPLY_LOGIN_MEMBER_OK = "login.user.ok";
-    public static final String REPLY_LOGIN_MEMBER_NOT_FOUND = "login.user.notFound";
-    public static final String REPLY_LOGIN_GUEST_OK  = "login.guest.ok";
-    public static final String REPLY_LOGIN_GUEST_ALREADY_MEMBER = "login.guest.alreadyMember";
+    public static final String REPLY_LOGIN_USER_OK = "login.user.ok";
+    public static final String REPLY_LOGIN_USER_NOT_FOUND = "login.user.notFound";
     
     
     // == Orders subject == //

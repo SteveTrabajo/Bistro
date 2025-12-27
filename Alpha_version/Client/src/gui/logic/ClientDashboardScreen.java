@@ -105,13 +105,12 @@ public class ClientDashboardScreen {
 			break;
 		}
 		BistroClientGUI.client.getReservationCTRL().askUserOnWaitingList(data);
-		if (BistroClientGUI.client.getReservationCTRL().isUserOnWaitingList()) {
+		if (BistroClientGUI.client.getReservationCTRL().getUserOnWaitingList()) {
 			btnJoinWaitingList.setText("Waiting List Status");
 		} else {
 			btnJoinWaitingList.setText("Join Waiting List");
 		}
 	}
-	
 	
 	/*
 	 * Method to set up the dashboard for a guest user.
@@ -190,18 +189,7 @@ public class ClientDashboardScreen {
 	 */
 	@FXML
 	public void CheckInForTable(Event event) {
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/screens/clientCheckInForTableScreen.fxml"));
-		try {
-			loader.load();
-			Parent root = loader.getRoot();
-			BistroClientGUI.switchScreen(event, "Check In For Table",
-					"Failed to load Client Check In For Table Screen.");
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.out.println("Failed to load Client Check In For Table Screen.");
-			display(lblError, "Failel loading screen", Color.RED);
-		}
-
+		BistroClientGUI.switchScreen(event, "clientCheckInTableScreen", "Failed to load Client Check-In For Table Screen.");
 	}
 
 	/*
@@ -211,17 +199,7 @@ public class ClientDashboardScreen {
 	 */
 	@FXML
 	public void ManageBooking(Event event) {
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/screens/clientManageBookingScreen.fxml"));
-		try {
-			loader.load();
-			Parent root = loader.getRoot();
-			BistroClientGUI.switchScreen(event, "Manage Booking", "Failed to load Client Manage Booking Screen.");
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.out.println("Failed to load Client Manage Booking Screen.");
-			display(lblError, "Failel loading screen", Color.RED);
-		}
-
+		BistroClientGUI.switchScreen(event, "clientManageBookingScreen", "Failed to load Client Manage Booking Screen.");
 	}
 
 	/*
@@ -231,17 +209,7 @@ public class ClientDashboardScreen {
 	 */
 	@FXML
 	public void PayBill(Event event) {
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/screens/clientPayBillScreen.fxml"));
-		try {
-			loader.load();
-			Parent root = loader.getRoot();
-			BistroClientGUI.switchScreen(event, "Pay Bill", "Failed to load Client Pay Bill Screen.");
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.out.println("Failed to load Client Pay Bill Screen.");
-			display(lblError, "Failel loading screen", Color.RED);
-		}
-
+		BistroClientGUI.switchScreen(event, "clientPayBillScreen", "Failed to load Client Pay Bill Screen.");
 	}
 
 	/*
@@ -251,18 +219,7 @@ public class ClientDashboardScreen {
 	 */
 	@FXML
 	public void EditPersonalDetails(Event event) {
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/screens/clientEditPersonalDetailsScreen.fxml"));
-		try {
-			loader.load();
-			Parent root = loader.getRoot();
-			BistroClientGUI.switchScreen(event, "Edit Personal Details",
-					"Failed to load Client Edit Personal Details Screen.");
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.out.println("Failed to load Client Edit Personal Details Screen.");
-			display(lblError, "Failel loading screen", Color.RED);
-		}
-
+		BistroClientGUI.switchScreen(event, "clientEditPersonalDetailsScreen", "Failed to load Client Edit Personal Details Screen.");
 	}
 
 	/*
@@ -274,21 +231,12 @@ public class ClientDashboardScreen {
 	public void SignOut(Event event) {
 		BistroClientGUI.client.getUserCTRL().signOutUser();
 		if (BistroClientGUI.client.getUserCTRL().getLoggedInUser() == null) {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/screens/loginScreen.fxml"));
-			try {
-				loader.load();
-				Parent root = loader.getRoot();
-				BistroClientGUI.switchScreen(event, "Login", "Failed to load Login Screen.");
-			} catch (IOException e) {
-				e.printStackTrace();
-				System.out.println("Failed to load Login Screen.");
-				display(lblError, "Failel loading screen", Color.RED);
-			}
+			BistroClientGUI.switchScreen(event, "loginScreen", "Failed to load Login Screen.");
 		} else {
 			display(lblError, "Failed to sign out. Please try again.", Color.RED);
 		}
 	}
-
+	
 	/*
 	 * Method to display an error message in a label with a specified color.
 	 * 
