@@ -1,39 +1,45 @@
 package entities;
 
 public class Table {
-	//****************************** Instance variables ******************************/
+
+	// ****************************** Instance variables ******************************
 	private int tableID;
 	private int capacity;
-	private boolean isAvailable;
-	//******************************** Constructors ***********************************//
-	public Table(int tableNumber, int capacity, boolean isAvailable) {
-		this.tableID = tableNumber;
+	private boolean occupiedNow;
+
+	// ****************************** Constructors ******************************
+	public Table(int tableID, int capacity, boolean occupiedNow) {
+		this.tableID = tableID;
 		this.capacity = capacity;
-		this.isAvailable = isAvailable;
+		this.occupiedNow = occupiedNow;
 	}
-	//******************************** Getters And Setters ***********************************//
+
+	// ****************************** Getters / Setters ******************************
 	public int getTableID() {
 		return tableID;
 	}
-	
-	public void setTableID(int tableNumber) {
-		this.tableID = tableNumber;
+
+	public void setTableID(int tableID) {
+		this.tableID = tableID;
 	}
-	
+
 	public int getCapacity() {
 		return capacity;
 	}
-	
+
 	public void setCapacity(int capacity) {
 		this.capacity = capacity;
 	}
-	
-	public boolean isAvailable() {
-		return isAvailable;
+
+	/**
+	 * Indicates whether the table is currently occupied,
+	 * NOT used for reservation availability calculations.
+	 */
+	public boolean isOccupiedNow() {
+		return occupiedNow;
 	}
-	public void setAvailable(boolean isAvailable) {
-		this.isAvailable = isAvailable;
+
+	public void setOccupiedNow(boolean occupiedNow) {
+		this.occupiedNow = occupiedNow;
 	}
-	
-	
 }

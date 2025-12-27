@@ -22,10 +22,12 @@
 DROP TABLE IF EXISTS `tables`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `tables` (
-  `tableNum` int NOT NULL,
-  `available` tinyint DEFAULT NULL,
-  PRIMARY KEY (`tableNum`)
+CCREATE TABLE `tables` (
+  `tableNum` INT NOT NULL,
+  `capacity` INT NOT NULL,
+  `active` TINYINT NOT NULL DEFAULT 1,
+  PRIMARY KEY (`tableNum`),
+  CONSTRAINT `chk_tables_capacity` CHECK (`capacity` > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

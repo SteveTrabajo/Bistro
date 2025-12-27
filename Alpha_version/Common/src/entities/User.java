@@ -1,7 +1,5 @@
 package entities;
 
-import java.util.List;
-
 import enums.UserType;
 
 /*
@@ -20,7 +18,6 @@ public class User {
 	private String firstName;
 	private String lastName;
 	private String address;
-	private List<Order> orderHistory;
 	
 	//****************************** Constructors ******************************//
 	
@@ -58,7 +55,6 @@ public class User {
 		this.phoneNumber = phoneNumber;
 		this.email = email;
 		this.userType = userType;
-		this.orderHistory = null; // initialize order history as empty
 	}
 	
 	/* 
