@@ -34,10 +34,12 @@ public class User implements Serializable {
 	 * @param email
 	 * @param userType
 	 */
-	public User(String phoneNumber, String email,UserType userType) {
-		this.phoneNumber = phoneNumber;
-		this.email = email;
+	public User(String phoneNumber, String email, UserType userType) {
+	    this.phoneNumber = phoneNumber;
+	    this.email = email;
+	    this.userType = userType;
 	}
+
 	
 	/* 
 	 * constructor for MEMBER user

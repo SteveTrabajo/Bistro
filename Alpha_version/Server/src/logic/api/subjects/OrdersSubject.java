@@ -7,6 +7,8 @@ import comms.Message;
 import entities.Order;
 import logic.BistroDataBase_Controller;
 import logic.api.Router;
+import enums.OrderType;
+
 
 
 /**
@@ -30,7 +32,7 @@ public final class OrdersSubject {
         router.on("orders", "updateStatus", (msg, client) -> {
             Order order = (Order) msg.getData();
 
-            if (order.getOrderDate() != null) {
+            if (order.getOrderType() == OrderType.RESERVATION && order.getOrderDate() != null) {
                 boolean available = BistroDataBase_Controller.isDateAvailable(
                         order.getOrderDate(),
                         order.getConfirmationCode());
@@ -40,6 +42,7 @@ public final class OrdersSubject {
                     return;
                 }
             }
+
 
             boolean updated = BistroDataBase_Controller.updateOrder(order);
 

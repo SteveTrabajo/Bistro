@@ -1,6 +1,7 @@
 package logic;
 
 import java.sql.Connection;
+
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,6 +19,9 @@ import java.util.concurrent.TimeUnit;
 import entities.Order;
 import entities.User;
 import enums.UserType;
+import enums.OrderStatus;
+import enums.OrderType;
+
 
 /**
  * Matches the normalized schema you applied:
@@ -111,11 +115,9 @@ public class BistroDataBase_Controller {
 
     public static Order getOrderByConfirmationCode(int confCode) {
         final String sql =
-                "SELECT "
-                        + "order_number, order_date, order_time, number_of_guests, confirmation_code, user_id, date_of_placing_order, "
-                        + "(order_type = 'WAITLIST') AS wait_list, "
-                        + "(status IN ('PENDING','NOTIFIED','SEATED')) AS order_active "
-                        + "FROM orders WHERE confirmation_code = ?";
+            "SELECT order_number, order_date, order_time, number_of_guests, confirmation_code, user_id, " +
+            "date_of_placing_order, order_type, status " +
+            "FROM orders WHERE confirmation_code = ?";
 
         Connection conn = null;
         try {
@@ -139,11 +141,11 @@ public class BistroDataBase_Controller {
                     Timestamp placedTs = rs.getTimestamp("date_of_placing_order");
                     LocalDate placedDate = (placedTs == null) ? null : placedTs.toLocalDateTime().toLocalDate();
 
-                    boolean orderActive = rs.getBoolean("order_active");
-                    boolean waitList = rs.getBoolean("wait_list");
+                    OrderType orderType = OrderType.valueOf(rs.getString("order_type"));
+                    OrderStatus status = OrderStatus.valueOf(rs.getString("status"));
 
                     return new Order(orderNumber, orderDate, orderTime, diners, confirmationCode,
-                            userId, orderActive, waitList, placedDate);
+                                     userId, orderType, status, placedDate);
                 }
             }
         } catch (SQLException ex) {
@@ -155,14 +157,13 @@ public class BistroDataBase_Controller {
         }
     }
 
+
     public static List<Order> getAllOrders() {
         final List<Order> allOrders = new ArrayList<>();
         final String sql =
-                "SELECT "
-                        + "order_number, order_date, order_time, number_of_guests, confirmation_code, user_id, date_of_placing_order, "
-                        + "(order_type = 'WAITLIST') AS wait_list, "
-                        + "(status IN ('PENDING','NOTIFIED','SEATED')) AS order_active "
-                        + "FROM orders";
+            "SELECT order_number, order_date, order_time, number_of_guests, confirmation_code, user_id, " +
+            "date_of_placing_order, order_type, status " +
+            "FROM orders";
 
         Connection conn = null;
         try {
@@ -185,11 +186,11 @@ public class BistroDataBase_Controller {
                     Timestamp placedTs = rs.getTimestamp("date_of_placing_order");
                     LocalDate placedDate = (placedTs == null) ? null : placedTs.toLocalDateTime().toLocalDate();
 
-                    boolean orderActive = rs.getBoolean("order_active");
-                    boolean waitList = rs.getBoolean("wait_list");
+                    OrderType orderType = OrderType.valueOf(rs.getString("order_type"));
+                    OrderStatus status = OrderStatus.valueOf(rs.getString("status"));
 
                     allOrders.add(new Order(orderNumber, orderDate, orderTime, diners, confirmationCode,
-                            userId, orderActive, waitList, placedDate));
+                                            userId, orderType, status, placedDate));
                 }
             }
         } catch (SQLException ex) {
@@ -201,11 +202,12 @@ public class BistroDataBase_Controller {
         return allOrders;
     }
 
+
     public static boolean updateOrder(Order orderUpdateData) {
         final String sql =
-                "UPDATE orders "
-                        + "SET order_date = ?, order_time = ?, number_of_guests = ? "
-                        + "WHERE confirmation_code = ?";
+            "UPDATE orders " +
+            "SET order_date = ?, order_time = ?, number_of_guests = ?, status = ? " +
+            "WHERE confirmation_code = ?";
 
         Connection conn = null;
         try {
@@ -225,7 +227,12 @@ public class BistroDataBase_Controller {
                 }
 
                 pst.setInt(3, orderUpdateData.getDinersAmount());
-                pst.setInt(4, orderUpdateData.getConfirmationCode());
+
+                OrderStatus st = orderUpdateData.getStatus();
+                if (st == null) st = OrderStatus.PENDING;
+                pst.setString(4, st.name());
+
+                pst.setInt(5, orderUpdateData.getConfirmationCode());
 
                 return pst.executeUpdate() > 0;
             }
@@ -238,16 +245,17 @@ public class BistroDataBase_Controller {
         }
     }
 
+
     public static boolean isDateAvailable(LocalDate date, int confirmationCodeToExclude) {
         if (date == null) return false;
 
         final String sql =
-                "SELECT 1 FROM orders "
-                        + "WHERE order_type = 'RESERVATION' "
-                        + "AND status IN ('PENDING','NOTIFIED','SEATED') "
-                        + "AND order_date = ? "
-                        + "AND confirmation_code <> ? "
-                        + "LIMIT 1";
+            "SELECT 1 FROM orders " +
+            "WHERE order_type = 'RESERVATION' " +
+            "AND status IN ('PENDING','NOTIFIED','SEATED') " +
+            "AND order_date = ? " +
+            "AND confirmation_code <> ? " +
+            "LIMIT 1";
 
         Connection conn = null;
         try {
@@ -267,6 +275,7 @@ public class BistroDataBase_Controller {
             release(conn);
         }
     }
+
 
     // Users
 

@@ -4,25 +4,38 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public class Order implements Serializable {
+import enums.OrderStatus;
+import enums.OrderType;
 
+public class Order implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private int orderNumber;
-    private LocalDate orderDate;
-    private LocalTime orderHour;
+    private LocalDate orderDate;          // NULL for waitlist
+    private LocalTime orderHour;          // NULL for waitlist
     private int dinersAmount;
     private int confirmationCode;
+
+    // This field existed in your old schema as member_id.
+    // Now it’s a user_id for both guests and members.
     private int userId;
-    private boolean orderActive;
-    private boolean waitList;
+
     private LocalDate dateOfPlacingOrder;
 
-    public Order() {
-    }
+    private OrderType orderType;          // RESERVATION / WAITLIST
+    private OrderStatus status;           // PENDING / ...
 
-    public Order(int orderNumber, LocalDate orderDate, LocalTime orderHour, int dinersAmount,
-                 int confirmationCode, int userId, boolean orderActive, boolean waitList, LocalDate dateOfPlacingOrder) {
+    public Order() {}
+
+    public Order(int orderNumber,
+                 LocalDate orderDate,
+                 LocalTime orderHour,
+                 int dinersAmount,
+                 int confirmationCode,
+                 int userId,
+                 OrderType orderType,
+                 OrderStatus status,
+                 LocalDate dateOfPlacingOrder) {
 
         this.orderNumber = orderNumber;
         this.orderDate = orderDate;
@@ -30,11 +43,23 @@ public class Order implements Serializable {
         this.dinersAmount = dinersAmount;
         this.confirmationCode = confirmationCode;
         this.userId = userId;
-        this.orderActive = orderActive;
-        this.waitList = waitList;
+        this.orderType = orderType;
+        this.status = status;
         this.dateOfPlacingOrder = dateOfPlacingOrder;
     }
 
+    // Convenience flags
+    public boolean isWaitList() {
+        return orderType == OrderType.WAITLIST;
+    }
+
+    public boolean isOrderActive() {
+        return status == OrderStatus.PENDING
+            || status == OrderStatus.NOTIFIED
+            || status == OrderStatus.SEATED;
+    }
+
+    // ---- getters/setters ----
     public int getOrderNumber() { return orderNumber; }
     public void setOrderNumber(int orderNumber) { this.orderNumber = orderNumber; }
 
@@ -50,32 +75,15 @@ public class Order implements Serializable {
     public int getConfirmationCode() { return confirmationCode; }
     public void setConfirmationCode(int confirmationCode) { this.confirmationCode = confirmationCode; }
 
-    public int getMemberId() { return userId; }
-    public void setMemberId(int memberId) { this.userId = memberId; }
-
-    public boolean isOrderActive() { return orderActive; }
-    public void setOrderActive(boolean orderActive) { this.orderActive = orderActive; }
-
-    public boolean isWaitList() { return waitList; }
-    public void setWaitList(boolean waitList) { this.waitList = waitList; }
+    public int getUserId() { return userId; }
+    public void setUserId(int userId) { this.userId = userId; }
 
     public LocalDate getDateOfPlacingOrder() { return dateOfPlacingOrder; }
-    public void setDateOfPlacingOrder(LocalDate dateOfPlacingOrder) {
-        this.dateOfPlacingOrder = dateOfPlacingOrder;
-    }
+    public void setDateOfPlacingOrder(LocalDate dateOfPlacingOrder) { this.dateOfPlacingOrder = dateOfPlacingOrder; }
 
-    @Override
-    public String toString() {
-        return "Order{" +
-                "orderNumber=" + orderNumber +
-                ", orderDate=" + orderDate +
-                ", orderHour=" + orderHour +
-                ", dinersAmount=" + dinersAmount +
-                ", confirmationCode=" + confirmationCode +
-                ", memberId=" + userId +
-                ", orderActive=" + orderActive +
-                ", waitList=" + waitList +
-                ", dateOfPlacingOrder=" + dateOfPlacingOrder +
-                '}';
-    }
+    public OrderType getOrderType() { return orderType; }
+    public void setOrderType(OrderType orderType) { this.orderType = orderType; }
+
+    public OrderStatus getStatus() { return status; }
+    public void setStatus(OrderStatus status) { this.status = status; }
 }
