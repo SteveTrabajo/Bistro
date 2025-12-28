@@ -12,6 +12,7 @@ import logic.BistroClientGUI;
 import java.util.HashMap;
 import java.util.Map;
 import common.InputCheck;
+import comms.Api;
 import javafx.event.Event;
 import entities.*;
 import enums.UserType;
@@ -72,7 +73,7 @@ public class ClientLoginScreen {
 			userLoginData = new HashMap<String, Object>();
 			userLoginData.put("phoneNumber", (Object) phoneNumber);
 			userLoginData.put("emailAddress", (Object) emailAddress);
-			BistroClientGUI.client.getUserCTRL().signInUser(userLoginData, "REQ_TO_LOGIN", UserType.GUEST);
+			BistroClientGUI.client.getUserCTRL().signInUser(userLoginData,Api.ASK_LOGIN_USER, UserType.GUEST);
 			if (BistroClientGUI.client.getUserCTRL().isUserLoggedIn()) {
 				BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
 			} else {
@@ -100,7 +101,7 @@ public class ClientLoginScreen {
 			userLoginData = new HashMap<String, Object>();
 			userLoginData.put("userType", (UserType.MEMBER));
 			userLoginData.put("id", (Object) id);
-			BistroClientGUI.client.getUserCTRL().signInUser(userLoginData, "REQ_TO_LOGIN", UserType.MEMBER);
+			BistroClientGUI.client.getUserCTRL().signInUser(userLoginData,Api.ASK_LOGIN_USER, UserType.MEMBER);
 			if (BistroClientGUI.client.getUserCTRL().isUserLoggedIn()) {
 				BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
 			} else {

@@ -17,14 +17,14 @@ public class Order implements Serializable {
     private int confirmationCode;
 
     // This field existed in your old schema as member_id.
-    // Now it’s a user_id for both guests and members.
+    // Now itï¿½s a user_id for both guests and members.
     private int userId;
 
     private LocalDate dateOfPlacingOrder;
 
     private OrderType orderType;          // RESERVATION / WAITLIST
     private OrderStatus status;           // PENDING / ...
-
+    
     public Order() {}
 
     public Order(int orderNumber,

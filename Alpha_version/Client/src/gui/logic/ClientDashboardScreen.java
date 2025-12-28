@@ -91,20 +91,8 @@ public class ClientDashboardScreen {
 	 * Method to edit the Join Waiting List button text based on user's waiting list status.
 	 */
 	private void editJoinWaitingListButton() {
-		Object data;
-		switch (BistroClientGUI.client.getUserCTRL().getLoggedInUserType()) {
-		case GUEST:
-			if (BistroClientGUI.client.getUserCTRL().getLoggedInUser().getPhoneNumber() != null) {
-				data = (Object) BistroClientGUI.client.getUserCTRL().getLoggedInUser().getPhoneNumber();
-			} else {
-				data = (Object) BistroClientGUI.client.getUserCTRL().getLoggedInUser().getEmail();
-			}
-			break;
-		default: // MEMBER
-			data = (Object) BistroClientGUI.client.getUserCTRL().getLoggedInUser().getID();
-			break;
-		}
-		BistroClientGUI.client.getWaitingListCTRL().askUserOnWaitingList(data);
+		String userID = BistroClientGUI.client.getUserCTRL().getLoggedInUser().getID();
+		BistroClientGUI.client.getWaitingListCTRL().askUserOnWaitingList(userID);
 		if (BistroClientGUI.client.getWaitingListCTRL().isUserOnWaitingList()) {
 			btnJoinWaitingList.setText("Waiting List Status");
 		} else {
@@ -170,10 +158,10 @@ public class ClientDashboardScreen {
 	@FXML
 	public void JoinWaitingList(Event event) {
 		String fxmlFileName;
-		if(BistroClientGUI.client.getReservationCTRL().getUserOnWaitingList()) {
+		if(BistroClientGUI.client.getWaitingListCTRL().isUserOnWaitingList()) {
 			fxmlFileName = "clientOnListScreen";
 		}
-		else if(BistroClientGUI.client.getReservationCTRL().getUserReservationReady()) {
+		else if(BistroClientGUI.client.getReservationCTRL().isUserReservationReady()) {
 			fxmlFileName = "clienWaitingOverScreen";
 		}
 		else {
