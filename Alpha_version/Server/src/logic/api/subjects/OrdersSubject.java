@@ -15,9 +15,8 @@ import logic.api.Router;
 public final class OrdersSubject {
 
     private OrdersSubject() {}
-
     /**
-     * Registers all order-related handlers.
+     * Registers all order related handlers.
      */
     public static void register(Router router) {
 
@@ -31,15 +30,15 @@ public final class OrdersSubject {
         router.on("orders", "updateStatus", (msg, client) -> {
             Order order = (Order) msg.getData();
 
-            boolean available = BistroDataBase_Controller.isDateAvailable(
-                    order.getOrderDate(),
-                    order.getConfirmationCode()
-            );
+            if (order.getOrderDate() != null) {
+                boolean available = BistroDataBase_Controller.isDateAvailable(
+                        order.getOrderDate(),
+                        order.getConfirmationCode());
 
-            if (!available) {
-                client.sendToClient(
-                        new Message(Api.REPLY_ORDERS_UPDATE_DATE_NOT_AVAILABLE, null));
-                return;
+                if (!available) {
+                    client.sendToClient(new Message(Api.REPLY_ORDERS_UPDATE_DATE_NOT_AVAILABLE, null));
+                    return;
+                }
             }
 
             boolean updated = BistroDataBase_Controller.updateOrder(order);
@@ -59,10 +58,7 @@ public final class OrdersSubject {
             client.sendToClient(
                     new Message(
                             Api.REPLY_ORDERS_GET_BY_CODE_RESULT,
-                            BistroDataBase_Controller.getOrderByConfirmationCode(code)
-                    )
-            );
+                            BistroDataBase_Controller.getOrderByConfirmationCode(code)));
         });
-
     }
 }

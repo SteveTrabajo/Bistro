@@ -1,33 +1,32 @@
 package logic.api.subjects;
-import java.util.List;
+
+import java.util.Map;
 
 import comms.Api;
 import comms.Message;
-import entities.Order;
 import entities.User;
 import logic.BistroDataBase_Controller;
 import logic.api.Router;
-public  final class UserSubject 
-{
 
-	/**
-	 * API handlers related to User Subject.
-	 */
-	 private UserSubject() {}
-	 
-	 /**
-	 * Registers all User-related handlers.
-	  */
-	 public static void register(Router router)
-	 {
-		 // Get user information
-	        router.on("login", "user", (msg, client) -> {
-	            User user = BistroDataBase_Controller.getUserInfo();	//need to put the given phone and email
-	            if(user != null) {
-	            client.sendToClient(new Message(Api.REPLY_LOGIN_USER_OK, user));
-	            }
-	            else{client.sendToClient(new Message(Api.REPLY_LOGIN_USER_NOT_FOUND, user));}
-	        });
-		 
-	 }
+public final class UserSubject {
+
+	private UserSubject() {
+	}
+
+	public static void register(Router router) {
+
+		// Request: "login.user"
+		router.on("login", "user", (msg, client) -> {
+			@SuppressWarnings("unchecked")
+			Map<String, Object> loginData = (Map<String, Object>) msg.getData();
+
+			User user = BistroDataBase_Controller.getUserInfo(loginData);
+			if (user != null) {
+				client.sendToClient(new Message(Api.REPLY_LOGIN_USER_OK, user));
+			} else {
+				client.sendToClient(new Message(Api.REPLY_LOGIN_USER_NOT_FOUND, null));
+			}
+		});
+
+	}
 }
