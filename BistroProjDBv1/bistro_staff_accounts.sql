@@ -16,35 +16,29 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `table_sessions`
+-- Table structure for table `staff_accounts`
 --
 
-DROP TABLE IF EXISTS `table_sessions`;
+DROP TABLE IF EXISTS `staff_accounts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `table_sessions` (
-  `session_id` int NOT NULL AUTO_INCREMENT,
-  `order_number` int NOT NULL,
-  `tableNum` int NOT NULL,
-  `seated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `expected_end_at` datetime DEFAULT NULL,
-  `left_at` datetime DEFAULT NULL,
-  `end_reason` enum('PAID','LEFT','NO_SHOW') DEFAULT NULL,
-  PRIMARY KEY (`session_id`),
-  UNIQUE KEY `order_number` (`order_number`),
-  KEY `idx_sessions_table_open` (`tableNum`,`left_at`),
-  CONSTRAINT `fk_sessions_order` FOREIGN KEY (`order_number`) REFERENCES `orders` (`order_number`) ON DELETE CASCADE,
-  CONSTRAINT `fk_sessions_table` FOREIGN KEY (`tableNum`) REFERENCES `tables` (`tableNum`) ON DELETE RESTRICT
+CREATE TABLE `staff_accounts` (
+  `user_id` int NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uq_staff_username` (`username`),
+  CONSTRAINT `fk_staff_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `table_sessions`
+-- Dumping data for table `staff_accounts`
 --
 
-LOCK TABLES `table_sessions` WRITE;
-/*!40000 ALTER TABLE `table_sessions` DISABLE KEYS */;
-/*!40000 ALTER TABLE `table_sessions` ENABLE KEYS */;
+LOCK TABLES `staff_accounts` WRITE;
+/*!40000 ALTER TABLE `staff_accounts` DISABLE KEYS */;
+/*!40000 ALTER TABLE `staff_accounts` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -56,4 +50,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-29  9:40:39
+-- Dump completed on 2025-12-29  9:40:38

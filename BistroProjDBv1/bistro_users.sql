@@ -26,12 +26,12 @@ CREATE TABLE `users` (
   `user_id` int NOT NULL AUTO_INCREMENT,
   `phoneNumber` varchar(20) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
-  `type` enum('customer','member','employee','manager') NOT NULL,
+  `type` enum('GUEST','MEMBER','EMPLOYEE','MANAGER') NOT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `uq_users_phone` (`phoneNumber`),
   UNIQUE KEY `uq_users_email` (`email`),
   CONSTRAINT `chk_user_contact` CHECK (((`phoneNumber` is not null) or (`email` is not null)))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -52,4 +52,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-28 18:30:08
+-- Dump completed on 2025-12-29  9:40:36
