@@ -24,6 +24,7 @@ public final class ConnectionSubject {
 
         router.on("connection", "disconnect", (msg, client) -> {
             ServerLogger.log("Client disconnected: " + client);
+            client.sendToClient(new Message(Api.REPLY_CONNECTION_DISCONNECT_OK, null));
             client.close();
         });
     }

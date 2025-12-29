@@ -20,7 +20,7 @@ public final class Api {
     
 // Responses
     public static final String REPLY_CONNECTION_CONNECT_OK = "connection.connect.ok";
-
+    public static final String REPLY_CONNECTION_DISCONNECT_OK = "connection.disconnect.ok";
 
     // == Login subject == //
 // Requests
@@ -47,7 +47,7 @@ public final class Api {
     public static final String REPLY_ORDERS_UPDATE_INVALID_CONFIRM_CODE = "orders.updateStatus.invalidConfirmCode";
     public static final String REPLY_ORDERS_GET_BY_CODE_RESULT          = "orders.getByCode.result";
 
-    // == Restaurant subject == //
+    // == Restaurant Management subject == //
 // Requests
     public static final String ASK_AVAIL_HOURS = "restaurant.getAvailableHours";
     
