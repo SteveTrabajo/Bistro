@@ -11,13 +11,13 @@ public class Table_Controller {
 	private final BistroClient client;
 	private List<Order> occupiedTables;
 	private Order userAllocatedOrderForTable;
-	private Table userAllocatedTable;
+	private int userAllocatedTable;
 	//******************************** Constructors ***********************************//
 	public Table_Controller(BistroClient client) {
 		this.client = client;
 		this.occupiedTables = new ArrayList<>();
 		this.userAllocatedOrderForTable = null;
-		this.userAllocatedTable = null;
+		this.userAllocatedTable = 0;
 	}
 	
 	//******************************** Getters And Setters ***********************************//	
@@ -37,11 +37,11 @@ public class Table_Controller {
 		this.userAllocatedOrderForTable = userAllocatedOrderForTable;
 	}
 
-	public Table getUserAllocatedTable() {
+	public int getUserAllocatedTable() {
 		return userAllocatedTable;
 	}
 
-	public void setUserAllocatedTable(Table userAllocatedTable) {
+	public void setUserAllocatedTable(int userAllocatedTable) {
 		this.userAllocatedTable = userAllocatedTable;
 	}
 	
@@ -49,6 +49,6 @@ public class Table_Controller {
 	
 	//******************************** Instance Methods ***********************************//
 	public boolean isCheckInTableSuccess() {
-		return userAllocatedTable != null;
+		return userAllocatedOrderForTable.getStatus() == enums.OrderStatus.SEATED;
 	}
 }
