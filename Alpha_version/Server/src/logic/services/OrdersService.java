@@ -2,6 +2,7 @@ package logic.services;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import entities.Order;
 import enums.OrderType;
@@ -22,12 +23,32 @@ public class OrdersService {
 	}
 
 
-	public boolean createNewOrder(List<Object> data) {
+	public boolean createNewOrder(List<Object> data, OrderType orderType) {
+		List<Object> orderData = data; //Received data contain : userId, date ,dinersAmount , time
+		String confimationCode = generateConfirmationCode();
+		int orderNumber = generateOrderNumber();
+		orderData.add(orderNumber);
+		orderData.add(confimationCode);
+		orderData.add(orderType);
+		orderData.add("PENDING");
+		//orderData order: userId, date ,dinersAmount , time, orderNumber, confirmationCode, orderType, status
+		return dbController.setNewOrderToDataBase(orderData); //DB should provide date of placing order
 		
-		return dbController.setNewOrderToDataBase(data);
+	}
+	
+	
+	private int generateOrderNumber() {
+		int num = 100000 + new Random().nextInt(900000);
+		return num;
 	}
 
 
+	private String generateConfirmationCode() {
+		int num = 100000 + new Random().nextInt(900000);
+	    return "R-" + num;
+	}
+	
+	
 	public Order getOrderByConfirmationCode(String confirmationCode, OrderType reservation) {
 		// TODO Auto-generated method stub
 		return null;

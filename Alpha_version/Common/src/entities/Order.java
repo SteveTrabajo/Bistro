@@ -11,14 +11,14 @@ public class Order implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private int orderNumber;
+	private int userId;
 	private LocalDate orderDate; // NULL for waitlist
 	private LocalTime orderHour; // NULL for waitlist
 	private int dinersAmount;
-	private int confirmationCode;
+	private String confirmationCode;
 
 	// This field existed in your old schema as member_id.
-	// Now it�s a user_id for both guests and members.
-	private int userId;
+	// Now its a user_id for both guests and members.
 
 	private LocalDate dateOfPlacingOrder;
 
@@ -28,7 +28,7 @@ public class Order implements Serializable {
 	public Order() {
 	}
 
-	public Order(int orderNumber, LocalDate orderDate, LocalTime orderHour, int dinersAmount, int confirmationCode,
+	public Order(int orderNumber, LocalDate orderDate, LocalTime orderHour, int dinersAmount, String confirmationCode,
 			int userId, OrderType orderType, OrderStatus status, LocalDate dateOfPlacingOrder) {
 
 		this.orderNumber = orderNumber;

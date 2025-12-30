@@ -38,8 +38,8 @@ public final class OrdersSubject {
 		// New reservation order
 		router.on("orders", "newReservation", (msg, client) -> {
 			@SuppressWarnings("unchecked")
-			List<Object> order = (ArrayList<Object>)msg.getData();
-			boolean orderCreated= ordersService.createNewOrder(order);
+			List<Object> orderData = (ArrayList<Object>)msg.getData();
+			boolean orderCreated= ordersService.createNewOrder(orderData, OrderType.RESERVATION);
 			if (orderCreated) {
 				client.sendToClient(new Message(Api.REPLY_CREATE_RESERVATION_OK, null));
 				logger.log("[INFO] Client: "+ client + " created a new reservation order successfully.");
@@ -47,7 +47,6 @@ public final class OrdersSubject {
 				client.sendToClient(new Message(Api.REPLY_CREATE_RESERVATION_FAIL, null));
 				logger.log("[ERROR] Client: "+ client + " failed to create a new reservation order.");
 			}
-
 		});
 		
 		// Send Order by confirmation code

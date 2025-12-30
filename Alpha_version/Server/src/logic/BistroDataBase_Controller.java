@@ -1,13 +1,16 @@
 package logic;
 
 import java.sql.Connection;
-
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -192,18 +195,43 @@ public class BistroDataBase_Controller {
     
     // ****************************** Order Operations ******************************	
 	
-    public boolean setNewOrderToDataBase(List<Object> data) {
-    	 final String sql =
-    	            "INSERT INTO orders (" +
-    	            " confirmation_code,"
-    	            + " user_id, "
-    	            + "number_of_guests,"
-    	            + " order_date, "
-    	            + "order_time,"
-    	            +" date_of_placing_order,"
-    	            + " order_type, status)" 
-    	            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    }
+	public boolean setNewOrderToDataBase(List<Object> orderData) {
+		// orderData order: userId, date ,dinersAmount , time, orderNumber,
+		// confirmationCode, orderType, status
+		final String sql = "INSERT INTO orders " + "(order_number," + " confirmation_code," + " user_id, "
+				+ "number_of_guests," + " order_date, " + "order_time," + " date_of_placing_order," + " order_type,"
+				+ " status," + "notified_at," + "canceled_at)" + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		Connection conn = null;
+		try {
+			conn = borrow();
+			try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+				ps.setObject(1, orderData.get(4)); // order_number
+				ps.setString(2, (String) orderData.get(5)); // confirmation_code
+				ps.setInt(3, (int) orderData.get(0)); // user_id
+				ps.setInt(4, (int) orderData.get(2)); // number_of_guests
+
+				ps.setDate(5, Date.valueOf((LocalDate) orderData.get(1))); // order_date
+				ps.setTime(6, Time.valueOf((LocalTime) orderData.get(3))); // order_time
+
+				ps.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now())); // date_of_placing_order
+
+				ps.setString(8, orderData.get(6).toString()); // order_type
+				ps.setString(9, orderData.get(7).toString()); // status
+				// For new orders, notified_at and canceled_at are null
+				ps.setNull(10, Types.TIMESTAMP); // notified_at
+				ps.setNull(11, Types.TIMESTAMP); // canceled_at
+
+				ps.executeUpdate();
+				return true;
+			}
+		}catch (SQLException ex) {
+			logger.log("SQLException in setNewOrderToDataBase: " + ex.getMessage());
+			ex.printStackTrace();
+			return false;
+		}
+		
+	}
 	
 	
 	
