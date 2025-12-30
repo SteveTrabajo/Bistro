@@ -125,9 +125,20 @@ public class BistroClient extends AbstractClient {
 		// Register API subjects
 		UserSubject.register(router);
 		OrderSubject.register(router);
-		OrderSubject.register(router);
 		WaitListSubject.register(router);
 		TablesSubject.register(router);
+		
+		// This tells the router: "When the server sends 'getAvailableHours.ok', update the controller."
+        router.on("orders", "getAvailableHours.ok", (msg) -> {
+            @SuppressWarnings("unchecked")
+            List<String> slots = (List<String>) msg.getData();
+            
+            // Pass the data to your specific controller instance
+            reservationCTRL.setAvailableTimeSlots(slots);
+            
+            // Critical: If your system waits for responses, unblock it here
+            awaitResponse = false; 
+        });
 	}
 
 	/*

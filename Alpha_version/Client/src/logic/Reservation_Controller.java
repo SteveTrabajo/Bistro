@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 
 import comms.Api;
 import comms.Message;
@@ -20,33 +21,23 @@ public class Reservation_Controller {
 	//****************************** Static variables ******************************//
 	
 	public static final int SLOT_MINUTES = 15;
-	public static final int DURATION_MINUTES = 120;
-	private static final int SLOTS_PER_RESERVATION = DURATION_MINUTES / SLOT_MINUTES;
-	public static final int MAX_CAPACITY = 80;
 	
 	//****************************** Instance variables ******************************//
 	
-	private  final BistroClient client;
-	private Map<LocalTime,List<Order>> reservationsByDate;
-	private Order reayUserReservation;
+	private final BistroClient client;
 	private String confirmationCode;
+	private List<String> availableTimeSlots;
+	private Consumer<List<String>> uiUpdateCallback;
+	
 	//******************************** Constructors ***********************************//
 	
 	public Reservation_Controller(BistroClient client) {
 		this.client = client;
-		this.reservationsByDate = new TreeMap<>();
 		this.confirmationCode = "";
+		this.availableTimeSlots = new ArrayList<>();
 	}
 	
 	//******************************** Getters And Setters ***********************************//
-	
-	public Map<LocalTime, List<Order>> getReservationsByDate() {
-		return reservationsByDate;
-	}
-	
-	public void setReservationsByDate(Map<LocalTime, List<Order>> reservationsByDate) {
-		this.reservationsByDate = reservationsByDate;
-	}
 	
 	public String getConfirmationCode() {
 		return confirmationCode;
@@ -56,35 +47,68 @@ public class Reservation_Controller {
 		this.confirmationCode = confirmationCode;
 	}
 	
-	public Order getReayUserReservation() {
-		return reayUserReservation;
-	}
+	public void setUIUpdateListener(Consumer<List<String>> callback) {
+        this.uiUpdateCallback = callback;
+    }
 	
-	public void setReayUserReservation(Order reayUserReservation) {
-		this.reayUserReservation = reayUserReservation;
+    // Set by the Client when Server replies with REPLY_ORDER_AVAIL_HOURS_OK
+	public void setAvailableTimeSlots(List<String> slots) {
+        this.availableTimeSlots = slots;
+        
+        // Trigger the callback to update the screen!
+        if (uiUpdateCallback != null) {
+            javafx.application.Platform.runLater(() -> {
+                uiUpdateCallback.accept(slots);
+            });
+        }
+    }
+
+	public List<String> getAvailableTimeSlots() {
+		return availableTimeSlots;
 	}
 	
 	//******************************** Instance Methods ***********************************//
-	public void askReservationsByDate(LocalDate date) {
-		client.handleMessageFromClientUI(new Message("ASK_ORDER_BY_DATE", date));
-	}
 	
+	/*
+	 * Asks the server for available hours based on date and party size.
+	 * Matches Api.ASK_ORDER_AVAIL_HOURS
+	 */
+	public void askAvailableHours(LocalDate date, int diners) {
+        Map<String, Object> requestData = new HashMap<>();
+        requestData.put("date", date);
+        requestData.put("diners", diners);
+        client.handleMessageFromClientUI(new Message(Api.ASK_ORDER_AVAIL_HOURS, requestData));
+    }
+	
+	/*
+	 * Sends the reservation request to the server.
+	 */
 	public void createNewReservation(LocalDate date, String selectedTimeSlot, int diners) {
 		List<Object> reservationData = new ArrayList<>();
-		reservationData.add(date);
-		reservationData.add(selectedTimeSlot);
-		reservationData.add(diners);
-		client.handleMessageFromClientUI(new Message(Api.ASK_CREATE_RESERVATION,reservationData));
 		
+		// Parse the time string (e.g., "17:00") to LocalTime for the entity
+		LocalTime time = LocalTime.parse(selectedTimeSlot);
+		
+		reservationData.add(date);
+		reservationData.add(time);
+		reservationData.add(diners);
+		
+		client.handleMessageFromClientUI(new Message(Api.ASK_CREATE_RESERVATION, reservationData));
 	}
 
+	/*
+	 * Checks if the provided confirmation code is correct by asking the server.
+	 */
+	public void CheckConfiamtionCodeCorrect(String confirmationCode) {
+        client.handleMessageFromClientUI(new Message(Api.ASK_GET_ORDER,confirmationCode));
+    }
+	
+	/*
+	 * Checks if a user's reservation is ready (for waiting list flow).
+	 */
 	public boolean isUserReservationReady() {
-		// TODO Auto-generated method stub
+		// Logic to check if a table is ready (for waiting list flow)
 		return false;
 	}
-
-	
-
-	
 	
 }
