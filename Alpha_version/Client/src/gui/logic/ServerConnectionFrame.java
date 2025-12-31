@@ -66,7 +66,7 @@ public class ServerConnectionFrame {
 				BistroClientGUI.client = BistroClient.getInstance(ip, intPort);
 				System.out.println("IP Entered Successfully");
 				BistroClientGUI.client.notifyServerOnConnection(); // Notify successful connection
-				BistroClientGUI.switchScreen(event, "clientLoginScreen", "Server Connection");
+				Platform.runLater(() -> BistroClientGUI.switchScreen(event, "clientLoginScreen", "Server Connection"));
 			} catch (Exception e) {
 				// Handles connection errors
 				System.out.println("Error: Can't setup connection! \nThe error message: ");
