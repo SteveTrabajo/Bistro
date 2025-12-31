@@ -39,7 +39,7 @@ public class clientCheckInTableScreen {
 		if(BistroClientGUI.client.getTableCTRL().isCheckInTableSuccess()) {
 			BistroClientGUI.switchScreen(event, "clientCheckInTableSucces.fxml", "clientCheckIn error messege");
 		} else {
-			BistroClientGUI.display(lblError, "Error has been accoured!", Color.RED);//TODO: add error message Label to fxml
+			BistroClientGUI.display(lblError, "Error has been occured!", Color.RED);//TODO: add error message Label to fxml
 		}
 	}
 }
