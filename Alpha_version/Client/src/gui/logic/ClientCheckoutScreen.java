@@ -144,7 +144,7 @@ public class ClientCheckoutScreen {
 		BistroClientGUI.client.getPaymentCTRL().checkpaymentSuccess(finalAmount);
 		// Process Payment
 		if (BistroClientGUI.client.getPaymentCTRL().processPaymentCompleted()) {
-			BistroClientGUI.switchScreen(event, "clientCheckoutSuccessScreen.fxml", "Payment Successful");
+			BistroClientGUI.switchScreen(event, "clientCheckoutSuccessScreen", "Payment Successful");
 		} else {
 			Alert alert = new Alert(Alert.AlertType.ERROR, "Payment failed! Please try again.", null);
 			alert.setTitle("Payment Error");
@@ -154,7 +154,7 @@ public class ClientCheckoutScreen {
 	}
 	public void btnBack(Event event) {
 		try {
-			BistroClientGUI.switchScreen(event, "clientDashboardScreen.fxml", "Client back error messege");
+			BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client back error messege");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -36,11 +36,11 @@ public void initialize() {
 	}
 @FXML
 public void btnBack(Event event) {
-	BistroClientGUI.switchScreen(event, "clientDashboardScreen.fxml", "client Dashboard error messege");
+	BistroClientGUI.switchScreen(event, "clientDashboardScreen", "client Dashboard error messege");
 	}
 @FXML
 public void btnNewReserve(Event event) {
-	BistroClientGUI.switchScreen(event, "clientNewReservationScreen.fxml", "client Make Reservation error messege");
+	BistroClientGUI.switchScreen(event, "clientNewReservationScreen", "client Make Reservation error messege");
 
 	}
 }

@@ -33,7 +33,7 @@ public class ClientEditPersonalScreen {
 	@FXML
 	public void btnBack(ActionEvent event) {
 		try {
-			BistroClientGUI.switchScreen(event, "clientDashboardScreen.fxml", "Client Home");
+			BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Home");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

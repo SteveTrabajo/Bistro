@@ -38,14 +38,14 @@ public class ClientCheckInTableScreen {
 		String testConfirmationCode = txtConfirmCode.getText();
 		BistroClientGUI.client.getReservationCTRL().CheckConfirmationCodeCorrect(testConfirmationCode);
 		if(BistroClientGUI.client.getTableCTRL().isCheckInTableSuccess()) {
-			BistroClientGUI.switchScreen(event, "clientCheckInTableSucces.fxml", "clientCheckIn error messege");
+			BistroClientGUI.switchScreen(event, "clientCheckInTableSucces", "clientCheckIn error messege");
 		} else {
 			BistroClientGUI.display(lblError, "Error has been occured!", Color.RED);//TODO: add error message Label to fxml
 		}
 	}
 	public void btnBack(Event event) {
 		try {
-			BistroClientGUI.switchScreen(event, "clientDashboardScreen.fxml", "Client back error messege");
+			BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client back error messege");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -52,14 +52,14 @@ public class ClientJoinWaitingListScreen {
 		int dinersAmount = Integer.parseInt(lblDinersAmount.getText());
 		BistroClientGUI.client.getWaitingListCTRL().joinWaitingList(dinersAmount);
 		if(BistroClientGUI.client.getWaitingListCTRL().isUserOnWaitingList()) {
-			BistroClientGUI.switchScreen(event, "clientDashboardScreen.fxml", "client Join Waiting List messege");
+			BistroClientGUI.switchScreen(event, "clientDashboardScreen", "client Join Waiting List messege");
 		} else {
 			BistroClientGUI.display(lblError, "Error has been accoured!", Color.RED);
 		}
 	}
 	public void btnBack(Event event) {
 		try {
-			BistroClientGUI.switchScreen(event, "clientDashboardScreen.fxml", "Client back error messege");
+			BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client back error messege");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -29,7 +29,7 @@ public class ClientCheckInTableSuccesScreen {
 	}
 	@FXML
 	public  void btnBack(Event event) {
-		BistroClientGUI.switchScreen(event, "clientDashboardScreen.fxml", "client Dashboard error messege");
+		BistroClientGUI.switchScreen(event, "clientDashboardScreen", "client Dashboard error messege");
 	}
 	
 }
