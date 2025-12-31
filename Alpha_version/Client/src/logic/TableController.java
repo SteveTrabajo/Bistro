@@ -8,14 +8,14 @@ import comms.Message;
 import entities.Order;
 import entities.Table;
 
-public class Table_Controller {
+public class TableController {
 	//****************************** Instance variables ******************************
 	private final BistroClient client;
 	private List<Order> occupiedTables;
 	private Order userAllocatedOrderForTable;
 	private int userAllocatedTable;
 	//******************************** Constructors ***********************************//
-	public Table_Controller(BistroClient client) {
+	public TableController(BistroClient client) {
 		this.client = client;
 		this.occupiedTables = new ArrayList<>();
 		this.userAllocatedOrderForTable = null;

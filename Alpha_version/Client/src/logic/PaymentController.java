@@ -1,6 +1,6 @@
 package logic;
 
-public class Payment_Controller {
+public class PaymentController {
 	private final BistroClient client;
 	private double amountPaid;
 	private enum PaymentStatus {
@@ -12,7 +12,7 @@ public class Payment_Controller {
 	private double taxRate= 0.18; // tax rate of 18%
 	private double discountRate= 0.1; // discount rate of 10%
 	private Object orderItemsForBilling;
-	public Payment_Controller(BistroClient client) {
+	public PaymentController(BistroClient client) {
 		this.client = client;
 		this.amountPaid = 0.0;
 		this.paymentstatus = PaymentStatus.PENDING.name();

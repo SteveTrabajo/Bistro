@@ -40,15 +40,15 @@ public class BistroClient extends AbstractClient {
 	
 	public static boolean awaitResponse = false;
 	
-	private final User_Controller userCTRL;
+	private final UserController userCTRL;
 	
-	private final Reservation_Controller reservationCTRL;
+	private final ReservationController reservationCTRL;
 	
 	private final WaitingListController waitingListCTRL;
 	
-	private final Table_Controller tableCTRL;
+	private final TableController tableCTRL;
 	
-	private final Payment_Controller paymentCTRL;
+	private final PaymentController paymentCTRL;
 	
 	//******************************** Constructors ***********************************
 	
@@ -69,11 +69,11 @@ public class BistroClient extends AbstractClient {
 			throw new Exception("Could not connect to server at " + host + ":" + port, e);
 		}
 		this.router = new ClientRouter();
-		this.userCTRL = new User_Controller(this);
-		this.reservationCTRL = new Reservation_Controller(this);
+		this.userCTRL = new UserController(this);
+		this.reservationCTRL = new ReservationController(this);
 		this.waitingListCTRL = new WaitingListController(this);
-		this.tableCTRL = new Table_Controller(this);
-		this.paymentCTRL = new Payment_Controller(this);
+		this.tableCTRL = new TableController(this);
+		this.paymentCTRL = new PaymentController(this);
 		registerHandlers(); // Register message handlers
 	}
 	
@@ -101,11 +101,11 @@ public class BistroClient extends AbstractClient {
 		 * 
 		 * @return The User_Controller instance.
 		 */
-		public User_Controller getUserCTRL() {
+		public UserController getUserCTRL() {
 			return this.userCTRL;
 		}
 
-		public Reservation_Controller getReservationCTRL() {
+		public ReservationController getReservationCTRL() {
 			return this.reservationCTRL;
 		}
 		
@@ -113,10 +113,10 @@ public class BistroClient extends AbstractClient {
 			return this.waitingListCTRL;
 		}
 		
-		public Table_Controller getTableCTRL() {
+		public TableController getTableCTRL() {
 			return this.tableCTRL;
 		}
-		public Payment_Controller getPaymentCTRL() {
+		public PaymentController getPaymentCTRL() {
 			return this.paymentCTRL;
 		}
 		

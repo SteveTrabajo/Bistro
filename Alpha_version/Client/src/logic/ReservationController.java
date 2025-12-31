@@ -16,7 +16,7 @@ import comms.Message;
 import entities.Order;
 import enums.DaysOfWeek;
 
-public class Reservation_Controller {
+public class ReservationController {
 	
 	//****************************** Static variables ******************************//
 	
@@ -35,7 +35,7 @@ public class Reservation_Controller {
 	
 	//******************************** Constructors ***********************************//
 	
-	public Reservation_Controller(BistroClient client) {
+	public ReservationController(BistroClient client) {
 		this.client = client;
 		this.confirmationCode = "";
 		this.availableTimeSlots = new ArrayList<>();

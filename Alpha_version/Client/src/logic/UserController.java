@@ -10,7 +10,7 @@ import enums.UserType;
 /*
  * This class represents the controller for user-related operations in the BistroClient.
  */
-public class User_Controller {
+public class UserController {
 	
 	//****************************** Instance variables ******************************
 	
@@ -24,7 +24,7 @@ public class User_Controller {
 	 * 
 	 * @param client The BistroClient instance for server communication.
 	 */
-	public User_Controller(BistroClient client) {
+	public UserController(BistroClient client) {
 		this.client=client;
 	}
 	
