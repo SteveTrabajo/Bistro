@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import entities.User;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -87,6 +88,9 @@ private void fetchAndPopulateTimeSlots() {
 			timeSlotGroup.selectToggle(first);
 			btnConfirmReservation.setDisable(false);
 		}
-	}
+	}	
 }
+void btnBack(Event event) { 
+    BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Error returning to dashboard");
+	}
 }

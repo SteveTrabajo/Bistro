@@ -34,7 +34,8 @@ public class clientCheckoutScreen {
     private Label totalLabel;
     @FXML
     private TableView<Object> billTable;
-    
+    @FXML
+    private Button btnBack;
     private double finalAmount = 0.0;
     private double minValue = 0.0;
 	
@@ -149,6 +150,13 @@ public class clientCheckoutScreen {
 			alert.setTitle("Payment Error");
 			alert.setHeaderText("Transaction Failed");
 			alert.showAndWait();
+		}
+	}
+	public void btnBack(Event event) {
+		try {
+			BistroClientGUI.switchScreen(event, "clientDashboardScreen.fxml", "Client back error messege");
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 }

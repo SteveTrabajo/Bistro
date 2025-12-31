@@ -19,7 +19,8 @@ public class clientCheckInTableScreen {
 	private Label lblUser;
 	@FXML
 	private Label lblError;
-	
+	@FXML
+	private Button btnBack;
 	// ****************************** Instance Methods ******************************
 	@FXML
 	public void initialize() {
@@ -40,6 +41,13 @@ public class clientCheckInTableScreen {
 			BistroClientGUI.switchScreen(event, "clientCheckInTableSucces.fxml", "clientCheckIn error messege");
 		} else {
 			BistroClientGUI.display(lblError, "Error has been occured!", Color.RED);//TODO: add error message Label to fxml
+		}
+	}
+	public void btnBack(Event event) {
+		try {
+			BistroClientGUI.switchScreen(event, "clientDashboardScreen.fxml", "Client back error messege");
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 }

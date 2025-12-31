@@ -132,7 +132,7 @@ public class ClientManageBookingScreen {
     }
 
     @FXML
-    void onBack(Event event) { // Matches FXML onAction="#onBack"
+    void btnBack(Event event) { // Matches FXML onAction="#onBack"
         BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Error returning to dashboard");
     }
 

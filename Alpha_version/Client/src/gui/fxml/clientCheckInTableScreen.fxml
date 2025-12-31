@@ -25,7 +25,7 @@
                     </padding>
 
                     <left>
-                        <Button onAction="#onBack" styleClass="nav-back" text=" Back">
+                        <Button fx:id="btnBack" onAction="#onBack" styleClass="nav-back" text=" Back">
                      <graphic>
                         <ImageView fitHeight="16.0" fitWidth="8.0">
                            <image>
