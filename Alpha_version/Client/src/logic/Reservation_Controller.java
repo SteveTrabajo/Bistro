@@ -28,6 +28,7 @@ public class Reservation_Controller {
 	private String confirmationCode;
 	private List<String> availableTimeSlots;
 	private Consumer<List<String>> uiUpdateCallback;
+	private List<Object> tempReservationData=new ArrayList<>();
 	
 	//******************************** Constructors ***********************************//
 	
@@ -84,18 +85,24 @@ public class Reservation_Controller {
 	 * Sends the reservation request to the server.
 	 */
 	public void createNewReservation(LocalDate date, String selectedTimeSlot, int diners) {
-		List<Object> reservationData = new ArrayList<>();
+		
 		
 		// Parse the time string (e.g., "17:00") to LocalTime for the entity
 		LocalTime time = LocalTime.parse(selectedTimeSlot);
 		
-		reservationData.add(date);
-		reservationData.add(time);
-		reservationData.add(diners);
+		tempReservationData.add(date);
+		tempReservationData.add(time);
+		tempReservationData.add(diners);
 		
-		client.handleMessageFromClientUI(new Message(Api.ASK_CREATE_RESERVATION, reservationData));
+		client.handleMessageFromClientUI(new Message(Api.ASK_CREATE_RESERVATION, tempReservationData));
 	}
-
+	public List<Object> getTempReservationData() {
+		return tempReservationData;
+	}
+	public void deleteTempReservationData(List<Object> tempReservationData) {
+		this.tempReservationData.removeAll(tempReservationData);
+	}
+			
 	/*
 	 * Checks if the provided confirmation code is correct by asking the server.
 	 */

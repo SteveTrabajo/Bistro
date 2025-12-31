@@ -111,7 +111,7 @@
                                 <HBox alignment="CENTER_LEFT" spacing="28.0">
                                     <children>
                                         <Label styleClass="muted-label" text="Booking as:" />
-                                        <Label styleClass="pill-blue" text="Member" />
+                                        <Label fx:id="lblUser" styleClass="pill-blue" text="Member" />
                                     </children>
                                 </HBox>
 
