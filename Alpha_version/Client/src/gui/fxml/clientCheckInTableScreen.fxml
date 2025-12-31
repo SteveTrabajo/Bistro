@@ -29,7 +29,7 @@
                      <graphic>
                         <ImageView fitHeight="16.0" fitWidth="8.0">
                            <image>
-                              <Image url="@resources/backIcon.png" />
+                              <Image url="@../../resources/icons/backIcon.png" />
                            </image>
                         </ImageView>
                      </graphic></Button>
@@ -60,7 +60,7 @@
                             </HBox>
                      <ImageView fitHeight="79.0" fitWidth="79.0">
                         <image>
-                           <Image url="@resources/getTableIconBlue.png" />
+                           <Image url="@../../resources/icons/getTableIcon.png" />
                         </image>
                      </ImageView>
 

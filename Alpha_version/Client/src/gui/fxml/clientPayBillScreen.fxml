@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="720" prefWidth="1280" styleClass="background" stylesheets="@clientPayBillStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="your.package.BillPaymentCodeController">
+<BorderPane prefHeight="720" prefWidth="1280" styleClass="background" stylesheets="@../../gui/css/clientPayBillStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="your.package.BillPaymentCodeController">
 
     <!-- HEADER -->
     <top>
@@ -25,7 +25,7 @@
                <graphic>
                   <ImageView fitHeight="18.0" fitWidth="9.0">
                      <image>
-                        <Image url="@resources/backIcon.png" />
+                        <Image url="@../../resources/icons/backIcon.png" />
                      </image>
                   </ImageView>
                </graphic></Button>
@@ -53,7 +53,7 @@
                       </HBox>
                <ImageView fitHeight="51.0" fitWidth="51.0">
                   <image>
-                     <Image url="@resources/bill_icon.png" />
+                     <Image url="@../../resources/icons/bill_icon.png" />
                   </image>
                </ImageView>
 

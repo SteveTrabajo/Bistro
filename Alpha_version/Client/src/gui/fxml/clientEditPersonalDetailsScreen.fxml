@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="720" prefWidth="1280" styleClass="background" stylesheets="@clientEditPesonalDetailsStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="your.package.EditMemberDetailsController">
+<BorderPane prefHeight="720" prefWidth="1280" styleClass="background" stylesheets="@../../gui/css/clientEditPesonalDetailsStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="your.package.EditMemberDetailsController">
 
     <!-- HEADER -->
     <top>
@@ -29,7 +29,7 @@
                <graphic>
                   <ImageView fitHeight="18.0" fitWidth="9.0">
                      <image>
-                        <Image url="@resources/backIcon.png" />
+                        <Image url="@../../resources/icons/backIcon.png" />
                      </image>
                   </ImageView>
                </graphic></Button>
@@ -57,7 +57,7 @@
                         <graphic>
                            <ImageView fitHeight="39.0" fitWidth="39.0">
                               <image>
-                                 <Image url="@resources/personIconBlue.png" />
+                                 <Image url="@../../resources/icons/personIconBlue.png" />
                               </image>
                            </ImageView>
                         </graphic></Label>
@@ -97,7 +97,7 @@
                            <graphic>
                               <ImageView fitHeight="19.0" fitWidth="19.0">
                                  <image>
-                                    <Image url="@resources/mail.png" />
+                                    <Image url="@../../resources/icons/mail.png" />
                                  </image>
                               </ImageView>
                            </graphic></Label>
@@ -112,7 +112,7 @@
                            <graphic>
                               <ImageView fitHeight="16.0" fitWidth="16.0">
                                  <image>
-                                    <Image url="@resources/phone.png" />
+                                    <Image url="@../../resources/icons/phone.png" />
                                  </image>
                               </ImageView>
                            </graphic></Label>
@@ -132,7 +132,7 @@
                            <graphic>
                               <ImageView fitHeight="18.0" fitWidth="18.0">
                                  <image>
-                                    <Image url="@resources/location.png" />
+                                    <Image url="@../../resources/icons/location.png" />
                                  </image>
                               </ImageView>
                            </graphic></Label>

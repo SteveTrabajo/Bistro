@@ -19,7 +19,7 @@
     <children>
       <ImageView fitHeight="720.0" fitWidth="1280.0" opacity="0.12">
          <image>
-            <Image url="@resources/pexels-pixabay-262978.jpg" />
+            <Image url="@../../resources/images/image2.jpg" />
          </image>
       </ImageView>
         <BorderPane prefHeight="720" prefWidth="1280">
@@ -45,7 +45,7 @@
                      <graphic>
                         <ImageView fitHeight="17.0" fitWidth="17.0">
                            <image>
-                              <Image url="@resources/LogoutIcon.png" />
+                              <Image url="@../../resources/icons/LogoutIcon.png" />
                            </image>
                         </ImageView>
                      </graphic></Button>
@@ -74,7 +74,7 @@
                                                 <children>
                                                     <ImageView fitHeight="39.0" fitWidth="39.0" preserveRatio="true">
                                                         <image>
-                                                            <Image url="@resources/reservationIcon.png" />
+                                                            <Image url="@../../resources/icons/reservationIcon.png" />
                                                         </image>
                                                     </ImageView>
                                                 </children>
@@ -99,7 +99,7 @@
                                                 <children>
                                                     <ImageView fitHeight="38.0" fitWidth="38.0" preserveRatio="true">
                                                         <image>
-                                                            <Image url="@resources/editReservationIcon.png" />
+                                                            <Image url="@../../resources/icons/editReservationIcon.png" />
                                                         </image>
                                                     </ImageView>
                                                 </children>
@@ -125,7 +125,7 @@
                                                 <children>
                                                     <ImageView fitHeight="36.0" fitWidth="36.0" preserveRatio="true">
                                                         <image>
-                                                            <Image url="@resources/billpayIcon.png" />
+                                                            <Image url="@../../resources/icons/billpayIcon.png" />
                                                         </image>
                                                     </ImageView>
                                                 </children>
@@ -150,7 +150,7 @@
                                                 <children>
                                                     <ImageView fitHeight="51.0" fitWidth="51.0" preserveRatio="true">
                                                         <image>
-                                                            <Image url="@resources/getTableIcon.png" />
+                                                            <Image url="@../../resources/icons/getTableIcon.png" />
                                                         </image>
                                                     </ImageView>
                                                 </children>
@@ -177,7 +177,7 @@
                                                 <children>
                                                     <ImageView fitHeight="43.0" fitWidth="43.0" preserveRatio="true">
                                                         <image>
-                                                            <Image url="@resources/EditMemberIcon.png" />
+                                                            <Image url="@../../resources/icons/EditMemberIcon.png" />
                                                         </image>
                                                     </ImageView>
                                                 </children>
@@ -203,7 +203,7 @@
                                                 <children>
                                                     <ImageView fitHeight="50.0" fitWidth="50.0" preserveRatio="true">
                                                         <image>
-                                                            <Image url="@resources/si--hourglass-line.png" />
+                                                            <Image url="@../../resources/icons/hourglass.png" />
                                                         </image>
                                                     </ImageView>
                                                 </children>

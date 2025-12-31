@@ -28,7 +28,7 @@
                      <graphic>
                         <ImageView fitHeight="16.0" fitWidth="8.0">
                            <image>
-                              <Image url="@resources/backIcon.png" />
+                              <Image url="@../../resources/icons/backIcon.png" />
                            </image>
                         </ImageView>
                      </graphic></Button>

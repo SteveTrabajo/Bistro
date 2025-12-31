@@ -48,7 +48,7 @@
 									<children>
 										<ImageView fitHeight="28" fitWidth="28" preserveRatio="true">
 											<image>
-												<Image url="@resources/PersonIcon.png" />
+												<Image url="@../../resources/icons/PersonIcon.png" />
 											</image>
 										</ImageView>
 									</children>
@@ -80,7 +80,7 @@
 									<graphic>
 										<ImageView fitHeight="24.0" fitWidth="24.0">
 											<image>
-												<Image url="@resources/lucide--qr-code.png" />
+												<Image url="@../../resources/icons/QRBlack.png" />
 											</image>
 										</ImageView>
 									</graphic>
@@ -93,7 +93,7 @@
 									<children>
 										<ImageView fitHeight="28" fitWidth="28" preserveRatio="true">
 											<image>
-												<Image url="@resources/EnterAsGuestIcon.png" />
+												<Image url="@../../resources/icons/EnterAsGuestIcon.png" />
 											</image>
 										</ImageView>
 									</children>

@@ -32,11 +32,11 @@
 					</padding>
 
 					<left>
-						<Button id="btnBack" fx:id="btnBack" onAction="#onBack" styleClass="nav-back" text="Back">
+						<Button id="btnBack" fx:id="btnBack" onAction="#btnBack" styleClass="nav-back" text="Back">
 							<graphic>
 								<ImageView fitHeight="18.0" fitWidth="9.0">
 									<image>
-										<Image url="@resources/backIcon.png" />
+										<Image url="@../../resources/icons/backIcon.png" />
 									</image>
 								</ImageView>
 							</graphic>
@@ -109,7 +109,7 @@
 													<children>
 														<ImageView fitHeight="17.0" fitWidth="17.0">
 															<image>
-																<Image url="@resources/material-symbols--square-rounded%20(1).png" />
+																<Image url="@../../resources/icons/blueSquare.png" />
 															</image>
 														</ImageView>
 														<Label styleClass="legend-text" text="Selected" />
@@ -120,26 +120,10 @@
 													<children>
 														<ImageView fitHeight="17.0" fitWidth="17.0">
 															<image>
-																<Image url="@resources/si--square-duotone.png" />
+																<Image url="@../../resources/icons/emptyBlueSquare.png" />
 															</image>
 														</ImageView>
 														<Label styleClass="legend-text" text="Available" />
-													</children>
-												</HBox>
-
-												<HBox alignment="CENTER_LEFT" spacing="10">
-													<children>
-														<ImageView fitHeight="17.0" fitWidth="17.0" opacity="0.54">
-															<image>
-																<Image url="@resources/si--square-duotone.png" />
-															</image>
-														</ImageView>
-														<Label text="Fully Booked">
-															<styleClass>
-																<String fx:value="legend text" />
-																<String fx:value="muted-strike" />
-															</styleClass>
-														</Label>
 													</children>
 												</HBox>
 											</children>
@@ -174,7 +158,7 @@
 											<graphic>
 												<ImageView fitHeight="18.0" fitWidth="18.0">
 													<image>
-														<Image url="@resources/formkit--date.png" />
+														<Image url="@../../resources/icons/formkitDate.png"/>
 													</image>
 												</ImageView>
 											</graphic>
@@ -190,7 +174,7 @@
 											<graphic>
 												<ImageView fitHeight="22.0" fitWidth="22.0">
 													<image>
-														<Image url="@resources/famicons--people-outline.png" />
+														<Image url="@../../resources/icons/peopleOutline.png" />
 													</image>
 												</ImageView>
 											</graphic>
@@ -206,7 +190,7 @@
 											<graphic>
 												<ImageView fitHeight="18.0" fitWidth="18.0">
 													<image>
-														<Image url="@resources/mingcute--time-line.png" />
+														<Image url="@../../resources/icons/clockOutline.png" />
 													</image>
 												</ImageView>
 											</graphic>

@@ -35,7 +35,7 @@
                      <graphic>
                         <ImageView fitHeight="18.0" fitWidth="9.0">
                            <image>
-                              <Image url="@resources/backIcon.png" />
+                              <Image url="@../../resources/icons/backIcon.png" />
                            </image>
                         </ImageView>
                      </graphic></Button>
@@ -69,7 +69,7 @@
                                     <graphic>
                                        <ImageView fitHeight="26.0" fitWidth="26.0">
                                           <image>
-                                             <Image url="@resources/bill_icon.png" />
+                                             <Image url="@../../resources/icons/bill_icon.png" />
                                           </image>
                                        </ImageView>
                                     </graphic></Label>
