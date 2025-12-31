@@ -83,8 +83,10 @@ private void fetchAndPopulateTimeSlots() {
 		// Select the first time slot by default
 		if (!timeSlots.isEmpty()) {
 			ToggleButton first = (ToggleButton) timeSlotsGridPane.getChildren().get(0);
+			first.setSelected(true); // Ensure the first button is selected
 			timeSlotGroup.selectToggle(first);
 			btnConfirmReservation.setDisable(false);
 		}
 	}
+}
 }
