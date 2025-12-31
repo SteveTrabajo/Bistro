@@ -36,7 +36,7 @@ public class BistroServer extends AbstractServer {
 	private final NotificationService notificationService;
 	private final UserService userService;
 	private final ReportsService reportService;
-
+	private final PaymentService paymentService;
 	// ******************************** Constructors***********************************
 
 	/**
@@ -52,12 +52,13 @@ public class BistroServer extends AbstractServer {
 		this.logger = new ServerLogger(serverConsoleController);
 		this.dbController.setLogger(this.logger);
 		// Initialize services:
-		this.ordersService = new OrdersService(this.dbController, this.logger);
+		this.ordersService = new OrdersService(this, this.dbController, this.logger);
 		this.tableService = new TableService(this.dbController, this.logger);
-		this.waitingListService = new WaitingListService(this.dbController, this.logger);
+		this.waitingListService = new WaitingListService(this,this.dbController, this.logger);
 		this.notificationService = new NotificationService(this.dbController, this.logger);
 		this.userService = new UserService(this.dbController, this.logger);
 		this.reportService = new ReportsService(this.dbController, this.logger);
+		this.paymentService = new PaymentService(this.dbController, this.logger);
 		// Register API subjects
 		registerHandlers(this.router, this.dbController, this.logger);
 	}
@@ -177,6 +178,15 @@ public class BistroServer extends AbstractServer {
 		UserSubject.register(router,userService, logger);
 		OrdersSubject.register(router, ordersService, logger);
 		WaitingListSubject.register(router, waitingListService, logger);
+	}
+	
+	// ******************************** Getters for Services ********************************
+	public OrdersService getOrdersService() {
+		return this.ordersService;
+	}
+
+	public TableService getTablesService() {
+		return this.tableService;
 	}
 
 }

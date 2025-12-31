@@ -12,4 +12,8 @@ public class TableService {
 		this.logger = logger;
 	}
 
+	public int getTableNumberByReservationConfirmationCode(String confirmationCode) {
+		return dbController.getTableNumberByConfirmationCode(confirmationCode);
+	}
+
 }

@@ -134,7 +134,8 @@ public class BistroDataBase_Controller {
         } catch (SQLException ignored) {}
     }
 
-	// ****************************** Database Operations ******************************
+	// ****************************** \\Database Operations// ******************************
+    
     // ******************************   User Operations   ******************************
     /**
      * Client sends: { userType: MEMBER, id: <member_code> }
@@ -235,8 +236,19 @@ public class BistroDataBase_Controller {
 	}
 	
 	
+	public List<Order> getReservationsbyDate(LocalDate date) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
-	// ****************************** Waiting List Operations ******************************
+	
+	public boolean checkOrderExistsInDB(String confirmationCode) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	
+	// ********************Waiting List Operations ******************************
 	public Order addToWaitingList(Map<String, Object> userData) {
 		// TODO Auto-generated method stub
 		return null;
@@ -258,15 +270,24 @@ public class BistroDataBase_Controller {
 		return null;
 	}
 
+	public int getTableNumberByConfirmationCode(String confirmationCode) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	
+	// ******************** Restaurant Management  Operations ******************
 	public List<LocalTime> getOpeningHoursFromDB() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public List<Order> getReservationsbyDate(LocalDate date) {
+	public boolean updateOrderStatusInDB(String confirmationCode, OrderStatus completed) {
 		// TODO Auto-generated method stub
-		return null;
+		return false;
 	}
+
+
+
 
 
 	

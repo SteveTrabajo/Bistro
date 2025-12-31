@@ -44,6 +44,9 @@ public final class Api {
     public static final String ASK_CREATE_RESERVATION 	= "orders.createReservation";
     public static final String ASK_ORDER_AVAIL_HOURS = "orders.getAvailableHours";
     public static final String ASK_GET_ORDER = "orders.getOrderConfirmationCode";
+    public static final String ASK_CHECK_ORDER_EXISTS = "orders.checkOrderExists";
+    public static final String ASK_GET_ALLOCATED_TABLE = "orders.getAllocatedTable";
+    public static final String ASK_PAYMENT_UPDATE = "orders.paymentUpdate";
     
 // Responses
     public static final String REPLY_CREATE_RESERVATION_OK = "orders.createReservation.ok";
@@ -52,7 +55,12 @@ public final class Api {
     public static final String REPLY_ORDER_AVAIL_HOURS_FAIL = "orders.getAvailableHours.fail";
     public static final String REPLY_GET_ORDER_OK = "orders.getOrderbyConfirmCode.ok";
     public static final String REPLY_GET_ORDER_FAIL = "orders.getOrderbyConfirmCode.fail";
-    
+    public static final String REPLY_ORDER_EXISTS = "orders.order.exists";
+    public static final String REPLY_ORDER_NOT_EXISTS = "orders.order.notExists";
+    public static final String REPLY_GET_ALLOCATED_TABLE_OK = "orders.getAllocatedTable.ok";
+    public static final String REPLY_GET_ALLOCATED_TABLE_FAIL = "orders.getAllocatedTable.fail";
+    public static final String REPLY_PAYMENT_UPDATE_OK = "Orders.paymentUpdate.ok";
+    public static final String REPLY_PAYMENT_UPDATE_FAIL = "Orders.paymentUpdate.fail";
     
     // == Restaurant Management subject == //
 // Requests

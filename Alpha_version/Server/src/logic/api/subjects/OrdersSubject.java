@@ -1,6 +1,7 @@
 package logic.api.subjects;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +13,7 @@ import logic.BistroServerGUI;
 import logic.ServerLogger;
 import logic.api.Router;
 import logic.services.OrdersService;
+import enums.OrderStatus;
 import enums.OrderType;
 
 
@@ -52,7 +54,7 @@ public final class OrdersSubject {
 		// Send Order by confirmation code
 		router.on("orders", "getOrderConfirmationCode", (msg, client) ->{
 			String confirmationCode = (String) msg.getData();
-			Order order = ordersService.getOrderByConfirmationCode(confirmationCode, OrderType.RESERVATION);
+			Order order = ordersService.getOrderByConfirmationCode(confirmationCode);
 			if(order != null) { //TODO change to return only confirmation code to client
 				client.sendToClient(new Message(Api.REPLY_GET_ORDER_OK, order));
 				logger.log("[INFO] Client: "+ client + " retrieved order with confirmation code: " + confirmationCode + " successfully.");
@@ -62,8 +64,18 @@ public final class OrdersSubject {
 			}
 		});
 		
+		//check if order exists by confirmation code
+		router.on("orders", "checkOrderExists", (msg, client) ->{
+			String confirmationCode = (String) msg.getData();
+			boolean orderExists = ordersService.checkOrderExists(confirmationCode);
+			if(orderExists) {
+				client.sendToClient(new Message(Api.REPLY_ORDER_EXISTS, null));
+				logger.log("[INFO] Client: "+ client + " confirmed existence of order with confirmation code: " + confirmationCode + " successfully.");
+				}else {
+					client.sendToClient(new Message(Api.REPLY_ORDER_NOT_EXISTS, null));
+				}
+		});
 		
-    	
         //Send available time slots for reservation
         router.on("orders", "getAvailableHours", (msg, client) -> {
 			@SuppressWarnings("unchecked")
@@ -76,5 +88,36 @@ public final class OrdersSubject {
 				logger.log("[ERROR] Client: "+ client + " failed to get available reservation hours.");
 			}
 		});
+        
+        //send allocated table for reservation
+        router.on("orders", "getAllocatedTable", (msg, client) -> {
+        	String confirmationCode = (String) msg.getData();
+        	int tableNumber = ordersService.getAllocatedTableForReservation(confirmationCode);
+        	Order order = ordersService.getOrderByConfirmationCode(confirmationCode);
+        	Map<String, Object> responseData = new HashMap<>();
+        	responseData.put("tableNumber", tableNumber);
+        	responseData.put("order", order);
+        	if(tableNumber != -1 && order.getOrderType() == OrderType.RESERVATION) {
+				client.sendToClient(new Message(Api.REPLY_GET_ALLOCATED_TABLE_OK, responseData));
+				logger.log("[INFO] Client: "+ client + " retrieved allocated table for reservation with confirmation code: " + confirmationCode + " successfully.");
+			}else {
+				client.sendToClient(new Message(Api.REPLY_GET_ALLOCATED_TABLE_FAIL, null));
+				logger.log("[ERROR] Client: "+ client + " failed to retrieve allocated table for reservation with confirmation code: " + confirmationCode + ".");
+			}
+        });
+        
+        //Update order status on payment success
+        router.on("orders", "paymentSuccess", (msg, client) -> {
+        	String confirmationCode = (String) msg.getData();
+			boolean paymentUpdated = ordersService.updateOrderStatus(confirmationCode, OrderStatus.COMPLETED);
+			if(paymentUpdated) {
+				client.sendToClient(new Message(Api.REPLY_PAYMENT_UPDATE_OK, null));
+				logger.log("[INFO] Client: "+ client + " updated payment status for order with confirmation code: " + confirmationCode + " successfully.");
+			}
+			else {
+				client.sendToClient(new Message(Api.REPLY_PAYMENT_UPDATE_FAIL, null));
+				logger.log("[ERROR] Client: "+ client + " failed to update payment status for order with confirmation code: " + confirmationCode + ".");
+			}
+        });
     }
 }
