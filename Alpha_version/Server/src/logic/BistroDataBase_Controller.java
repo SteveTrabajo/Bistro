@@ -15,6 +15,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -137,32 +138,143 @@ public class BistroDataBase_Controller {
 	//Database Operations Methods:
     // ******************************   User Operations   ******************************
    
-   
-    public User findGuestUser(String phoneNumber, String email) {
-    	//query to find guest user by phone number and email
-        final String qry="SELECT * FROM users WHERE type = ? AND (phoneNumber = ? OR email = ?)";
-        User foundUser = null;
-    	Connection conn = null;
-		try {
-			conn = borrow();
-			try (PreparedStatement ps = conn.prepareStatement(qry)) {
-				ps.setString(1, UserType.GUEST.name());
-				ps.setString(2, phoneNumber);
-				ps.setString(3, email);
-				try (ResultSet rs = ps.executeQuery()) {
-					if (rs.next()) {
-						foundUser = new User(rs.getInt("id"), rs.getString("phoneNumber"), rs.getString("email"),
-								UserType.GUEST);
-					}
-				}
-			}
-		} catch (SQLException ex) {
-			logger.log("[ERROR] SQLException in findGuestUser: " + ex.getMessage());
-			ex.printStackTrace();
+    public User findOrCreateGuestUser(String phoneNumber, String email) {
+        if ((phoneNumber == null || phoneNumber.isBlank()) && (email == null || email.isBlank())) {
+            throw new IllegalArgumentException("Guest must have phoneNumber or email");
+        }
 
-		}
-		return foundUser;
+        String findByPhone =
+            "SELECT user_id, phoneNumber, email FROM users WHERE type = 'GUEST' AND phoneNumber = ?";
+        String findByEmail =
+            "SELECT user_id, phoneNumber, email FROM users WHERE type = 'GUEST' AND email = ?";
+
+        String insertQry =
+            "INSERT INTO users (user_id, phoneNumber, email, type) VALUES (?, ?, ?, 'GUEST')";
+
+        Connection conn = null;
+        try {
+            conn = borrow();
+
+            // 1) Find
+            String findQry = (phoneNumber != null && !phoneNumber.isBlank()) ? findByPhone : findByEmail;
+
+            try (PreparedStatement ps = conn.prepareStatement(findQry)) {
+                ps.setString(1, (phoneNumber != null && !phoneNumber.isBlank()) ? phoneNumber : email);
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return new User(
+                            rs.getInt("user_id"),
+                            rs.getString("phoneNumber"),
+                            rs.getString("email"),
+                            UserType.GUEST
+                        );
+                    }
+                }
+            }
+
+            // 2) Create
+            int newUserId = generateRandomUserId(conn);
+
+            try (PreparedStatement psInsert = conn.prepareStatement(insertQry)) {
+                psInsert.setInt(1, newUserId);
+
+                if (phoneNumber == null || phoneNumber.isBlank()) psInsert.setNull(2, java.sql.Types.VARCHAR);
+                else psInsert.setString(2, phoneNumber);
+
+                if (email == null || email.isBlank()) psInsert.setNull(3, java.sql.Types.VARCHAR);
+                else psInsert.setString(3, email);
+
+                psInsert.executeUpdate();
+            }
+
+            return new User(newUserId, phoneNumber, email, UserType.GUEST);
+
+        } catch (SQLException ex) {
+            logger.log("[ERROR] SQLException in findOrCreateGuestUser: " + ex.getMessage());
+            ex.printStackTrace();
+            return null;
+        } finally {
+            // אל תשכח להחזיר את החיבור ל-pool אצלך:
+            if (conn != null) {
+                try { release(conn); } catch (Exception ignore) {}
+            }
+        }
     }
+    
+    private int generateRandomUserId(Connection conn) throws SQLException {
+        Random random = new Random();
+
+        String checkSql = "SELECT 1 FROM users WHERE user_id = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(checkSql)) {
+            for (int i = 0; i < 50; i++) {
+                int candidate = 100000 + random.nextInt(900000);
+
+                ps.setInt(1, candidate);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) {
+                        return candidate;
+                    }
+                }
+            }
+        }
+        throw new SQLException("Failed to generate unique 6-digit user_id after 50 attempts.");
+    }
+
+//    public User findGuestUser(String phoneNumber, String email) {
+//    	//query to find guest user by phone number and email
+//        final String findQry="SELECT * FROM users WHERE type = ? AND (phoneNumber = ? OR email = ?)";
+//        String insertQry =
+//                "INSERT INTO users (user_id, phoneNumber, email, type) " +
+//                "VALUES (?, ?, ?, 'GUEST')";
+//        User foundUser = null;
+//    	Connection conn = null;
+//		try {
+//			conn = borrow();
+//			try (PreparedStatement ps = conn.prepareStatement(findQry)) {
+//				ps.setString(1, UserType.GUEST.name());
+//				ps.setString(2, phoneNumber);
+//				ps.setString(3, email);
+//				try (ResultSet rs = ps.executeQuery()) {
+//					if (rs.next()) {
+//						foundUser = new User(rs.getInt("id"), rs.getString("phoneNumber"), rs.getString("email"),
+//								UserType.GUEST);
+//					}
+//				}
+//			}
+//		} catch (SQLException ex) {
+//			logger.log("[ERROR] SQLException in findGuestUser: " + ex.getMessage());
+//			ex.printStackTrace();
+//		}
+//		// If guest user not found, create a new one
+//		if (foundUser == null) {
+//			try {
+//				conn = borrow();
+//				try (PreparedStatement psInsert = conn.prepareStatement(insertQry, PreparedStatement.RETURN_GENERATED_KEYS)) {
+//					psInsert.setNull(1, Types.INTEGER); // Assuming user_id is auto-incremented
+//					psInsert.setString(2, phoneNumber);
+//					psInsert.setString(3,  email);
+//					int affectedRows = psInsert.executeUpdate();
+//					if (affectedRows == 0) {
+//						throw new SQLException("Creating guest user failed, no rows affected.");
+//					}
+//					try (ResultSet generatedKeys = psInsert.getGeneratedKeys()) {
+//						if (generatedKeys.next()) {
+//							int newUserId = generatedKeys.getInt(1);
+//							foundUser = new User(newUserId, phoneNumber, email, UserType.GUEST);
+//						} else {
+//							throw new SQLException("Creating guest user failed, no ID obtained.");
+//						}
+//					}
+//				}
+//			} catch (SQLException ex) {
+//				logger.log("[ERROR] SQLException in creating new Guest user: " + ex.getMessage());
+//				ex.printStackTrace();
+//			}
+//		}
+//		return foundUser;
+//    }
     
     /**
      * Method to find a member user by their ID.
