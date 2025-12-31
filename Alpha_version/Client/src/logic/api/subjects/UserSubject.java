@@ -15,7 +15,7 @@ public class UserSubject {
 		});
 		
 		// Handler for login failure messages
-		router.on("login", "user.not_found", msg -> {
+		router.on("login", "user.notFound", msg -> {
 			Platform.runLater(() -> BistroClientGUI.client.getUserCTRL().setLoggedInUser(null));
 		});
 	}

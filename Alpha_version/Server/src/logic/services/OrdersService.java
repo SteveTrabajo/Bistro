@@ -45,14 +45,14 @@ public class OrdersService {
 	/*
 	 * Fetches all table sizes from the database and stores them in the tableSizes list.
 	 */
-	public void getTableSizes() {
+	/* public void getTableSizes() {
 		List<Table> tables = dbController.getAllTablesFromDB();
 		for (Table table : tables) {
 			tableSizes.add(table.getCapacity());
 		}
 		return;
 	}
-	
+	*/
 
 
 	public boolean createNewOrder(List<Object> data, OrderType orderType) {

@@ -10,7 +10,9 @@ package comms;
  */
 
 public final class Api {
-    private Api() {}
+
+
+	private Api() {}
 
     // == Connection subject == // 
     

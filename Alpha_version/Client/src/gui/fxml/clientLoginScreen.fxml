@@ -58,7 +58,7 @@
 								<VBox spacing="6" styleClass="loginD-form">
 									<children>
 										<Label styleClass="loginD-label" text="Member ID:" />
-										<TextField id="txtUsername" fx:id="memberCodeField" promptText="Enter your member ID" styleClass="loginD-input" />
+										<TextField id="txtUsername" fx:id="txtMemberID" promptText="Enter your member ID" styleClass="loginD-input" />
 									</children>
 								</VBox>
 								<Button fx:id="btnSignIn" maxWidth="414.0" minWidth="414.0" onAction="#btnSignIn" prefHeight="45.0" prefWidth="414.0" text="Sign In">

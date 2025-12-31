@@ -27,6 +27,7 @@ CREATE TABLE `members` (
   `member_code` varchar(50) NOT NULL,
   `f_name` varchar(50) NOT NULL,
   `l_name` varchar(50) NOT NULL,
+  `address` varchar(150) NOT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `uq_member_code` (`member_code`),
   CONSTRAINT `fk_member_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE

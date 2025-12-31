@@ -103,7 +103,7 @@ public class ReservationController {
         Map<String, Object> requestData = new HashMap<>();
         requestData.put("date", date);
         requestData.put("diners", diners);
-        client.handleMessageFromClientUI(new Message(Api.ASK_ORDER_AVAIL_HOURS, requestData));
+        client.handleMessageFromClientUI(new Message(Api.ASK_ORDER_AVAILABLE_HOURS, requestData));
     }
 	
 	/*

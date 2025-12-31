@@ -7,6 +7,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.paint.Color;
 import logic.BistroClientGUI;
 import java.util.HashMap;
@@ -62,6 +63,28 @@ public class ClientLoginScreen {
 	 * 
 	 * @param event The event triggered by clicking the guest login button.
 	 */
+
+	@FXML
+	public void initialize() {
+		txtMemberID.setTextFormatter(new TextFormatter<String>(change -> {
+			String newText = change.getControlNewText();
+
+			// allow empty so backspace/delete works
+			if (newText.isEmpty())
+				return change;
+
+			// digits only, up to 6
+			if (!InputCheck.isDigitsUpTo(newText, 6))
+				return null;
+
+			// enforce "no leading 0" while typing
+			if (newText.length() >= 1 && newText.charAt(0) == '0')
+				return null;
+
+			return change;
+		}));
+	}
+
 	@FXML
 	public void btnGuest(Event event) {
 		String phoneNumber = txtPhoneNumber.getText();
@@ -92,23 +115,29 @@ public class ClientLoginScreen {
 	 * 
 	 * @param event The event triggered by clicking the member sign-in button.
 	 */
+
 	@FXML
 	public void btnSignIn(Event event) {
-		String id = txtMemberID.getText();
-		String errorMessage = InputCheck.isValidID(id);
-		if (!errorMessage.equals("")) {
-			BistroClientGUI.display(lblError, errorMessage.trim(), Color.RED);
+		String memberCodeText = txtMemberID.getText();
+
+		String err = InputCheck.validateMemberCode6DigitsNoLeadingZero(memberCodeText);
+		if (!err.isEmpty()) {
+			lblError.setText(err);
+			return;
+		}
+
+		int memberCode = Integer.parseInt(memberCodeText.trim());
+
+		HashMap<String, Object> userLoginData = new HashMap<>();
+		userLoginData.put("userType", UserType.MEMBER);
+		userLoginData.put("memberCode", memberCode);
+
+		BistroClientGUI.client.getUserCTRL().signInUser(userLoginData);
+
+		if (BistroClientGUI.client.getUserCTRL().isUserLoggedIn()) {
+			BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
 		} else {
-			userLoginData = new HashMap<String, Object>();
-			userLoginData.put("userType", (UserType.MEMBER));
-			userLoginData.put("id", (Object) id);
-			BistroClientGUI.client.getUserCTRL().signInUser(userLoginData);
-			if (BistroClientGUI.client.getUserCTRL().isUserLoggedIn()) {
-				BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
-			} else {
-				BistroClientGUI.display(lblError, "Member ID does not exist.", Color.RED);
-				return;
-			}
+			lblError.setText("Member code does not exist.");
 		}
 	}
 
@@ -121,9 +150,9 @@ public class ClientLoginScreen {
 	@FXML
 	public void btnScanQR(Event event) {
 		// TODO - Implement QR code scanning functionality
-		
+
 	}
-	
+
 	/*
 	 * Handles the employee login hyperlink click event. Switches to the employee
 	 * login screen.

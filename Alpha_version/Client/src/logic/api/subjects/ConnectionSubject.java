@@ -1,17 +1,24 @@
 package logic.api.subjects;
 
 import javafx.application.Platform;
-import logic.BistroClientGUI;
+import logic.BistroClient;
 import logic.api.ClientRouter;
 
 public class ConnectionSubject {
-	
-	public static void register(ClientRouter router) {
-		System.out.println("ConnectionSubject.register() CALLED");
-		// Handler for connection displayed successfully
-		router.on("connection", "connect.ok", msg -> {
-			String status = "Displayed";
-			Platform.runLater(() -> System.out.println("Connection status: " + status));
-		});
-	}
+
+    public static void register(ClientRouter router) {
+        router.on("connection", "connect.ok", msg -> {
+            // Release any waiting request loops
+            BistroClient.awaitResponse = false;
+
+            Platform.runLater(() ->
+                System.out.println("Connection status: Displayed")
+            );
+        });
+
+        router.on("connection", "disconnect.ok", msg -> {
+            BistroClient.awaitResponse = false;
+            // Handle disconnection logic here
+        });
+    }
 }

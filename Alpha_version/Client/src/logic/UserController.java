@@ -84,7 +84,7 @@ public class UserController {
 		return null;
 	}
 	public void updateUserDetails(User updatedUser) {
-		client.handleMessageFromClientUI(new Message(Api.ASK_UPDATE_USER_DETAILS, updatedUser));
+		client.handleMessageFromClientUI(new Message(Api.ASK_MEMBER_UPDATE_INFO, updatedUser));
 
     }
 

@@ -195,7 +195,6 @@ public class BistroDataBase_Controller {
             ex.printStackTrace();
             return null;
         } finally {
-            // אל תשכח להחזיר את החיבור ל-pool אצלך:
             if (conn != null) {
                 try { release(conn); } catch (Exception ignore) {}
             }
@@ -276,52 +275,45 @@ public class BistroDataBase_Controller {
 //		return foundUser;
 //    }
     
-    /**
-     * Method to find a member user by their ID.
-     * @param i Member user ID.
-     * @return User object if found, null otherwise.
-     */
-    public User findMemberUser(int i) {
-    	//query to find member user by id
-		final String qry="SELECT * FROM users WHERE type = ? AND id = ?";
-		final String qry2="SELECT * FROM members WHERE id = ?";
-		User foundUser = null;
-		int id=0;
-		String memeberCode= null, firstName= null, lastName=null, phoneNumber = null, email = null, address= null;
-		Connection conn = null;
-		try {
-			conn = borrow();
-			try (PreparedStatement ps = conn.prepareStatement(qry)) {
-				ps.setString(1, UserType.MEMBER.name());
-				ps.setInt(2, i);
-				try (ResultSet rs = ps.executeQuery()) {
-					if (rs.next()) {
-						id=rs.getInt("id");
-						phoneNumber =rs.getString("phoneNumber");
-						email = rs.getString("email");
-					}
-				}
-			}
-			// Optionally, you can also fetch additional member-specific data from the members table
-			try (PreparedStatement ps2 = conn.prepareStatement(qry2)) {
-				ps2.setInt(1, i);
-				try (ResultSet rs2 = ps2.executeQuery()) {
-					if (rs2.next() && id !=0 ) {
-						firstName = rs2.getString("first_name");
-						lastName = rs2.getString("last_name");
-						memeberCode = rs2.getString("member_code");
-						address = rs2.getString("address");
-						foundUser = new User(id, phoneNumber, email, memeberCode, firstName, lastName, address,
-								UserType.MEMBER);
-					}
-				}
-			}
-		} catch (SQLException ex) {
-			logger.log("[ERROR] SQLException in findMemberUser: " + ex.getMessage());
-			ex.printStackTrace();
-		}
-		return foundUser;
+    public User findMemberUserByCode(int memberCode) {
+
+        final String sql =
+            "SELECT u.user_id, u.phoneNumber, u.email, u.type, " +
+            "       m.member_code, m.f_name, m.l_name, m.address " +
+            "FROM members m " +
+            "JOIN users u ON u.user_id = m.user_id " +
+            "WHERE m.member_code = ? AND u.type = 'MEMBER' " +
+            "LIMIT 1";
+
+        Connection conn = null;
+        try {
+            conn = borrow();
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, memberCode);
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) return null;
+
+                    int userId     = rs.getInt("user_id");
+                    String phone   = rs.getString("phoneNumber");
+                    String email   = rs.getString("email");
+                    String codeStr = String.valueOf(rs.getInt("member_code"));
+                    String first   = rs.getString("f_name");
+                    String last    = rs.getString("l_name");
+                    String address = rs.getString("address");
+
+                    return new User(userId, phone, email, codeStr, first, last, address, UserType.MEMBER);
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            return null;
+        } finally {
+            release(conn);
+        }
     }
+
+
     
 	public User findStaffUser(String username, String password) {
 		// query to find staff user by username and password

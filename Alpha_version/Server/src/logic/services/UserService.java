@@ -21,9 +21,23 @@ public class UserService {
 		case "GUEST":
 			userfound= dbController.findOrCreateGuestUser((String) loginData.get("phoneNumber"),(String) loginData.get("email"));
 			break;
-		case "MEMBER":
-			userfound = dbController.findMemberUser((int) loginData.get("id"));
-			break;
+		case "MEMBER": {
+		    Object raw = loginData.get("memberCode");
+		    if (raw == null) return null;
+
+		    int memberCode;
+		    try {
+		        memberCode = (raw instanceof Integer)
+		                ? (Integer) raw
+		                : Integer.parseInt(raw.toString().trim());
+		    } catch (NumberFormatException ex) {
+		        return null;
+		    }
+
+		    userfound = dbController.findMemberUserByCode(memberCode);
+		    break;
+		}
+
 		case "EMPLOYEE", "MANAGER":
 			String username = String.valueOf(loginData.get("username"));
 			String password = String.valueOf(loginData.get("password"));
