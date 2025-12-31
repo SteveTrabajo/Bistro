@@ -44,7 +44,7 @@ public class BistroClient extends AbstractClient {
 	
 	private final Reservation_Controller reservationCTRL;
 	
-	private final WaitingList_Controller waitingListCTRL;
+	private final WaitingListController waitingListCTRL;
 	
 	private final Table_Controller tableCTRL;
 	
@@ -71,7 +71,7 @@ public class BistroClient extends AbstractClient {
 		this.router = new ClientRouter();
 		this.userCTRL = new User_Controller(this);
 		this.reservationCTRL = new Reservation_Controller(this);
-		this.waitingListCTRL = new WaitingList_Controller(this);
+		this.waitingListCTRL = new WaitingListController(this);
 		this.tableCTRL = new Table_Controller(this);
 		this.paymentCTRL = new Payment_Controller(this);
 		registerHandlers(); // Register message handlers
@@ -109,7 +109,7 @@ public class BistroClient extends AbstractClient {
 			return this.reservationCTRL;
 		}
 		
-		public WaitingList_Controller getWaitingListCTRL() {
+		public WaitingListController getWaitingListCTRL() {
 			return this.waitingListCTRL;
 		}
 		

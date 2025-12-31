@@ -10,13 +10,13 @@ import comms.Message;
 import entities.Order;
 import enums.OrderStatus;
 
-public class WaitingList_Controller {
+public class WaitingListController {
 	
 	//****************************** Instance variables ******************************//
 	private final BistroClient client;
 	private Map<LocalDate, TreeMap<LocalTime, Order>> waitingList;
 	//******************************** Constructors ***********************************//
-	public WaitingList_Controller(BistroClient client) {
+	public WaitingListController(BistroClient client) {
 		this.client = client;
 		this.waitingList = new TreeMap<>();
 	}
