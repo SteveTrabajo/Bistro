@@ -91,7 +91,7 @@ public class ClientDashboardScreen {
 	 * Method to edit the Join Waiting List button text based on user's waiting list status.
 	 */
 	private void editJoinWaitingListButton() {
-		String userID = BistroClientGUI.client.getUserCTRL().getLoggedInUser().getID();
+		int userID = BistroClientGUI.client.getUserCTRL().getLoggedInUser().getUserId();
 		BistroClientGUI.client.getWaitingListCTRL().askUserOnWaitingList(userID);
 		if (BistroClientGUI.client.getWaitingListCTRL().isUserOnWaitingList()) {
 			btnJoinWaitingList.setText("Waiting List Status");
@@ -127,7 +127,7 @@ public class ClientDashboardScreen {
 	@FXML
 	public void SetDashboardAsMember(User member) {
 		lblWelcome.setText("Welcome, " + member.getFirstName() + " " + member.getLastName() + "!");
-		lblTopSubTitle.setText("Member ID: " + member.getID());
+		lblTopSubTitle.setText("Member ID: " + member.getUserId());
 		btnEditPersonalDetails.setVisible(true);
 		btnEditPersonalDetails.setManaged(true);
 		loyalpointVbox.setVisible(true);

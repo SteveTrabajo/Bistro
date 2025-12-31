@@ -21,6 +21,8 @@ public class clientJoinWaitingListScreen {
 	private Label lblDinersAmount;
 	@FXML 
 	private Label lblUser;
+	@FXML
+	private Label lblError;
 
 
 	

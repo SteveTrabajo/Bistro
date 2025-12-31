@@ -6,5 +6,6 @@ public enum OrderStatus {
     SEATED,
     CANCELLED,
     NO_SHOW,
-    COMPLETED
+    COMPLETED,
+    WAITING_LIST
 }

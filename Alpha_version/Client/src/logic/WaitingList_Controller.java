@@ -31,16 +31,21 @@ public class WaitingList_Controller {
 	
 	//********************************Instance Methods ***********************************//
 	
-	public void askUserOnWaitingList(String userID) { // verficationID can be memberID or phone number/email for guest
-		client.handleMessageFromClientUI(new Message(Api.ASK_WAITLIST_IS_USER_ON, userID));
+	public void askUserOnWaitingList(int userID) { // verficationID can be memberID or phone number/email for guest
+		client.handleMessageFromClientUI(new Message(Api.ASK_IS_IN_WAITLIST, userID));
 		return;
 	}
 	public boolean isUserOnWaitingList() {
-		OrderStatus stat = client.getReservationCTRL().getReayUserReservation().getStatus();
+		OrderStatus status = client.getReservationCTRL().getReadyUserReservation().getStatus();
+		return status == OrderStatus.WAITING_LIST;
 		
 	}
 	public void joinWaitingList( int dinersAmount) {
 		client.handleMessageFromClientUI(new Message(Api.ASK_WAITING_LIST_JOIN,dinersAmount));
+	}
+	public Object setCurrentWaitingOrder(Order waitingOrder) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 
