@@ -47,6 +47,10 @@ public class WaitingList_Controller {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	public void leaveWaitingList() {
+		client.handleMessageFromClientUI(new Message(Api.ASK_WAITING_LIST_LEAVE, null));
+		
+	}
 
 
 	
