@@ -83,5 +83,16 @@ public class User_Controller {
 		}
 		return null;
 	}
+	public void updateUserDetails(User updatedUser) {
+		client.handleMessageFromClientUI(new Message(Api.ASK_UPDATE_USER_DETAILS, updatedUser));
+
+    }
+
+	public boolean isUpdateSuccessful(User oldUser) {
+		return !oldUser.equals(this.loggedInUser);
+		
+		
+		
+	}
 	
 }

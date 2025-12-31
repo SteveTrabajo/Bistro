@@ -56,8 +56,6 @@ public class Table_Controller {
 	public void CheckConfiamtionCodeCorrect(String confirmationCode) {
         client.handleMessageFromClientUI(new Message(Api.ASK_GET_ORDER,confirmationCode));
     }
-	public boolean processPaymentCompleted() {
-		return userAllocatedOrderForTable.getStatus() == enums.OrderStatus.COMPLETED;
-	}
+
 
 }
