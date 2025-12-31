@@ -133,7 +133,12 @@ public class BistroClient extends AbstractClient {
 		OrderSubject.register(router);
 		WaitListSubject.register(router);
 		TablesSubject.register(router);
+		ConnectionSubject.register(router);
+		PaymentSubject.register(router);
+		SystemSubject.register(router);
 		
+		
+		//TODO add this router to the ordrer subject!!!!!
 		// This tells the router: "When the server sends 'getAvailableHours.ok', update the controller."
         router.on("orders", "getAvailableHours.ok", (msg) -> {
             @SuppressWarnings("unchecked")
@@ -214,15 +219,7 @@ public class BistroClient extends AbstractClient {
 	 * Method to notify the server when the client successfully connects.
 	 */
 	public void notifyServerOnConnection() {
-		try {
-			handleMessageFromClientUI(new Message("connect", null));
-			if (messageFromServer.getId().equals("connectionDisplayed")) {
-				System.out.println("Connected to server and connection displayed.");
-			}
-		} catch (Exception e) {
-			e.printStackTrace(); // Handle errors during connection notification
-			System.out.println("Error: Could not notify server on connection." + e);
-		}
+		handleMessageFromClientUI(new Message(Api.ASK_CONNECTION_CONNECT, null));	
 	}
 
 	// Server connection closed or lost handling

@@ -25,6 +25,7 @@ public final class ConnectionSubject {
         	logger.log("[INFO] Client connected: " + client);
             client.sendToClient(new Message(Api.REPLY_CONNECTION_CONNECT_OK, null));
         });
+        
 
         router.on("connection", "disconnect", (msg, client) -> {
         	logger.log("[INFO] Client disconnected: " + client);

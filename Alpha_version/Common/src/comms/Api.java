@@ -17,9 +17,11 @@ public final class Api {
 // Requests
     public static final String ASK_CONNECTION_CONNECT    = "connection.connect";
     public static final String ASK_CONNECTION_DISCONNECT = "connection.disconnect";
+    public static final String NOTIFY_CONNECTION = "connection.notifyConnection";
     
 // Responses
     public static final String REPLY_CONNECTION_CONNECT_OK = "connection.connect.ok";
+    public static final String REPLY_CONNECTION_CONNECT_FAILED = "connection.connect.failed";
     public static final String REPLY_CONNECTION_DISCONNECT_OK = "connection.disconnect.ok";
 
     // == Login/signOut subject == //

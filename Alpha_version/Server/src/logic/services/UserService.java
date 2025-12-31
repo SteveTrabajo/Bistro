@@ -19,7 +19,7 @@ public class UserService {
 		User userfound=null;
 		switch (String.valueOf(loginData.get("userType"))) {
 		case "GUEST":
-			userfound= dbController.findGuestUser((String) loginData.get("phoneNumber"),(String) loginData.get("email"));
+			userfound= dbController.findOrCreateGuestUser((String) loginData.get("phoneNumber"),(String) loginData.get("email"));
 			break;
 		case "MEMBER":
 			userfound = dbController.findMemberUser((int) loginData.get("id"));

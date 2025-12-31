@@ -38,7 +38,7 @@ public class OrdersService {
 		this.tableSizes = new ArrayList<Integer>();
 		this.slotStepMinutes = 30;
 		this.reservationDurationMinutes = 120;
-		getTableSizes();
+		//getTableSizes();
 	}
 	// ********************************Instance Methods ***********************************
 	
