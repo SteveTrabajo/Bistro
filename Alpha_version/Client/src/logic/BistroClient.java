@@ -48,6 +48,8 @@ public class BistroClient extends AbstractClient {
 	
 	private final Table_Controller tableCTRL;
 	
+	private final Payment_Controller paymentCTRL;
+	
 	//******************************** Constructors ***********************************
 	
 	/*
@@ -112,6 +114,9 @@ public class BistroClient extends AbstractClient {
 		
 		public Table_Controller getTableCTRL() {
 			return this.tableCTRL;
+		}
+		public Payment_Controller getPaymentCTRL() {
+			return this.paymentCTRL;
 		}
 		
 		
@@ -249,5 +254,6 @@ public class BistroClient extends AbstractClient {
 		}
 		System.exit(0); // Exit the program
 	}
-	
+
+
 }

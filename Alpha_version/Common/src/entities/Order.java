@@ -24,9 +24,7 @@ public class Order implements Serializable {
 
 	private OrderType orderType; // RESERVATION / WAITLIST
 	private OrderStatus status; // PENDING / ...
-
-	public Order() {
-	}
+	// ---- constructors ----		
 
 	public Order(int orderNumber, LocalDate orderDate, LocalTime orderHour, int dinersAmount, String confirmationCode,
 			int userId, OrderType orderType, OrderStatus status, LocalDate dateOfPlacingOrder) {

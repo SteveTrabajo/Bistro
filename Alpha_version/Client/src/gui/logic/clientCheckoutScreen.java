@@ -2,6 +2,7 @@ package gui.logic;
 
 import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
@@ -41,16 +42,16 @@ public class clientCheckoutScreen {
 	@FXML
 	public void initialize() {
 		// Fetch data from Controller
-		List orderItems = BistroClientGUI.client.getTableCTRL().getCurrentOrderItems();
-		double subtotal = BistroClientGUI.client.getTableCTRL().calculateSubtotal();
-		double tax = BistroClientGUI.client.getTableCTRL().calculateTax(subtotal);
+		Object orderItems = BistroClientGUI.client.getPaymentCTRL().getOrderItems();
+		double subtotal = BistroClientGUI.client.getPaymentCTRL().getPaymentAmount();
+		double tax = BistroClientGUI.client.getPaymentCTRL().calculateTax(subtotal);
 		double discount = 0;
 		
 		// Check if user is a MEMBER for discount benefits
 		if (BistroClientGUI.client.getUserCTRL().getLoggedInUser().getUserType().name().equals("MEMBER")) {
 			LabelUserBenefits.setStyle("-fx-text-fill: green;");
 			LabelUserBenefits.setText("Discount Applied");
-			discount = subtotal * 0.1; // 10% discount for members
+			discount = BistroClientGUI.client.getPaymentCTRL().calculateDiscount(subtotal);
 			summaryDiscount.setText(String.format("-%.2f", discount));
 		} else {
 			LabelUserBenefits.setStyle("-fx-text-fill: red;");
@@ -139,11 +140,15 @@ public class clientCheckoutScreen {
 		enforceMinimumValue();
 		// Get confirmation code and set payment amount
 		BistroClientGUI.client.getPaymentCTRL().setPaymentAmount(finalAmount);//TODO: paymentCTRL create it
+		BistroClientGUI.client.getPaymentCTRL().checkpaymentSuccess(finalAmount);
 		// Process Payment
-		if (BistroClientGUI.client.getTableCTRL().processPayment()) {
+		if (BistroClientGUI.client.getPaymentCTRL().processPaymentCompleted()) {
 			BistroClientGUI.switchScreen(event, "clientCheckoutSuccessScreen.fxml", "Payment Successful");
 		} else {
-			BistroClientGUI.switchScreen(event, "clientDashboardScreen.fxml", "Payment Failed");
+			Alert alert = new Alert(Alert.AlertType.ERROR, "Payment failed! Please try again.", null);
+			alert.setTitle("Payment Error");
+			alert.setHeaderText("Transaction Failed");
+			alert.showAndWait();
 		}
 	}
 }
