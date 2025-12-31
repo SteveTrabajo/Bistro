@@ -96,7 +96,7 @@ public class ClientLoginScreen {
 			userLoginData = new HashMap<String, Object>();
 			userLoginData.put("userType", (UserType.GUEST));
 			userLoginData.put("phoneNumber", (Object) phoneNumber);
-			userLoginData.put("emailAddress", (Object) emailAddress);
+			userLoginData.put("email", (Object) emailAddress);
 			BistroClientGUI.client.getUserCTRL().signInUser(userLoginData);
 			if (BistroClientGUI.client.getUserCTRL().isUserLoggedIn()) {
 				BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");

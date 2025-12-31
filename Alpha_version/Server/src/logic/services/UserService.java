@@ -16,6 +16,7 @@ public class UserService {
 	}
 
 	public User getUserInfo(Map<String, Object> loginData) {
+		logger.log("[LOGIN] Received login data=" + loginData);
 		User userfound=null;
 		switch (String.valueOf(loginData.get("userType"))) {
 		case "GUEST":
@@ -23,7 +24,10 @@ public class UserService {
 			break;
 		case "MEMBER": {
 		    Object raw = loginData.get("memberCode");
-		    if (raw == null) return null;
+		    if (raw == null) {
+		        logger.log("[LOGIN] MEMBER missing key 'memberCode'. Keys=" + loginData.keySet());
+		        return null;
+		    }
 
 		    int memberCode;
 		    try {
@@ -31,12 +35,14 @@ public class UserService {
 		                ? (Integer) raw
 		                : Integer.parseInt(raw.toString().trim());
 		    } catch (NumberFormatException ex) {
+		        logger.log("[LOGIN] MEMBER invalid memberCode value: " + raw);
 		        return null;
 		    }
 
 		    userfound = dbController.findMemberUserByCode(memberCode);
 		    break;
 		}
+
 
 		case "EMPLOYEE", "MANAGER":
 			String username = String.valueOf(loginData.get("username"));

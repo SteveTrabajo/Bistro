@@ -67,7 +67,7 @@ public class InputCheck {
 		return text.matches("\\d{0," + maxLen + "}");
 	}
 
-	// Final validation for member login: exactly 6 digits, cannot start with 0
+	// Validation for member login: exactly 6 digits, cannot start with 0
 	public static String validateMemberCode6DigitsNoLeadingZero(String code) {
 		if (code == null)
 			return "Member code is required.";
