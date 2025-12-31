@@ -18,6 +18,10 @@ public class clientCheckInTableScreen {
 	@FXML 
 	private Label lblUser;
 	@FXML
+	private Label lblError;
+	
+	// ****************************** Instance Methods ******************************
+	@FXML
 	public void initialize() {
 		User currentUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
 		lblUser.setText(currentUser.getUserType().name());
@@ -30,8 +34,8 @@ public class clientCheckInTableScreen {
 	}
 	@FXML
 	public void btnCheckIn(Event event) {
-		String testConfiramtionCode = txtConfirmCode.getText();
-		BistroClientGUI.client.getReservationCTRL().CheckConfiamtionCodeCorrect(testConfiramtionCode);
+		String testConfirmationCode = txtConfirmCode.getText();
+		BistroClientGUI.client.getReservationCTRL().CheckConfirmationCodeCorrect(testConfirmationCode);
 		if(BistroClientGUI.client.getTableCTRL().isCheckInTableSuccess()) {
 			BistroClientGUI.switchScreen(event, "clientCheckInTableSucces.fxml", "clientCheckIn error messege");
 		} else {

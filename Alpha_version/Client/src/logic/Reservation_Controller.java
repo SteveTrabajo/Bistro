@@ -30,6 +30,8 @@ public class Reservation_Controller {
 	private Consumer<List<String>> uiUpdateCallback;
 	private List<Object> tempReservationData=new ArrayList<>();
 	
+	private Consumer<Order> orderLoadedCallback;
+	
 	//******************************** Constructors ***********************************//
 	
 	public Reservation_Controller(BistroClient client) {
@@ -52,7 +54,7 @@ public class Reservation_Controller {
         this.uiUpdateCallback = callback;
     }
 	
-    // Set by the Client when Server replies with REPLY_ORDER_AVAIL_HOURS_OK
+    // Set by the Client when Server replies with REPLY_ORDER_AVAILABLE_HOURS_OK
 	public void setAvailableTimeSlots(List<String> slots) {
         this.availableTimeSlots = slots;
         
@@ -68,17 +70,31 @@ public class Reservation_Controller {
 		return availableTimeSlots;
 	}
 	
+	public void setOrderLoadedListener(Consumer<Order> callback) {
+		this.orderLoadedCallback = callback;
+	}
+	
+	public void setLoadedOrder(Order order) {
+		if (orderLoadedCallback != null) {
+			javafx.application.Platform.runLater(() -> {
+				orderLoadedCallback.accept(order);
+			});
+		}
+	}
+	
+	// Set by the Client when Server replies with REPLY_GET_ORDER_OK
+	
 	//******************************** Instance Methods ***********************************//
 	
 	/*
 	 * Asks the server for available hours based on date and party size.
-	 * Matches Api.ASK_ORDER_AVAIL_HOURS
+	 * Matches Api.ASK_ORDER_AVAILABLE_HOURS
 	 */
 	public void askAvailableHours(LocalDate date, int diners) {
         Map<String, Object> requestData = new HashMap<>();
         requestData.put("date", date);
         requestData.put("diners", diners);
-        client.handleMessageFromClientUI(new Message(Api.ASK_ORDER_AVAIL_HOURS, requestData));
+        client.handleMessageFromClientUI(new Message(Api.ASK_ORDER_AVAILABLE_HOURS, requestData));
     }
 	
 	/*
@@ -106,9 +122,17 @@ public class Reservation_Controller {
 	/*
 	 * Checks if the provided confirmation code is correct by asking the server.
 	 */
-	public void CheckConfiamtionCodeCorrect(String confirmationCode) {
-        client.handleMessageFromClientUI(new Message(Api.ASK_GET_ORDER,confirmationCode));
+	public void CheckConfirmationCodeCorrect(String confirmationCode) {
+        client.handleMessageFromClientUI(new Message(Api.ASK_CHECK_ORDER_EXISTS, confirmationCode));
     }
+	
+	public void askOrderDetails(String confirmationCode) {
+	    client.handleMessageFromClientUI(new Message(Api.ASK_GET_ORDER, confirmationCode));
+	}
+	
+	public void cancelReservation(String confirmationCode) {
+	    client.handleMessageFromClientUI(new Message(Api.ASK_CANCEL_RESERVATION, confirmationCode));
+	}
 	
 	/*
 	 * Checks if a user's reservation is ready (for waiting list flow).

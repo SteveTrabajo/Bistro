@@ -82,9 +82,9 @@ public final class OrdersSubject {
 			Map<String,Object> requestData = (Map<String,Object>) msg.getData();
 			List<String> availableHours = ordersService.getAvailableReservationHours(requestData);
 			if(availableHours != null) {
-				client.sendToClient(new Message(Api.REPLY_ORDER_AVAIL_HOURS_OK, availableHours));
+				client.sendToClient(new Message(Api.REPLY_ORDER_AVAILABLE_HOURS_OK, availableHours));
 			}else {
-				client.sendToClient(new Message(Api.REPLY_ORDER_AVAIL_HOURS_FAIL, null));
+				client.sendToClient(new Message(Api.REPLY_ORDER_AVAILABLE_HOURS_FAIL, null));
 				logger.log("[ERROR] Client: "+ client + " failed to get available reservation hours.");
 			}
 		});

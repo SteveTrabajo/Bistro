@@ -19,7 +19,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane styleClass="reservation-root" stylesheets="@../../gui/css/clientNewReservationStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.ManageBookingScreen">
+<StackPane styleClass="reservation-root" stylesheets="@../../gui/css/clientNewReservationStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.ClientManageBookingScreen">
 
 	<children>
 		<BorderPane prefHeight="720" prefWidth="1280">
@@ -70,7 +70,7 @@
 												<Label styleClass="field-label" text="Confirmation Code" />
 												<HBox prefHeight="100.0" prefWidth="200.0" spacing="15.0" styleClass="confirm-form">
 													<children>
-														<TextField prefHeight="44.0" prefWidth="236.0" promptText="Enter your order confirmation code">
+														<TextField fx:id="txtConfirmationCode" prefHeight="44.0" prefWidth="236.0" promptText="Enter your order confirmation code">
 															<styleClass>
 																<String fx:value="confirm-label" />
 																<String fx:value="confirm-input" />
@@ -158,7 +158,7 @@
 											<graphic>
 												<ImageView fitHeight="18.0" fitWidth="18.0">
 													<image>
-														<Image url="@../../resources/icons/formkitDate.png"/>
+														<Image url="@../../resources/icons/formkitDate.png" />
 													</image>
 												</ImageView>
 											</graphic>
