@@ -1,0 +1,142 @@
+/* ====== Screen base ====== */
+.root { -fx-font-family: "Segoe UI", "Arial"; }
+
+.sm-root {
+  -fx-background-color: #f4f6f9;
+}
+
+.sm-title {
+  -fx-font-size: 32px;
+  -fx-text-fill: #0f172a;
+  -fx-font-weight: 800;
+}
+
+.sm-subtitle {
+  -fx-font-size: 16px;
+  -fx-text-fill: #64748b;
+}
+
+/* ====== Generic card ====== */
+.sm-card {
+  -fx-background-color: white;
+  -fx-background-radius: 10;
+  -fx-padding: 16;
+  -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.15), 16, 0, 0, 6);
+}
+
+.sm-card-title {
+  -fx-font-size: 20px; 
+  -fx-text-fill: #0f172a;
+  -fx-font-weight: 800;
+}
+
+/* ====== Stats cards ====== */
+.sm-stat-card {
+  -fx-background-color: white;
+  -fx-background-radius: 10;
+  -fx-padding: 12;
+  -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.15), 12, 0, 0, 4);
+  -fx-min-width: 210;
+}
+
+.sm-stat-label { -fx-text-fill: #64748b; }
+.sm-stat-value { -fx-font-size: 26px; -fx-text-fill: #0f172a; -fx-font-weight: 800; }
+
+.sm-stat-available { -fx-border-width: 0 0 0 4; -fx-border-color: #22c55e; -fx-border-radius: 10; }
+.sm-stat-occupied  { -fx-border-width: 0 0 0 4; -fx-border-color: #ef4444; -fx-border-radius: 10; }
+.sm-stat-reserved  { -fx-border-width: 0 0 0 4; -fx-border-color: #eab308; -fx-border-radius: 10; }
+
+/* ====== Floor tiles ====== */
+.sm-scroll { -fx-background-color: transparent; -fx-padding: 0; }
+.sm-scroll > .viewport { -fx-background-color: transparent; }
+
+.sm-floor-tiles {
+  -fx-hgap: 10;
+  -fx-vgap: 10;
+}
+
+/* Divider line in legend area */
+.sm-divider { -fx-background-color: #e5e7eb; -fx-pref-height: 1; }
+
+/* Legend */
+.sm-legend-label { -fx-text-fill: #64748b; }
+.sm-legend-text { -fx-text-fill: #334155; }
+.sm-legend-dot {
+  -fx-pref-width: 12;
+  -fx-pref-height: 12;
+  -fx-background-radius: 4;
+}
+.sm-dot-available { -fx-background-color: #22c55e; }
+.sm-dot-occupied  { -fx-background-color: #ef4444; }
+.sm-dot-reserved  { -fx-background-color: #eab308; }
+
+/* ====== Primary button ====== */
+.sm-primary {
+  -fx-background-color: #2563eb;
+  -fx-text-fill: white;
+  -fx-font-size: 14px;
+  -fx-background-radius: 10;
+  -fx-padding: 8 16;
+  -fx-font-weight: 700;
+  -fx-cursor: hand;
+}
+.sm-primary:hover { -fx-background-color: #1d4ed8; }
+.sm-primary:pressed { -fx-background-color: #1e40af; }  
+
+/* ====== Table tile nodes that you create in code ====== */
+.sm-table {
+  -fx-background-radius: 10;
+  -fx-padding: 16;
+  -fx-pref-width: 160;
+  -fx-pref-height: 120;
+  -fx-alignment: CENTER;
+  -fx-cursor: hand;
+  -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.12), 12, 0, 0, 4);
+}
+.sm-table-id { -fx-font-size: 22px; -fx-font-weight: 800; -fx-text-fill: white; }
+.sm-table-meta { -fx-font-size: 12px; -fx-text-fill: rgba(255,255,255,0.92); }
+
+.sm-table-available { -fx-background-color: #00c853; }
+.sm-table-occupied  { -fx-background-color: #ff2d2d; }
+.sm-table-reserved  { -fx-background-color: #f4b000; }
+
+/* ====== Waiting list cards created in code ====== */
+.sm-wait-card {
+  -fx-background-color: white;
+  -fx-background-radius: 10;
+  -fx-padding: 12;
+  -fx-border-color: #e2e8f0;
+  -fx-border-radius: 10;
+}
+
+.sm-wait-badge {
+  -fx-background-color: #2563eb;
+  -fx-text-fill: white;
+  -fx-font-size: 11px;
+  -fx-font-weight: 800;
+  -fx-padding: 2 8;
+  -fx-background-radius: 999;
+}
+
+.sm-wait-name { -fx-font-size: 13px; -fx-text-fill: #0f172a; -fx-font-weight: 800; }
+.sm-wait-sub { -fx-font-size: 12px; -fx-text-fill: #64748b; }
+
+.sm-btn-seat {
+  -fx-background-color: #16a34a;
+  -fx-text-fill: white;
+  -fx-background-radius: 10;
+  -fx-padding: 8 12;
+  -fx-font-weight: 800;
+  -fx-cursor: hand;
+}
+.sm-btn-seat:hover { -fx-background-color: #15803d; }
+
+.sm-btn-notify {
+  -fx-background-color: #cbd5e1;
+  -fx-text-fill: #0f172a;
+  -fx-background-radius: 10;
+  -fx-padding: 8 12;
+  -fx-font-weight: 800;
+  -fx-cursor: hand;
+}
+.sm-btn-notify:hover { -fx-background-color: #b6c2d3; }
