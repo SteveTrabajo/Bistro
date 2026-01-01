@@ -44,7 +44,7 @@
                            <children>
                               <ImageView fitHeight="38.0" fitWidth="38.0" preserveRatio="true">
                                  <image>
-                                    <Image url="@../../resources/icons/ServerConnectionFrame/serverIcon.png" />
+                                    <Image url="@../../resources/icons/serverIcon.png" />
                                  </image>
                               </ImageView>
                            </children>

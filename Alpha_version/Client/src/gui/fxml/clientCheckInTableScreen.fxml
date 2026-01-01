@@ -60,7 +60,7 @@
                             </HBox>
                      <ImageView fitHeight="79.0" fitWidth="79.0">
                         <image>
-                           <Image url="@../../resources/icons/getTableIcon.png" />
+                           <Image url="@../../resources/icons/getTableIconBlue.png" />
                         </image>
                      </ImageView>
 

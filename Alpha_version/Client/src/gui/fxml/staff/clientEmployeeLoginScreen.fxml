@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane prefHeight="720" prefWidth="1280" stylesheets="@clientEmployeeLoginStyle.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="your.package.BistroLoginController">
+<StackPane prefHeight="720" prefWidth="1280" stylesheets="@../../css/staff/clientEmployeeLoginStyle.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="your.package.BistroLoginController">
    <BorderPane prefHeight="200.0" prefWidth="200.0" styleClass="background">
       <center>
       
@@ -29,7 +29,7 @@
                <children>
                   <ImageView fitHeight="36.0" fitWidth="36.0">
                      <image>
-                        <Image url="@resources/loginlock.png" />
+                        <Image url="@../../../resources/icons/loginlock.png" />
                      </image>
                   </ImageView>
                </children>
@@ -45,7 +45,7 @@
                   <graphic>
                      <ImageView fitHeight="15.0" fitWidth="15.0">
                         <image>
-                           <Image url="@resources/personIconGery.png" />
+                           <Image url="@../../../resources/icons/personIconGery.png" />
                         </image>
                      </ImageView>
                   </graphic>
@@ -61,7 +61,7 @@
                   <graphic>
                      <ImageView fitHeight="15.0" fitWidth="15.0">
                         <image>
-                           <Image url="@resources/passwordIcon.png" />
+                           <Image url="@../../../resources/icons/passwordIcon.png" />
                         </image>
                      </ImageView>
                   </graphic>
@@ -99,7 +99,7 @@
                   <graphic>
                      <ImageView fitHeight="14.0" fitWidth="7.0">
                         <image>
-                           <Image url="@resources/backIcon.png" />
+                           <Image url="@../../../resources/icons/backIcon.png" />
                         </image>
                      </ImageView>
                   </graphic>
