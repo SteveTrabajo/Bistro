@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="14" styleClass="wl-root" stylesheets="@WaitingListPanelStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bistro.app.controllers.WaitingListTableController">
+
+    <padding>
+        <Insets bottom="18" left="18" right="18" top="18" />
+    </padding>
+
+    <!-- Header -->
+    <VBox spacing="4">
+        <Label styleClass="wl-title" text="Waiting List" />
+        <Label styleClass="wl-subtitle" text="Manage customer queue and wait times" />
+    </VBox>
+
+    <!-- Stats row -->
+    <HBox spacing="14">
+        <HBox spacing="10" HBox.hgrow="ALWAYS">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label styleClass="wl-stat-label" text="Total in Queue" />
+                <Label fx:id="totalInQueueLabel" styleClass="wl-stat-value" text="0" />
+            </VBox>
+         <styleClass>
+            <String fx:value="wl-stat" />
+            <String fx:value="wl-left-orange" />
+         </styleClass>
+        </HBox>
+
+        <HBox spacing="10" styleClass="wl-stat wl-left-orange" HBox.hgrow="ALWAYS">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label styleClass="wl-stat-label" text="Waiting" />
+                <Label fx:id="waitingCountLabel" styleClass="wl-stat-value" text="0" />
+            <styleClass>
+               <String fx:value="wl-stat" />
+               <String fx:value="wl-left-amber" />
+            </styleClass>
+            </VBox>
+        </HBox>
+
+        <HBox spacing="10" styleClass="wl-stat wl-left-blue" HBox.hgrow="ALWAYS">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label styleClass="wl-stat-label" text="Called" />
+                <Label fx:id="calledCountLabel" styleClass="wl-stat-value" text="0" />
+            <styleClass>
+               <String fx:value="wl-stat" />
+               <String fx:value="wl-left-purple" />
+            </styleClass>
+            </VBox>
+        </HBox>
+
+        <HBox spacing="10" styleClass="wl-stat wl-left-purple" HBox.hgrow="ALWAYS">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label styleClass="wl-stat-label" text="Avg. Wait Time" />
+                <Label fx:id="avgWaitLabel" styleClass="wl-stat-value" text="0 min" />
+            <styleClass>
+               <String fx:value="wl-stat" />
+               <String fx:value="wl-left-blue" />
+            </styleClass>
+            </VBox>
+        </HBox>
+    </HBox>
+
+    <!-- Search bar -->
+    <HBox alignment="CENTER_LEFT" spacing="12" styleClass="wl-search-card">
+        <TextField fx:id="searchField" promptText="Search by customer name or queue number..." styleClass="wl-search-field" HBox.hgrow="ALWAYS" />
+
+        <Button onAction="#onAddToWaitlist" styleClass="wl-add-btn" text="Add to Waitlist" />
+    </HBox>
+
+    <!-- Table -->
+    <VBox spacing="10" styleClass="wl-card" VBox.vgrow="ALWAYS">
+        <Label fx:id="queueTitleLabel" styleClass="wl-card-title" text="Current Queue (0)" />
+
+        <TableView fx:id="waitingTable" styleClass="wl-table" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colQueue" text="#" />
+                <TableColumn fx:id="colName" text="Customer" />
+                <TableColumn fx:id="colMember" text="Member" />
+                <TableColumn fx:id="colParty" text="Party" />
+                <TableColumn fx:id="colJoined" text="Joined" />
+                <TableColumn fx:id="colWait" text="Wait" />
+                <TableColumn fx:id="colStatus" text="Status" />
+                <TableColumn fx:id="colActions" text="Actions" />
+            </columns>
+        </TableView>
+    </VBox>
+
+</VBox>

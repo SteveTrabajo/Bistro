@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="op-scroll" stylesheets="@RestaurantManagementPanelStyles.css" vbarPolicy="AS_NEEDED" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bistro.app.controllers.OperationsPanelController">
+
+    <content>
+        <VBox spacing="16" styleClass="op-root">
+            <padding>
+                <Insets bottom="18" left="18" right="18" top="18" />
+            </padding>
+
+            <!-- Header -->
+            <VBox spacing="4">
+                <Label styleClass="op-title" text="Managment Panel" />
+                <Label styleClass="op-subtitle" text="Manage restaurant hours and table configuration" />
+            </VBox>
+
+            <!-- Top row: Opening Hours + Holiday Exceptions -->
+            <HBox alignment="TOP_LEFT" spacing="16">
+            <VBox prefWidth="520" spacing="10" styleClass="op-card">
+               <children>
+                  <Label style="-fx-font-size:18px; -fx-text-fill:#0f172a; -fx-font-weight:bold;" text="Opening Hours" />
+                  <GridPane hgap="8" vgap="6">
+                     <children>
+                        <Label styleClass="op-section-title" text="Day" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                        <Label styleClass="op-section-title" text="Open" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                        <Label styleClass="op-section-title" text="Close" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                        <Label styleClass="op-section-title" text="Active" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                        <Label text="Monday" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                        <TextField fx:id="txtMonOpen" promptText="11:00" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <TextField fx:id="txtMonClose" promptText="23:00" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                        <CheckBox fx:id="monActiveCheck" selected="true" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                        <Label text="Tuesday" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                        <TextField fx:id="txtTueOpen" promptText="11:00" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <TextField fx:id="txtTueClose" promptText="23:00" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                        <CheckBox fx:id="tueActiveCheck" selected="true" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                        <Label text="Wednesday" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                        <TextField fx:id="txtWedOpen" promptText="11:00" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <TextField fx:id="txtWedClose" promptText="23:00" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                        <CheckBox fx:id="wedActiveCheck" selected="true" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                        <Label text="Thursday" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                        <TextField fx:id="txtThuOpen" promptText="11:00" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                        <TextField fx:id="txtThuClose" promptText="23:00" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                        <CheckBox fx:id="thuActiveCheck" selected="true" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+                        <Label text="Friday" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+                        <TextField fx:id="friOpenField" promptText="11:00" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                        <TextField fx:id="friCloseField" promptText="01:00" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                        <CheckBox fx:id="friActiveCheck" selected="true" GridPane.columnIndex="3" GridPane.rowIndex="5" />
+                        <Label text="Saturday" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+                        <TextField fx:id="satOpenField" promptText="11:00" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                        <TextField fx:id="satCloseField" promptText="01:00" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                        <CheckBox fx:id="satActiveCheck" selected="true" GridPane.columnIndex="3" GridPane.rowIndex="6" />
+                     </children>
+                     <columnConstraints>
+                        <ColumnConstraints />
+                        <ColumnConstraints />
+                        <ColumnConstraints />
+                        <ColumnConstraints />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                     </rowConstraints>
+                  </GridPane>
+                  <HBox spacing="8">
+                     <children>
+                        <Button onAction="#onSaveHours" styleClass="op-btn-primary" text="Save Hours" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+
+                <!-- Holiday Exceptions -->
+                <VBox spacing="12" styleClass="op-card" HBox.hgrow="ALWAYS">
+                    <Label styleClass="op-card-title" text="Holiday Exceptions" />
+
+                    <VBox fx:id="holidaysListBox" spacing="12" />
+
+                    <Region styleClass="op-divider" />
+
+                    <Label styleClass="op-section-title" text="Add Holiday" />
+
+                    <GridPane hgap="10" vgap="10">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="ALWAYS" />
+                        </columnConstraints>
+
+                        <DatePicker fx:id="holidayDatePicker" promptText="dd/mm/yyyy" styleClass="op-field" GridPane.rowIndex="0" />
+                        <TextField fx:id="holidayNameField" promptText="Holiday name" styleClass="op-field" GridPane.rowIndex="1" />
+
+                        <CheckBox fx:id="holidayClosedCheck" styleClass="op-checkbox" text="Restaurant closed on this day" GridPane.rowIndex="2" />
+
+                        <Button fx:id="btnAddHoliday" onAction="#btnAddHoliday" styleClass="op-btn-primary" text="➕  Add Holiday" GridPane.rowIndex="3" />
+                  <rowConstraints>
+                     <RowConstraints />
+                     <RowConstraints />
+                     <RowConstraints />
+                     <RowConstraints />
+                  </rowConstraints>
+                    </GridPane>
+                </VBox>
+            </HBox>
+
+            <!-- Table Management (full width) -->
+            <VBox spacing="12" styleClass="op-card">
+                <Label styleClass="op-card-title" text="Table Management" />
+
+                <TableView fx:id="tablesTable" styleClass="op-table" VBox.vgrow="NEVER">
+                    <columns>
+                        <TableColumn fx:id="colTableId" text="Table ID" />
+                        <TableColumn fx:id="colSeats" prefWidth="363.0" text="Number of Seats" />
+                        <TableColumn fx:id="colActions" minWidth="0.0" prefWidth="291.0" text="Actions" />
+                    </columns>
+                </TableView>
+
+                <Region styleClass="op-divider" />
+
+                <Label styleClass="op-section-title" text="Add New Table" />
+
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <TextField fx:id="txtTableID" prefWidth="220" promptText="Table ID (e.g., T13)" styleClass="op-field" />
+                    <Spinner fx:id="spinDinersAmount" prefWidth="120" styleClass="op-spinner" />
+                    <Button fx:id="btnAddTable" onAction="#btnAddTable" styleClass="op-btn-primary" text="➕  Add Table" />
+                </HBox>
+            </VBox>
+
+        </VBox>
+    </content>
+</ScrollPane>

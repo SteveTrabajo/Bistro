@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefHeight="737.0" prefWidth="687.0" spacing="14" styleClass="pay-root" stylesheets="@PaymentPanelStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bistro.app.controllers.PaymentProcessingController">
+
+    <padding><Insets bottom="18" left="18" right="18" top="18" /></padding>
+
+    <!-- Header -->
+    <VBox spacing="4">
+        <Label styleClass="pay-title" text="Payment Processing" />
+        <Label styleClass="pay-subtitle" text="Process customer payments and manage bills" />
+    </VBox>
+
+    <!-- Stats row -->
+    <HBox spacing="14">
+        <HBox styleClass="pay-stat pay-left-blue" HBox.hgrow="ALWAYS">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label styleClass="pay-stat-label" text="Pending Bills" />
+                <Label fx:id="pendingBillsLabel" styleClass="pay-stat-value" text="0" />
+            <styleClass>
+               <String fx:value="pay-stat" />
+               <String fx:value="pay-left-blue" />
+            </styleClass>
+            </VBox>
+        </HBox>
+
+        <HBox styleClass="pay-stat pay-left-green" HBox.hgrow="ALWAYS">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label styleClass="pay-stat-label" text="Today's Revenue" />
+                <Label fx:id="todayRevenueLabel" styleClass="pay-stat-value" text="₪0.00" />
+            <styleClass>
+               <String fx:value="pay-stat" />
+               <String fx:value="pay-left-green" />
+            </styleClass>
+            </VBox>
+        </HBox>
+
+        <HBox styleClass="pay-stat pay-left-purple" HBox.hgrow="ALWAYS">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label styleClass="pay-stat-label" text="Transactions" />
+                <Label fx:id="transactionsLabel" styleClass="pay-stat-value" text="0" />
+            <styleClass>
+               <String fx:value="pay-stat" />
+               <String fx:value="pay-left-orange" />
+            </styleClass>
+            </VBox>
+        </HBox>
+
+        <HBox styleClass="pay-stat pay-left-orange" HBox.hgrow="ALWAYS">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label styleClass="pay-stat-label" text="Avg. Bill" />
+                <Label fx:id="avgBillLabel" styleClass="pay-stat-value" text="₪0.00" />
+            <styleClass>
+               <String fx:value="pay-stat" />
+               <String fx:value="pay-left-purple" />
+            </styleClass>
+            </VBox>
+        </HBox>
+    </HBox>
+
+    <!-- Search card -->
+    <HBox alignment="CENTER_LEFT" spacing="12" styleClass="pay-search-card">
+        <Label styleClass="pay-search-icon" text="🔍" />
+        <TextField fx:id="searchField" promptText="Search by table, customer, or bill ID..." styleClass="pay-search-field" HBox.hgrow="ALWAYS" />
+    </HBox>
+
+    <!-- Main two columns -->
+    <HBox spacing="16" VBox.vgrow="ALWAYS">
+
+        <!-- Left: Table -->
+        <VBox prefHeight="465.0" prefWidth="652.0" spacing="10" styleClass="pay-card" VBox.vgrow="ALWAYS">
+            <Label fx:id="pendingTitleLabel" styleClass="pay-card-title" text="Pending Bills (0)" />
+
+            <TableView fx:id="billsTable" styleClass="pay-table" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colBillId" text="Bill" />
+                    <TableColumn fx:id="colTable" text="Table" />
+                    <TableColumn fx:id="colCustomer" text="Customer" />
+                    <TableColumn fx:id="colMember" text="Member" />
+                    <TableColumn fx:id="colCreated" text="Created" />
+                    <TableColumn fx:id="colTotal" text="Total" />
+                    <TableColumn fx:id="colActions" text="Actions" />
+                </columns>
+            </TableView>
+        </VBox>
+    </HBox>
+
+</VBox>

@@ -15,82 +15,106 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.GridPane;
 import logic.BistroClientGUI;
 
+/**
+ * This class represents the controller for the Client New Reservation screen in
+ * the BistroClientGUI.
+ */
 public class ClientNewReservationScreen {
-@FXML
-private Label lblUser;
-@FXML
-private DatePicker datePicker;
-@FXML
-private ComboBox<String> dinersAmountComboBox;
-@FXML
-private GridPane timeSlotsGridPane;
-@FXML
-private Button btnBack;
-@FXML
-private Button btnConfirmReservation;
-
-@FXML
-public void initialize() {
-	User currentUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
-	lblUser.setText(currentUser.getUserType().name());
-	datePicker.setValue(java.time.LocalDate.now());
 	
-	// Populate dinersAmountComboBox
-	for (int i = 1; i <= 12; i++) {
-		dinersAmountComboBox.getItems().add(String.valueOf(i)+" People");
+	// ****************************** FXML Variables ******************************
+	@FXML
+	private Label lblUser;
+	@FXML
+	private DatePicker datePicker;
+	@FXML
+	private ComboBox<String> dinersAmountComboBox;
+	@FXML
+	private GridPane timeSlotsGridPane;
+	@FXML
+	private Button btnBack;
+	@FXML
+	private Button btnConfirmReservation;
+	
+	// *************************** FXML Methods ****************************
+	
+	/**
+	 * Initializes the Client New Reservation screen.
+	 */
+	@FXML
+	public void initialize() {
+		User currentUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
+		lblUser.setText(currentUser.getUserType().name());
+		datePicker.setValue(java.time.LocalDate.now());
+		// Populate dinersAmountComboBox
+		for (int i = 1; i <= 12; i++) {
+			dinersAmountComboBox.getItems().add(String.valueOf(i) + " People");
+		}
+		dinersAmountComboBox.getSelectionModel().selectFirst();
+		// Disable the confirm button initially
+		btnConfirmReservation.setDisable(true);
+		// Add listeners to fetch time slots dynamically
+		datePicker.valueProperty().addListener((obs, oldDate, newDate) -> fetchAndPopulateTimeSlots());
+		dinersAmountComboBox.valueProperty().addListener((obs, oldValue, newValue) -> fetchAndPopulateTimeSlots());
 	}
-	dinersAmountComboBox.getSelectionModel().selectFirst();
+	
+	/**
+	 * Fetches available time slots from the server and populates the GridPane.
+	 */
+	@FXML
+	private void fetchAndPopulateTimeSlots() {
+		if (datePicker.getValue() != null && dinersAmountComboBox.getValue() != null) {
+			BistroClientGUI.client.getReservationCTRL().askAvailableHours(datePicker.getValue(),
+					Integer.parseInt(dinersAmountComboBox.getValue().split(" ")[0]));
+			// Fetch available time slots from the server
+			List<String> timeSlots = BistroClientGUI.client.getReservationCTRL().getAvailableTimeSlots();
+			// Clear the GridPane
+			timeSlotsGridPane.getChildren().clear();
+			// Populate the GridPane with time slots using a ToggleGroup for exclusive selection
+			ToggleGroup timeSlotGroup = new ToggleGroup();
+			int row = 0;
+			int col = 0;
+			for (String timeSlot : timeSlots) {
+				ToggleButton toggleButton = new ToggleButton(timeSlot);
+				toggleButton.setToggleGroup(timeSlotGroup);
+				timeSlotsGridPane.add(toggleButton, col, row);
+				col++;
+				if (col > 3) {
+					col = 0;
+					row++;
+				}
+			}
+			// Enable confirm when a selection exists
+			timeSlotGroup.selectedToggleProperty().addListener((obs, oldToggle, selectedToggle) -> {
+				btnConfirmReservation.setDisable(selectedToggle == null);
+			});
 
-	// Disable the confirm button initially
-	btnConfirmReservation.setDisable(true);
-
-	// Add listeners to fetch time slots dynamically
-	datePicker.valueProperty().addListener((obs, oldDate, newDate) -> fetchAndPopulateTimeSlots());
-	dinersAmountComboBox.valueProperty().addListener((obs, oldValue, newValue) -> fetchAndPopulateTimeSlots());
-}
-
-private void fetchAndPopulateTimeSlots() {
-	if (datePicker.getValue() != null && dinersAmountComboBox.getValue() != null) {
-		BistroClientGUI.client.getReservationCTRL().askAvailableHours(
-			datePicker.getValue(),
-			Integer.parseInt(dinersAmountComboBox.getValue().split(" ")[0])
-		);
-		// Fetch available time slots from the server
-		List<String> timeSlots = BistroClientGUI.client.getReservationCTRL().getAvailableTimeSlots();
-
-		// Clear the GridPane
-		timeSlotsGridPane.getChildren().clear();
-
-		// Populate the GridPane with time slots using a ToggleGroup for exclusive selection
-		ToggleGroup timeSlotGroup = new ToggleGroup();
-		int row = 0;
-		int col = 0;
-		for (String timeSlot : timeSlots) {
-			ToggleButton toggleButton = new ToggleButton(timeSlot);
-			toggleButton.setToggleGroup(timeSlotGroup);
-			timeSlotsGridPane.add(toggleButton, col, row);
-			col++;
-			if (col > 3) {
-				col = 0;
-				row++;
+			// Select the first time slot by default
+			if (!timeSlots.isEmpty()) {
+				ToggleButton first = (ToggleButton) timeSlotsGridPane.getChildren().get(0);
+				first.setSelected(true); // Ensure the first button is selected
+				timeSlotGroup.selectToggle(first);
+				btnConfirmReservation.setDisable(false);
 			}
 		}
-
-		// Enable confirm when a selection exists
-		timeSlotGroup.selectedToggleProperty().addListener((obs, oldToggle, selectedToggle) -> {
-			btnConfirmReservation.setDisable(selectedToggle == null);
-		});
-
-		// Select the first time slot by default
-		if (!timeSlots.isEmpty()) {
-			ToggleButton first = (ToggleButton) timeSlotsGridPane.getChildren().get(0);
-			first.setSelected(true); // Ensure the first button is selected
-			timeSlotGroup.selectToggle(first);
-			btnConfirmReservation.setDisable(false);
-		}
-	}	
-}
-void btnBack(Event event) { 
-    BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Error returning to dashboard");
+	}
+	
+	@FXML
+	/**
+	 * Handles the confirmation of a new reservation.
+	 * 
+	 * @param event The event triggered by clicking the confirm button.
+	 */
+	void btnConfirmReservation(Event event) {
+		//TODO: Implement reservation confirmation logic
+	}
+	
+	/**
+	 * Handles the confirmation of a new reservation.
+	 * 
+	 * @param event The event triggered by clicking the confirm button.
+	 */
+	void btnBack(Event event) {
+		BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Error returning to dashboard");
 	}
 }
+//End of ClientNewReservationScreen.java

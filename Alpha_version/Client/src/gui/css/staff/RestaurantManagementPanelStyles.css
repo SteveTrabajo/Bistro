@@ -1,0 +1,275 @@
+.root { -fx-font-family: "Segoe UI", "Arial"; }
+
+.op-root { -fx-background-color: #f4f6f9; }
+
+.op-title { -fx-font-size: 34px; -fx-font-weight: 800; -fx-text-fill: #0f172a; }
+.op-subtitle { -fx-font-size: 14px; -fx-text-fill: #64748b; }
+
+.op-card {
+  -fx-background-color: white;
+  -fx-background-radius: 12;
+  -fx-padding: 16;
+  -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.10), 14, 0.10, 0, 6);
+}
+
+.op-card-title { -fx-font-size: 18px; -fx-font-weight: 900; -fx-text-fill: #0f172a; }
+.op-section-title { -fx-font-size: 13px; -fx-font-weight: 900; -fx-text-fill: #0f172a; }
+
+.op-icon-blue { -fx-font-size: 16px; -fx-text-fill: #2563eb; }
+
+.op-divider { -fx-background-color: #e2e8f0; -fx-pref-height: 1; }
+
+/* Inputs */
+.op-field {
+  -fx-background-radius: 10;
+  -fx-border-radius: 10;
+  -fx-border-color: #cbd5e1;
+  -fx-background-color: #ffffff;
+  -fx-padding: 10 12;
+  -fx-prompt-text-fill: #94a3b8;
+}
+.op-checkbox { -fx-text-fill: #0f172a; }
+.op-spinner { -fx-background-radius: 10; -fx-border-radius: 10; }
+
+/* Primary button */
+.op-btn-primary {
+  -fx-background-color: #2563eb;
+  -fx-text-fill: white;
+  -fx-font-weight: 900;
+  -fx-background-radius: 12;
+  -fx-padding: 10 14;
+  -fx-cursor: hand;
+}
+.op-btn-primary:hover { -fx-background-color: #1d4ed8; }
+
+/* Table */
+.op-table {
+  -fx-background-color: transparent;
+  -fx-border-color: #e2e8f0;
+  -fx-border-radius: 10;
+  -fx-background-radius: 10;
+}
+.table-view .column-header-background {
+  -fx-background-color: #f8fafc;
+  -fx-background-radius: 10 10 0 0;
+}
+.table-view .column-header, .table-view .filler {
+  -fx-background-color: transparent;
+}
+.table-view .table-row-cell {
+  -fx-background-color: white;
+  -fx-border-color: transparent transparent #eef2f7 transparent;
+}
+.table-view .table-row-cell:filled:selected {
+  -fx-background-color: #eff6ff;
+}
+
+
+/* Hours rows (built in code) */
+.op-hours-row {
+  -fx-background-color: #f8fafc;
+  -fx-border-color: #e2e8f0;
+  -fx-background-radius: 12;
+  -fx-border-radius: 12;
+  -fx-padding: 12;
+}
+.op-day { -fx-font-weight: 800; -fx-text-fill: #0f172a; }
+.op-muted { -fx-text-fill: #64748b; }
+
+/* Holiday cards (built in code) */
+.op-holiday-card {
+  -fx-background-color: #ffffff;
+  -fx-border-color: #e2e8f0;
+  -fx-background-radius: 12;
+  -fx-border-radius: 12;
+  -fx-padding: 12;
+}
+.op-badge {
+  -fx-padding: 4 10;
+  -fx-background-radius: 999;
+  -fx-font-size: 11px;
+  -fx-font-weight: 900;
+}
+.op-badge-closed { -fx-background-color: #fee2e2; -fx-text-fill: #b91c1c; }
+.op-badge-open { -fx-background-color: #dcfce7; -fx-text-fill: #166534; }
+
+/* Action buttons inside table */
+.op-row-btn {
+  -fx-background-radius: 10;
+  -fx-padding: 6 10;
+  -fx-font-weight: 800;
+  -fx-cursor: hand;
+}
+.op-row-edit { -fx-background-color: #2563eb; -fx-text-fill: white; }
+.op-row-edit:hover { -fx-background-color: #1d4ed8; }
+
+.op-row-del {
+  -fx-background-color: transparent;
+  -fx-text-fill: #ef4444;
+  -fx-border-color: #ef4444;
+  -fx-border-radius: 10;
+}
+.op-row-del:hover { -fx-background-color: rgba(239,68,68,0.10); }
+
+
+/* ================= ScrollBar ================= */
+
+.scroll-bar {
+    -fx-background-color: rgb(0, 0, 0);;
+}
+
+/* המסילה (הרקע) */
+.scroll-bar:vertical .track,
+.scroll-bar:horizontal .track {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+/* הידית (החלק שנגרר) */
+.scroll-bar:vertical .thumb,
+.scroll-bar:horizontal .thumb {
+    -fx-background-color: rgba(196, 196, 196, 0.6); /* slate */
+    -fx-background-radius: 15px;
+}
+
+/* hover */
+.scroll-bar:vertical .thumb:hover,
+.scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: rgba(37, 99, 235, 0.8); /* כחול */
+}
+
+/* לחיצה */
+.scroll-bar:vertical .thumb:pressed,
+.scroll-bar:horizontal .thumb:pressed {
+    -fx-background-color: #2563eb;
+}
+
+/* גודל ברירת מחדל */
+.scroll-bar:vertical {
+    -fx-pref-width: 12px;
+}
+
+.scroll-bar:horizontal {
+    -fx-pref-height: 12px;
+}
+
+/* ביטול חיצים */
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-prfer-width: 5px;
+}
+
+
+/* ---------- DatePicker (field) ---------- */
+
+
+.date-picker:focused,
+.date-picker:showing {
+    -fx-border-color: #2563eb;
+    -fx-border-width: 1.5px;
+}
+
+/* הטקסט בתוך השדה */
+.date-picker .text-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 10 12;
+    -fx-font-size: 14px;
+    -fx-text-fill: #0f172a;
+    -fx-prompt-text-fill: #94a3b8;
+}
+
+/* כפתור הקלנדר בצד */
+.date-picker .arrow-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0 12px 12px 0;
+    -fx-padding: 0 12 0 12;
+    -fx-cursor: hand;
+}
+
+.date-picker .arrow-button:hover {
+    -fx-background-color: rgba(37, 99, 235, 0.10);
+}
+
+.date-picker .arrow-button:pressed {
+    -fx-background-color: rgba(37, 99, 235, 0.18);
+}
+
+/* החץ עצמו */
+.date-picker .arrow {
+    -fx-background-color: #64748b;
+}
+
+/* ---------- Popup calendar ---------- */
+.date-picker-popup {
+    -fx-background-color: white;
+    -fx-background-radius: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.25), 18, 0.2, 0, 10);
+    -fx-padding: 10;
+}
+
+/* header למעלה (חודש/שנה) */
+.date-picker-popup .month-year-pane {
+    -fx-background-color: transparent;
+    -fx-padding: 8 10 10 10;
+}
+
+.date-picker-popup .month-year-pane .label {
+    -fx-text-fill: #0f172a;
+    -fx-font-weight: 700;
+}
+
+/* חצים של מעבר חודש */
+.date-picker-popup .spinner .button {
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+    -fx-background-radius: 10px;
+}
+.date-picker-popup .spinner .button:hover {
+    -fx-background-color: rgba(37, 99, 235, 0.10);
+}
+
+/* ימי השבוע */
+.date-picker-popup .day-name-cell {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+/* תאים רגילים */
+.date-picker-popup .day-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #0f172a;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+}
+
+/* hover על יום */
+.date-picker-popup .day-cell:hover {
+    -fx-background-color: rgba(37, 99, 235, 0.10);
+}
+
+/* היום שנבחר */
+.date-picker-popup .day-cell:selected {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: white;
+}
+
+/* היום של היום (לא נבחר) */
+.date-picker-popup .day-cell:today {
+    -fx-border-color: rgba(37, 99, 235, 0.45);
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+}
+
+/* ימים מחוץ לחודש */
+.date-picker-popup .day-cell:disabled {
+    -fx-text-fill: #cbd5e1;
+    -fx-opacity: 1.0;
+}

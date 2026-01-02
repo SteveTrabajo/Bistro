@@ -44,7 +44,7 @@
                                 </padding>
                                 <children>
                                     <Label styleClass="table-small" text="Your Table Number" />
-                                    <Label fx:id="tableNumberLabel" styleClass="table-number" text="22" />
+                                    <Label fx:id="lblTableNumber" styleClass="table-number" text="22" />
                                     <Label styleClass="table-small" text="Please proceed to your table" />
                                 </children>
                             </VBox>
@@ -74,7 +74,7 @@
                                     <HBox>
                                         <children>
                                             <Label styleClass="details-key" text="Status: " />
-                                            <Label fx:id="lblStat" styleClass="details-ok" text="Checked In" />
+                                            <Label styleClass="details-ok" text="Checked In" />
                                         </children>
                                     </HBox>
                                 </children>

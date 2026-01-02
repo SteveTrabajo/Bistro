@@ -1,0 +1,127 @@
+.root { -fx-font-family: "Segoe UI", "Arial"; }
+
+.wl-root { -fx-background-color: #f4f6f9; }
+
+.wl-title { -fx-font-size: 34px; -fx-font-weight: 800; -fx-text-fill: #0f172a; }
+.wl-subtitle { -fx-font-size: 14px; -fx-text-fill: #64748b; }
+
+/* Stats */
+.wl-stat {
+  -fx-background-color: white;
+  -fx-background-radius: 12;
+  -fx-padding: 14;
+  -fx-min-height: 74;
+  -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.10), 12, 0.10, 0, 6);
+  -fx-border-width: 0 0 0 4;
+  -fx-border-radius: 12;
+}
+.wl-left-amber  { -fx-border-color: #d08a00; }
+.wl-left-orange { -fx-border-color: #f97316; }
+.wl-left-blue   { -fx-border-color: #2563eb; }
+.wl-left-purple { -fx-border-color: #7c3aed; }
+
+.wl-stat-label { -fx-font-size: 12px; -fx-text-fill: #64748b; }
+.wl-stat-value { -fx-font-size: 22px; -fx-font-weight: 800; -fx-text-fill: #0f172a; }
+
+/* Search card */
+.wl-search-card {
+  -fx-background-color: white;
+  -fx-background-radius: 12;
+  -fx-padding: 14;
+  -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.10), 12, 0.10, 0, 6);
+}
+.wl-search-field {
+  -fx-background-radius: 10;
+  -fx-border-radius: 10;
+  -fx-border-color: #cbd5e1;
+  -fx-background-color: #ffffff;
+  -fx-padding: 10 12;
+  -fx-prompt-text-fill: #94a3b8;
+}
+.wl-add-btn {
+  -fx-background-color: #d08a00;
+  -fx-text-fill: white;
+  -fx-font-weight: 800;
+  -fx-background-radius: 10;
+  -fx-padding: 10 16;
+  -fx-cursor: hand;
+}
+.wl-add-btn:hover { -fx-background-color: #b97700; }
+
+/* Main card */
+.wl-card {
+  -fx-background-color: white;
+  -fx-background-radius: 12;
+  -fx-padding: 16;
+  -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.10), 14, 0.10, 0, 6);
+}
+.wl-card-title { -fx-font-size: 18px; -fx-font-weight: 800; -fx-text-fill: #0f172a; }
+
+/* Table */
+.wl-table {
+  -fx-background-color: transparent;
+  -fx-border-color: #e2e8f0;
+  -fx-border-radius: 10;
+  -fx-background-radius: 10;
+}
+.table-view .column-header-background {
+  -fx-background-color: #f8fafc;
+  -fx-background-radius: 10 10 0 0;
+}
+.table-view .column-header, .table-view .filler {
+  -fx-background-color: transparent;
+}
+.table-view .table-row-cell {
+  -fx-background-color: white;
+  -fx-border-color: transparent transparent #eef2f7 transparent;
+}
+.table-view .table-row-cell:filled:selected {
+  -fx-background-color: #eff6ff;
+}
+
+/* Chips */
+.wl-chip {
+  -fx-padding: 4 10;
+  -fx-background-radius: 999;
+  -fx-font-size: 11px;
+  -fx-font-weight: 800;
+}
+.wl-chip-member {
+  -fx-background-color: #dcfce7;
+  -fx-text-fill: #166534;
+}
+.wl-chip-waiting {
+  -fx-background-color: #fef3c7;
+  -fx-text-fill: #92400e;
+  -fx-border-color: #f59e0b;
+  -fx-border-radius: 999;
+}
+.wl-chip-called {
+  -fx-background-color: #ffedd5;
+  -fx-text-fill: #9a3412;
+  -fx-border-color: #fb923c;
+  -fx-border-radius: 999;
+}
+
+/* Action buttons in table */
+.wl-btn {
+  -fx-background-radius: 10;
+  -fx-padding: 6 10;
+  -fx-font-weight: 800;
+  -fx-cursor: hand;
+}
+.wl-btn-call { -fx-background-color: #ea580c; -fx-text-fill: white; }
+.wl-btn-call:hover { -fx-background-color: #c2410c; }
+
+.wl-btn-seat { -fx-background-color: #16a34a; -fx-text-fill: white; }
+.wl-btn-seat:hover { -fx-background-color: #15803d; }
+
+.wl-btn-remove {
+  -fx-background-color: transparent;
+  -fx-text-fill: #ef4444;
+  -fx-border-color: #ef4444;
+  -fx-border-radius: 10;
+}
+.wl-btn-remove:hover {
+  -fx-background-color: rgba(239, 68, 68, 0.10);
+}

@@ -39,7 +39,7 @@ public class ServerConnectionFrame {
 	
 	//****************************** FXML Methods *****************************
 	
-	/*
+	/**
 	 * Handles the connect button click event.
 	 * Validates the IP address and port inputs.
 	 * If valid, attempts to create a BistroClient instance and connect to the server.
@@ -76,7 +76,7 @@ public class ServerConnectionFrame {
 		}
 	}
 	
-	/*
+	/**
 	 * Handles the exit hyperlink click event.
 	 * Safely exits the Bistro Client application.
 	 * 
@@ -89,7 +89,7 @@ public class ServerConnectionFrame {
 	}
 	
 	
-	/*
+	/**
 	 * Method to start the Server Connection screen.
 	 * 
 	 * @param primaryStage The primary stage for the application.
@@ -97,7 +97,7 @@ public class ServerConnectionFrame {
 	public void start(Stage primaryStage) {
 		Parent root = null;
 		try {
-			root = FXMLLoader.load(getClass().getResource("/gui/fxml/ServerConnectionFrame"));
+			root = FXMLLoader.load(getClass().getResource("/gui/fxml/ServerConnectionFrame.fxml"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

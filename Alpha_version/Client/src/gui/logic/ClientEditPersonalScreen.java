@@ -8,8 +8,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import logic.BistroClientGUI;
 
-public class ClientEditPersonalScreen {
+/**
+ * This class represents the controller for the Client Edit Personal screen in
+ * the BistroClientGUI.
+ */
 
+public class ClientEditPersonalScreen {
+	// ****************************** FXML Elements ******************************
 	@FXML
 	private Button btnBack;
 	@FXML
@@ -23,13 +28,48 @@ public class ClientEditPersonalScreen {
 	@FXML
 	private TextField txtEmailAddress;
 	@FXML
-	private TextField txtCity;
-	@FXML
-	private TextField txtStreet;
+	private TextField txtAddress;
 	@FXML
 	private Label lblMemberID;
 	@FXML
 	private Label lblError;
+	
+	// ****************************** Instance Methods ******************************
+	
+	/**
+	 * Initializes the Client Edit Personal screen.
+	 */
+	@FXML
+	public void initialize() {
+		// Load initial data
+		lblMemberID.setText(String.valueOf(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getUserId()));
+		txtFirstName.setText(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getFirstName());
+		txtLastName.setText(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getLastName());
+		txtPhoneNumber.setText(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getPhoneNumber());
+		txtEmailAddress.setText(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getEmail());
+		txtAddress.setText(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getAddress());
+		lblError.setText("");
+		//TODO: change input restriction to use the input check class on common folder
+		// Added: Restriction for First Name - only letters allowed during typing
+		txtFirstName.textProperty().addListener((observable, oldValue, newValue) -> {
+			if (!newValue.matches("[a-zA-Zא-ת]*")) {
+				txtFirstName.setText(oldValue);
+			}
+		});
+		
+		// Added: Restriction for Phone - only digits and max 10 characters
+		txtPhoneNumber.textProperty().addListener((observable, oldValue, newValue) -> {
+			if (!newValue.matches("\\d*") || newValue.length() > 10) {
+				txtPhoneNumber.setText(oldValue);
+			}
+		});
+	}
+	
+	/**
+	 * Handles the Back button click event.
+	 *
+	 * @param event The event triggered by clicking the Back button.
+	 */
 	@FXML
 	public void btnBack(ActionEvent event) {
 		try {
@@ -38,18 +78,22 @@ public class ClientEditPersonalScreen {
 			e.printStackTrace();
 		}
 	}
-
+	
+	
+	/**
+	 * Handles the Save button click event.
+	 *
+	 * @param event The event triggered by clicking the Save button.
+	 */
 	@FXML
 	public void btnSave(ActionEvent event) {
 		String firstName = txtFirstName.getText().trim();
 		String lastName = txtLastName.getText().trim();
 		String phoneNumber = txtPhoneNumber.getText().trim();
 		String email = txtEmailAddress.getText().trim();
-		String city = txtCity.getText().trim();
-		String street = txtStreet.getText().trim();
-		String address = street + "_" + city;
+		String address = txtAddress.getText().trim();
 		lblError.setText("");
-
+		//TODO: change input check to use the input check class on common folder
 		// Validations
 		if (!firstName.matches("[a-zA-Zא-ת]+")) {
 			lblError.setText("Error: First name must contain only letters");
@@ -102,35 +146,5 @@ public class ClientEditPersonalScreen {
 
 
 
-
-	@FXML
-	public void initialize() {
-		// Load initial data
-		lblMemberID.setText(String.valueOf(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getUserId()));
-		txtFirstName.setText(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getFirstName());
-		txtLastName.setText(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getLastName());
-		txtPhoneNumber.setText(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getPhoneNumber());
-		txtEmailAddress.setText(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getEmail());
-		String[] addressParts = BistroClientGUI.client.getUserCTRL().getLoggedInUser().getAddress().split("_");
-		if (addressParts.length == 2) {
-			txtStreet.setText(addressParts[0]);
-			txtCity.setText(addressParts[1]);
-		}
-		lblError.setText("");
-
-		// Added: Restriction for First Name - only letters allowed during typing
-		txtFirstName.textProperty().addListener((observable, oldValue, newValue) -> {
-			if (!newValue.matches("[a-zA-Zא-ת]*")) {
-				txtFirstName.setText(oldValue);
-			}
-		});
-
-		// Added: Restriction for Phone - only digits and max 10 characters
-		txtPhoneNumber.textProperty().addListener((observable, oldValue, newValue) -> {
-			if (!newValue.matches("\\d*") || newValue.length() > 10) {
-				txtPhoneNumber.setText(oldValue);
-			}
-		});
-	}
 	
 }

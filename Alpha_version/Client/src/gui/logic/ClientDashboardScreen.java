@@ -63,7 +63,7 @@ public class ClientDashboardScreen {
 	
 	// ******************************** FXML Methods ***********************************
 
-	/*
+	/**
 	 * Method to initialize the Client Dashboard screen based on the logged-in user
 	 * type.
 	 */
@@ -87,7 +87,7 @@ public class ClientDashboardScreen {
 		}
 	}
 	
-	/*
+	/**
 	 * Method to edit the Join Waiting List button text based on user's waiting list status.
 	 */
 	private void editJoinWaitingListButton() {
@@ -100,7 +100,7 @@ public class ClientDashboardScreen {
 		}
 	}
 	
-	/*
+	/**
 	 * Method to set up the dashboard for a guest user.
 	 */
 	@FXML
@@ -119,7 +119,7 @@ public class ClientDashboardScreen {
 		becomeMemberVbox.setManaged(true);
 	}
 
-	/*
+	/**
 	 * Method to set up the dashboard for a member user.
 	 * 
 	 * @param member The member user whose details are to be displayed.
@@ -140,7 +140,7 @@ public class ClientDashboardScreen {
 		becomeMemberVbox.setManaged(false);
 	}
 
-	/*
+	/**
 	 * Method to handle the action of creating a new reservation.
 	 * 
 	 * @param event The event that triggered this action.
@@ -150,7 +150,7 @@ public class ClientDashboardScreen {
 		BistroClientGUI.switchScreen(event, "clientNewReservationScreen", "Failed to load Client New Reservation Screen.");
 	}
 
-	/*
+	/**
 	 * Method to handle the action of joining the waiting list.
 	 * 
 	 * @param event The event that triggered this action.
@@ -170,7 +170,7 @@ public class ClientDashboardScreen {
 		BistroClientGUI.switchScreen(event, fxmlFileName, "Failed to load Client Join Waiting List Screen.");
 	}
 
-	/*
+	/**
 	 * Method to handle the action of checking in for a table.
 	 * 
 	 * @param event The event that triggered this action.
@@ -180,7 +180,7 @@ public class ClientDashboardScreen {
 		BistroClientGUI.switchScreen(event, "clientCheckInTableScreen", "Failed to load Client Check-In For Table Screen.");
 	}
 
-	/*
+	/**
 	 * Method to handle the action of managing bookings.
 	 * 
 	 * @param event The event that triggered this action.
@@ -190,7 +190,7 @@ public class ClientDashboardScreen {
 		BistroClientGUI.switchScreen(event, "clientManageBookingScreen", "Failed to load Client Manage Booking Screen.");
 	}
 
-	/*
+	/**
 	 * Method to handle the action of paying a bill.
 	 * 
 	 * @param event The event that triggered this action.
@@ -200,7 +200,7 @@ public class ClientDashboardScreen {
 		BistroClientGUI.switchScreen(event, "clientPayBillScreen", "Failed to load Client Pay Bill Screen.");
 	}
 
-	/*
+	/**
 	 * Method to handle the action of editing personal details.
 	 * 
 	 * @param event The event that triggered this action.
@@ -210,7 +210,7 @@ public class ClientDashboardScreen {
 		BistroClientGUI.switchScreen(event, "clientEditPersonalDetailsScreen", "Failed to load Client Edit Personal Details Screen.");
 	}
 
-	/*
+	/**
 	 * Method to handle the action of signing out.
 	 * 
 	 * @param event The event that triggered this action.
@@ -225,7 +225,7 @@ public class ClientDashboardScreen {
 		}
 	}
 	
-	/*
+	/**
 	 * Method to display an error message in a label with a specified color.
 	 * 
 	 * @param lbl The label to display the message.

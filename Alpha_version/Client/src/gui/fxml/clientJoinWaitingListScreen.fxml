@@ -85,6 +85,7 @@
                            <String fx:value="btn-primary" />
                            <String fx:value="btn-wide" />
                         </styleClass></Button>
+                     <Label fx:id="lblError" />
 
                             <!-- Footer help box -->
                             <StackPane styleClass="help-box">

@@ -40,7 +40,7 @@ public final class UserSubject {
 		//Request: "Member.updateInfo"
 		router.on("member", "updateInfo", (msg, client) -> {
 			User updatedUser = (User) msg.getData();
-			boolean success = userService.updateUserInfo(updatedUser);
+			boolean success = userService.updateMebmerInfo(updatedUser);
 			if (success) {
 				logger.log("[INFO] Client " + client + " requested to update user info: successful.");
 				client.sendToClient(new Message(Api.REPLY_MEMBER_UPDATE_INFO_OK, null));

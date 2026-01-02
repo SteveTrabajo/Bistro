@@ -60,7 +60,7 @@
                             </HBox>
                      <ImageView fitHeight="79.0" fitWidth="79.0">
                         <image>
-                           <Image url="@../../resources/icons/getTableIcon.png" />
+                           <Image url="@../../resources/icons/getTableIconBlue.png" />
                         </image>
                      </ImageView>
 
@@ -78,6 +78,7 @@
                                     <Label styleClass="field-label" text="Confirmation Code" />
 
                                     <TextField fx:id="txtConfirmCode" promptText="E.G., R-1234" styleClass="field-input" />
+                           <Label fx:id="lblError" />
 
                                     <Button fx:id="btnCheckIn" onAction="#btnCheckIn" text="Check In">
                               <styleClass>

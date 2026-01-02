@@ -18,7 +18,7 @@ import javafx.event.Event;
 import entities.*;
 import enums.UserType;
 
-/*
+/**
  * This class represents the client login screen controller.
  */
 public class ClientLoginScreen {
@@ -55,7 +55,27 @@ public class ClientLoginScreen {
 
 	// ****************************** FXML Methods *****************************
 
-	/*
+	/**
+	 * Initializes the client login screen. Sets up input validation for the member ID text field.
+	 */
+	@FXML
+	public void initialize() {
+		txtMemberID.setTextFormatter(new TextFormatter<String>(change -> {
+			String newText = change.getControlNewText();
+			// allow empty so backspace/delete works
+			if (newText.isEmpty())
+				return change;
+			// digits only, up to 6
+			if (!InputCheck.isDigitsUpTo(newText, 6))
+				return null;
+			// enforce "no leading 0" while typing
+			if (newText.length() >= 1 && newText.charAt(0) == '0')
+				return null;
+			return change;
+		}));
+	}
+	
+	/**
 	 * Handles the guest login button click event. Validates the phone number and
 	 * email address inputs. If valid, attempts to log in the guest user and switch
 	 * to the client dashboard screen. Displays error messages for invalid inputs or
@@ -63,28 +83,6 @@ public class ClientLoginScreen {
 	 * 
 	 * @param event The event triggered by clicking the guest login button.
 	 */
-
-	@FXML
-	public void initialize() {
-		txtMemberID.setTextFormatter(new TextFormatter<String>(change -> {
-			String newText = change.getControlNewText();
-
-			// allow empty so backspace/delete works
-			if (newText.isEmpty())
-				return change;
-
-			// digits only, up to 6
-			if (!InputCheck.isDigitsUpTo(newText, 6))
-				return null;
-
-			// enforce "no leading 0" while typing
-			if (newText.length() >= 1 && newText.charAt(0) == '0')
-				return null;
-
-			return change;
-		}));
-	}
-
 	@FXML
 	public void btnGuest(Event event) {
 		String phoneNumber = txtPhoneNumber.getText();
@@ -96,7 +94,7 @@ public class ClientLoginScreen {
 			userLoginData = new HashMap<String, Object>();
 			userLoginData.put("userType", (UserType.GUEST));
 			userLoginData.put("phoneNumber", (Object) phoneNumber);
-			userLoginData.put("emailAddress", (Object) emailAddress);
+			userLoginData.put("email", (Object) emailAddress);
 			BistroClientGUI.client.getUserCTRL().signInUser(userLoginData);
 			if (BistroClientGUI.client.getUserCTRL().isUserLoggedIn()) {
 				BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
@@ -107,7 +105,8 @@ public class ClientLoginScreen {
 		}
 	}
 
-	/*
+	
+	/**
 	 * Handles the member sign-in button click event. Validates the member ID input.
 	 * If valid, attempts to log in the member user and switch to the client
 	 * dashboard screen. Displays error messages for invalid inputs or login
@@ -115,7 +114,6 @@ public class ClientLoginScreen {
 	 * 
 	 * @param event The event triggered by clicking the member sign-in button.
 	 */
-
 	@FXML
 	public void btnSignIn(Event event) {
 		String memberCodeText = txtMemberID.getText();
@@ -141,7 +139,7 @@ public class ClientLoginScreen {
 		}
 	}
 
-	/*
+	/**
 	 * Handles the QR code scanning button click event. (Functionality to be
 	 * implemented)
 	 * 
@@ -153,7 +151,7 @@ public class ClientLoginScreen {
 
 	}
 
-	/*
+	/**
 	 * Handles the employee login hyperlink click event. Switches to the employee
 	 * login screen.
 	 * 

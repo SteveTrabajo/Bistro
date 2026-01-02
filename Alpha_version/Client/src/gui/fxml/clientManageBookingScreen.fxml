@@ -76,7 +76,7 @@
 																<String fx:value="confirm-input" />
 															</styleClass>
 														</TextField>
-														<Button id="btnCheck" fx:id="btnCheck" mnemonicParsing="false" prefHeight="42.0" prefWidth="79.0" styleClass="btn-primary" text="Check" />
+														<Button fx:id="btnCheck" onAction="#btnCheck" mnemonicParsing="false" prefHeight="42.0" prefWidth="79.0" styleClass="btn-primary" text="Check" />
 													</children>
 												</HBox>
 												<Button id="btnCancel" fx:id="btnCancel" disable="true" mnemonicParsing="false" prefHeight="25.0" prefWidth="334.0" text="Cancel Reservation">

@@ -1,0 +1,145 @@
+/* =========================
+   Global
+========================= */
+.root {
+    -fx-font-family: "Segoe UI", "Arial";
+    -fx-font-smoothing-type: lcd;
+}
+
+/* =========================
+   Main content
+========================= */
+.mgmt-content-root {
+    -fx-background-color: #e9edf2;
+}
+
+/* =========================
+   Sidebar
+========================= */
+.mgmt-sidebar {
+    -fx-background-color: radial-gradient(
+        center 50% 52.5%,
+        radius 100%,
+        #0E355C 0%,
+        #100E48 90%
+    );
+    -fx-border-color: rgba(255,255,255,0.10);
+    -fx-border-width: 0 1 0 0;
+}
+
+/* Header area */
+.mgmt-sidebar-header {
+    -fx-background-color: transparent;
+}
+
+.mgmt-sidebar-subtitle {
+    -fx-text-fill: rgba(255,255,255,0.78);
+    -fx-font-size: 13px;
+    -fx-padding: 4 0 0 0;
+}
+
+.mgmt-sidebar-user {
+    -fx-text-fill: rgba(255,255,255,0.60);
+    -fx-font-size: 12px;
+    -fx-padding: 2 0 0 0;
+}
+
+/* Make separators visible on dark background */
+.separator .line {
+    -fx-border-color: rgba(255,255,255,0.22);
+    -fx-border-width: 1 0 0 0;
+}
+
+.mgmt-role-chip { 
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-padding: 4 12;
+    -fx-background-radius: 999;
+}
+.mgmt-chip-manager { -fx-background-color: #7c3aed; }
+.mgmt-chip-employee{ -fx-background-color: #16a34a; }
+
+
+/* =========================
+   Menu buttons
+========================= */
+.mgmt-sidebar-menu {
+    -fx-background-color: transparent;
+}
+
+.mgmt-menu-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(255,255,255,0.92);
+    -fx-font-size: 14px;
+
+    -fx-padding: 12 14;
+    -fx-alignment: CENTER_LEFT;
+    -fx-graphic-text-gap: 10;
+
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+
+/* hover/pressed */
+.mgmt-menu-button:hover {
+    -fx-background-color: rgba(255,255,255,0.10);
+}
+
+.mgmt-menu-button:pressed {
+    -fx-background-color: rgba(255,255,255,0.16);
+}
+
+/* Optional: "active" state */
+.mgmt-menu-button-active {
+    -fx-background-color: rgba(255,255,255,0.14);
+    -fx-border-color: rgba(255,255,255,0.25);
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+}
+
+/* Make button graphics (ImageView) look consistent */
+.mgmt-menu-button .image-view {
+    -fx-opacity: 0.95;
+}
+
+/* If some buttons are disabled */
+.mgmt-menu-button:disabled {
+    -fx-opacity: 0.45;
+}
+
+/* =========================
+   Footer / Secondary buttons
+========================= */
+.mgmt-sidebar-footer {
+    -fx-background-color: transparent;
+}
+
+.mgmt-secondary-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(255,255,255,0.78);
+    -fx-font-size: 13px;
+
+    -fx-padding: 10 12;
+    -fx-alignment: CENTER_LEFT;
+    -fx-graphic-text-gap: 10;
+
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+
+.mgmt-secondary-button:hover {
+    -fx-background-color: rgba(255,255,255,0.08);
+    -fx-text-fill: rgba(255,255,255,0.92);
+}
+
+.mgmt-secondary-button:pressed {
+    -fx-background-color: rgba(255,255,255,0.12);
+}
+
+/* Optional: make logout slightly red on hover (נעים אבל לא אגרסיבי) */
+#btnLogout:hover {
+    -fx-background-color: rgba(239, 68, 68, 0.18);
+}
+
+

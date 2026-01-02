@@ -64,7 +64,7 @@
                         </HBox>
 
                         <!-- Member ID panel (not a TextField) -->
-                        <VBox spacing="6" styleClass="memberid-panel">
+                        <VBox prefHeight="104.0" prefWidth="486.0" spacing="6" styleClass="memberid-panel">
                             <Label styleClass="memberid-caption" text="Member ID" />
                             <Label fx:id="lblMemberID" styleClass="memberid-value" />
                         </VBox>
@@ -118,17 +118,9 @@
                            </graphic></Label>
                             </HBox>
                             <TextField fx:id="txtPhoneNumber" styleClass="field" />
-                        </VBox>
 
-                        <!-- City/Zip -->
-                        <GridPane hgap="18" vgap="14">
-                            <columnConstraints>
-                                <ColumnConstraints hgrow="ALWAYS" percentWidth="50" />
-                                <ColumnConstraints hgrow="ALWAYS" percentWidth="50" />
-                            </columnConstraints>
-
-                            <VBox spacing="6" GridPane.columnIndex="0">
-                                <Label styleClass="field-label" text="City">
+                            <VBox spacing="6">
+                                <Label styleClass="field-label" text="Address">
                            <graphic>
                               <ImageView fitHeight="18.0" fitWidth="18.0">
                                  <image>
@@ -136,17 +128,9 @@
                                  </image>
                               </ImageView>
                            </graphic></Label>
-                                <TextField fx:id="txtCity" styleClass="field" />
+                                <TextField fx:id="txtAddress" prefHeight="51.0" prefWidth="922.0" styleClass="field" />
                             </VBox>
-
-                            <VBox spacing="6" GridPane.columnIndex="1">
-                                <Label styleClass="field-label" text="Street" />
-                                <TextField fx:id="txtStreet" styleClass="field" />
-                            </VBox>
-                     <rowConstraints>
-                        <RowConstraints />
-                     </rowConstraints>
-                        </GridPane>
+                        </VBox>
 
                         <!-- Buttons row: Save centered wide, Cancel at right -->
                         <HBox alignment="CENTER" spacing="18" styleClass="buttons-row">
@@ -155,10 +139,10 @@
                            <String fx:value="btn-primary" />
                            <String fx:value="btn-wide" />
                         </styleClass></Button>
-                            <Button fx:id="btnCancel" onAction="#btnCancel" styleClass="btn-outline" text="Cancel" />
                         </HBox>
 
                     </VBox>
+               <Label fx:id="lblError" />
                <BorderPane prefHeight="16.0" prefWidth="1218.0">
                   <left>
                      <HBox prefHeight="33.0" prefWidth="457.0" BorderPane.alignment="CENTER">

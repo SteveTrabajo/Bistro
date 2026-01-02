@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefHeight="749.0" prefWidth="581.0" spacing="14" styleClass="cm-root" stylesheets="@CustomersPanelStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bistro.app.controllers.CustomerManagementController">
+
+    <padding><Insets bottom="18" left="18" right="18" top="18" /></padding>
+
+    <!-- Header -->
+    <VBox spacing="4">
+        <Label styleClass="cm-title" text="Customers" />
+        <Label styleClass="cm-subtitle" text="View and manage all customers" />
+    </VBox>
+
+    <!-- Stats -->
+    <HBox spacing="14">
+        <HBox styleClass="cm-stat cm-left-blue" HBox.hgrow="ALWAYS">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label styleClass="cm-stat-label" text="Total Customers" />
+                <Label fx:id="totalCustomersLabel" styleClass="cm-stat-value" text="0" />
+            <styleClass>
+               <String fx:value="cm-stat" />
+               <String fx:value="cm-left-blue" />
+            </styleClass>
+            </VBox>
+        </HBox>
+
+        <HBox styleClass="cm-stat cm-left-green" HBox.hgrow="ALWAYS">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label styleClass="cm-stat-label" text="Members" />
+                <Label fx:id="membersLabel" styleClass="cm-stat-value" text="0" />
+            <styleClass>
+               <String fx:value="cm-stat" />
+               <String fx:value="cm-left-green" />
+            </styleClass>
+            </VBox>
+        </HBox>
+
+        <HBox styleClass="cm-stat cm-left-orange" HBox.hgrow="ALWAYS">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label styleClass="cm-stat-label" text="Walk-in" />
+                <Label fx:id="walkinsLabel" styleClass="cm-stat-value" text="0" />
+            <styleClass>
+               <String fx:value="cm-stat" />
+               <String fx:value="cm-left-orange" />
+            </styleClass>
+            </VBox>
+        </HBox>
+    </HBox>
+
+    <!-- Search + filter -->
+    <HBox alignment="CENTER_LEFT" spacing="12" styleClass="cm-search-card">
+        <TextField fx:id="searchField" promptText="Search by name, email, phone, or member code..." styleClass="cm-search-field" HBox.hgrow="ALWAYS" />
+    </HBox>
+
+    <!-- Table card -->
+    <VBox spacing="10" styleClass="cm-card" VBox.vgrow="ALWAYS">
+        <Label fx:id="directoryTitleLabel" styleClass="cm-card-title" text="Customer Directory (0)" />
+
+        <TableView fx:id="customersTable" styleClass="cm-table" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colName" text="Name" />
+                <TableColumn fx:id="colEmail" text="Email" />
+                <TableColumn fx:id="colPhone" text="Phone" />
+                <TableColumn fx:id="colMemberCode" prefWidth="93.0" text="Member Code" />
+                <TableColumn fx:id="colType" prefWidth="67.0" text="Type" />
+                <TableColumn fx:id="colActions" text="Actions" />
+            </columns>
+        </TableView>
+    </VBox>
+
+</VBox>

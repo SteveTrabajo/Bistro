@@ -358,9 +358,44 @@ public class BistroDataBase_Controller {
 	
 	
     
-    public boolean updateUserInfo(User updatedUser) {
-		// TODO Auto-generated method stub
-		return false;
+    public boolean setUpdatedMemberData(User updatedUser) 
+    {
+    	if( updatedUser == null  || updatedUser.getUserType() == UserType.GUEST)
+    	{
+    		return false;
+    	}
+		
+    	final String qry = "UPDATE users " +
+    						"SET phoneNumber = ?, email = ? " +
+    						"WHERE user_id = ?";
+    	
+    	Connection conn = null;
+    	
+    	try {
+			conn = borrow();
+			
+			try(PreparedStatement ps = conn.prepareStatement(qry))
+			{
+				ps.setString(1, updatedUser.getPhoneNumber());
+				ps.setString(2, updatedUser.getEmail());
+				ps.setInt(3, updatedUser.getUserId());
+				
+				int success = ps.executeUpdate();
+				
+				return success == 1;			//when success get 1 the updated worked and changed the row well in table
+			}
+			
+			
+    	}
+    	catch (SQLException ex) {
+			logger.log("[ERROR] SQLException in setUpdatedMemberData: " + ex.getMessage());
+			ex.printStackTrace();
+			return false;
+		}
+    	finally{
+    		release(conn);
+    	}
+  	
 	}
     
     // ****************************** Order Operations ******************************	
@@ -409,11 +444,45 @@ public class BistroDataBase_Controller {
 		return null;
 	}
 	
+
 	
 	public boolean checkOrderExistsInDB(String confirmationCode) {
-		// TODO Auto-generated method stub
-		return false;
+		if( confirmationCode == null  || confirmationCode.isEmpty())
+    	{
+    		return false;
+    	}
+		
+    	final String qry =   "SELECT 1 "
+    	          			+ "FROM orders "
+    	          			+ "WHERE confirmation_code = ?";
+    	
+    	Connection conn = null;
+    	
+    	try {
+			conn = borrow();
+			
+			try(PreparedStatement ps = conn.prepareStatement(qry))
+			{
+				ps.setString(1, confirmationCode); 
+					
+				try(ResultSet rs = ps.executeQuery())
+				{
+					return rs.next();			// rs.next() returns true if at least one matching order exists
+				}
+			}
+			
+    	}
+    	catch (SQLException ex) {
+			logger.log("[ERROR] SQLException in checkOrderExistsInDB: " + ex.getMessage());
+			ex.printStackTrace();
+			return false;
+		}
+    	finally{
+    		release(conn);
+    	}
+  	
 	}
+	
 	
 	
 	// ********************Waiting List Operations ******************************
@@ -437,10 +506,57 @@ public class BistroDataBase_Controller {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	
 
 	public int getTableNumberByConfirmationCode(String confirmationCode) {
-		// TODO Auto-generated method stub
-		return 0;
+		if(confirmationCode == null || confirmationCode.isEmpty())
+		{
+			return -1;
+		}
+		
+		final String qry =  "SELECT ts.tableNum "
+						+ "FROM orders o "
+						+ "JOIN table_sessions ts "
+						+ "ON o.order_number = ts.order_number "
+						+ "WHERE o.confirmation_code = ? "
+						+ "AND ts.left_at IS NULL";			// need to see if remove this row.
+		
+		Connection conn = null;
+		
+		try {
+			conn = borrow();
+			
+			try(PreparedStatement ps = conn.prepareStatement(qry))
+			{
+				ps.setString(1, confirmationCode); 				//change id db table orders confirmationCode from int to varchar
+				
+				try(ResultSet rs = ps.executeQuery())
+				{
+					if(!rs.next())
+					{
+						return -1; 			// where there is no table that got on qry
+					}
+					
+					int tableNumber = rs.getInt("tableNum");
+					
+					if( rs.wasNull())
+					{
+						return -1; 			// where there is table but with null value 
+					}
+					
+					return tableNumber;
+				}
+			}
+									
+		} catch (SQLException ex) {
+			logger.log("[ERROR] SQLException in getTableNumberByConfirmationCode: " + ex.getMessage());
+			ex.printStackTrace();
+			return -1;
+		}
+		finally {
+	    	release(conn);
+	    }		
 	}
 	
 	// ******************** Restaurant Management  Operations ******************
@@ -448,20 +564,41 @@ public class BistroDataBase_Controller {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	public boolean updateOrderStatusInDB(String confirmationCode, OrderStatus completed) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-
-
-
-
-
+	
 	
 
+	public boolean updateOrderStatusInDB(String confirmationCode, OrderStatus completed) {
+		
+		  if (confirmationCode == null || confirmationCode.trim().isEmpty() ) {
+		        return false;
+		    }
+		  
+		  final String qry =	"UPDATE orders "
+		          				+ "SET status = ? "
+		          				+ "WHERE confirmation_code = ?";
+		  
+		  Connection conn = null;
+		  
+		  try {
+		        conn = borrow();
 
+		        try (PreparedStatement ps = conn.prepareStatement(qry)) {
 
+		        	ps.setString(1, completed.name());
+		            ps.setString(2, confirmationCode);
+
+		            int success = ps.executeUpdate();
+					
+					return success == 1;			//when success get 1 the updated worked and changed the row well in table
+		        }
+		  } catch (SQLException ex) {
+		       	logger.log("[ERROR] SQLException in updateOrderStatusInDB: " + ex.getMessage());
+		        ex.printStackTrace();
+		        return false;
+
+		  } finally {
+		        release(conn);
+		    }
+	}
 
 }
