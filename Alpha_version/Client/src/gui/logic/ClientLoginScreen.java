@@ -158,7 +158,7 @@ public class ClientLoginScreen {
 			BistroClientGUI.display(lblError, "Unable to open Forgot Member ID screen.", Color.RED);
 		}
 		forgotModalsCTRL = loader.getController();
-		forgotModalsCTRL.setParent(this);
+		forgotModalsCTRL.setParentController(this);
 		
 	}
 
