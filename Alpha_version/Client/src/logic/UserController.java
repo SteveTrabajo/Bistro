@@ -55,9 +55,26 @@ public class UserController {
 	 * 
 	 * @param userLoginData An ArrayList containing user login information.
 	 */
-	public void signInUser(Map<String, Object> userLoginData) {
-		client.handleMessageFromClientUI(new Message(Api.ASK_LOGIN_USER, userLoginData));
+	public void signInUser(String userLoginData, UserType userType) {
+		
+		switch(userType) {
+			case GUEST:
+				client.handleMessageFromClientUI(new Message(Api.ASK_LOGIN_GUEST, userLoginData));
+				break;
+			case EMPLOYEE:
+				client.handleMessageFromClientUI(new Message(Api.ASK_LOGIN_EMPLOYEE, userLoginData));
+				break;
+			case MEMBER:
+				client.handleMessageFromClientUI(new Message(Api.ASK_LOGIN_MEMBER, userLoginData));
+				break;
+			case MANAGER:
+				client.handleMessageFromClientUI(new Message(Api.ASK_LOGIN_MANAGER, userLoginData));
+				break;
+			default:
+				System.out.println("Unknown user type");
+		}
 	}
+
 	
 	public void signOutUser() {
 		this.loggedInUser = null;
@@ -68,8 +85,8 @@ public class UserController {
 	 * 
 	 * @return true if a user is logged in, false otherwise.
 	 */
-	public boolean isUserLoggedIn() {
-		return this.loggedInUser != null;
+	public boolean isUserLoggedInAs( UserType expectedType) {
+		return this.loggedInUser != null && this.loggedInUser.getUserType() == expectedType;
 	}
 	
 	/*
@@ -78,10 +95,10 @@ public class UserController {
 	 * @return The UserType of the logged-in user, or null if no user is logged in.
 	 */
 	public UserType getLoggedInUserType() {
-		if (isUserLoggedIn()) {
-			return this.loggedInUser.getUserType();
+		if (this.loggedInUser == null) {
+			return null;
 		}
-		return null;
+		return this.loggedInUser.getUserType();
 	}
 	public void updateUserDetails(User updatedUser) {
 		client.handleMessageFromClientUI(new Message(Api.ASK_MEMBER_UPDATE_INFO, updatedUser));

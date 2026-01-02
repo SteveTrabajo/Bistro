@@ -88,15 +88,13 @@ public class ClientLoginScreen {
 		String phoneNumber = txtPhoneNumber.getText();
 		String emailAddress = txtEmailAddress.getText();
 		String errorMessage = InputCheck.isValidGuestInfo(phoneNumber, emailAddress);
+		UserType userType = UserType.GUEST;
 		if (!errorMessage.equals("")) {
 			BistroClientGUI.display(lblError, errorMessage.trim(), Color.RED);
 		} else {
-			userLoginData = new HashMap<String, Object>();
-			userLoginData.put("userType", (UserType.GUEST));
-			userLoginData.put("phoneNumber", (Object) phoneNumber);
-			userLoginData.put("email", (Object) emailAddress);
-			BistroClientGUI.client.getUserCTRL().signInUser(userLoginData);
-			if (BistroClientGUI.client.getUserCTRL().isUserLoggedIn()) {
+			String userLoginData = phoneNumber.trim() + "_" + emailAddress.trim();
+			BistroClientGUI.client.getUserCTRL().signInUser(userLoginData,userType);
+			if (BistroClientGUI.client.getUserCTRL().isUserLoggedInAs(UserType.GUEST)) {
 				BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
 			} else {
 				BistroClientGUI.display(lblError, "Error has been accoured!", Color.RED);
@@ -129,10 +127,10 @@ public class ClientLoginScreen {
 		HashMap<String, Object> userLoginData = new HashMap<>();
 		userLoginData.put("userType", UserType.MEMBER);
 		userLoginData.put("memberCode", memberCode);
-
+		
 		BistroClientGUI.client.getUserCTRL().signInUser(userLoginData);
 
-		if (BistroClientGUI.client.getUserCTRL().isUserLoggedIn()) {
+		if (BistroClientGUI.client.getUserCTRL().isUserLoggedInAs(UserType.MEMBER)) {
 			BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
 		} else {
 			lblError.setText("Member code does not exist.");

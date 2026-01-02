@@ -27,8 +27,11 @@ public final class Api {
 
     // == Login/signOut subject == //
 // Requests
-    public static final String ASK_LOGIN_USER = "login.user";
     public static final String ASK_SIGNOUT_USER = "signout.user";
+    public static final String ASK_LOGIN_GUEST = "login.guest";
+    public static final String ASK_LOGIN_EMPLOYEE = "login.employee";
+    public static final String ASK_LOGIN_MANAGER = "login.manager";
+    public static final String ASK_LOGIN_MEMBER = "login.member";
 // Responses
     public static final String REPLY_LOGIN_USER_OK = "login.user.ok";
     public static final String REPLY_LOGIN_USER_NOT_FOUND = "login.user.notFound";
