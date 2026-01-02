@@ -54,6 +54,7 @@ public final class Api {
     public static final String ASK_GET_ALLOCATED_TABLE = "orders.getAllocatedTable";
     public static final String ASK_PAYMENT_UPDATE = "orders.paymentUpdate";
     public static final String ASK_CANCEL_RESERVATION = "orders.cancelReservation";
+    public static final String ASK_UPDATE_RESERVATION = "orders.updateReservation";
     
 // Responses
     public static final String REPLY_CREATE_RESERVATION_OK = "orders.createReservation.ok";
@@ -70,6 +71,8 @@ public final class Api {
     public static final String REPLY_PAYMENT_UPDATE_FAIL = "Orders.paymentUpdate.fail";
     public static final String REPLY_CANCEL_RESERVATION_OK = "orders.cancelReservation.ok";
     public static final String REPLY_CANCEL_RESERVATION_FAIL = "orders.cancelReservation.fail";
+    public static final String REPLY_UPDATE_RESERVATION_OK = "orders.updateReservation.ok";
+    public static final String REPLY_UPDATE_RESERVATION_FAIL = "orders.updateReservation.fail";
     
     // == Restaurant Management subject == //
 // Requests
