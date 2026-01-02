@@ -1,6 +1,7 @@
 package gui.logic;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -174,7 +175,24 @@ public class ClientManageBookingScreen {
 		int col = 0;
 		int row = 0;
 
+		LocalDate selectedDate = datePicker.getValue();
+		LocalDate today = LocalDate.now();
+		LocalTime currentTime = LocalTime.now();
+		LocalTime thresholdTime = currentTime.plusHours(1);
+		
 		for (String timeSlot : availableTimeSlots) {
+			// Filter out past or too-soon time slots if the selected date is today
+			if (selectedDate != null && selectedDate.equals(today)) {
+				try {
+					LocalTime slotTime = LocalTime.parse(timeSlot);
+					if (slotTime.isBefore(thresholdTime)) {
+						continue; // Skip this time slot
+					}
+				} catch (Exception e) {
+					// If parsing fails, include the slot anyway
+				}
+			}
+			
 			ToggleButton timeSlotButton = new ToggleButton(timeSlot);
 			timeSlotButton.setToggleGroup(timeSlotToggleGroup);
 			timeSlotButton.setPrefWidth(104);
@@ -193,7 +211,7 @@ public class ClientManageBookingScreen {
 
 			timeSlotsGridPane.add(timeSlotButton, col, row);
 			col++;
-			if (col >= 4) {
+			if (col >= 3) {
 				col = 0;
 				row++;
 			}
@@ -228,7 +246,9 @@ public class ClientManageBookingScreen {
 			@Override
 			public void updateItem(LocalDate date, boolean empty) {
 				super.updateItem(date, empty);
-				setDisable(empty || date.isBefore(LocalDate.now()));
+				LocalDate today = LocalDate.now();
+				LocalDate maxDate = today.plusMonths(1);
+				setDisable(empty || date.isBefore(today) || date.isAfter(maxDate));
 			}
 		});
 		datePicker.valueProperty().addListener((obs, old, newVal) -> refreshTimeSlots());

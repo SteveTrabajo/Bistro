@@ -79,6 +79,84 @@ public class InputCheck {
 		return "";
 	}
 
+	// ==================== Name Validation Methods ====================
+	
+	/*
+	 * Validates if the given first name contains only English letters.
+	 * 
+	 * @param firstName The first name to validate.
+	 * 
+	 * @return An error message if validation fails, otherwise an empty string.
+	 */
+	public static String validateFirstName(String firstName) {
+		if (firstName == null || firstName.trim().isEmpty()) {
+			return "First name is required.";
+		}
+		if (!firstName.matches("[a-zA-Z]+")) {
+			return "Error: First name must contain only English letters";
+		}
+		return "";
+	}
+
+	/*
+	 * Validates if the given last name contains only English letters.
+	 * 
+	 * @param lastName The last name to validate.
+	 * 
+	 * @return An error message if validation fails, otherwise an empty string.
+	 */
+	public static String validateLastName(String lastName) {
+		if (lastName == null || lastName.trim().isEmpty()) {
+			return "Last name is required.";
+		}
+		if (!lastName.matches("[a-zA-Z]+")) {
+			return "Error: Last name must contain only English letters";
+		}
+		return "";
+	}
+
+	// ==================== Phone and Email Validation Methods ====================
+	
+	// Regex patterns for phone number and email validation
+	private static final String PHONE_REGEX = "^\\d{10}$";
+	private static final Pattern PHONE_PATTERN = Pattern.compile(PHONE_REGEX);
+	private static final String EMAIL_REGEX = "^[\\w.-]+@[\\w.-]+\\.\\w{2,}$";
+	private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
+
+	/*
+	 * Validates if the given phone number contains exactly 10 digits.
+	 * 
+	 * @param phoneNumber The phone number to validate.
+	 * 
+	 * @return An error message if validation fails, otherwise an empty string.
+	 */
+	public static String validatePhoneNumber(String phoneNumber) {
+		if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
+			return "Phone number is required.";
+		}
+		if (!phoneNumber.matches("\\d{10}")) {
+			return "Error: Phone number must contain exactly 10 digits";
+		}
+		return "";
+	}
+
+	/*
+	 * Validates if the given email contains the @ symbol.
+	 * 
+	 * @param email The email to validate.
+	 * 
+	 * @return An error message if validation fails, otherwise an empty string.
+	 */
+	public static String validateEmail(String email) {
+		if (email == null || email.trim().isEmpty()) {
+			return "Email is required.";
+		}
+		if (!email.contains("@")) {
+			return "Error: Email must contain @";
+		}
+		return "";
+	}
+
 	/*
 	 * Validates the guest's phone number and email address.
 	 * 
@@ -89,12 +167,6 @@ public class InputCheck {
 	 * @return An error message if there are validation issues, otherwise an empty
 	 * string.
 	 */
-	// Regex patterns for phone number and email validation
-	private static final String PHONE_REGEX = "^\\d{10}$ or ^[0-9]{10}$";
-	private static final Pattern PHONE_PATTERN = Pattern.compile(PHONE_REGEX);
-	private static final String EMAIL_REGEX = "^[\\w.-]+@[\\w.-]+\\.\\w{2,}$";
-	private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
-
 	public static String isValidGuestInfo(String phoneNumber, String emailAddress) {
 		String errorMessage = "";
 		if ((phoneNumber.trim().isEmpty()) && (emailAddress.trim().isEmpty())) {
@@ -110,4 +182,8 @@ public class InputCheck {
 		return errorMessage;
 	}
 
+	private InputCheck() {
+		// Private constructor to prevent instantiation
+	}
+	
 }
