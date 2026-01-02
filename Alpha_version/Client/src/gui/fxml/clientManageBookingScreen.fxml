@@ -238,7 +238,7 @@
 									</children>
 								</VBox>
 
-								<Button id="btnConfirmReservation" fx:id="btnConfirmReservation" disable="true" onAction="#onConfirm" text="Confirm Reservation">
+								<Button id="btnConfirmReservation" fx:id="btnConfirmReservation" disable="true" onAction="#btnConfirmReservation" text="Confirm Reservation">
 									<styleClass>
 										<String fx:value="btn-primary" />
 										<String fx:value="btn-wide" />

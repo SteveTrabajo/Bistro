@@ -9,15 +9,24 @@ import entities.Order;
 import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Control;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.Pane;
+import java.io.IOException;
+import javafx.scene.Parent;
+import javafx.scene.effect.GaussianBlur;
 import logic.BistroClientGUI;
 
 public class ClientManageBookingScreen {
@@ -38,9 +47,16 @@ public class ClientManageBookingScreen {
 	private TextField txtConfirmationCode;
 	@FXML
 	private Button btnConfirmReservation;
+	@FXML
+	private Hyperlink lnkForgot;
+	@FXML
+	private StackPane modalOverlay;
+	@FXML
+	private Pane mainPane;
 
 	private String selectedTimeSlot = null;
 	private Order currentOrder = null;
+	private Parent forgotCodeRoot = null;
 
 	// *************************** FXML Methods ****************************
 
@@ -63,15 +79,10 @@ public class ClientManageBookingScreen {
 			return;
 		}
 
-		// 1. Register a callback to handle the server response asynchronously
-		// This ensures we wait for the data before trying to display it
 		BistroClientGUI.client.getReservationCTRL().setOrderLoadedListener(this::handleOrderFound);
-
-		// 2. Send request to server
 		BistroClientGUI.client.getReservationCTRL().askOrderDetails(code.trim());
 	}
 
-	// Callback method: This runs when the server replies with the order
 	private void handleOrderFound(Order order) {
 		Platform.runLater(() -> {
 			if (order == null) {
@@ -85,28 +96,16 @@ public class ClientManageBookingScreen {
 	}
 
 	private void loadOrderIntoUI(Order order) {
-		// Populate fields with order data
 		datePicker.setValue(order.getOrderDate());
 		dinersAmountComboBox.setValue(order.getDinersAmount() + " People");
-
-		// Fetch valid slots for this date/size
 		refreshTimeSlots();
-
-		// Try to visually select the order's existing time
-		String timeStr = order.getOrderHour().toString();
-		// (Simple formatting fix if needed, e.g., "17:00:00" -> "17:00")
-		if (timeStr.length() > 5)
-			timeStr = timeStr.substring(0, 5);
-
-		selectTimeSlotInGrid(timeStr);
-
 		setEditingEnabled(true);
 	}
 
 	// --- 2. UPDATE / CANCEL LOGIC ---
 
 	@FXML
-	void onConfirm(Event event) { // Matches FXML onAction="#onConfirm"
+	void btnConfirmReservation(Event event) { 
 		if (currentOrder == null)
 			return;
 
@@ -116,34 +115,50 @@ public class ClientManageBookingScreen {
 		}
 
 		LocalDate date = datePicker.getValue();
+		LocalTime time = LocalTime.parse(selectedTimeSlot);
 		int diners = parseDiners(dinersAmountComboBox.getValue());
 
-		// Call controller to update (You will need to implement updateReservation in
-		// Reservation_Controller)
-		// BistroClientGUI.client.getReservationCTRL().updateReservation(currentOrder.getOrderNumber(),
-		// date, selectedTimeSlot, diners);
-
-		showAlert(Alert.AlertType.INFORMATION, "Success", "Reservation updated successfully!");
-		BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Returning to Dashboard");
+		currentOrder.setOrderDate(date);
+		currentOrder.setOrderHour(time);
+		currentOrder.setDinersAmount(diners);
+		
+		BistroClientGUI.client.getReservationCTRL().setUpdateListener(success -> {
+			Platform.runLater(() -> {
+				if (success) {
+					showAlert(Alert.AlertType.INFORMATION, "Success", "Reservation updated successfully!");
+					BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Returning to Dashboard");
+				} else {
+					showAlert(Alert.AlertType.ERROR, "Update Failed", "Could not update reservation. The slot might be taken.");
+				}
+			});
+		});
+		
+		BistroClientGUI.client.getReservationCTRL().updateReservation(currentOrder);
 	}
 
 	@FXML
-	void btnCancel(Event event) { // Matches FXML onAction="#btnCancel" (check FXML method name)
+	void btnCancel(Event event) { 
 		if (currentOrder == null)
 			return;
 
-		// Call controller to cancel
-		// BistroClientGUI.client.getReservationCTRL().cancelReservation(currentOrder.getOrderNumber());
-
-		showAlert(Alert.AlertType.INFORMATION, "Cancelled", "Reservation has been cancelled.");
-		setEditingEnabled(false);
-		txtConfirmationCode.clear();
-		currentOrder = null;
-		timeSlotsGridPane.getChildren().clear();
+		BistroClientGUI.client.getReservationCTRL().setCancelListener(success -> {
+			Platform.runLater(() -> {
+				if (success) {
+					showAlert(Alert.AlertType.INFORMATION, "Cancelled", "Reservation has been cancelled.");
+					setEditingEnabled(false);
+					txtConfirmationCode.clear();
+					currentOrder = null;
+					timeSlotsGridPane.getChildren().clear();
+				} else {
+					showAlert(Alert.AlertType.ERROR, "Error", "Could not cancel the reservation. Please try again.");
+				}
+			});
+		});
+		BistroClientGUI.client.getReservationCTRL().cancelReservation(currentOrder.getConfirmationCode());
 	}
 
 	@FXML
-	void btnBack(Event event) { // Matches FXML onAction="#onBack"
+	void btnBack(Event event) {
 		BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Error returning to dashboard");
 	}
 
@@ -163,72 +178,53 @@ public class ClientManageBookingScreen {
 			return;
 		int diners = parseDiners(dinersAmountComboBox.getValue());
 
-		// In a real scenario, you would use the async callback here too (like in
-		// NewReservationScreen)
-		// For now, I'll use the default generator so the grid isn't empty
-		generateTimeSlots(generateDefaultTimeSlots());
+		timeSlotsGridPane.getChildren().clear();
+		selectedTimeSlot = null;
+		btnConfirmReservation.setDisable(true);
+		
+		BistroClientGUI.client.getReservationCTRL().setAvailableTimeSlotsListener(this::generateTimeSlots);
+		BistroClientGUI.client.getReservationCTRL().askAvailableHours(date, diners);
 	}
 
 	private void generateTimeSlots(List<String> availableTimeSlots) {
-		timeSlotsGridPane.getChildren().clear();
-		ToggleGroup timeSlotToggleGroup = new ToggleGroup();
-		int col = 0;
-		int row = 0;
-
-		LocalDate selectedDate = datePicker.getValue();
-		LocalDate today = LocalDate.now();
-		LocalTime currentTime = LocalTime.now();
-		LocalTime thresholdTime = currentTime.plusHours(1);
-		
-		for (String timeSlot : availableTimeSlots) {
-			// Filter out past or too-soon time slots if the selected date is today
-			if (selectedDate != null && selectedDate.equals(today)) {
-				try {
-					LocalTime slotTime = LocalTime.parse(timeSlot);
-					if (slotTime.isBefore(thresholdTime)) {
-						continue; // Skip this time slot
-					}
-				} catch (Exception e) {
-					// If parsing fails, include the slot anyway
-				}
+		Platform.runLater(() -> {
+			timeSlotsGridPane.getChildren().clear();
+			if (availableTimeSlots == null || availableTimeSlots.isEmpty()) {
+				// Optional: Show a "No slots available" label
+				Label noSlotsLabel = new Label("No available time slots.");
+				noSlotsLabel.setStyle("-fx-text-fill: #ef4444; -fx-font-size: 14px; -fx-font-weight: bold;");
+				timeSlotsGridPane.add(noSlotsLabel, 0, 0);
+				GridPane.setColumnSpan(noSlotsLabel, 4);
+				return;
 			}
 			
-			ToggleButton timeSlotButton = new ToggleButton(timeSlot);
-			timeSlotButton.setToggleGroup(timeSlotToggleGroup);
-			timeSlotButton.setPrefWidth(104);
-			timeSlotButton.setPrefHeight(37);
-			timeSlotButton.getStyleClass().add("time-slot");
+			ToggleGroup timeSlotToggleGroup = new ToggleGroup();
+			int col = 0;
+			int row = 0;
 
-			timeSlotButton.setOnAction(event -> {
-				if (timeSlotButton.isSelected()) {
-					selectedTimeSlot = timeSlot;
-					btnConfirmReservation.setDisable(false);
-				} else {
-					selectedTimeSlot = null;
-					btnConfirmReservation.setDisable(true);
-				}
-			});
-
-			timeSlotsGridPane.add(timeSlotButton, col, row);
-			col++;
-			if (col >= 3) {
-				col = 0;
-				row++;
-			}
-		}
-	}
-
-	private void selectTimeSlotInGrid(String timeToSelect) {
-		for (javafx.scene.Node node : timeSlotsGridPane.getChildren()) {
-			if (node instanceof ToggleButton) {
-				ToggleButton btn = (ToggleButton) node;
-				if (btn.getText().equals(timeToSelect)) {
-					btn.setSelected(true);
-					selectedTimeSlot = timeToSelect;
-					return;
+			for (String timeSlot : availableTimeSlots) {
+				ToggleButton timeSlotButton = new ToggleButton(timeSlot);
+				timeSlotButton.setToggleGroup(timeSlotToggleGroup);
+				timeSlotButton.setPrefWidth(104);
+				timeSlotButton.setPrefHeight(37);
+				timeSlotButton.getStyleClass().add("time-slot");
+				timeSlotButton.setOnAction(event -> {
+					if (timeSlotButton.isSelected()) {
+						selectedTimeSlot = timeSlot;
+						btnConfirmReservation.setDisable(false);
+					} else {
+						selectedTimeSlot = null;
+						btnConfirmReservation.setDisable(true);
+					}
+				});
+				timeSlotsGridPane.add(timeSlotButton, col, row);
+				col++;
+				if (col >= 4) {
+					col = 0;
+					row++;
 				}
 			}
-		}
+		});
 	}
 
 	private void showAlert(Alert.AlertType type, String title, String content) {
@@ -273,13 +269,24 @@ public class ClientManageBookingScreen {
 		return 2;
 	}
 
-	// Temporary helper until server is connected for slots
-	private List<String> generateDefaultTimeSlots() {
-		List<String> times = new ArrayList<>();
-		times.add("18:00");
-		times.add("18:30");
-		times.add("19:00");
-		return times;
+	@FXML
+	private void lnkForgot(Event event) {
+		if (forgotCodeRoot==null) {
+			try {
+				FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/fxml/ClientForgotConfirmationCode.fxml"));
+				forgotCodeRoot = loader.load();
+				modalOverlay.getChildren().add(forgotCodeRoot);
+			} catch (IOException e) {
+				e.printStackTrace();
+				showAlert(Alert.AlertType.ERROR, "Error", "Unable to open Forgot Booking Code screen.");
+				return;
+			}
+		}
+		
+		modalOverlay.setVisible(true);
+		modalOverlay.setManaged(true);
+		
+		mainPane.setEffect(new GaussianBlur(15));
 	}
-
 }
+

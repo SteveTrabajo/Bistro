@@ -15,6 +15,8 @@ import comms.Api;
 import comms.Message;
 import entities.Order;
 import enums.DaysOfWeek;
+import enums.OrderStatus;
+import javafx.application.Platform;
 
 public class ReservationController {
 	
@@ -31,6 +33,9 @@ public class ReservationController {
 	private List<Object> tempReservationData=new ArrayList<>();
 	
 	private Consumer<Order> orderLoadedCallback;
+	private Consumer<List<String>> availableSlotsCallback;
+	private Consumer<Boolean> updateResultCallback;
+	private Consumer<Boolean> cancelResultCallback;
 	private Order orderReady;
 	
 	//******************************** Constructors ***********************************//
@@ -41,8 +46,8 @@ public class ReservationController {
 		this.availableTimeSlots = new ArrayList<>();
 	}
 	
-	//******************************** Getters And Setters ***********************************//
-	
+	//******************************** Getters, Setters and Listeners ***********************************//
+		
 	public String getConfirmationCode() {
 		return confirmationCode;
 	}
@@ -61,7 +66,7 @@ public class ReservationController {
         
         // Trigger the callback to update the screen!
         if (uiUpdateCallback != null) {
-            javafx.application.Platform.runLater(() -> {
+            Platform.runLater(() -> {
                 uiUpdateCallback.accept(slots);
             });
         }
@@ -71,16 +76,20 @@ public class ReservationController {
 		return availableTimeSlots;
 	}
 	
-	public void setOrderLoadedListener(Consumer<Order> callback) {
-		this.orderLoadedCallback = callback;
+	public void setAvailableTimeSlotsListener(Consumer<List<String>> callback) {
+		this.availableSlotsCallback = callback;
 	}
-	
+		
 	public void setLoadedOrder(Order order) {
 		if (orderLoadedCallback != null) {
-			javafx.application.Platform.runLater(() -> {
+			Platform.runLater(() -> {
 				orderLoadedCallback.accept(order);
 			});
 		}
+	}
+	
+	public void setOrderLoadedListener(Consumer<Order> callback) {
+		this.orderLoadedCallback = callback;
 	}
 	
 	public Order getReadyUserReservation() {
@@ -89,6 +98,14 @@ public class ReservationController {
 	
 	public void setReadyUserReservation(Order orderReady) {
 		this.orderReady = orderReady;
+	}
+	
+	public void setUpdateListener(Consumer<Boolean> callback) {
+		this.updateResultCallback = callback;
+	}
+	
+	public void setCancelListener(Consumer<Boolean> callback) {
+		this.cancelResultCallback = callback;
 	}
 	
 	// Set by the Client when Server replies with REPLY_GET_ORDER_OK
@@ -110,20 +127,22 @@ public class ReservationController {
 	 * Sends the reservation request to the server.
 	 */
 	public void createNewReservation(LocalDate date, String selectedTimeSlot, int diners) {
-		
-		
-		// Parse the time string (e.g., "17:00") to LocalTime for the entity
 		LocalTime time = LocalTime.parse(selectedTimeSlot);
-		
+		tempReservationData.clear();
 		tempReservationData.add(date);
 		tempReservationData.add(time);
 		tempReservationData.add(diners);
-		
 		client.handleMessageFromClientUI(new Message(Api.ASK_CREATE_RESERVATION, tempReservationData));
 	}
+	
+	public void updateReservation(Order order) {
+		client.handleMessageFromClientUI(new Message(Api.ASK_UPDATE_RESERVATION, order));
+	}
+	
 	public List<Object> getTempReservationData() {
 		return tempReservationData;
 	}
+	
 	public void deleteTempReservationData(List<Object> tempReservationData) {
 		this.tempReservationData.removeAll(tempReservationData);
 	}
@@ -147,7 +166,7 @@ public class ReservationController {
 	 * Checks if a user's reservation is ready (for waiting list flow).
 	 */
 	public boolean isUserReservationReady() {
-		return orderReady.getStatus() == enums.OrderStatus.COMPLETED;
+		return orderReady.getStatus() == OrderStatus.COMPLETED;
 	}
 	
 }
