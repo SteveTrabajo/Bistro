@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
@@ -76,9 +77,10 @@
 																<String fx:value="confirm-input" />
 															</styleClass>
 														</TextField>
-														<Button fx:id="btnCheck" onAction="#btnCheck" mnemonicParsing="false" prefHeight="42.0" prefWidth="79.0" styleClass="btn-primary" text="Check" />
+														<Button fx:id="btnCheck" mnemonicParsing="false" onAction="#btnCheck" prefHeight="42.0" prefWidth="79.0" styleClass="btn-primary" text="Check" />
 													</children>
 												</HBox>
+                                    <Hyperlink fx:id="lnkForgot" onAction="#lnkForgot" text="Forgot Confirmation Code? click here" />
 												<Button id="btnCancel" fx:id="btnCancel" disable="true" mnemonicParsing="false" prefHeight="25.0" prefWidth="334.0" text="Cancel Reservation">
 													<styleClass>
 														<String fx:value="btn-primary" />
