@@ -53,9 +53,6 @@ public class TableController {
 	public boolean isCheckInTableSuccess() {
 		return userAllocatedOrderForTable.getStatus() == enums.OrderStatus.SEATED;
 	}
-	public void CheckConfiamtionCodeCorrect(String confirmationCode) {
-        client.handleMessageFromClientUI(new Message(Api.ASK_GET_ORDER,confirmationCode));
-    }
 
 
 }
