@@ -40,9 +40,11 @@ public final class Api {
     // == User subject == //
     // Requests
     public static final String ASK_MEMBER_UPDATE_INFO = "member.updateInfo";
+    public static final String ASK_FORGOT_MEMBER_ID = "User.forgotMemberID";
     //Responses
     public static final String REPLY_MEMBER_UPDATE_INFO_OK = "member.updateInfo.ok";
     public static final String REPLY_MEMBER_UPDATE_INFO_FAILED = "member.updateInfo.failed";
+    public static final String REPLY_FORGOT_MEMBER_ID_OK = "User.forgotMemberID.ok";
     
     // == Orders subject == //
     

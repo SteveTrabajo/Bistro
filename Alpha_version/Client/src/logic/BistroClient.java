@@ -124,7 +124,8 @@ public class BistroClient extends AbstractClient {
 		
 	
 	//******************************** Instance methods ********************************
-	/*
+		
+	/**
 	 * Method to register message handlers for different message types.
 	 */
 	private void registerHandlers() {
@@ -152,7 +153,7 @@ public class BistroClient extends AbstractClient {
         });
 	}
 
-	/*
+	/**
 	 * Method to handle messages received from the server.
 	 * 
 	 * @param msg The message received from the server.
@@ -172,7 +173,7 @@ public class BistroClient extends AbstractClient {
 		}
 	}
 	
-	/*
+	/**
 	 * Method to handle messages sent from the client UI to the server.
 	 * 
 	 * @param message The message to be sent to the server.
@@ -197,7 +198,7 @@ public class BistroClient extends AbstractClient {
 	}
 	
 	//TODO: check if method below are neccessary:
-	/*
+	/**
 	 * Method to notify the server when the client is exiting.
 	 */
 	public void notifyServerOnExit() {
@@ -215,7 +216,7 @@ public class BistroClient extends AbstractClient {
 		}
 	}
 	
-	/*
+	/**
 	 * Method to notify the server when the client successfully connects.
 	 */
 	public void notifyServerOnConnection() {
@@ -240,7 +241,7 @@ public class BistroClient extends AbstractClient {
         });
     }
     
-   /*
+   /**
 	* Method to terminate the client and close the connection.
 	*/
 	public void quit() {

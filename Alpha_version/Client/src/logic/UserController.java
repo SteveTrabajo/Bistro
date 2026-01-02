@@ -1,6 +1,7 @@
 package logic;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import comms.*;
@@ -50,13 +51,12 @@ public class UserController {
 	
 	//******************************** Instance Methods ***********************************
 	
-	/*
+	/**
 	 * Method to sign in a user with the provided login data.
 	 * 
 	 * @param userLoginData An ArrayList containing user login information.
 	 */
 	public void signInUser(String userLoginData, UserType userType) {
-		
 		switch(userType) {
 			case GUEST:
 				client.handleMessageFromClientUI(new Message(Api.ASK_LOGIN_GUEST, userLoginData));
@@ -75,7 +75,9 @@ public class UserController {
 		}
 	}
 
-	
+	/*
+	 * Method to sign out the currently logged-in user.
+	 */
 	public void signOutUser() {
 		this.loggedInUser = null;
 	}
@@ -89,7 +91,7 @@ public class UserController {
 		return this.loggedInUser != null && this.loggedInUser.getUserType() == expectedType;
 	}
 	
-	/*
+	/**
 	 * Method to get the type of the currently logged-in user.
 	 * 
 	 * @return The UserType of the logged-in user, or null if no user is logged in.
@@ -100,16 +102,36 @@ public class UserController {
 		}
 		return this.loggedInUser.getUserType();
 	}
+	
+	/**
+	 * Method to update the details of the currently logged-in user.
+	 * 
+	 * @param updatedUser The User object containing the updated user details.
+	 */
 	public void updateUserDetails(User updatedUser) {
 		client.handleMessageFromClientUI(new Message(Api.ASK_MEMBER_UPDATE_INFO, updatedUser));
-
     }
-
+	
+	/**
+	 * Method to check if the user update was successful by comparing the old user details with the current logged-in user details.
+	 * @param oldUser
+	 * @return
+	 */
 	public boolean isUpdateSuccessful(User oldUser) {
-		return !oldUser.equals(this.loggedInUser);
-		
-		
-		
+		return !oldUser.equals(this.loggedInUser);	
+	}
+	
+	/**
+	 * Method to handle forgotten member ID requests.
+	 * 
+	 * @param email The email address associated with the member account.
+	 * @param phoneNumber The phone number associated with the member account.
+	 */
+	public void forgotMemberID(String email, String phoneNumber) {
+		Map<String, String> userContactInfo = new HashMap<>();
+		userContactInfo.put("email", email);
+		userContactInfo.put("phoneNumber", phoneNumber);
+		client.handleMessageFromClientUI(new Message(Api.ASK_FORGOT_MEMBER_ID, userContactInfo));
 	}
 	
 }

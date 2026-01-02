@@ -20,7 +20,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-/*
+/**
  * This class represents the GUI application for the Bistro client.
  */
 
@@ -34,7 +34,7 @@ public class BistroClientGUI extends Application {
 	
 	//******************************** Main Method ***********************************
 	
-	/*
+	/**
 	 * Main method to launch the JavaFX application.
 	 * 
 	 * @param args Command-line arguments.
@@ -44,7 +44,7 @@ public class BistroClientGUI extends Application {
 	}
 	//******************************** Start Method **********************************
 	
-	/*
+	/**
 	 * Method to start the JavaFX application and establish a connection to the
 	 * server.
 	 * 
@@ -83,7 +83,7 @@ public class BistroClientGUI extends Application {
         }
     }
 	
-	/*
+	/**
 	 * Method to display an error message in a label with a specified color.
 	 * 
 	 * @param lbl The label to display the message.
@@ -100,6 +100,7 @@ public class BistroClientGUI extends Application {
 	/**
      * Called by BistroClient when the server disconnects.
      * Blurs the entire UI, blocks interaction, and shows an exit dialog.
+     * @param message The message to display in the dialog.
      */
     public static void showServerDisconnected(String message) {
         if (primaryStage == null) {

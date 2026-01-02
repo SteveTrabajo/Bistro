@@ -8,7 +8,9 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import logic.BistroClientGUI;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,13 +52,24 @@ public class ClientLoginScreen {
 	private TextField txtEmailAddress;
 	
 	@FXML
+	private StackPane mainPane;
+	
+	@FXML
 	private Label lblError;
+	
+	@FXML
+	private StackPane modalOverlay; // Overlay pane for modals
+
+	@FXML
+	private Rectangle overlayBackground;
+	
+	private Parent ForgotIDModalRoot;
 
 	// ******************************** Variables ********************************
 
 	private Map<String, Object> userLoginData; // holds received user login data
 	
-	private ClientForgotModals forgotModalsCTRL;
+	private ClientForgotIDModal forgotModalsCTRL;
 	// ****************************** FXML Methods *****************************
 
 	/**
@@ -148,19 +161,22 @@ public class ClientLoginScreen {
 	
 	@FXML
 	public void lnkForgotMemberID(Event event) {
-		Parent root= null;
-		 FXMLLoader loader = null;
-		try {
-			loader = new FXMLLoader(getClass().getResource("/gui/fxml/ClientForgotMemberIDScreen.fxml"));
-			root = loader.load();
-		}catch (Exception e) {
-			e.printStackTrace();
-			BistroClientGUI.display(lblError, "Unable to open Forgot Member ID screen.", Color.RED);
+		if (ForgotIDModalRoot == null) {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/fxml/ClientForgotMemberIDScreen.fxml"));
+			try {
+				ForgotIDModalRoot = loader.load();
+			} catch (Exception e) {
+				e.printStackTrace();
+				BistroClientGUI.display(lblError, "Unable to open Forgot Member ID screen.", Color.RED);
+			}
+			forgotModalsCTRL = loader.getController();
+			forgotModalsCTRL.setParentCtrl(this);
+			modalOverlay.getChildren().add(ForgotIDModalRoot);
+			modalOverlay.setVisible(true);
+			modalOverlay.setManaged(true);
 		}
-		forgotModalsCTRL = loader.getController();
-		forgotModalsCTRL.setParentController(this);
-		
 	}
+
 
 	/**
 	 * Handles the employee login hyperlink click event. Switches to the employee
@@ -172,5 +188,16 @@ public class ClientLoginScreen {
 	public void lnkEmployee(Event event) {
 		BistroClientGUI.switchScreen(event, "employeeLoginScreen", "Employee Login Error Message");
 	}
+	
+	
+	/**
+	 * Closes the forgot member ID modal dialog.
+	 */
+	public void closeForgotIDModal() {
+		modalOverlay.setVisible(false);
+		modalOverlay.setManaged(false);
+		mainPane.setEffect(null);
+	}
+	
 }
-//End of ClientLoginScreen class
+//End of ClientLoginScreen.java
