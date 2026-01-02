@@ -147,8 +147,7 @@ public class ReservationController {
 	 * Checks if a user's reservation is ready (for waiting list flow).
 	 */
 	public boolean isUserReservationReady() {
-		// Logic to check if a table is ready (for waiting list flow)
-		return false;
+		return orderReady.getStatus() == enums.OrderStatus.COMPLETED;
 	}
 	
 }
