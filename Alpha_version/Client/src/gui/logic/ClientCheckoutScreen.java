@@ -140,7 +140,7 @@ public class ClientCheckoutScreen {
 		// Force validation one last time (in case user clicked Pay without leaving the text field)
 		enforceMinimumValue();
 		// Get confirmation code and set payment amount
-		BistroClientGUI.client.getPaymentCTRL().setPaymentAmount(finalAmount);//TODO: paymentCTRL create it
+		BistroClientGUI.client.getPaymentCTRL().setPaymentAmount(finalAmount);//TODO
 		BistroClientGUI.client.getPaymentCTRL().checkpaymentSuccess(finalAmount);
 		// Process Payment
 		if (BistroClientGUI.client.getPaymentCTRL().processPaymentCompleted()) {

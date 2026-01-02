@@ -115,15 +115,15 @@ public class ClientLoginScreen {
 	@FXML
 	public void btnSignIn(Event event) {
 		String memberCodeText = txtMemberID.getText();
-
+		UserType userType = UserType.MEMBER;
 		String err = InputCheck.validateMemberCode6DigitsNoLeadingZero(memberCodeText);
 		if (!err.isEmpty()) {
 			lblError.setText(err);
 			return;
 		}
-		BistroClientGUI.client.getUserCTRL().signInUser(memberCodeText, UserType.MEMBER);
+		BistroClientGUI.client.getUserCTRL().signInUser(memberCodeText, userType);
 
-		if (BistroClientGUI.client.getUserCTRL().isUserLoggedInAs(UserType.MEMBER)) {
+		if (BistroClientGUI.client.getUserCTRL().isUserLoggedInAs(userType)) {
 			BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
 		} else {
 			lblError.setText("Member code does not exist.");
