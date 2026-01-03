@@ -36,10 +36,10 @@ public final class Api {
     public static final String ASK_SIGNOUT_EMPLOYEE = "signout.employee";
     public static final String ASK_SIGNOUT_MANAGER = "signout.manager";
 // Responses
-    public static final String REPLY_LOGIN_GUEST = "login.guest";
-    public static final String REPLY_LOGIN_EMPLOYEE = "login.employee";
-    public static final String REPLY_LOGIN_MANAGER = "login.manager";
-    public static final String REPLY_LOGIN_MEMBER = "login.member";
+    public static final String REPLY_LOGIN_GUEST_OK = "login.guest.ok";
+    public static final String REPLY_LOGIN_EMPLOYEE_OK = "login.employee.ok";
+    public static final String REPLY_LOGIN_MANAGER_OK = "login.manager.ok";
+    public static final String REPLY_LOGIN_MEMBER_OK = "login.member.ok";
     public static final String REPLY_LOGIN_GUEST_NOT_FOUND = "login.guest.notFound";
     public static final String REPLY_LOGIN_EMPLOYEE_NOT_FOUND = "login.employee.notFound";
     public static final String REPLY_LOGIN_MANAGER_NOT_FOUND = "login.manager.notFound";
