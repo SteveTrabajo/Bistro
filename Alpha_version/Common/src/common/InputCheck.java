@@ -115,6 +115,16 @@ public class InputCheck {
 		return "";
 	}
 
+	public static String validateAddress(String address) {
+		if (address == null || address.trim().isEmpty()) {
+			return "Address is required.";
+		}
+		if (!address.matches("[a-zA-Z0-9\\s,.-]+")) {
+			return "Error: Address contains invalid characters";
+		}
+		return "";
+	}
+	
 	// ==================== Phone and Email Validation Methods ====================
 	
 	// Regex patterns for phone number and email validation
@@ -185,5 +195,6 @@ public class InputCheck {
 	private InputCheck() {
 		// Private constructor to prevent instantiation
 	}
+
 	
 }

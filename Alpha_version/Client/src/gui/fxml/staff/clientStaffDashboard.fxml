@@ -30,7 +30,7 @@
             <HBox alignment="CENTER_LEFT" spacing="8">
                      <ImageView fitHeight="25.0" fitWidth="25.0">
                         <image>
-                           <Image url="@resources/employeeIcon.png" />
+                           <Image url="@../../resources/icons/employeeIcon.png" />
                         </image>
                      </ImageView>
               <Label fx:id="lblRole" text="Manager">
@@ -52,7 +52,7 @@
                      <graphic>
                         <ImageView fitHeight="28.0" fitWidth="28.0">
                            <image>
-                              <Image url="@resources/getTableIcon.png" />
+                              <Image url="@../../resources/icons/getTableIcon.png" />
                            </image>
                         </ImageView>
                      </graphic></Button>
@@ -60,7 +60,7 @@
                      <graphic>
                         <ImageView fitHeight="22.0" fitWidth="22.0">
                            <image>
-                              <Image url="@resources/reservationIcon.png" />
+                              <Image url="@../../resources/icons/reservationIcon.png" />
                            </image>
                         </ImageView>
                      </graphic></Button>
@@ -68,7 +68,7 @@
                      <graphic>
                         <ImageView fitHeight="26.0" fitWidth="26.0">
                            <image>
-                              <Image url="@resources/hourglass.png" />
+                              <Image url="@../../resources/icons/hourglass.png" />
                            </image>
                         </ImageView>
                      </graphic></Button>
@@ -76,7 +76,7 @@
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0">
                            <image>
-                              <Image url="@resources/billpayIcon.png" />
+                              <Image url="@../../resources/icons/billpayIcon.png" />
                            </image>
                         </ImageView>
                      </graphic>
@@ -85,7 +85,7 @@
                      <graphic>
                         <ImageView fitHeight="28.0" fitWidth="26.0">
                            <image>
-                              <Image url="@resources/custormersIcon.png" />
+                              <Image url="@../../resources/icons/custormersIcon.png" />
                            </image>
                         </ImageView>
                      </graphic></Button>
@@ -93,7 +93,7 @@
                      <graphic>
                         <ImageView fitHeight="26.0" fitWidth="26.0">
                            <image>
-                              <Image url="@resources/addMemberIcon.png" />
+                              <Image url="@../../resources/icons/addMemberIcon.png" />
                            </image>
                         </ImageView>
                      </graphic></Button>
@@ -101,7 +101,7 @@
               <graphic>
                 <ImageView fitHeight="18.0" fitWidth="18.0">
                   <image>
-                    <Image url="@resources/ReportsIcon.png" />
+                    <Image url="@../../resources/icons/ReportsIcon.png" />
                   </image>
                 </ImageView>
               </graphic>
@@ -110,7 +110,7 @@
                      <graphic>
                         <ImageView fitHeight="25.0" fitWidth="25.0">
                            <image>
-                              <Image url="@resources/SettingsIcon.png" />
+                              <Image url="@../../resources/icons/SettingsIcon.png" />
                            </image>
                         </ImageView>
                      </graphic></Button>
@@ -127,7 +127,7 @@
               <graphic>
                 <ImageView fitHeight="17.0" fitWidth="17.0">
                   <image>
-                    <Image url="@resources/LogoutIcon.png" />
+                    <Image url="@../../resources/icons/LogoutIcon.png" />
                   </image>
                 </ImageView>
               </graphic>

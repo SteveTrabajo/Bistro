@@ -47,15 +47,15 @@ public class ClientStaffDashboardScreen {
 	
 	private Button activeButton;
 	
-	@FXML
-	public void initialize() {
-		String role = BistroClientGUI.client.getUserCTRL().getLoggedInUserType().toString();
-		lblRole.setText(role);
-		btnTableOverview(null);
-		if(role.equals("EMPLOYEE")) {
-			btnAnalytics.setDisable(true);
-		}
-	}
+//	@FXML
+//	public void initialize() {
+//		String role = BistroClientGUI.client.getUserCTRL().getLoggedInUserType().toString();
+//		lblRole.setText(role);
+//		btnTableOverview(null);
+//		if(role.equals("EMPLOYEE")) {
+//			btnAnalytics.setDisable(true);
+//		}
+//	}
 	
 	@FXML
 	public void btnTableOverview(Event event) {

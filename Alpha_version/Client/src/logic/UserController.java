@@ -17,7 +17,7 @@ public class UserController {
 	
 	private final BistroClient client; //final reference to the BistroClient to ensure only one instance is associated
 	private User loggedInUser;
-	
+	private ArrayList<Integer> memberRegistrationStats;
 	//******************************** Constructors ***********************************
 	
 	/*
@@ -47,6 +47,25 @@ public class UserController {
 	 */
 	public void setLoggedInUser(User user) {
 		this.loggedInUser = user;
+	}
+	
+	/**
+	 * Method to retrieve member registration statistics.
+	 * 
+	 * @return An ArrayList containing member registration statistics.
+	 */
+	public ArrayList<Integer> getMemberRegistrationStats() {
+		
+		return memberRegistrationStats;
+	}
+	
+	/**
+	 * Method to set member registration statistics.
+	 * 
+	 * @param stats An ArrayList containing member registration statistics.
+	 */
+	public void setMemberRegistrationStats(ArrayList<Integer> stats) {
+		this.memberRegistrationStats = stats;
 	}
 	
 	//******************************** Instance Methods ***********************************
@@ -112,6 +131,10 @@ public class UserController {
 		client.handleMessageFromClientUI(new Message(Api.ASK_MEMBER_UPDATE_INFO, updatedUser));
     }
 	
+	public void RegisterNewMember(Object newMemberData) {
+		client.handleMessageFromClientUI(new Message(Api.ASK_REGISTER_NEW_MEMBER, newMemberData));
+	}
+	
 	/**
 	 * Method to check if the user update was successful by comparing the old user details with the current logged-in user details.
 	 * @param oldUser
@@ -132,6 +155,10 @@ public class UserController {
 		userContactInfo.put("email", email);
 		userContactInfo.put("phoneNumber", phoneNumber);
 		client.handleMessageFromClientUI(new Message(Api.ASK_FORGOT_MEMBER_ID, userContactInfo));
+	}
+
+	public void requestMemberRegistrationStats() {
+		client.handleMessageFromClientUI(new Message(Api.ASK_REGISTERATION_STATS, null));
 	}
 	
 }

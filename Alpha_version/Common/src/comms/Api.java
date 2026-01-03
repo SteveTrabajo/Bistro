@@ -41,6 +41,8 @@ public final class Api {
     // Requests
     public static final String ASK_MEMBER_UPDATE_INFO = "member.updateInfo";
     public static final String ASK_FORGOT_MEMBER_ID = "User.forgotMemberID";
+    public static final String ASK_REGISTER_NEW_MEMBER = "user.registerNewMember";
+    public static final String ASK_REGISTERATION_STATS = "member.registerationStats";
     //Responses
     public static final String REPLY_MEMBER_UPDATE_INFO_OK = "member.updateInfo.ok";
     public static final String REPLY_MEMBER_UPDATE_INFO_FAILED = "member.updateInfo.failed";
