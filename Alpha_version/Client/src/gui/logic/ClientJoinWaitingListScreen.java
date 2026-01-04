@@ -66,6 +66,11 @@ public class ClientJoinWaitingListScreen {
 	public void btnCheckAvail(Event event) {
 		int dinersAmount = Integer.parseInt(lblDinersAmount.getText());
 		BistroClientGUI.client.getWaitingListCTRL().joinWaitingList(dinersAmount);
+		if( BistroClientGUI.client.getWaitingListCTRL().getskipWaitingListJoin()) {
+			BistroClientGUI.switchScreen(event, "clientCheckInTableSuccesScreen", "client Join Waiting List messege");
+			BistroClientGUI.client.getWaitingListCTRL().setskipWaitingListJoin(false);
+			return;
+		}
 		if (BistroClientGUI.client.getWaitingListCTRL().isUserOnWaitingList()) {
 			BistroClientGUI.switchScreen(event, "clientDashboardScreen", "client Join Waiting List messege");
 		} else {
