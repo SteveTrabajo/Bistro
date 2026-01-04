@@ -22,6 +22,7 @@ public class WaitingListController {
 	private Map<LocalDate, TreeMap<LocalTime, Order>> waitingList;
 	
 	private Consumer<Map<String, Map<String, Order>>> waitingListUpdateCallback;
+	
 	//******************************** Constructors ***********************************//
 	public WaitingListController(BistroClient client) {
 		this.client = client;
@@ -76,22 +77,6 @@ public class WaitingListController {
 		OrderStatus status = client.getReservationCTRL().getReadyUserReservation().getStatus();
 		return status != OrderStatus.WAITING_LIST;
 	}
-
-	//******************************** Message Handlers ***********************************//
 	
-	public void handleMessageFromUI(Message msg) {
-        switch (msg.getId()) {
-            case Api.REPLY_WAITING_LIST_JOIN_OK:
-                this.userOnWaitingList = true;
-                break;
-            case Api.REPLY_WAITING_LIST_JOIN_FAIL:
-                this.userOnWaitingList = false;
-                break;
-            case Api.REPLY_WAITING_LIST_LEAVE_OK:
-                this.leaveWaitingListSuccess = true;
-                this.userOnWaitingList = false;
-                break;
-        }
-    }
 
 }

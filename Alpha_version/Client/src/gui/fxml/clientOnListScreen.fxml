@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -11,7 +10,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane styleClass="onlist-root" stylesheets="@../../gui/css/clientOnListStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bistro.app.controllers.WaitingListOnListScreen">
+<StackPane styleClass="onlist-root" stylesheets="@../../gui/css/clientOnListStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.ClientOnListScreen">
 
     <children>
         <BorderPane prefHeight="720" prefWidth="1280">
@@ -42,6 +41,7 @@
                                     <Label fx:id="lblConfirmCode" styleClass="big-code" text="9904" />
                                 </children>
                             </VBox>
+                     <Label fx:id="lblError" />
 
                             <VBox alignment="CENTER" spacing="10" styleClass="info-box">
                                 <padding>

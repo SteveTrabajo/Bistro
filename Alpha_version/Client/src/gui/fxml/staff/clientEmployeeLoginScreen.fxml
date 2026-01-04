@@ -72,12 +72,14 @@
 									<StackPane.margin>
 										<Insets right="8.0" />
 									</StackPane.margin>
+                           <graphic>
+      										<ImageView fx:id="imgEyeIcon" fitHeight="19.0" fitWidth="28.0" opacity="0.2" pickOnBounds="true" preserveRatio="true">
+      											<image>
+      												<Image url="@../../../resources/icons/eye-open.png" />
+      											</image>
+      										</ImageView>
+                           </graphic>
 								</Button>
-										<ImageView fx:id="imgEyeIcon" fitHeight="19.0" fitWidth="28.0" opacity="0.2" pickOnBounds="true" preserveRatio="true">
-											<image>
-												<Image url="@../../../resources/icons/eye-open.png" />
-											</image>
-										</ImageView>
 							</children>
 						</StackPane>
 					</HBox>
