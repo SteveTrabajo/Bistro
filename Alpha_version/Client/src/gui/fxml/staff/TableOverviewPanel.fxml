@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane styleClass="sm-root"
-	stylesheets="@TableOverviewPanelStyles.css"
+	stylesheets="@../../gui/css/staff/TableOverviewPanelStyles.css"
 	xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
 	fx:controller="gui.logic.staff.TableOverviewPanel">
 	<center>
