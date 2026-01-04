@@ -139,5 +139,18 @@
     -fx-text-fill: #1f5cff;
     -fx-font-weight: 600;
 }
+.eye-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-cursor: hand; 
+}
+
+.eye-button:hover {
+    -fx-opacity: 0.6;
+}
+
+.password-field, .text-field {
+    -fx-padding: 0 35 0 10; 
+}
 
 

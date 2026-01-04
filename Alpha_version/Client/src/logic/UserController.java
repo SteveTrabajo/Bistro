@@ -178,5 +178,32 @@ public class UserController {
 		client.handleMessageFromClientUI(new Message(Api.ASK_REGISTERATION_STATS, null));
 	}
 
+	public boolean isEmployeeLoginSuccess() {
+		if (this.loggedInUser != null && (this.loggedInUser.getUserType() == UserType.EMPLOYEE))
+		{
+		return true;
+		}
+	
+		return false;
+	}
+	public boolean isManagerLoginSuccess() {
+		if (this.loggedInUser != null && (this.loggedInUser.getUserType() == UserType.MANAGER)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	public void staffLogin(String username, String password) {
+		String userLoginData = username + "_" + password;
+		client.handleMessageFromClientUI(new Message(Api.ASK_LOGIN_EMPLOYEE, userLoginData));
+		if (isEmployeeLoginSuccess()) {
+			return;
+		} else {
+			client.handleMessageFromClientUI(new Message(Api.ASK_LOGIN_MANAGER, userLoginData));
+		}
+		
+	}
+
 
 }

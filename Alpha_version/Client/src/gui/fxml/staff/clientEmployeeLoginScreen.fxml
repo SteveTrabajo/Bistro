@@ -14,99 +14,108 @@
 <?import javafx.scene.layout.VBox?>
 
 <StackPane prefHeight="720" prefWidth="1280" stylesheets="@../../css/staff/clientEmployeeLoginStyle.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="your.package.BistroLoginController">
-   <BorderPane prefHeight="200.0" prefWidth="200.0" styleClass="background">
-      <center>
-      
-          <!-- LOGIN CARD -->
-          <VBox alignment="CENTER" prefHeight="639.0" spacing="18" styleClass="login-card" BorderPane.alignment="CENTER">
-      
-              <!-- Icon -->
-              <StackPane prefHeight="64.0" prefWidth="227.0">
-               <styleClass>
-                  <String fx:value="icon-circle" />
-                  <String fx:value="icon" />
-               </styleClass>
-               <children>
-                  <ImageView fitHeight="36.0" fitWidth="36.0">
-                     <image>
-                        <Image url="@../../../resources/icons/loginlock.png" />
-                     </image>
-                  </ImageView>
-               </children>
-              </StackPane>
-      
-              <!-- Title -->
-              <Label styleClass="title" text="Bistro" />
-              <Label styleClass="subtitle" text="Management Portal" />
-      
-              <!-- Username -->
-              <VBox alignment="CENTER_LEFT" spacing="6">
-                  <Label styleClass="field-label" text="Username">
-                  <graphic>
-                     <ImageView fitHeight="15.0" fitWidth="15.0">
-                        <image>
-                           <Image url="@../../../resources/icons/personIconGery.png" />
-                        </image>
-                     </ImageView>
-                  </graphic>
-               </Label>
-                  <HBox alignment="CENTER_LEFT" spacing="10" styleClass="input-box">
-                      <TextField fx:id="txtUserName" promptText="Enter username" />
-                  </HBox>
-              </VBox>
-      
-              <!-- Password -->
-              <VBox alignment="CENTER_LEFT" spacing="6">
-                  <Label styleClass="field-label" text="Password">
-                  <graphic>
-                     <ImageView fitHeight="15.0" fitWidth="15.0">
-                        <image>
-                           <Image url="@../../../resources/icons/passwordIcon.png" />
-                        </image>
-                     </ImageView>
-                  </graphic>
-               </Label>
-                  <HBox alignment="CENTER_LEFT" spacing="10" styleClass="input-box">
-                      <PasswordField fx:id="txtPassword" promptText="Enter password" />
-                  </HBox>
-              </VBox>
-      
-              <!-- Sign in -->
-              <Button fx:id="btnSignIn" onAction="#btnSignIn" prefHeight="48.0" prefWidth="221.0" styleClass="btn-primary" text="Sign In" />
-            <Label styleClass="loginD-orText" text="Cannot remember your password?" />
-            <Button fx:id="btnForgotPassword" onAction="#btnForgotPassword" prefHeight="48.0" prefWidth="221.0" styleClass="btn-outline" text="Forgot Password" />
-      
-          </VBox>
-      </center>
-      <bottom>
-         <BorderPane BorderPane.alignment="CENTER">
-            <left>
-               <HBox alignment="BOTTOM_LEFT">
-                  <children>
-                     <Label styleClass="footer-label" text="© 2025 Bistro · All rights reserved · v1.0.0" textFill="WHITE" />
-                  </children>
-                  <padding>
-                     <Insets bottom="16" left="24" right="0" top="0" />
-                  </padding>
-               </HBox>
-            </left>
-         </BorderPane>
-      </bottom>
-      <top>
-         <BorderPane>
-            <left>
-               <Button fx:id="btnBack" mnemonicParsing="false" onAction="#btnBack" styleClass="nav-back" text="Back">
-                  <graphic>
-                     <ImageView fitHeight="14.0" fitWidth="7.0">
-                        <image>
-                           <Image url="@../../../resources/icons/backIcon.png" />
-                        </image>
-                     </ImageView>
-                  </graphic>
-               </Button>
-            </left>
-         </BorderPane>
-      </top>
-   </BorderPane>
+	<BorderPane prefHeight="200.0" prefWidth="200.0" styleClass="background">
+		<center>
 
+			<VBox alignment="CENTER" prefHeight="639.0" spacing="18" styleClass="login-card" BorderPane.alignment="CENTER">
+
+				<StackPane prefHeight="64.0" prefWidth="227.0">
+					<styleClass>
+						<String fx:value="icon-circle" />
+						<String fx:value="icon" />
+					</styleClass>
+					<children>
+						<ImageView fitHeight="36.0" fitWidth="36.0">
+							<image>
+								<Image url="@../../../resources/icons/loginlock.png" />
+							</image>
+						</ImageView>
+					</children>
+				</StackPane>
+
+				<Label styleClass="title" text="Bistro" />
+				<Label styleClass="subtitle" text="Management Portal" />
+
+				<VBox alignment="CENTER_LEFT" spacing="6">
+					<Label styleClass="field-label" text="Username">
+						<graphic>
+							<ImageView fitHeight="15.0" fitWidth="15.0">
+								<image>
+									<Image url="@../../../resources/icons/personIconGery.png" />
+								</image>
+							</ImageView>
+						</graphic>
+					</Label>
+					<HBox alignment="CENTER_LEFT" spacing="10" styleClass="input-box">
+						<TextField fx:id="txtUserName" promptText="Enter username" />
+					</HBox>
+				</VBox>
+
+				<VBox alignment="CENTER_LEFT" spacing="6">
+					<Label styleClass="field-label" text="Password">
+						<graphic>
+							<ImageView fitHeight="15.0" fitWidth="15.0">
+								<image>
+									<Image url="@../../../resources/icons/passwordIcon.png" />
+								</image>
+							</ImageView>
+						</graphic>
+					</Label>
+					<HBox alignment="CENTER_LEFT" spacing="10" styleClass="input-box">
+						<StackPane alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+							<children>
+								<PasswordField fx:id="txtPassword" promptText="Enter password" />
+
+								<TextField fx:id="txtPasswordVisible" managed="false" promptText="Enter password" visible="false" />
+
+								<Button fx:id="btnToggleVisibility" mnemonicParsing="false" onAction="#togglePassword" styleClass="eye-button">
+									<StackPane.margin>
+										<Insets right="8.0" />
+									</StackPane.margin>
+								</Button>
+										<ImageView fx:id="imgEyeIcon" fitHeight="19.0" fitWidth="28.0" opacity="0.2" pickOnBounds="true" preserveRatio="true">
+											<image>
+												<Image url="@../../../resources/icons/eye-open.png" />
+											</image>
+										</ImageView>
+							</children>
+						</StackPane>
+					</HBox>
+				</VBox>
+				<Button fx:id="btnSignIn" onAction="#btnSignIn" prefHeight="48.0" prefWidth="221.0" styleClass="btn-primary" text="Sign In" />
+				<Label styleClass="loginD-orText" text="Cannot remember your password?" />
+				<Button fx:id="btnForgotPassword" onAction="#btnForgotPassword" prefHeight="48.0" prefWidth="221.0" styleClass="btn-outline" text="Forgot Password" />
+
+			</VBox>
+		</center>
+		<bottom>
+			<BorderPane BorderPane.alignment="CENTER">
+				<left>
+					<HBox alignment="BOTTOM_LEFT">
+						<children>
+							<Label styleClass="footer-label" text="© 2025 Bistro · All rights reserved · v1.0.0" textFill="WHITE" />
+						</children>
+						<padding>
+							<Insets bottom="16" left="24" right="0" top="0" />
+						</padding>
+					</HBox>
+				</left>
+			</BorderPane>
+		</bottom>
+		<top>
+			<BorderPane>
+				<left>
+					<Button fx:id="btnBack" mnemonicParsing="false" onAction="#btnBack" styleClass="nav-back" text="Back">
+						<graphic>
+							<ImageView fitHeight="14.0" fitWidth="7.0">
+								<image>
+									<Image url="@../../../resources/icons/backIcon.png" />
+								</image>
+							</ImageView>
+						</graphic>
+					</Button>
+				</left>
+			</BorderPane>
+		</top>
+	</BorderPane>
 </StackPane>
