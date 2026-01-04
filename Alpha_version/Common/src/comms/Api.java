@@ -107,9 +107,13 @@ public final class Api {
     // == Restaurant Management subject == //
 // Requests
     public static final String ASK_TABLE_STATUS = "tables.getStatus";
+	public static final String ASK_LOAD_CUSTOMERS_DATA = "customers.getalldata";
     
 // Responses
-    
+	public static final String REPLY_TABLE_STATUS_OK = "tables.getStatus.ok";
+	public static final String REPLY_TABLE_STATUS_FAIL = "tables.getStatus.fail";
+	public static final String REPLY_LOAD_CUSTOMERS_DATA_OK = "customers.getalldata.ok";
+	public static final String REPLY_LOAD_CUSTOMERS_DATA_FAIL = "customers.getalldata.fail";
     // == WaitList subject == //
   // Requests
 	public static final String ASK_WAITING_LIST_JOIN = "waitingList.join";
