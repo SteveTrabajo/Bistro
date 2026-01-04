@@ -14,7 +14,7 @@ import entities.User;
  * the BistroClientGUI.
  */
 
-public class ClientEditPersonalScreen {
+public class ClientEditPersonalDetailsScreen {
 	// ****************************** FXML Elements ******************************
 	@FXML
 	private Button btnBack;
