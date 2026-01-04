@@ -18,6 +18,7 @@ public class WaitingListController {
 	private final BistroClient client;
 	private boolean userOnWaitingList = false;
 	private boolean leaveWaitingListSuccess = false;
+	private boolean skipWaitingListJoin = false;
 	private Map<LocalDate, TreeMap<LocalTime, Order>> waitingList;
 	
 	private Consumer<Map<String, Map<String, Order>>> waitingListUpdateCallback;
@@ -34,8 +35,12 @@ public class WaitingListController {
 	public void setWaitingList(Map<LocalDate, TreeMap<LocalTime, Order>> waitingList) {
 		this.waitingList = waitingList;
 	}
-	
-	
+	public void setskipWaitingListJoin(boolean skipWaitingListJoin) {
+		this.skipWaitingListJoin = skipWaitingListJoin;
+	}
+	public boolean getskipWaitingListJoin() {
+		return skipWaitingListJoin;
+	}
 	//********************************Instance Methods ***********************************//
 	
 	public void askUserOnWaitingList(int userID) { // verficationID can be memberID or phone number/email for guest
