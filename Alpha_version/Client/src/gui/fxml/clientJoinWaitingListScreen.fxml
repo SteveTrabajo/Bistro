@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane styleClass="wl-root" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bistro.app.controllers.WaitingListJoinScreen">
+<StackPane styleClass="wl-root" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.ClientJoinWaitingListScreen">
 
     <children>
         <BorderPane prefHeight="720" prefWidth="1280">
@@ -120,7 +120,6 @@
         </BorderPane>
     </children>
    <stylesheets>
-      <URL value="@../css/waiting_list_join.css" />
       <URL value="@../../gui/css/clientJoinWaitingListStyles.css" />
    </stylesheets>
 </StackPane>

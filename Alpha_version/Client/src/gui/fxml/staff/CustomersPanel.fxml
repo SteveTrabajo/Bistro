@@ -59,7 +59,7 @@
     <!-- Search + filter -->
     <HBox alignment="CENTER_LEFT" spacing="12" styleClass="cm-search-card">
         <TextField fx:id="searchField" promptText="Search by name, email, phone, or member code..." styleClass="cm-search-field" HBox.hgrow="ALWAYS" />
-      <Button mnemonicParsing="false" styleClass="cm-btn" text="Refresh List" />
+      <Button fx:id="btnRefresh" mnemonicParsing="false" onAction="#btnRefresh" styleClass="cm-btn" text="Refresh List" />
     </HBox>
 
     <!-- Table card -->

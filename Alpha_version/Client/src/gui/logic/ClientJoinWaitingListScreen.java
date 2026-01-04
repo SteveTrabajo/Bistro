@@ -5,7 +5,6 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import logic.BistroClientGUI;
 
@@ -15,23 +14,30 @@ import logic.BistroClientGUI;
  * join the waiting list.
  */
 public class ClientJoinWaitingListScreen {
-	//*********** FXML Elements ***********//
+	
+	//**************** FXML Variables ****************//
 	@FXML
 	private Button btnCheckAvail;
+	
 	@FXML
 	private Button btnPlus;
+	
 	@FXML
 	private Button btnMinus;
-	@FXML
-	private Label lblDinersAmount;
-	@FXML
-	private Label lblUser;
-	@FXML
-	private Label lblError;
+	
 	@FXML
 	private Button btnBack;
 	
-	//***********FXML Methods***********//
+	@FXML
+	private Label lblDinersAmount;
+	
+	@FXML
+	private Label lblUser;
+	
+	@FXML
+	private Label lblError;
+	
+	//**************** FXML Methods ****************//
 	/**
 	 * Initializes the screen by setting up user information and button actions.
 	 */
@@ -40,21 +46,39 @@ public class ClientJoinWaitingListScreen {
 		User currentUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
 		lblUser.setText(currentUser.getUserType().name());
 		lblDinersAmount.setText("1");
-		btnPlus.setOnAction(e -> {
-			int currentAmount = Integer.parseInt(lblDinersAmount.getText());
-			if (currentAmount < 12) {
-				currentAmount++;
-				lblDinersAmount.setText(String.valueOf(currentAmount));
-			}
-		});
-		btnMinus.setOnAction(e -> {
-			int currentAmount = Integer.parseInt(lblDinersAmount.getText());
-			if (currentAmount > 1) {
-				currentAmount--;
-				lblDinersAmount.setText(String.valueOf(currentAmount));
-			}
-		});
 	}
+	
+	/**
+	 * Handles the action when the "+" button is clicked.
+	 * It increments the number of diners, ensuring it does not exceed 12.
+	 * 
+	 * @param event The event triggered by clicking the button.
+	 */
+	@FXML
+	public void btnPlus(Event event) {
+		int currentAmount = Integer.parseInt(lblDinersAmount.getText());
+		if (currentAmount < 12) {
+			currentAmount++;
+			lblDinersAmount.setText(String.valueOf(currentAmount));
+		}
+	}
+	
+	
+	/**
+	 * Handles the action when the "-" button is clicked.
+	 * It decrements the number of diners, ensuring it does not go below 1.
+	 * 
+	 * @param event The event triggered by clicking the button.
+	 */
+	@FXML
+	public void btnMinus(Event event) {
+		int currentAmount = Integer.parseInt(lblDinersAmount.getText());
+		if (currentAmount > 1) {
+			currentAmount--;
+			lblDinersAmount.setText(String.valueOf(currentAmount));
+		}
+	}
+	
 	
 	/**
 	 * Handles the action when the "Check Availability" button is clicked.
