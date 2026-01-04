@@ -1,0 +1,148 @@
+.root { -fx-font-family: "Segoe UI", "Arial"; }
+
+.ad-scroll { -fx-background: #f4f6f9; -fx-background-color: #f4f6f9; }
+.ad-scroll > .viewport { -fx-background-color: #f4f6f9; }
+
+.ad-root { -fx-background-color: #f4f6f9; }
+
+.ad-title { -fx-font-size: 34px; -fx-font-weight: 800; -fx-text-fill: #0f172a; }
+.ad-subtitle { -fx-font-size: 14px; -fx-text-fill: #64748b; }
+
+.ad-card {
+  -fx-background-color: white;
+  -fx-background-radius: 12;
+  -fx-padding: 16;
+  -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.10), 14, 0.10, 0, 6);
+}
+
+/* KPI = Key Performance Indicator */
+.ad-kpi {
+  -fx-background-color: white;
+  -fx-background-radius: 12;
+  -fx-padding: 14;
+  -fx-min-height: 78;
+  -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.10), 12, 0.10, 0, 6);
+  -fx-border-width: 0 0 0 4;
+  -fx-border-radius: 12;
+}
+.ad-left-blue { -fx-border-color: #2563eb; }
+.ad-left-green { -fx-border-color: #16a34a; }
+.ad-left-purple { -fx-border-color: #7c3aed; }
+.ad-left-orange { -fx-border-color: #f97316; }
+
+.ad-kpi-label { -fx-font-size: 12px; -fx-text-fill: #64748b; }
+.ad-kpi-value { -fx-font-size: 24px; -fx-font-weight: 900; -fx-text-fill: #0f172a; }
+.ad-kpi-icon { -fx-font-size: 18px; -fx-text-fill: #64748b; }
+.ad-kpi-delta { -fx-font-size: 12px; -fx-text-fill: #16a34a; -fx-font-weight: 800; }
+.ad-kpi-month { -fx-font-size: 12px; -fx-text-fill: #64748b; }
+
+/* Titles */
+.ad-card-title { -fx-font-size: 18px; -fx-font-weight: 900; -fx-text-fill: #0f172a; }
+.ad-card-subtitle { -fx-font-size: 12px; -fx-text-fill: #64748b; }
+
+/* Charts */
+.ad-chart { -fx-background-color: transparent; }
+.chart-plot-background { -fx-background-color: transparent; }
+.chart-vertical-grid-lines { -fx-stroke: #e2e8f0; }
+.chart-horizontal-grid-lines { -fx-stroke: #e2e8f0; }
+.axis { -fx-tick-label-fill: #64748b; }
+.axis-label { -fx-text-fill: #64748b; }
+
+/* Mini totals under bar chart */
+.ad-mini {
+  -fx-background-radius: 12;
+  -fx-padding: 12;
+}
+.ad-mini-green { -fx-background-color: #f0fdf4; }
+.ad-mini-red { -fx-background-color: #fff1f2; }
+.ad-mini-label { -fx-font-size: 12px; -fx-text-fill: #64748b; }
+.ad-mini-value { -fx-font-size: 18px; -fx-font-weight: 900; -fx-text-fill: #0f172a; }
+
+/* Summary boxes under line chart */
+.ad-summary {
+  -fx-background-color: #f8fafc;
+  -fx-background-radius: 12;
+  -fx-padding: 12;
+}
+.ad-summary-blue { -fx-background-color: #eff6ff; }
+.ad-summary-purple { -fx-background-color: #f5f3ff; }
+
+.ad-summary-label { -fx-font-size: 12px; -fx-text-fill: #64748b; }
+.ad-summary-value { -fx-font-size: 12px; -fx-text-fill: #0f172a; -fx-font-weight: 700; }
+.ad-summary-big { -fx-font-size: 18px; -fx-text-fill: #0f172a; -fx-font-weight: 900; }
+
+/* Progress rows (built in code) */
+.ad-row { -fx-padding: 6 0; }
+.ad-row-title { -fx-text-fill: #0f172a; -fx-font-weight: 700; }
+.ad-row-pct { -fx-text-fill: #0f172a; -fx-font-weight: 800; }
+
+.ad-bar {
+  -fx-accent: #2563eb; /* default */
+}
+.ad-bar-green { -fx-accent: #16a34a; }
+.ad-bar-blue  { -fx-accent: #2563eb; }
+
+.progress-bar {
+  -fx-background-radius: 999;
+}
+.progress-bar .track {
+  -fx-background-color: #e2e8f0;
+  -fx-background-radius: 999;
+}
+.progress-bar .bar {
+  -fx-background-radius: 999;
+}
+
+
+/* ================= ScrollBar ================= */
+
+.scroll-bar {
+    -fx-background-color: rgb(0, 0, 0);;
+}
+
+/* המסילה (הרקע) */
+.scroll-bar:vertical .track,
+.scroll-bar:horizontal .track {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+/* הידית (החלק שנגרר) */
+.scroll-bar:vertical .thumb,
+.scroll-bar:horizontal .thumb {
+    -fx-background-color: rgba(196, 196, 196, 0.6); /* slate */
+    -fx-background-radius: 15px;
+}
+
+/* hover */
+.scroll-bar:vertical .thumb:hover,
+.scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: rgba(37, 99, 235, 0.8); /* כחול */
+}
+
+/* לחיצה */
+.scroll-bar:vertical .thumb:pressed,
+.scroll-bar:horizontal .thumb:pressed {
+    -fx-background-color: #2563eb;
+}
+
+/* גודל ברירת מחדל */
+.scroll-bar:vertical {
+    -fx-pref-width: 12px;
+}
+
+.scroll-bar:horizontal {
+    -fx-pref-height: 12px;
+}
+
+/* ביטול חיצים */
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-prfer-width: 5px;
+}
