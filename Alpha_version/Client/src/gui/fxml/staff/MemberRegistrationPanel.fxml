@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane styleClass="ur-root" stylesheets="@MemberRegistraionPanelStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.staff.MemberRegistrationPanel">
+<BorderPane styleClass="ur-root" stylesheets="@MemberRegistraionPanelStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.staff.MemberRegistrationScreen">
   <padding>
     <Insets bottom="18" left="18" right="18" top="18" />
   </padding>

@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="220" maxWidth="420" prefHeight="220.0" prefWidth="420.0" style="                 -fx-background-color: white;                 -fx-background-radius: 15;                 -fx-border-radius: 15;                 -fx-border-color: #d0d0d0;                 -fx-border-width: 1;                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 20, 0, 0, 4);" stylesheets="@/gui/css/styles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controllers.ConnectionStatusWindowController">
+<BorderPane maxHeight="220" maxWidth="420" prefHeight="220.0" prefWidth="420.0" style="-fx-background-color: white;-fx-background-radius: 15;-fx-border-radius: 15;-fx-border-color: #d0d0d0;-fx-border-width: 1;-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 20, 0, 0, 4);" stylesheets="@../../gui/css/gui/css/styles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controllers.ConnectionStatusWindowScreen">
 	<top>
 		<HBox alignment="TOP_RIGHT" prefHeight="40.0" BorderPane.alignment="CENTER">
 			<children>

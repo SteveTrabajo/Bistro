@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane styleClass="onlist-root" stylesheets="@../../gui/css/clientOnListStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bistro.app.controllers.WaitingListOnListController">
+<StackPane styleClass="onlist-root" stylesheets="@../../gui/css/clientOnListStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bistro.app.controllers.WaitingListOnListScreen">
 
     <children>
         <BorderPane prefHeight="720" prefWidth="1280">
