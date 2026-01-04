@@ -72,6 +72,7 @@ public class ClientDashboardScreen {
 	 */
 	@FXML
 	public void initialize() {
+//TODO : add method to disable join waiting list button and check in for table button if there is an active reservation for the user.
 		UserType type = BistroClientGUI.client.getUserCTRL().getLoggedInUserType();
 		switch (type) {
 		case GUEST:
@@ -224,11 +225,6 @@ public class ClientDashboardScreen {
 		} else {
 			display(lblError, "Failed to sign out. Please try again.", Color.RED);
 		}
-	}
-	
-	
-	public void seatedCostumer{
-		
 	}
 	
 	
