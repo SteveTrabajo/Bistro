@@ -2,81 +2,124 @@ package logic;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.function.Consumer;
 
 import comms.Api;
 import comms.Message;
 import entities.Order;
 import enums.OrderStatus;
+import gui.logic.staff.WaitingListPanel;
 
+/*
+ * This class represents the controller for waiting list operations in the BistroClient.
+ */
 public class WaitingListController {
 	
-	//****************************** Instance variables ******************************//
+	// ****************************** Instance variables ******************************
 	private final BistroClient client;
+	
+	// State variables
 	private boolean userOnWaitingList = false;
 	private boolean leaveWaitingListSuccess = false;
 	private boolean skipWaitingListJoin = false;
-	private Map<LocalDate, TreeMap<LocalTime, Order>> waitingList;
 	
-	private Consumer<Map<String, Map<String, Order>>> waitingListUpdateCallback;
+	// Data Holders
+	private ArrayList<Order> waitingList = new ArrayList<>();
 	
-	//******************************** Constructors ***********************************//
+	// GUI Reference (for refreshing the table)
+	private WaitingListPanel waitingListPanelController; 
+
+	// ******************************** Constructors ***********************************
 	public WaitingListController(BistroClient client) {
 		this.client = client;
-		this.waitingList = new TreeMap<>();
 	}
-	//******************************** Getter and Setters ***********************************//
-	public Map<LocalDate, TreeMap<LocalTime, Order>> getWaitingList() {
+
+	// ******************************** Getters And Setters ***********************************
+	public ArrayList<Order> getWaitingList() {
 		return waitingList;
 	}
 	
-	public void setWaitingList(Map<LocalDate, TreeMap<LocalTime, Order>> waitingList) {
+	public void setWaitingList(ArrayList<Order> waitingList) {
 		this.waitingList = waitingList;
+		// If the UI is open, update it immediately
+		if (waitingListPanelController != null) {
+			waitingListPanelController.updateListFromServer(waitingList);
+		}
 	}
+	
 	public void setskipWaitingListJoin(boolean skipWaitingListJoin) {
 		this.skipWaitingListJoin = skipWaitingListJoin;
 	}
+	
 	public boolean getskipWaitingListJoin() {
 		return skipWaitingListJoin;
 	}
-	//********************************Instance Methods ***********************************//
 	
-	public void askUserOnWaitingList(int userID) { // verficationID can be memberID or phone number/email for guest
-		client.handleMessageFromClientUI(new Message(Api.ASK_IS_IN_WAITLIST, userID));
-		return;
+	public void setUserOnWaitingList(boolean status) {
+		this.userOnWaitingList = status;
 	}
+	
 	public boolean isUserOnWaitingList() {
-		if (client.getReservationCTRL().getReadyUserReservation() == null) {
-			return false;
+		// Checks if user status locally is true OR if the active reservation says so
+		if (client.getReservationCTRL().getReadyUserReservation() != null) {
+			return client.getReservationCTRL().getReadyUserReservation().getStatus() == OrderStatus.WAITING_LIST;
 		}
-		OrderStatus status = client.getReservationCTRL().getReadyUserReservation().getStatus();
-		return status == OrderStatus.WAITING_LIST;
-		
+		return userOnWaitingList;
 	}
-	public void joinWaitingList( int dinersAmount) {
+	
+	public void setLeaveWaitingListSuccess(boolean status) {
+		this.leaveWaitingListSuccess = status;
+		// If true (left successfully), refresh the list for the staff view
+		if (status && waitingListPanelController != null) {
+			askWaitingList();
+		}
+	}
+	
+	public boolean isLeaveWaitingListSuccess() {
+		return leaveWaitingListSuccess;
+	}
+    
+    /**
+     * Links the Staff GUI controller so it can receive updates.
+     */
+    public void setGuiController(WaitingListPanel guiController) {
+        this.waitingListPanelController = guiController;
+    }
+
+	// ******************************** Instance Methods (Requests) ***********************************
+	
+	public void askUserOnWaitingList(int userID) { 
+		client.handleMessageFromClientUI(new Message(Api.ASK_IS_IN_WAITLIST, userID));
+	}
+
+	public void joinWaitingList(int dinersAmount) {
 		Map<String, Object> req = new HashMap<>();
         req.put("diners", dinersAmount);
+		client.handleMessageFromClientUI(new Message(Api.ASK_WAITING_LIST_JOIN, req));
+	}
 
-		client.handleMessageFromClientUI(new Message(Api.ASK_WAITING_LIST_JOIN,req));
-	}
-	public Object setCurrentWaitingOrder(Order waitingOrder) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 	public void leaveWaitingList() {
 		client.handleMessageFromClientUI(new Message(Api.ASK_WAITING_LIST_LEAVE, null));
-		
 	}
-	public boolean isLeaveWaitingListSuccess() {
-		if (client.getReservationCTRL().getReadyUserReservation() == null) {
-			return true;
-		}
-		OrderStatus status = client.getReservationCTRL().getReadyUserReservation().getStatus();
-		return status != OrderStatus.WAITING_LIST;
-	}
-	
 
+    /**
+     * Staff Method: Requests the full waiting list from the server.
+     */
+    public void askWaitingList() {
+        client.handleMessageFromClientUI(new Message(Api.ASK_GET_WAITING_LIST, null));
+    }
+
+    /**
+     * Staff Method: Removes a specific customer from the list.
+     */
+    public void removeFromWaitingList(String confirmationCode) {
+        client.handleMessageFromClientUI(new Message(Api.ASK_WAITING_LIST_LEAVE, confirmationCode));
+    }
+    
+    public void addWalkIn(Map<String, Object> details) {
+        client.handleMessageFromClientUI(new Message(Api.ASK_WAITING_LIST_ADD_WALKIN, details));
+    }
 }

@@ -34,7 +34,7 @@
     <HBox spacing="10" styleClass="wl-stat wl-left-blue" HBox.hgrow="ALWAYS">
       <VBox prefHeight="77.0" prefWidth="110.0" spacing="6" HBox.hgrow="ALWAYS">
         <Label styleClass="wl-stat-label" text="Notified to seat" />
-        <Label fx:id="calledCountLabel" styleClass="wl-stat-value" text="0" />
+        <Label fx:id="lblTotalNotifiedLabel" styleClass="wl-stat-value" text="0" />
         <styleClass>
           <String fx:value="wl-stat" />
           <String fx:value="wl-left-purple" />

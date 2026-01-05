@@ -1,5 +1,8 @@
 package gui.logic;
 
+import java.util.ArrayList;
+
+import entities.Order;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -16,13 +19,10 @@ public class ClientOnListScreen {
 
 	@FXML
 	private Button btnBack;
-	
 	@FXML
 	private Button btnLeave;
-	
 	@FXML
 	private Label lblConfirmCode;
-	
 	@FXML
 	private Label lblError;
 
@@ -35,20 +35,29 @@ public class ClientOnListScreen {
 	//TODO: refactor logic of the method
 	@FXML
 	public void initialize() {
+		//check the specific reservation stored for this session
+		Order activeOrder = BistroClientGUI.client.getReservationCTRL().getReadyUserReservation();
+		
+		if (activeOrder != null && activeOrder.getConfirmationCode() != null) {
+			lblConfirmCode.setText(activeOrder.getConfirmationCode());
+			return;
+		}
+
+		//search the Waiting List cache
 		int currentUserId = BistroClientGUI.client.getUserCTRL().getLoggedInUser().getUserId();
-		var waitingListByDate = BistroClientGUI.client.getWaitingListCTRL().getWaitingList();
-		if (waitingListByDate != null) {
-			for (var timeMap : waitingListByDate.values()) {
-				for (var order : timeMap.values()) {
-					if (order.getUserId() == currentUserId) {
-						lblConfirmCode.setText(order.getConfirmationCode());
-						return;
-					}
+		ArrayList<Order> waitingList = BistroClientGUI.client.getWaitingListCTRL().getWaitingList();
+		
+		if (waitingList != null) {
+			for (Order order : waitingList) {
+				if (order.getUserId() == currentUserId) {
+					lblConfirmCode.setText(order.getConfirmationCode());
+					return;
 				}
 			}
 		}
-		// If no order was found for this user, show nothing
-		lblConfirmCode.setText("ERROR.");
+		
+		// If no order was found
+		lblConfirmCode.setText("Error");
 	}
 	
 	/**

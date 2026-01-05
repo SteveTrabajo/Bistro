@@ -130,9 +130,9 @@ public class InputCheck {
 	// ==================== User Validation Methods ====================
 	
 	// Regex patterns for phone number and email validation
-	private static final String PHONE_REGEX = "^\\d{9,15}$";
+	private static final String PHONE_REGEX = "^(0|\\+972)5\\d{8}$";
 	private static final Pattern PHONE_PATTERN = Pattern.compile(PHONE_REGEX);
-	private static final String EMAIL_REGEX = "\"^[A-Za-z0-9+_.-]+@(.+)$\"";
+	private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
 	private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
 
 	/*
@@ -147,24 +147,24 @@ public class InputCheck {
 			return "Phone number is required.";
 		}
 		if (!phoneNumber.matches("\\d{10}")) {
-			return "Error: Phone number must contain exactly 10 digits";
+			return "Invalid phone number. Must be 05XXXXXXXX or +9725XXXXXXXX";
 		}
 		return "";
 	}
 
 	/*
-	 * Validates if the given email contains the @ symbol.
-	 * 
-	 * @param email The email to validate.
-	 * 
-	 * @return An error message if validation fails, otherwise an empty string.
+	 * Validates if the given email matches the strict format (user@domain.txt).
+	 * * @param email The email to validate.
+	 * * @return An error message if validation fails, otherwise an empty string.
 	 */
 	public static String validateEmail(String email) {
 		if (email == null || email.trim().isEmpty()) {
 			return "Email is required.";
 		}
-		if (!email.contains("@")) {
-			return "Error: Email must contain @";
+		
+		// Updated to use the strict Pattern instead of just contains("@")
+		if (!EMAIL_PATTERN.matcher(email).matches()) {
+			return "Error: Invalid email format (example: user@domain.com)";
 		}
 		return "";
 	}
@@ -185,7 +185,7 @@ public class InputCheck {
 			errorMessage += "You must enter a phone number, an email address or both\n";
 		} else {
 			if (!phoneNumber.trim().isEmpty() && !PHONE_PATTERN.matcher(phoneNumber).matches()) {
-				errorMessage += "Phone number must be exactly 10 digits\n";
+				errorMessage += "Invalid Israeli phone format (05XXXXXXXX or +9725XXXXXXXX)\n";
 			}
 			if (!emailAddress.trim().isEmpty() && !EMAIL_PATTERN.matcher(emailAddress).matches()) {
 				errorMessage += "Invalid email address format\n";
@@ -252,5 +252,12 @@ public class InputCheck {
 		// Private constructor to prevent instantiation
 	}
 
+	public static String validateWalkIn(boolean isMember, String memberCode, String phone, String email) {
+        if (isMember) {
+            return validateMemberCode6DigitsNoLeadingZero(memberCode);
+        } else {
+            return isValidGuestInfo(phone, email);
+        }
+    }
 	
 }

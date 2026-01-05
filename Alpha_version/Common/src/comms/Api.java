@@ -14,20 +14,20 @@ public final class Api {
 
 	private Api() {}
 
-    // == Connection subject == // 
+// == Connection subject == // 
     
-// Requests
+	// Requests
     public static final String ASK_CONNECTION_CONNECT    = "connection.connect";
     public static final String ASK_CONNECTION_DISCONNECT = "connection.disconnect";
     public static final String NOTIFY_CONNECTION = "connection.notifyConnection";
     
-// Responses
+    // Responses
     public static final String REPLY_CONNECTION_CONNECT_OK = "connection.connect.ok";
     public static final String REPLY_CONNECTION_DISCONNECT_OK = "connection.disconnect.ok";
 
-    // == Login/signOut subject == //
+// == Login/signOut subject == //
     
-// Requests
+    // Requests
     public static final String ASK_LOGIN_GUEST = "login.guest";
     public static final String ASK_LOGIN_MEMBER = "login.member";
     public static final String ASK_LOGIN_EMPLOYEE = "login.employee";
@@ -37,7 +37,7 @@ public final class Api {
     public static final String ASK_SIGNOUT_EMPLOYEE = "signout.employee";
     public static final String ASK_SIGNOUT_MANAGER = "signout.manager";
     
-// Responses
+    // Responses
     public static final String REPLY_LOGIN_GUEST_OK = "login.guest.ok";
     public static final String REPLY_LOGIN_MEMBER_OK = "login.member.ok";
     public static final String REPLY_LOGIN_EMPLOYEE_OK = "login.employee.ok";
@@ -59,13 +59,15 @@ public final class Api {
     public static final String REPLY_SIGNOUT_EMPLOYEE_FAIL = "signout.employee.fail";
     public static final String REPLY_SIGNOUT_MANAGER_FAIL = "signout.manager.fail";
 
-    // == User subject == //
+// == User subject == //
+    
     // Requests
     public static final String ASK_MEMBER_UPDATE_INFO = "member.updateInfo";
     public static final String ASK_FORGOT_MEMBER_ID = "User.forgotMemberID";
     public static final String ASK_REGISTER_NEW_MEMBER = "user.registerNewMember";
     public static final String ASK_REGISTERATION_STATS = "member.registerationStats";
     public static final String ASK_STAFF_CREATE = "staff.create";
+    
     //Responses
     public static final String REPLY_MEMBER_UPDATE_INFO_OK = "member.updateInfo.ok";
     public static final String REPLY_MEMBER_UPDATE_INFO_FAILED = "member.updateInfo.failed";
@@ -81,9 +83,9 @@ public final class Api {
     public static final String REPLY_STAFF_CREATE_INVALID_DATA = "staff.create.invalidData";
     public static final String REPLY_STAFF_CREATE_UNAUTHORIZED = "staff.create.unauthorized";
     
-    // == Orders subject == //
+// == Orders subject == //
     
-// Requests
+    // Requests
     public static final String ASK_CREATE_RESERVATION 	= "orders.createReservation";
     public static final String ASK_ORDER_AVAILABLE_HOURS = "orders.getAvailableHours";
     public static final String ASK_GET_ORDER = "orders.getOrder";
@@ -94,7 +96,7 @@ public final class Api {
     public static final String ASK_UPDATE_RESERVATION = "orders.updateReservation";
     public static final String ASK_GET_RESERVATIONS_BY_DATE = "orders.getOrdersByDate";
     
-// Responses
+    // Responses
     public static final String REPLY_CREATE_RESERVATION_OK = "orders.createReservation.ok";
     public static final String REPLY_CREATE_RESERVATION_FAIL = "orders.createReservation.fail";
     public static final String REPLY_ORDER_AVAILABLE_HOURS_OK= "orders.getAvailableHours.ok";
@@ -114,23 +116,29 @@ public final class Api {
     public static final String REPLY_GET_RESERVATIONS_BY_DATE_OK = "orders.getOrdersByDate.ok";
     public static final String REPLY_GET_RESERVATIONS_BY_DATE_FAIL = "orders.getOrdersByDate.fail";
     
-    // == Restaurant Management subject == //
-// Requests
+// == Restaurant Management subject == //
+    
+    // Requests
     public static final String ASK_TABLE_STATUS = "tables.getStatus";
 	public static final String ASK_LOAD_CUSTOMERS_DATA = "customers.getalldata";
 	public static final String ASK_MONTHLY_REPORT_DATA = "monthlyReports.getData";
     
-// Responses
+	// Responses
 	public static final String REPLY_TABLE_STATUS_OK = "tables.getStatus.ok";
 	public static final String REPLY_TABLE_STATUS_FAIL = "tables.getStatus.fail";
 	public static final String REPLY_LOAD_CUSTOMERS_DATA_OK = "customers.getalldata.ok";
 	public static final String REPLY_LOAD_CUSTOMERS_DATA_FAIL = "customers.getalldata.fail";
-    // == WaitList subject == //
-  // Requests
+	
+// == WaitList subject == //
+	
+	// Requests
 	public static final String ASK_WAITING_LIST_JOIN = "waitingList.join";
 	public static final String ASK_WAITING_LIST_LEAVE = "waitingList.leave";
 	public static final String ASK_IS_IN_WAITLIST = "waitinglist.isInWaitingList";
- // Responses
+	public static final String ASK_GET_WAITING_LIST = "waitinglist.getAll";
+	public static final String ASK_WAITING_LIST_ADD_WALKIN = "waitinglist.addWalkIn";
+	
+	// Responses
     public static final String REPLY_WAITING_LIST_JOIN_OK = "waitinglist.join.ok";
     public static final String REPLY_WAITING_LIST_SKIPPED = "waitinglist.join.skipped";
     public static final String REPLY_WAITING_LIST_JOIN_FAIL = "waitinglist.join.fail";
@@ -138,19 +146,22 @@ public final class Api {
     public static final String REPLY_WAITING_LIST_LEAVE_FAIL = "waitinglist.leave.fail";
     public static final String REPLY_IS_IN_WAITLIST_YES = "waitinglist.isInWaitingList.yes";
     public static final String REPLY_IS_IN_WAITLIST_NO = "waitinglist.isInWaitingList.no";
-    public static final String REPLY_WAITING_LIST_NOTIFIED_OK = "waitinglist.notified.ok";//
-    public static final String REPLY_WAITING_LIST_NOTIFIED_FAIL = "waitinglist.notified.fail";//
+    public static final String REPLY_WAITING_LIST_NOTIFIED_OK = "waitinglist.notified.ok";
+    public static final String REPLY_WAITING_LIST_NOTIFIED_FAIL = "waitinglist.notified.fail";
+    public static final String REPLY_GET_WAITING_LIST = "waitinglist.getAll.ok";
+    public static final String REPLY_WAITING_LIST_ADD_WALKIN_OK = "waitinglist.addWalkIn.ok";
     
-    // == Payment subject == //
-// Requests
+// == Payment subject == //
+    
+    // Requests
     public static final String ASK_PAYMENT_COMPLETE = "payment.complete";
     
-// Responses
+    // Responses
 	public static final String REPLY_PAYMENT_COMPLETE_OK = "payment.complete.ok";
 	public static final String REPLY_PAYMENT_COMPLETE_FAIL = "payment.complete.fail";
   
     
-    // == System responses == //
+// == System responses == //
     
     public static final String REPLY_UNKNOWN_COMMAND = "system.unknownCommand";
 }
