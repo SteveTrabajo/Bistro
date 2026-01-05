@@ -1,16 +1,19 @@
 package logic.api.subjects;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import entities.Order;
 import entities.User;
-import logic.BistroClient;
+import entities.UserData;
+
 import logic.BistroClientGUI;
 import logic.UserController;
 import logic.api.ClientRouter;
 import enums.UserType;
-import javafx.scene.control.Alert;
 
+import javafx.scene.control.Alert;
+import logic.UserDataMapper;
 public class UserSubject {
 
 	public static void register(ClientRouter router) {
@@ -52,17 +55,26 @@ public class UserSubject {
 		});
 		
 		router.on("customers", "getalldata.ok", msg -> {
-			ArrayList<User> customersData = (ArrayList<User>) msg.getData();
-			BistroClientGUI.client.getUserCTRL().setCustomersData(customersData);
+		    ArrayList<ArrayList<String>> rawData = (ArrayList<ArrayList<String>>) msg.getData();
+
+		    // Convert raw data to strongly-typed UserData
+		    List<UserData> customersData = rawData.stream()
+		            .map(UserDataMapper::fromArray)
+		            .collect(Collectors.toList());
+
+		    // Store in UserCTRL
+		    BistroClientGUI.client.getUserCTRL().setCustomersData(customersData);
 		});
-		
+
+
 		router.on("customers", "getalldata.fail", msg -> {
-			Alert alert = new Alert(Alert.AlertType.ERROR);
-			alert.setTitle("Error");
-			alert.setHeaderText("Failed to Retrieve Customers Data");
-			alert.setContentText("An error occurred while trying to retrieve customers data. Please try again later.");
-			alert.showAndWait();
+		    Alert alert = new Alert(Alert.AlertType.ERROR);
+		    alert.setTitle("Error");
+		    alert.setHeaderText("Failed to Retrieve Customer Data");
+		    alert.setContentText("An error occurred while retrieving customer data. Please try again later.");
+		    alert.showAndWait();
 		});
+
 		
 		// Employee creation response handlers
 		router.on("staff", "create.ok", msg -> {
