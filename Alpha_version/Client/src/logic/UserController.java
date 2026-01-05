@@ -90,8 +90,7 @@ public class UserController {
 	public void setRegistrationSuccessFlag(boolean registrationSuccessFlag) {
 		this.registrationSuccessFlag = registrationSuccessFlag;
 	}
-	// ******************************** Instance Methods
-	// ***********************************
+	// ******************************** Instance Methods ***********************************
 
 	/**
 	 * Method to sign in a user with the provided login data.
@@ -226,5 +225,68 @@ public class UserController {
 		this.customersData = customersNewData;
 		
 	}
-
+	
+	/**
+	 * Method to create a new employee account.
+	 * Called by manager from the add employee form.
+	 * 
+	 * @param username The new staff username (3-20 chars)
+	 * @param password The new staff password (min 4 chars)
+	 * @param email The new staff email address
+	 * @param phoneNumber The new staff phone number (9-15 digits)
+	 * @param userType The role: EMPLOYEE
+	 */
+	
+	public void createNewEmployee(String username, String password, String email, String phoneNumber, UserType userType) {
+		Map<String, Object> staffData = new HashMap<>();
+		staffData.put("username", username);
+		staffData.put("password", password);
+		staffData.put("email", email);
+		staffData.put("phoneNumber", phoneNumber);
+		staffData.put("userType", UserType.EMPLOYEE);
+		
+		client.handleMessageFromClientUI(new Message(Api.ASK_STAFF_CREATE, staffData));
+	}
+	
+	/**
+	 * Flag to track if staff creation was successful
+	 */
+	private boolean staffCreationSuccessFlag = false;
+	private String staffCreationErrorMessage = null;
+	
+	/**
+	 * Set the staff creation success flag
+	 */
+	public void setStaffCreationSuccess(boolean success) {
+		this.staffCreationSuccessFlag = success;
+	}
+	
+	/**
+	 * Get the staff creation success flag
+	 */
+	public boolean isStaffCreationSuccess() {
+		return this.staffCreationSuccessFlag;
+	}
+	
+	/**
+	 * Set the staff creation error message (if creation failed)
+	 */
+	public void setStaffCreationErrorMessage(String message) {
+		this.staffCreationErrorMessage = message;
+	}
+	
+	/**
+	 * Get the staff creation error message
+	 */
+	public String getStaffCreationErrorMessage() {
+		return this.staffCreationErrorMessage;
+	}
+	
+	/**
+	 * Clear staff creation status for next operation
+	 */
+	public void clearStaffCreationStatus() {
+		this.staffCreationSuccessFlag = false;
+		this.staffCreationErrorMessage = null;
+	}
 }

@@ -6,6 +6,8 @@ public class InputCheck {
 	// Regex pattern for validating IPv4 addresses
 	private static final String IPv4_REGEX = "^((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.|$)){4}$";
 	private static final Pattern IPv4_PATTERN = Pattern.compile(IPv4_REGEX);
+	
+	//
 
 	/*
 	 * Validates if the given port string represents a valid port number (0-65535).
@@ -125,12 +127,12 @@ public class InputCheck {
 		return "";
 	}
 	
-	// ==================== Phone and Email Validation Methods ====================
+	// ==================== User Validation Methods ====================
 	
 	// Regex patterns for phone number and email validation
-	private static final String PHONE_REGEX = "^\\d{10}$";
+	private static final String PHONE_REGEX = "^\\d{9,15}$";
 	private static final Pattern PHONE_PATTERN = Pattern.compile(PHONE_REGEX);
-	private static final String EMAIL_REGEX = "^[\\w.-]+@[\\w.-]+\\.\\w{2,}$";
+	private static final String EMAIL_REGEX = "\"^[A-Za-z0-9+_.-]+@(.+)$\"";
 	private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
 
 	/*
@@ -190,6 +192,60 @@ public class InputCheck {
 			}
 		}
 		return errorMessage;
+	}
+	
+	
+	// Regex pattern for validating usernames
+	private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9._-]{3,20}$");
+	private static final int MIN_PASSWORD_LENGTH = 4;
+	
+	/**
+	 * Validates a username (3-20 chars, alphanumeric + dot, underscore, hyphen)
+	 */
+	public static String validateUsername(String username) {
+		if (username == null || username.trim().isEmpty()) {
+			return "Username cannot be empty";
+		}
+		
+		username = username.trim();
+		if (!USERNAME_PATTERN.matcher(username).matches()) {
+			return "Username: 3-20 chars, letters/numbers/.-_ only";
+		}
+		return null;
+	}
+	
+	/**
+	 * Validates a password (minimum 4 characters)
+	 */
+	public static String validatePassword(String password) {
+		if (password == null || password.isEmpty()) {
+			return "Password cannot be empty";
+		}
+		
+		if (password.length() < MIN_PASSWORD_LENGTH) {
+			return "Password must be at least " + MIN_PASSWORD_LENGTH + " characters";
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Validates all staff account data at once
+	 */
+	public static String validateAllStaffData(String username, String password, String email, String phoneNumber) {
+		String usernameError = InputCheck.validateUsername(username);
+		if (usernameError != null) return usernameError;
+		
+		String passwordError = validatePassword(password);
+		if (passwordError != null) return passwordError;
+		
+		String emailError = validateEmail(email);
+		if (emailError != null) return emailError;
+		
+		String phoneError = validatePhoneNumber(phoneNumber);
+		if (phoneError != null) return phoneError;
+		
+		return null;
 	}
 
 	private InputCheck() {

@@ -63,5 +63,27 @@ public class UserSubject {
 			alert.setContentText("An error occurred while trying to retrieve customers data. Please try again later.");
 			alert.showAndWait();
 		});
+		
+		// Employee creation response handlers
+		router.on("staff", "create.ok", msg -> {
+			User newEmployee = (User) msg.getData();
+			userController.setStaffCreationSuccess(true);
+			userController.setStaffCreationErrorMessage(null);
+		});
+		
+		router.on("staff", "create.invalidData", msg -> {
+			userController.setStaffCreationSuccess(false);
+			userController.setStaffCreationErrorMessage("Invalid staff data provided. Please check all fields.");
+		});
+		
+		router.on("staff", "create.usernameExists", msg -> {
+			userController.setStaffCreationSuccess(false);
+			userController.setStaffCreationErrorMessage("Username already exists. Please choose a different username.");
+		});
+		
+		router.on("staff", "create.failed", msg -> {
+			userController.setStaffCreationSuccess(false);
+			userController.setStaffCreationErrorMessage("Failed to create staff account. Please try again.");
+		});
 	}
 }

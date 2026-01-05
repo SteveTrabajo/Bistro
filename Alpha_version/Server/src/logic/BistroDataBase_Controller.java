@@ -315,48 +315,162 @@ public class BistroDataBase_Controller {
 
 
     
-	public User findStaffUser(String username, String password) {
-		// query to find staff user by username and password
-		final String qry = "SELECT * FROM staff_accounts WHERE username = ? AND password = ?";
-		final String qry2 = "SELECT * FROM users WHERE id = ?";
+	public User findEmployeeUser(String username, String password) {
+		// Optimized query to find employee user by username, joining users and staff_accounts tables
+		final String qry = "SELECT u.user_id, u.phoneNumber, u.email, u.type, " +
+		                   "sa.username, sa.password_hash " +
+		                   "FROM users u " +
+		                   "JOIN staff_accounts sa ON u.user_id = sa.user_id " +
+		                   "WHERE sa.username = ? AND u.type IN ('EMPLOYEE', 'MANAGER')";
+		
 		User foundUser = null;
-		int userId = 0;
-		String phoneNumber = null, email = null, user_name = null,pass=null , type = null;
 		Connection conn = null;
+		
 		try {
 			conn = borrow();
 			try (PreparedStatement ps = conn.prepareStatement(qry)) {
 				ps.setString(1, username);
-				ps.setString(2, password);
 				try (ResultSet rs = ps.executeQuery()) {
 					if (rs.next()) {
-						userId = rs.getInt("user_id");
-						user_name = rs.getString("username");
-						pass = rs.getString("password");
-						// Now fetch user details from users table
-						try (PreparedStatement ps2 = conn.prepareStatement(qry2)) {
-							ps2.setInt(1, userId);
-							try (ResultSet rs2 = ps2.executeQuery()) {
-								if (rs2.next()) {
-									phoneNumber = rs2.getString("phoneNumber");
-									email = rs2.getString("email");
-									type = rs2.getString("type");
-									foundUser = new User(userId, phoneNumber, email, user_name, UserType.valueOf(type));
-								}
+						String hashedPassword = rs.getString("password_hash");
+						
+						// Verify the provided password against the hash
+						try {
+							if (PasswordUtil.verifyPassword(password, hashedPassword)) {
+								int userId = rs.getInt("user_id");
+								String phoneNumber = rs.getString("phoneNumber");
+								String email = rs.getString("email");
+								String type = rs.getString("type");
+								foundUser = new User(userId, phoneNumber, email, username, UserType.valueOf(type));
+								
+								// Record successful login
+								LoginAttemptTracker.recordSuccessfulLogin(username);
+								logger.log("[LOGIN] Successful login for employee user: " + username);
+							} else {
+								// Record failed attempt
+								LoginAttemptTracker.recordFailedAttempt(username);
+								logger.log("[LOGIN] Failed login attempt for employee user: " + username);
 							}
+						} catch (Exception e) {
+							logger.log("[ERROR] Exception during password verification: " + e.getMessage());
 						}
+					} else {
+						// Username not found
+						logger.log("[LOGIN] Username not found: " + username);
 					}
 				}
 			}
 		} catch (SQLException ex) {
-			logger.log("[ERROR] SQLException in findStaffUser: " + ex.getMessage());
+			logger.log("[ERROR] SQLException in findEmployeeUser: " + ex.getMessage());
 			ex.printStackTrace();
+		} finally {
+			release(conn);
 		}
 		return foundUser;
 
     }
 	
+	/**
+	 * Checks if a username already exists in the staff_accounts table.
+	 * 
+	 * @param username The username to check
+	 * @return true if username exists, false otherwise
+	 */
+	public boolean employeeUsernameExists(String username) {
+		final String qry = "SELECT 1 FROM staff_accounts WHERE LOWER(username) = LOWER(?)";
+		Connection conn = null;
+		
+		try {
+			conn = borrow();
+			try (PreparedStatement ps = conn.prepareStatement(qry)) {
+				ps.setString(1, username);
+				try (ResultSet rs = ps.executeQuery()) {
+					return rs.next();
+				}
+			}
+		} catch (SQLException ex) {
+			logger.log("[ERROR] SQLException in employeeUsernameExists: " + ex.getMessage());
+			ex.printStackTrace();
+			return false;
+		} finally {
+			release(conn);
+		}
+	}
 	
+	/**
+	 * Creates a new employee account (EMPLOYEE or MANAGER).
+	 * Performs atomic insert into both users and staff_accounts tables.
+	 * 
+	 * @param username The employee username
+	 * @param password The plaintext password (will be hashed)
+	 * @param email The employee email
+	 * @param phoneNumber The employee phone number
+	 * @param userType The user type (EMPLOYEE or MANAGER)
+	 * @return The newly created User object, or null if creation failed
+	 */
+	public User createEmployeeUser(String username, String password, String email, String phoneNumber, UserType userType) {
+		if (userType != UserType.EMPLOYEE && userType != UserType.MANAGER) {
+			logger.log("[ERROR] Invalid user type for employee creation: " + userType);
+			return null;
+		}
+		
+		Connection conn = null;
+		
+		try {
+			conn = borrow();
+			conn.setAutoCommit(false); // Start transaction
+			
+			try {
+				// Hash the password
+				String hashedPassword = PasswordUtil.hashPassword(password);
+				
+				// Generate unique user ID
+				int userId = generateRandomUserId(conn);
+				
+				// Insert into users table
+				final String insertUserQry = "INSERT INTO users (user_id, phoneNumber, email, type) " +
+				                             "VALUES (?, ?, ?, ?)";
+				try (PreparedStatement ps = conn.prepareStatement(insertUserQry)) {
+					ps.setInt(1, userId);
+					ps.setString(2, phoneNumber);
+					ps.setString(3, email);
+					ps.setString(4, userType.name());
+					ps.executeUpdate();
+				}
+				
+				// Insert into staff_accounts table
+				final String insertStaffQry = "INSERT INTO staff_accounts (user_id, username, password_hash, created_at) " +
+				                              "VALUES (?, ?, ?, NOW())";
+				try (PreparedStatement ps = conn.prepareStatement(insertStaffQry)) {
+					ps.setInt(1, userId);
+					ps.setString(2, username);
+					ps.setString(3, hashedPassword);
+					ps.executeUpdate();
+				}
+				
+				conn.commit();
+				conn.setAutoCommit(true);
+				
+				logger.log("[ADMIN] New staff user created: username=" + username + ", type=" + userType);
+				
+				// Return the created user
+				return new User(userId, phoneNumber, email, username, userType);
+				
+			} catch (Exception e) {
+				conn.rollback();
+				conn.setAutoCommit(true);
+				logger.log("[ERROR] Failed to create staff user: " + e.getMessage());
+				e.printStackTrace();
+				return null;
+			}
+		} catch (SQLException ex) {
+			logger.log("[ERROR] SQLException in createStaffUser: " + ex.getMessage());
+			ex.printStackTrace();
+			return null;
+		} finally {
+			release(conn);
+		}
+	}
     
     public boolean setUpdatedMemberData(User updatedUser) 
     {

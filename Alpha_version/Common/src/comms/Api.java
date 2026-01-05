@@ -46,6 +46,10 @@ public final class Api {
     public static final String REPLY_LOGIN_MEMBER_NOT_FOUND = "login.member.notFound";
     public static final String REPLY_LOGIN_EMPLOYEE_NOT_FOUND = "login.employee.notFound";
     public static final String REPLY_LOGIN_MANAGER_NOT_FOUND = "login.manager.notFound";
+    public static final String REPLY_LOGIN_EMPLOYEE_INVALID_CREDENTIALS = "login.employee.invalidCredentials";
+    public static final String REPLY_LOGIN_MANAGER_INVALID_CREDENTIALS = "login.manager.invalidCredentials";
+    public static final String REPLY_LOGIN_EMPLOYEE_ACCOUNT_LOCKED = "login.employee.accountLocked";
+    public static final String REPLY_LOGIN_MANAGER_ACCOUNT_LOCKED = "login.manager.accountLocked";
     public static final String REPLY_SIGNOUT_GUEST_OK = "signout.guest.ok";
     public static final String REPLY_SIGNOUT_MEMBER_OK = "signout.member.ok";
     public static final String REPLY_SIGNOUT_EMPLOYEE_OK = "signout.employee.ok";
@@ -61,6 +65,7 @@ public final class Api {
     public static final String ASK_FORGOT_MEMBER_ID = "User.forgotMemberID";
     public static final String ASK_REGISTER_NEW_MEMBER = "user.registerNewMember";
     public static final String ASK_REGISTERATION_STATS = "member.registerationStats";
+    public static final String ASK_STAFF_CREATE = "staff.create";
     //Responses
     public static final String REPLY_MEMBER_UPDATE_INFO_OK = "member.updateInfo.ok";
     public static final String REPLY_MEMBER_UPDATE_INFO_FAILED = "member.updateInfo.failed";
@@ -70,6 +75,11 @@ public final class Api {
     public static final String REPLY_FORGOT_MEMBER_ID_FAILED = "User.forgotMemberID.failed";
     public static final String REPLY_REGISTERATION_STATS_OK = "member.registerationStats.ok";
     public static final String REPLY_REGISTERATION_STATS_FAILED = "member.registerationStats.failed";
+    public static final String REPLY_STAFF_CREATE_OK = "staff.create.ok";
+    public static final String REPLY_STAFF_CREATE_FAILED = "staff.create.failed";
+    public static final String REPLY_STAFF_CREATE_USERNAME_EXISTS = "staff.create.usernameExists";
+    public static final String REPLY_STAFF_CREATE_INVALID_DATA = "staff.create.invalidData";
+    public static final String REPLY_STAFF_CREATE_UNAUTHORIZED = "staff.create.unauthorized";
     
     // == Orders subject == //
     
