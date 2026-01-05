@@ -1,6 +1,11 @@
 package gui.logic.staff;
 
+import java.util.List;
+
+import entities.UserData;
 import enums.UserType;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -9,34 +14,62 @@ import javafx.scene.control.TextField;
 import logic.BistroClientGUI;
 
 public class CustomersPanel {
-@FXML
-public Label totalCustomersLabel;
 
-@FXML
-public Label membersLabel;
+	@FXML
+	public Label totalCustomersLabel; 
+	
+	@FXML
+	public Label membersLabel;
+	
+	@FXML
+	public Label walkinsLabel;
+	
+	@FXML
+	public TextField searchField;
+	
+	@FXML
+	public Button btnRefresh;
+	
+	@FXML
+	public Label directoryTitleLabel;
+	@FXML
+	public TableView<UserData> customersTable;
+    public void initialize() {
+        // Load customer data from UserCTRL
+        BistroClientGUI.client.getUserCTRL().loadCustomersData();
 
-@FXML
-public Label walkinsLabel;
+        if (BistroClientGUI.client.getUserCTRL().isCustomersDataLoaded()) {
+            List<UserData> customersData = BistroClientGUI.client.getUserCTRL().getCustomersData();
 
-@FXML
-public TextField searchField;
+            int totalCustomers = customersData.size();
+            long membersCount = customersData.stream()
+                    .filter(c -> c.getUserType() == UserType.MEMBER)
+                    .count();
+            int walkinsCount = totalCustomers - (int) membersCount;
 
-@FXML
-public Button btnRefresh;
+            // Update UI safely
+            Platform.runLater(() -> {
+                totalCustomersLabel.setText(String.valueOf(totalCustomers));
+                membersLabel.setText(String.valueOf(membersCount));
+                walkinsLabel.setText(String.valueOf(walkinsCount));
+                customersTable.setItems(FXCollections.observableArrayList(customersData));
+            });
+        }
+    }
 
-@FXML
-public Label directoryTitleLabel;
+    // This method can be called from the network listener when new data arrives
+    public void updateCustomers(List<UserData> customersData) {
+        int totalCustomers = customersData.size();
+        long membersCount = customersData.stream()
+                .filter(c -> c.getUserType() == UserType.MEMBER)
+                .count();
+        int walkinsCount = totalCustomers - (int) membersCount;
 
-@FXML
-public TableView customersTable;
-public void initialize() {
-	BistroClientGUI.client.getUserCTRL().loadCustomersData();
-	if(BistroClientGUI.client.getUserCTRL().isCustomersDataLoaded()) {
-		int totalCustomers = BistroClientGUI.client.getUserCTRL().getCustomersData().size();
-		totalCustomersLabel.setText(String.valueOf(totalCustomers));
-		membersLabel.setText(String.valueOf(BistroClientGUI.client.getUserCTRL().getCustomersData().stream().filter(c -> c.getUserType()== UserType.MEMBER).count()));
-		walkinsLabel.setText(String.valueOf(totalCustomers - Integer.parseInt(membersLabel.getText())));
-		customersTable.setItems(BistroClientGUI.client.getUserCTRL().getCustomersData());
-	}
-}
+        Platform.runLater(() -> {
+            totalCustomersLabel.setText(String.valueOf(totalCustomers));
+            membersLabel.setText(String.valueOf(membersCount));
+            walkinsLabel.setText(String.valueOf(walkinsCount));
+            customersTable.setItems(FXCollections.observableArrayList(customersData));
+        });
+    }
 }

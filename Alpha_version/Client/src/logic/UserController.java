@@ -2,10 +2,12 @@ package logic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import comms.*;
 import entities.User;
+import entities.UserData;
 import enums.UserType;
 import gui.logic.staff.CustomersPanel;
 
@@ -23,7 +25,7 @@ public class UserController {
 	private boolean registrationSuccessFlag = false;
 	// ******************************** Constructors
 	// ***********************************
-	private ArrayList<User> customersData=new ArrayList<User>();
+	private List<UserData> customersData=new ArrayList<UserData>();
 
 	/*
 	 * Constructor to initialize the User_Controller with a reference to the
@@ -56,7 +58,7 @@ public class UserController {
 		this.loggedInUser = user;
 	}
 
-	public ArrayList<User> getCustomersData() {
+	public List<UserData> getCustomersData() {
 		return customersData;
 	}
 	
@@ -221,8 +223,8 @@ public class UserController {
 		return !customersData.isEmpty();
 	}
 
-	public void setCustomersData(ArrayList<User> customersNewData) {
-		this.customersData = customersNewData;
+	public void setCustomersData(List<UserData> customersDataNew) {
+		this.customersData = customersDataNew;
 		
 	}
 	
