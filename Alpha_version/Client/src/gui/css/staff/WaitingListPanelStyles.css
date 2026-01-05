@@ -69,6 +69,9 @@
   -fx-border-radius: 10;
   -fx-background-radius: 10;
 }
+.table-cell {
+	-fx-alignment: CENTER;
+}
 .table-view .column-header-background {
   -fx-background-color: #f8fafc;
   -fx-background-radius: 10 10 0 0;

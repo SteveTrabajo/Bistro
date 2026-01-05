@@ -6,7 +6,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import logic.BistroClientGUI;
 
-public class ClientPayBillDScreen {
+public class ClientPayBillScreen {
 @FXML
 private Button btnBack;
 @FXML
