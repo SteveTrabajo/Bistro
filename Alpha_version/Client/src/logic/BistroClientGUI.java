@@ -26,15 +26,13 @@ import javafx.stage.Stage;
 
 public class BistroClientGUI extends Application {
 
-	// ****************************** Instance variables
-	// ******************************
+	// ****************************** Instance variables ******************************
 
 	public static BistroClient client; // Static client instance for server communication
 
 	private static Stage primaryStage; // Primary stage for the application
 
-	// ******************************** Main Method
-	// ***********************************
+	// ******************************** Main Method ***********************************
 
 	/**
 	 * Main method to launch the JavaFX application.
@@ -44,8 +42,7 @@ public class BistroClientGUI extends Application {
 	public static void main(String[] args) {
 		launch(args); // Launch the JavaFX application
 	}
-	// ******************************** Start Method
-	// **********************************
+	// ******************************** Start Method **********************************
 
 	/**
 	 * Method to start the JavaFX application and establish a connection to the
