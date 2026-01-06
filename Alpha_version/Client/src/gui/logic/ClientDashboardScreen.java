@@ -73,25 +73,42 @@ public class ClientDashboardScreen {
 	 */
 	@FXML
 	public void initialize() {
-//TODO : add method to disable join waiting list button and check in for table button if there is an active reservation for the user.
-		UserType type = BistroClientGUI.client.getUserCTRL().getLoggedInUserType();
-		switch (type) {
-		case GUEST:
-			SetDashboardAsGuest();
-			//check if guest is on waiting list and change button name to "Waiting List Status":
-			editJoinWaitingListButton();
-			break;
-		case MEMBER:
-			SetDashboardAsMember(BistroClientGUI.client.getUserCTRL().getLoggedInUser());
-			//check if member is on waiting list and change button name to "Waiting List Status":
-			editJoinWaitingListButton();
-			break;
-		default:
-			System.out.println("Error: Unknown user type.");
-			break;
-		}
+	    User loggedInUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
+	    int userID = loggedInUser.getUserId();
+
+	    // Fetch all necessary states at once
+	    BistroClientGUI.client.getWaitingListCTRL().askUserOnWaitingList(userID);
+	    boolean isOnWaitingList = BistroClientGUI.client.getWaitingListCTRL().isUserOnWaitingList();
+	    boolean hasActiveReservation = BistroClientGUI.client.getReservationCTRL().hasActiveReservation();
+
+	    // Set user-type specific layout
+	    if (BistroClientGUI.client.getUserCTRL().getLoggedInUserType() == UserType.MEMBER) {
+	        SetDashboardAsMember(loggedInUser);
+	    } else {
+	        SetDashboardAsGuest();
+	    }
+
+	    //Centralized UI State Management
+	    applyBusinessRules(isOnWaitingList, hasActiveReservation);
 	}
-	
+
+	/**
+	 * Centralizes the logic for button states and labels to avoid code duplication.
+	 */
+	private void applyBusinessRules(boolean isOnWaitingList, boolean hasActiveReservation) {
+	    // Handle Waiting List button text
+	    LblButtonDescrip.setText(isOnWaitingList ? "Waiting List Status" : "Add to queue");
+
+	    // Disable actions if an active reservation exists
+	    if (hasActiveReservation) {
+	        btnJoinWaitingList.setDisable(true);
+	        btnCheckInForTable.setDisable(true);
+	        display(lblError, "Active reservation detected. Some options are disabled.", Color.ORANGE);
+	    } else {
+	        btnJoinWaitingList.setDisable(false);
+	        btnCheckInForTable.setDisable(false);
+	    }
+	}
 	/**
 	 * Method to edit the Join Waiting List button text based on user's waiting list status.
 	 */

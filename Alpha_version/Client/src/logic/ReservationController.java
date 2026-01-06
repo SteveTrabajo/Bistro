@@ -200,5 +200,13 @@ public class ReservationController {
 	    client.handleMessageFromClientUI(new Message(Api.ASK_FORGOT_CONFIRMATION_CODE, requestData));
 		
 	}
-	
+
+	public boolean hasActiveReservation() {
+		Order userOrder = client.getReservationCTRL().getReadyUserReservation();
+		if (userOrder != null) {
+			return userOrder.getStatus() == OrderStatus.PENDING || userOrder.getStatus() == OrderStatus.NOTIFIED||
+					userOrder.getStatus() == OrderStatus.SEATED|| userOrder.getStatus() == OrderStatus.WAITING_LIST;
+		}
+		return false;
+	}
 }
