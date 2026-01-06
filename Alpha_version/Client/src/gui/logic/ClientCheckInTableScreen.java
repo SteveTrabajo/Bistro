@@ -3,6 +3,7 @@ package gui.logic;
 import entities.User;
 import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
@@ -86,7 +87,7 @@ public class ClientCheckInTableScreen {
 	
 	@FXML
 	public void lnkForgot(Event event) {
-		//TODO: Open Forgot Confirmation Code modal
+		BistroClientGUI.switchScreen(event, "clientForgotConfirmCodeScreen", "Client Forgot Confirmation Code error messege");
 		return;
 	}
 	
@@ -111,7 +112,11 @@ public class ClientCheckInTableScreen {
             ScreenContainer.getChildren().remove(currentScreen);
             currentScreen = null;
         } else {
-            System.out.println("Modal closed.");
+        	Alert alert = new Alert(Alert.AlertType.ERROR);
+        	alert.setTitle("Error");
+        	alert.setHeaderText(null);
+        	alert.setContentText("Unable to close the Forgot Code screen.");
+        	alert.showAndWait();
         }
     }
 }
