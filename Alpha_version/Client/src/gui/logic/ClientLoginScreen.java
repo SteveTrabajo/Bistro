@@ -106,11 +106,21 @@ public class ClientLoginScreen {
 		String phoneNumber = txtPhoneNumber.getText();
 		String emailAddress = txtEmailAddress.getText();
 		String errorMessage = InputCheck.isValidGuestInfo(phoneNumber, emailAddress);
+		if (phoneNumber == null) {
+			phoneNumber = "";
+		} else {
+			phoneNumber = phoneNumber.trim();
+		}
+		if (emailAddress == null) {
+			emailAddress = "";
+		} else {
+			emailAddress = emailAddress.trim();
+		}
 		UserType userType = UserType.GUEST;
 		if (!errorMessage.equals("")) {
 			BistroClientGUI.display(lblError, errorMessage.trim(), Color.RED);
 		} else {
-			String userLoginData = phoneNumber.trim() + "_" + emailAddress.trim();
+			String userLoginData = phoneNumber.trim() + "|" + emailAddress.trim();
 			BistroClientGUI.client.getUserCTRL().signInUser(userLoginData,userType);
 			if (BistroClientGUI.client.getUserCTRL().isUserLoggedInAs(userType)) {
 				BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");

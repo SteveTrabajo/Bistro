@@ -19,51 +19,84 @@ public class UserService {
 		this.logger = logger;
 	}
 
-	public User getUserInfo(Map<String, Object> loginData) {
-		logger.log("[LOGIN] Received login data=" + loginData);
-		User userfound=null;
-		switch (String.valueOf(loginData.get("userType"))) {
-		case "GUEST":
-			userfound= dbController.findOrCreateGuestUser((String) loginData.get("phoneNumber"),(String) loginData.get("email"));
-			break;
-		case "MEMBER": {
-		    Object raw = loginData.get("memberCode");
-		    if (raw == null) {
-		        logger.log("[LOGIN] MEMBER missing key 'memberCode'. Keys=" + loginData.keySet());
-		        return null;
-		    }
+	public User getUserInfo(String loginData) {
+		logger.log("[LOGIN] Received login data = " + loginData);
 
-		    int memberCode;
-		    try {
-		        memberCode = (raw instanceof Integer)
-		                ? (Integer) raw
-		                : Integer.parseInt(raw.toString().trim());
-		    } catch (NumberFormatException ex) {
-		        logger.log("[LOGIN] MEMBER invalid memberCode value: " + raw);
-		        return null;
-		    }
-
-		    userfound = dbController.findMemberUserByCode(memberCode);
-		    break;
+		if (loginData == null || loginData.isBlank()) {
+			logger.log("[LOGIN] Empty login data");
+			return null;
 		}
 
-		case "EMPLOYEE", "MANAGER":
-			String username = String.valueOf(loginData.get("username"));
-			String password = String.valueOf(loginData.get("password"));
-			
-			// Check if account is locked due to failed login attempts
-			if (LoginAttemptTracker.isAccountLocked(username)) {
-				logger.log("[LOGIN] Account locked due to too many failed attempts: " + username);
-				return null; // Account is locked, return null to indicate failure
+		String[] parts = loginData.split("\\|");
+		String userType = parts[0];
+
+		User userFound = null;
+
+		switch (userType) {
+
+		case "GUEST": {
+			parts = loginData.split("\\|", -1);
+
+			if (parts.length < 3) {
+				logger.log("[LOGIN] GUEST invalid format: " + loginData);
+				return null;
 			}
-			
-			userfound = dbController.findEmployeeUser(username, password);
-			break;
-		default:
-			logger.log("[ERROR] Unknown user type: " + String.valueOf(loginData.get("userType")));
+
+			String phone = parts[1].trim();
+			String email = parts[2].trim();
+
+			if (phone.isEmpty())
+				phone = null;
+			if (email.isEmpty())
+				email = null;
+
+			if (phone == null && email == null) {
+				logger.log("[LOGIN] GUEST must provide phone or email");
+				return null;
+			}
+
+			return dbController.findOrCreateGuestUser(phone, email);
+		}
+
+		case "MEMBER": {
+			if (parts.length < 2) {
+				logger.log("[LOGIN] MEMBER invalid format");
+				return null;
+			}
+			try {
+				int memberCode = Integer.parseInt(parts[1]);
+				userFound = dbController.findMemberUserByCode(memberCode);
+			} catch (NumberFormatException e) {
+				logger.log("[LOGIN] MEMBER invalid memberCode: " + parts[1]);
+				return null;
+			}
 			break;
 		}
-		return userfound;
+
+		case "EMPLOYEE":
+		case "MANAGER": {
+			if (parts.length < 3) {
+				logger.log("[LOGIN] STAFF invalid format");
+				return null;
+			}
+			String username = parts[1];
+			String password = parts[2];
+
+			if (LoginAttemptTracker.isAccountLocked(username)) {
+				logger.log("[LOGIN] Account locked: " + username);
+				return null;
+			}
+
+			userFound = dbController.findEmployeeUser(username, password);
+			break;
+		}
+
+		default:
+			logger.log("[LOGIN] Unknown user type: " + userType);
+			return null;
+		}
+
+		return userFound;
 	}
 	
 	/**

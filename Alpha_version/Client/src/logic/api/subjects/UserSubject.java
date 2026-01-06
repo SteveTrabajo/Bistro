@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import entities.User;
 import entities.UserData;
-
+import logic.BistroClient;
 import logic.BistroClientGUI;
 import logic.UserController;
 import logic.api.ClientRouter;
@@ -20,6 +20,7 @@ public class UserSubject {
 			String typeKey = type.name().toLowerCase();
 
 			router.on("login", typeKey + ".ok", msg -> {
+				BistroClient.awaitResponse = false;
 				User user = (User) msg.getData();
 				userController.setLoggedInUser(user);
 			});

@@ -7,6 +7,8 @@ import entities.UserData;
 import enums.UserType;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -79,19 +81,16 @@ public class CustomersPanel {
 		refreshdata();
 
 	}
+
 // Send updated user data to server
 	private void setupColumns() {
-		colFullName.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
-				cellData.getValue().getName()));
-		colEmail.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
-				cellData.getValue().getEmail()));
-		colPhone.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
-				cellData.getValue().getPhone()));
-		colMemberCode.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
-				cellData.getValue().getMemberCode()));
-		colUserType.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(
-				cellData.getValue().getUserType()));
+		colFullName.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
+		colEmail.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEmail()));
+		colPhone.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPhone()));
+		colMemberCode.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getMemberCode()));
+		colUserType.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getUserType()));
 	}
+
 	// Set up double-click listener on table rows
 	private void setupRowListeners() {
 		customersTable.setRowFactory(tv -> {
@@ -105,12 +104,13 @@ public class CustomersPanel {
 			return row;
 		});
 	}
+
 	// Set up search functionality
 	private void setupSearchLogic() {
 		// Wrap master list in a filtered list
 		filteredData = new FilteredList<>(masterData, p -> true);
 
-		//  Add listener to search field with YOUR specific fields
+		// Add listener to search field with YOUR specific fields
 		searchField.textProperty().addListener((observable, oldValue, newValue) -> {
 			filteredData.setPredicate(user -> {
 				// If filter text is empty, display all users
@@ -144,11 +144,11 @@ public class CustomersPanel {
 			});
 		});
 
-		//  Wrap in a sorted list so column sorting still works
+		// Wrap in a sorted list so column sorting still works
 		SortedList<UserData> sortedData = new SortedList<>(filteredData);
 		sortedData.comparatorProperty().bind(customersTable.comparatorProperty());
 
-		//  Bind the Sorted List to the Table
+		// Bind the Sorted List to the Table
 		customersTable.setItems(sortedData);
 	}
 
@@ -159,7 +159,7 @@ public class CustomersPanel {
 		int total = customersData.size();
 		long members = customersData.stream().filter(c -> c.getUserType() == UserType.MEMBER).count();
 		int walkins = total - (int) members;
-		
+
 		// Update UI
 		Platform.runLater(() -> {
 			directoryTitleLabel.setText("Customer Directory (" + total + ")");
@@ -169,7 +169,6 @@ public class CustomersPanel {
 			masterData.setAll(customersData);
 		});
 	}
-	
 
 	public void btnRefresh() {
 		refreshdata();
@@ -180,8 +179,7 @@ public class CustomersPanel {
 		BistroClientGUI.client.getUserCTRL().loadCustomersData();
 		if (BistroClientGUI.client.getUserCTRL().isCustomersDataLoaded()) {
 			updateCustomers(BistroClientGUI.client.getUserCTRL().getCustomersData());
-		}
-		else {
+		} else {
 			totalCustomersLabel.setText("0");
 			membersLabel.setText("0");
 			walkinsLabel.setText("0");
@@ -194,117 +192,106 @@ public class CustomersPanel {
 		}
 
 	}
+
 	private void handleCustomerDoubleClick(UserData editUser) {
-	    //  Create the custom dialog
-	    Dialog<UserData> dialog = new Dialog<>();
-	    dialog.setTitle("Edit Customer: " + editUser.getName());
-	    dialog.setHeaderText("Update details for " + editUser.getName());
+		// Create the custom dialog
+		Dialog<UserData> dialog = new Dialog<>();
+		dialog.setTitle("Edit Customer: " + editUser.getName());
+		dialog.setHeaderText("Update details for " + editUser.getName());
 
-	    //  Set the button types (Save and Cancel)
-	    ButtonType saveButtonType = new ButtonType("Save Changes", ButtonBar.ButtonData.OK_DONE);
-	    dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+		// Set the button types (Save and Cancel)
+		ButtonType saveButtonType = new ButtonType("Save Changes", ButtonBar.ButtonData.OK_DONE);
+		dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
 
-	    //  Create the form fields
-	    GridPane grid = new GridPane();
-	    grid.setHgap(10);
-	    grid.setVgap(10);
-	    grid.setPadding(new javafx.geometry.Insets(20, 150, 10, 10));
+		// Create the form fields
+		GridPane grid = new GridPane();
+		grid.setHgap(10);
+		grid.setVgap(10);
+		grid.setPadding(new javafx.geometry.Insets(20, 150, 10, 10));
 
-	    TextField nameField = new TextField(editUser.getName());
-	    TextField emailField = new TextField(editUser.getEmail());
-	    TextField phoneField = new TextField(editUser.getPhone());
-	    
-	    // Member code is usually read-only
-	    TextField memberCodeField = new TextField(editUser.getMemberCode());
-	    memberCodeField.setEditable(false); 
-	    memberCodeField.setDisable(true);
-	    
-	    ComboBox<UserType> typeComboBox = new ComboBox<>();
-	    typeComboBox.getItems().setAll(
-	    	    java.util.Arrays.stream(UserType.values())
-	    	        .filter(type -> type != UserType.MANAGER)
-	    	        .collect(java.util.stream.Collectors.toList())
-	    	);
-	    typeComboBox.setValue(editUser.getUserType());
-	    typeComboBox.setMaxWidth(Double.MAX_VALUE);
+		TextField nameField = new TextField(editUser.getName());
+		TextField emailField = new TextField(editUser.getEmail());
+		TextField phoneField = new TextField(editUser.getPhone());
 
-	    grid.add(new Label("Full Name:"), 0, 0);
-	    grid.add(nameField, 1, 0);
-	    
-	    grid.add(new Label("Email:"), 0, 1);
-	    grid.add(emailField, 1, 1);
-	    
-	    grid.add(new Label("Phone:"), 0, 2);
-	    grid.add(phoneField, 1, 2);
-	    
-	    grid.add(new Label("Member Code:"), 0, 3);
-	    grid.add(memberCodeField, 1, 3);
-	    
-	    grid.add(new Label("User Type:"), 0, 4);
-	    grid.add(typeComboBox, 1, 4);
+		// Member code is usually read-only
+		TextField memberCodeField = new TextField(editUser.getMemberCode());
+		memberCodeField.setEditable(false);
+		memberCodeField.setDisable(true);
 
-	    dialog.getDialogPane().setContent(grid);
-	    Platform.runLater(nameField::requestFocus);
-	    
-	    Node saveButton = dialog.getDialogPane().lookupButton(saveButtonType);
-	    
-	    saveButton.disableProperty().bind(
-	            Bindings.createBooleanBinding(() -> 
-	                nameField.getText().trim().isEmpty() ||
-	                !InputCheck.validateEmail(emailField.getText()).isEmpty() ||
-	                !InputCheck.validatePhoneNumber(phoneField.getText()).isEmpty(),
-	                
-	                nameField.textProperty(), 
-	                emailField.textProperty(), 
-	                phoneField.textProperty()
-	            )
-	        );
-	    
-	    // Convert the result when save is clicked
-	    dialog.setResultConverter(dialogButton -> {
-	        if (dialogButton == saveButtonType) {
-	            // Return a new UserData object with updated fields
-	            return new UserData(
-	            	nameField.getText().trim(), 
-	            	emailField.getText().trim(), 
-	            	phoneField.getText().trim(), 
-	                editUser.getMemberCode(), 
-	                typeComboBox.getValue()
-	            );
-	        }
-	        return null;
-	    });
-	    
-	    //Show dialog and handle the result
-	    dialog.showAndWait().ifPresent(updatedUser -> {
-	        Node rootNode = grid.getScene().getRoot();
-	        rootNode.setDisable(true);
-	        rootNode.setCursor(Cursor.WAIT);
+		ComboBox<UserType> typeComboBox = new ComboBox<>();
+		typeComboBox.getItems().setAll(java.util.Arrays.stream(UserType.values())
+				.filter(type -> type != UserType.MANAGER).collect(java.util.stream.Collectors.toList()));
+		typeComboBox.setValue(editUser.getUserType());
+		typeComboBox.setMaxWidth(Double.MAX_VALUE);
 
-	        Thread updateThread = new Thread(() -> {
-	            try {
-	                // Perform the update
-	                BistroClientGUI.client.getUserCTRL().updateUserDetails(updatedUser);
-	                boolean success = BistroClientGUI.client.getUserCTRL().isUserUpdateSuccessful();
+		grid.add(new Label("Full Name:"), 0, 0);
+		grid.add(nameField, 1, 0);
 
-	                Platform.runLater(() -> {
-	                    if (success) refreshdata();
-	                    else new Alert(Alert.AlertType.ERROR, "Update failed on server.").showAndWait();
-	                });
-	            } catch (Exception e) {
-	                Platform.runLater(() -> 
-	                    new Alert(Alert.AlertType.ERROR, "Connection error: " + e.getMessage()).showAndWait());
-	            } finally {
-	                // ALWAYS unlock the UI, even if an error occurred
-	                Platform.runLater(() -> {
-	                    rootNode.setDisable(false);
-	                    rootNode.setCursor(Cursor.DEFAULT);
-	                });
-	            }
-	        });
+		grid.add(new Label("Email:"), 0, 1);
+		grid.add(emailField, 1, 1);
 
-	        updateThread.setDaemon(true); 
-	        updateThread.start();
-	    });
+		grid.add(new Label("Phone:"), 0, 2);
+		grid.add(phoneField, 1, 2);
+
+		grid.add(new Label("Member Code:"), 0, 3);
+		grid.add(memberCodeField, 1, 3);
+
+		grid.add(new Label("User Type:"), 0, 4);
+		grid.add(typeComboBox, 1, 4);
+
+		dialog.getDialogPane().setContent(grid);
+		Platform.runLater(nameField::requestFocus);
+
+		Node saveButton = dialog.getDialogPane().lookupButton(saveButtonType);
+
+		saveButton.disableProperty().bind(Bindings.createBooleanBinding(
+				() -> nameField.getText().trim().isEmpty() || !InputCheck.validateEmail(emailField.getText()).isEmpty()
+						|| !InputCheck.validatePhoneNumber(phoneField.getText()).isEmpty(),
+
+				nameField.textProperty(), emailField.textProperty(), phoneField.textProperty()));
+
+		// Convert the result when save is clicked
+		dialog.setResultConverter(dialogButton -> {
+			if (dialogButton == saveButtonType) {
+				// Return a new UserData object with updated fields
+				return new UserData(nameField.getText().trim(), emailField.getText().trim(),
+						phoneField.getText().trim(), editUser.getMemberCode(), typeComboBox.getValue());
+			}
+			return null;
+		});
+
+		// Show dialog and handle the result
+		dialog.showAndWait().ifPresent(updatedUser -> {
+			Node rootNode = grid.getScene().getRoot();
+			rootNode.setDisable(true);
+			rootNode.setCursor(Cursor.WAIT);
+
+			Thread updateThread = new Thread(() -> {
+				try {
+					// Perform the update
+					BistroClientGUI.client.getUserCTRL().updateUserDetails(updatedUser);
+					boolean success = BistroClientGUI.client.getUserCTRL().isUserUpdateSuccessful();
+
+					Platform.runLater(() -> {
+						if (success)
+							refreshdata();
+						else
+							new Alert(Alert.AlertType.ERROR, "Update failed on server.").showAndWait();
+					});
+				} catch (Exception e) {
+					Platform.runLater(() -> new Alert(Alert.AlertType.ERROR, "Connection error: " + e.getMessage())
+							.showAndWait());
+				} finally {
+					// ALWAYS unlock the UI, even if an error occurred
+					Platform.runLater(() -> {
+						rootNode.setDisable(false);
+						rootNode.setCursor(Cursor.DEFAULT);
+					});
+				}
+			});
+
+			updateThread.setDaemon(true);
+			updateThread.start();
+		});
 	}
 }

@@ -55,6 +55,7 @@ public class UserController {
 	 * @param user The User object to set as the logged-in user.
 	 */
 	public void setLoggedInUser(User user) {
+		System.out.println("Setting logged in user: " + user);
 		this.loggedInUser = user;
 	}
 
