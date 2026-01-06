@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="ad-scroll" vbarPolicy="AS_NEEDED" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bistro.app.controllers.AnalyticsDashboardScreen">
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="ad-scroll" vbarPolicy="AS_NEEDED" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.AnalyticsDashboardScreen">
 
     <content>
         <VBox spacing="16" styleClass="ad-root">

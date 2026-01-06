@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane styleClass="rc-root" stylesheets="@../../gui/css/clientNewReservationCreatedStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bistro.app.controllers.ReservationConfirmedScreen">
+<StackPane styleClass="rc-root" stylesheets="@../../gui/css/clientNewReservationCreatedStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.ReservationConfirmedScreen">
 
     <children>
         <BorderPane prefHeight="720" prefWidth="1280">
