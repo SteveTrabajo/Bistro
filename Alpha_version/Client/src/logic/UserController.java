@@ -10,7 +10,6 @@ import comms.*;
 import entities.User;
 import entities.UserData;
 import enums.UserType;
-import gui.logic.staff.CustomersPanel;
 import javafx.application.Platform;
 
 /*
@@ -18,19 +17,17 @@ import javafx.application.Platform;
  */
 public class UserController {
 
-	// ****************************** Instance variables
-	// ******************************
+	// ****************************** Instance variables ******************************
 
 	private final BistroClient client; // final reference to the BistroClient to ensure only one instance is associated
 	private User loggedInUser;
 	private ArrayList<Integer> memberRegistrationStats;
 	private boolean registrationSuccessFlag = false;
-	// ******************************** Constructors
-	// ***********************************
 	private List<UserData> customersData = new ArrayList<UserData>();
 	private boolean userUpdateSuccessFlag = false;
 	private Consumer<String> onMemberIDFoundListener;
 
+	// ******************************** Constructors ***********************************
 	/*
 	 * Constructor to initialize the User_Controller with a reference to the
 	 * BistroClient.
@@ -41,8 +38,7 @@ public class UserController {
 		this.client = client;
 	}
 
-	// ******************************** Getters And Setters
-	// ***********************************
+	// ******************************** Getters And Setters ***********************************
 
 	/*
 	 * Getter for the currently logged-in user.

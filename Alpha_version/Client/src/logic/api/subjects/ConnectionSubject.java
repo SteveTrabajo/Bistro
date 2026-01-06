@@ -10,7 +10,6 @@ public class ConnectionSubject {
         router.on("connection", "connect.ok", msg -> {
             // Release any waiting request loops
             BistroClient.awaitResponse = false;
-
             Platform.runLater(() ->
                 System.out.println("Connection status: Displayed")
             );

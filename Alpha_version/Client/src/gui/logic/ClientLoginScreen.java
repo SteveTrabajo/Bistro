@@ -8,6 +8,7 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.effect.GaussianBlur;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -54,8 +55,6 @@ public class ClientLoginScreen {
 	@FXML
 	private StackPane mainPane;
 	
-	@FXML
-	private Label lblError;
 	
 	@FXML
 	private StackPane modalOverlay; // Overlay pane for modals
@@ -65,6 +64,8 @@ public class ClientLoginScreen {
 	
 	private Parent ForgotIDModalRoot;
 
+	@FXML
+	private Label lblError;
 	// ******************************** Variables ********************************
 
 	private Map<String, Object> userLoginData; // holds received user login data
@@ -161,21 +162,31 @@ public class ClientLoginScreen {
 	@FXML
 	public void lnkForgotMemberID(Event event) {
 		if (ForgotIDModalRoot == null) {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/fxml/ClientForgotMemberIDScreen.fxml"));
+			var url = getClass().getResource("/gui/fxml/clientForgotMemberIDModal.fxml");
+			if (url == null) {
+				BistroClientGUI.display(lblError, "FXML not found: /gui/fxml/clientForgotMemberIDModal.fxml",
+						Color.RED);
+				return;
+			}
+
+			FXMLLoader loader = new FXMLLoader(url);
 			try {
 				ForgotIDModalRoot = loader.load();
 			} catch (Exception e) {
 				e.printStackTrace();
 				BistroClientGUI.display(lblError, "Unable to open Forgot Member ID screen.", Color.RED);
+				return;
 			}
+
 			forgotModalsCTRL = loader.getController();
 			forgotModalsCTRL.setParentCtrl(this);
-			modalOverlay.getChildren().add(ForgotIDModalRoot);
-			modalOverlay.setVisible(true);
-			modalOverlay.setManaged(true);
-		}
-	}
 
+			modalOverlay.getChildren().add(ForgotIDModalRoot);
+		}
+		mainPane.setEffect(new GaussianBlur(18));
+		modalOverlay.setVisible(true);
+		modalOverlay.setManaged(true);
+	}
 
 	/**
 	 * Handles the employee login hyperlink click event. Switches to the employee
@@ -193,9 +204,9 @@ public class ClientLoginScreen {
 	 * Closes the forgot member ID modal dialog.
 	 */
 	public void closeForgotIDScreen() {
+		mainPane.setEffect(null);
 		modalOverlay.setVisible(false);
 		modalOverlay.setManaged(false);
-		mainPane.setEffect(null);
 	}
 	
 }
