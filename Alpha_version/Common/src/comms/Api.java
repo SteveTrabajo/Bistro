@@ -71,10 +71,10 @@ public final class Api {
     //Responses
     public static final String REPLY_MEMBER_UPDATE_INFO_OK = "member.updateInfo.ok";
     public static final String REPLY_MEMBER_UPDATE_INFO_FAILED = "member.updateInfo.failed";
-    public static final String REPLY_REGISTER_NEW_MEMBER_OK = "user.registerNewMember.ok";
-    public static final String REPLY_REGISTER_NEW_MEMBER_FAILED = "user.registerNewMember.failed";
     public static final String REPLY_FORGOT_MEMBER_ID_OK = "User.forgotMemberID.ok";
     public static final String REPLY_FORGOT_MEMBER_ID_FAILED = "User.forgotMemberID.failed";
+    public static final String REPLY_REGISTER_NEW_MEMBER_OK = "user.registerNewMember.ok";
+    public static final String REPLY_REGISTER_NEW_MEMBER_FAILED = "user.registerNewMember.failed";
     public static final String REPLY_REGISTERATION_STATS_OK = "member.registerationStats.ok";
     public static final String REPLY_REGISTERATION_STATS_FAILED = "member.registerationStats.failed";
     public static final String REPLY_STAFF_CREATE_OK = "staff.create.ok";

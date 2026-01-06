@@ -90,5 +90,14 @@ public class UserSubject {
 			userController.setStaffCreationSuccess(false);
 			userController.setStaffCreationErrorMessage("Failed to create staff account. Please try again.");
 		});
+		router.on("user", "forgotMemberID.ok", msg -> {
+		    String memberID = (String) msg.getData();
+		    userController.handleForgotIDResponse(memberID);
+		    });
+		
+		router.on("user", "forgotMemberID.fail", msg -> {
+		        userController.handleForgotIDResponse("NOT_FOUND");
+		    });
+		
 	}
 }

@@ -39,4 +39,6 @@ public class Bill implements Serializable {
     public void setUserType(UserType userType) { this.userType = userType; }
     public void setDate(Time date) { this.date = date; }
     public void setTotal(double total) { this.total = total; }
+
+
 }

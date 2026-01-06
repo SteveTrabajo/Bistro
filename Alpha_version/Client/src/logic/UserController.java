@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import comms.*;
 import entities.User;
 import entities.UserData;
 import enums.UserType;
 import gui.logic.staff.CustomersPanel;
+import javafx.application.Platform;
 
 /*
  * This class represents the controller for user-related operations in the BistroClient.
@@ -25,8 +27,9 @@ public class UserController {
 	private boolean registrationSuccessFlag = false;
 	// ******************************** Constructors
 	// ***********************************
-	private List<UserData> customersData=new ArrayList<UserData>();
+	private List<UserData> customersData = new ArrayList<UserData>();
 	private boolean userUpdateSuccessFlag = false;
+	private Consumer<String> onMemberIDFoundListener;
 
 	/*
 	 * Constructor to initialize the User_Controller with a reference to the
@@ -62,11 +65,11 @@ public class UserController {
 	public List<UserData> getCustomersData() {
 		return customersData;
 	}
-	
+
 	public void clearCustomersData() {
 		this.customersData.clear();
 	}
-	
+
 	/**
 	 * Method to retrieve member registration statistics.
 	 * 
@@ -85,7 +88,7 @@ public class UserController {
 	public void setMemberRegistrationStats(ArrayList<Integer> stats) {
 		this.memberRegistrationStats = stats;
 	}
-	
+
 	public boolean getRegistrationSuccessFlag() {
 		return registrationSuccessFlag;
 	}
@@ -93,7 +96,8 @@ public class UserController {
 	public void setRegistrationSuccessFlag(boolean registrationSuccessFlag) {
 		this.registrationSuccessFlag = registrationSuccessFlag;
 	}
-	// ******************************** Instance Methods ***********************************
+	// ******************************** Instance Methods
+	// ***********************************
 
 	/**
 	 * Method to sign in a user with the provided login data.
@@ -190,13 +194,13 @@ public class UserController {
 	}
 
 	public boolean isEmployeeLoginSuccess() {
-		if (this.loggedInUser != null && (this.loggedInUser.getUserType() == UserType.EMPLOYEE))
-		{
-		return true;
+		if (this.loggedInUser != null && (this.loggedInUser.getUserType() == UserType.EMPLOYEE)) {
+			return true;
 		}
-	
+
 		return false;
 	}
+
 	public boolean isManagerLoginSuccess() {
 		if (this.loggedInUser != null && (this.loggedInUser.getUserType() == UserType.MANAGER)) {
 			return true;
@@ -213,78 +217,80 @@ public class UserController {
 		} else {
 			client.handleMessageFromClientUI(new Message(Api.ASK_LOGIN_MANAGER, userLoginData));
 		}
-		
+
 	}
 
 	public void loadCustomersData() {
 		client.handleMessageFromClientUI(new Message(Api.ASK_LOAD_CUSTOMERS_DATA, null));
-		
+
 	}
+
 	public boolean isCustomersDataLoaded() {
 		return !customersData.isEmpty();
 	}
 
 	public void setCustomersData(List<UserData> customersDataNew) {
 		this.customersData = customersDataNew;
-		
+
 	}
-	
+
 	/**
-	 * Method to create a new employee account.
-	 * Called by manager from the add employee form.
+	 * Method to create a new employee account. Called by manager from the add
+	 * employee form.
 	 * 
-	 * @param username The new staff username (3-20 chars)
-	 * @param password The new staff password (min 4 chars)
-	 * @param email The new staff email address
+	 * @param username    The new staff username (3-20 chars)
+	 * @param password    The new staff password (min 4 chars)
+	 * @param email       The new staff email address
 	 * @param phoneNumber The new staff phone number (9-15 digits)
-	 * @param userType The role: EMPLOYEE
+	 * @param userType    The role: EMPLOYEE
 	 */
-	
-	public void createNewEmployee(String username, String password, String email, String phoneNumber, UserType userType) {
+
+	public void createNewEmployee(String username, String password, String email, String phoneNumber,
+			UserType userType) {
 		Map<String, Object> staffData = new HashMap<>();
 		staffData.put("username", username);
 		staffData.put("password", password);
 		staffData.put("email", email);
 		staffData.put("phoneNumber", phoneNumber);
 		staffData.put("userType", UserType.EMPLOYEE);
-		
+
 		client.handleMessageFromClientUI(new Message(Api.ASK_STAFF_CREATE, staffData));
 	}
-	
+
 	/**
 	 * Flag to track if staff creation was successful
 	 */
 	private boolean staffCreationSuccessFlag = false;
 	private String staffCreationErrorMessage = null;
-	
+
 	/**
 	 * Set the staff creation success flag
 	 */
 	public void setStaffCreationSuccess(boolean success) {
 		this.staffCreationSuccessFlag = success;
 	}
-	
+
 	/**
 	 * Get the staff creation success flag
 	 */
 	public boolean isStaffCreationSuccess() {
 		return this.staffCreationSuccessFlag;
 	}
-	
+
 	/**
 	 * Set the staff creation error message (if creation failed)
 	 */
 	public void setStaffCreationErrorMessage(String message) {
 		this.staffCreationErrorMessage = message;
 	}
-	
+
 	/**
 	 * Get the staff creation error message
 	 */
 	public String getStaffCreationErrorMessage() {
 		return this.staffCreationErrorMessage;
 	}
-	
+
 	/**
 	 * Clear staff creation status for next operation
 	 */
@@ -295,5 +301,19 @@ public class UserController {
 
 	public boolean isUserUpdateSuccessful() {
 		return userUpdateSuccessFlag;
+	}
+
+	public void setOnMemberIDFoundListener(Consumer<String> listener) {
+		this.onMemberIDFoundListener = listener;
+	}
+
+	public void handleForgotIDResponse(String result) {
+		if (onMemberIDFoundListener != null) {
+			Platform.runLater(() -> {
+				onMemberIDFoundListener.accept(result);
+				// Clear after use to prevent memory leaks
+				onMemberIDFoundListener = null;
+			});
+		}
 	}
 }
