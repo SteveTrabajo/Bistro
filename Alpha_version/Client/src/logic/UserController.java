@@ -26,6 +26,7 @@ public class UserController {
 	// ******************************** Constructors
 	// ***********************************
 	private List<UserData> customersData=new ArrayList<UserData>();
+	private boolean userUpdateSuccessFlag = false;
 
 	/*
 	 * Constructor to initialize the User_Controller with a reference to the
@@ -151,7 +152,7 @@ public class UserController {
 	 * 
 	 * @param updatedUser The User object containing the updated user details.
 	 */
-	public void updateUserDetails(User updatedUser) {
+	public void updateUserDetails(UserData updatedUser) {
 		client.handleMessageFromClientUI(new Message(Api.ASK_MEMBER_UPDATE_INFO, updatedUser));
 	}
 
@@ -290,5 +291,9 @@ public class UserController {
 	public void clearStaffCreationStatus() {
 		this.staffCreationSuccessFlag = false;
 		this.staffCreationErrorMessage = null;
+	}
+
+	public boolean isUserUpdateSuccessful() {
+		return userUpdateSuccessFlag;
 	}
 }

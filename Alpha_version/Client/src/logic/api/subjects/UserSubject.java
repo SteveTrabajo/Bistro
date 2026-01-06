@@ -13,7 +13,6 @@ import logic.api.ClientRouter;
 import enums.UserType;
 
 import javafx.scene.control.Alert;
-import logic.UserDataMapper;
 public class UserSubject {
 
 	public static void register(ClientRouter router) {
@@ -55,19 +54,13 @@ public class UserSubject {
 		});
 		
 		router.on("customers", "getalldata.ok", msg -> {
-		    ArrayList<ArrayList<String>> rawData = (ArrayList<ArrayList<String>>) msg.getData();
-
-		    // Convert raw data to strongly-typed UserData
-		    List<UserData> customersData = rawData.stream()
-		            .map(UserDataMapper::fromArray)
-		            .collect(Collectors.toList());
-
-		    // Store in UserCTRL
-		    BistroClientGUI.client.getUserCTRL().setCustomersData(customersData);
+			List<UserData> customersData = (List<UserData>) msg.getData();
+			BistroClientGUI.client.getUserCTRL().setCustomersData(customersData);
 		});
 
 
 		router.on("customers", "getalldata.fail", msg -> {
+			BistroClientGUI.client.getUserCTRL().setCustomersData(new ArrayList<>());
 		    Alert alert = new Alert(Alert.AlertType.ERROR);
 		    alert.setTitle("Error");
 		    alert.setHeaderText("Failed to Retrieve Customer Data");

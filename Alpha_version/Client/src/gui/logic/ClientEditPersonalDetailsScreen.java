@@ -9,6 +9,8 @@ import javafx.scene.control.TextField;
 import logic.BistroClientGUI;
 import common.InputCheck;
 import entities.User;
+import entities.UserData;
+
 /**
  * This class represents the controller for the Client Edit Personal screen in
  * the BistroClientGUI.
@@ -34,9 +36,10 @@ public class ClientEditPersonalDetailsScreen {
 	private Label lblMemberID;
 	@FXML
 	private Label lblError;
-	
-	// ****************************** Instance Methods ******************************
-	
+
+	// ****************************** Instance Methods
+	// ******************************
+
 	/**
 	 * Initializes the Client Edit Personal screen.
 	 */
@@ -50,14 +53,15 @@ public class ClientEditPersonalDetailsScreen {
 		txtEmailAddress.setText(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getEmail());
 		txtAddress.setText(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getAddress());
 		lblError.setText("");
-		//TODO: change input restriction to use the input check class on common folder
-		// Added: Restriction for First Name - only English letters allowed during typing
+		// TODO: change input restriction to use the input check class on common folder
+		// Added: Restriction for First Name - only English letters allowed during
+		// typing
 		txtFirstName.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (!newValue.matches("[a-zA-Z]*")) {
 				txtFirstName.setText(oldValue);
 			}
 		});
-		
+
 		// Added: Restriction for Phone - only digits and max 10 characters
 		txtPhoneNumber.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (!newValue.matches("\\d*") || newValue.length() > 10) {
@@ -65,7 +69,7 @@ public class ClientEditPersonalDetailsScreen {
 			}
 		});
 	}
-	
+
 	/**
 	 * Handles the Back button click event.
 	 *
@@ -79,8 +83,7 @@ public class ClientEditPersonalDetailsScreen {
 			e.printStackTrace();
 		}
 	}
-	
-	
+
 	/**
 	 * Handles the Save button click event.
 	 *
@@ -94,54 +97,49 @@ public class ClientEditPersonalDetailsScreen {
 		String email = txtEmailAddress.getText().trim();
 		String address = txtAddress.getText().trim();
 		lblError.setText("");
-		
+
 		// Input validation using InputCheck methods
 		String errorMessage;
-		
+
 		errorMessage = InputCheck.validateFirstName(firstName);
 		if (!errorMessage.isEmpty()) {
 			lblError.setText(errorMessage);
 			return;
 		}
-		
+
 		errorMessage = InputCheck.validateLastName(lastName);
 		if (!errorMessage.isEmpty()) {
 			lblError.setText(errorMessage);
 			return;
 		}
-		
+
 		errorMessage = InputCheck.validatePhoneNumber(phoneNumber);
 		if (!errorMessage.isEmpty()) {
 			lblError.setText(errorMessage);
 			return;
 		}
-		
+
 		errorMessage = InputCheck.validateEmail(email);
 		if (!errorMessage.isEmpty()) {
 			lblError.setText(errorMessage);
 			return;
 		}
 
-		// 1. Get the current user object once to avoid long, repetitive lines
+		// Get the current user object once to avoid long, repetitive lines
 		User currentUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
 
-		// 2. Build the updated user object using local variables and the current user's data
-		User updatedUser = new entities.User(
-		    currentUser.getUserId(),
-		    phoneNumber, 
-		    email, 
-		    currentUser.getMemberCode(),
-		    firstName, 
-		    lastName,
-		    address,
-		    currentUser.getUserType()
-		);
-		if (updatedUser.equals(currentUser)) {
-		    lblError.setText("No changes were made.");
-		    return; // Don't send anything to the server
+		UserData updatedUser = new UserData(firstName + "_" + lastName + "_" + address, 
+				email, phoneNumber, currentUser.getMemberCode(), currentUser.getUserType());
+		boolean isChanged = !updatedUser.getEmail().equals(currentUser.getEmail())
+				|| !updatedUser.getPhone().equals(currentUser.getPhoneNumber())
+				|| !updatedUser.getName().equals(currentUser.getFirstName() + " " + currentUser.getLastName());
+
+		if (!isChanged) {
+			lblError.setText("No changes were made.");
+			return;
 		}
-		// 3. Send the updated user object to the server
-		 BistroClientGUI.client.getUserCTRL().updateUserDetails(updatedUser);
+		BistroClientGUI.client.getUserCTRL().updateUserDetails(updatedUser);
+
 		if (!BistroClientGUI.client.getUserCTRL().isUpdateSuccessful(currentUser)) {
 			lblError.setText("Error: Failed to save details. Please try again.");
 			return;
@@ -152,9 +150,6 @@ public class ClientEditPersonalDetailsScreen {
 		alert.setHeaderText(null);
 		alert.setContentText("Your details have been updated successfully.");
 		alert.showAndWait();
-		}
+	}
 
-
-
-	
 }

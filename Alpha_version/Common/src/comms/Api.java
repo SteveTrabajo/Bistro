@@ -62,7 +62,7 @@ public final class Api {
 // == User subject == //
     
     // Requests
-    public static final String ASK_MEMBER_UPDATE_INFO = "member.updateInfo";
+    public static final String ASK_MEMBER_UPDATE_INFO = "member.updateInfo";//TODO: MAYBE ADD member.updateDetails 
     public static final String ASK_FORGOT_MEMBER_ID = "User.forgotMemberID";
     public static final String ASK_REGISTER_NEW_MEMBER = "user.registerNewMember";
     public static final String ASK_REGISTERATION_STATS = "member.registerationStats";

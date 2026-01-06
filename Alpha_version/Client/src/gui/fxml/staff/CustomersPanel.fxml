@@ -75,6 +75,7 @@
                 <TableColumn fx:id="colType" prefWidth="107.0" text="Type" />
             </columns>
         </TableView>
+      <Label styleClass="cm-subtitle" text="Double-click in the table to edit customer" />
     </VBox>
 
 </VBox>
