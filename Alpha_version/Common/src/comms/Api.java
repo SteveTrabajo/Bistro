@@ -63,7 +63,8 @@ public final class Api {
     
     // Requests
     public static final String ASK_MEMBER_UPDATE_INFO = "member.updateInfo";//TODO: MAYBE ADD member.updateDetails 
-    public static final String ASK_FORGOT_MEMBER_ID = "User.forgotMemberID";
+    public static final String ASK_FORGOT_MEMBER_ID = "user.forgotMemberID";
+	public static final String ASK_FORGOT_CONFIRMATION_CODE = "reservation.forgotConfirmationCode";
     public static final String ASK_REGISTER_NEW_MEMBER = "user.registerNewMember";
     public static final String ASK_REGISTERATION_STATS = "member.registerationStats";
     public static final String ASK_STAFF_CREATE = "staff.create";
@@ -71,8 +72,10 @@ public final class Api {
     //Responses
     public static final String REPLY_MEMBER_UPDATE_INFO_OK = "member.updateInfo.ok";
     public static final String REPLY_MEMBER_UPDATE_INFO_FAILED = "member.updateInfo.failed";
-    public static final String REPLY_FORGOT_MEMBER_ID_OK = "User.forgotMemberID.ok";
-    public static final String REPLY_FORGOT_MEMBER_ID_FAILED = "User.forgotMemberID.failed";
+    public static final String REPLY_FORGOT_MEMBER_ID_OK = "user.forgotMemberID.ok";
+    public static final String REPLY_FORGOT_MEMBER_ID_FAILED = "user.forgotMemberID.failed";
+    public static final String REPLY_FORGOT_CONFIRMATION_CODE_OK = "reservation.forgotConfirmationCode.ok";
+    public static final String REPLY_FORGOT_CONFIRMATION_CODE_FAILED = "reservation.forgotConfirmationCode.failed";
     public static final String REPLY_REGISTER_NEW_MEMBER_OK = "user.registerNewMember.ok";
     public static final String REPLY_REGISTER_NEW_MEMBER_FAILED = "user.registerNewMember.failed";
     public static final String REPLY_REGISTERATION_STATS_OK = "member.registerationStats.ok";
@@ -170,4 +173,5 @@ public final class Api {
 // == System responses == //
     
     public static final String REPLY_UNKNOWN_COMMAND = "system.unknownCommand";
+
 }

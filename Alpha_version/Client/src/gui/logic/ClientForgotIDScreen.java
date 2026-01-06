@@ -11,9 +11,9 @@ import javafx.scene.paint.Color;
 import logic.BistroClientGUI;
 
 /**
- * Controller for the "Find Your Member ID" modal.
+ * Controller for the "Find Your Member ID" Screen.
  */
-public class ClientForgotIDModal {
+public class ClientForgotIDScreen {
 
     // ****************************** FXML Variables ******************************
     private ClientLoginScreen parentCtrl;
@@ -105,12 +105,12 @@ public class ClientForgotIDModal {
 
     @FXML
     private void btnCancel(Event event) {
-        closeModal();
+        closeScreen();
     }
 
     @FXML
     private void btnClose(Event event) {
-        closeModal();
+        closeScreen();
     }
 
     // ****************************** Helper Methods ******************************
@@ -122,11 +122,11 @@ public class ClientForgotIDModal {
         btnFindMemberID.setDisable(false);
     }
 
-    private void closeModal() {
+    private void closeScreen() {
         if (parentCtrl != null) {
             // Clear the listener so the server response doesn't trigger on a closed window
             BistroClientGUI.client.getUserCTRL().setOnMemberIDFoundListener(null);
-            parentCtrl.closeForgotIDModal();
+            parentCtrl.closeForgotIDScreen();
         }
     }
 }

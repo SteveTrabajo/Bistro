@@ -69,7 +69,7 @@ public class ClientLoginScreen {
 
 	private Map<String, Object> userLoginData; // holds received user login data
 	
-	private ClientForgotIDModal forgotModalsCTRL;
+	private ClientForgotIDScreen forgotModalsCTRL;
 	// ****************************** FXML Methods *****************************
 
 	/**
@@ -192,7 +192,7 @@ public class ClientLoginScreen {
 	/**
 	 * Closes the forgot member ID modal dialog.
 	 */
-	public void closeForgotIDModal() {
+	public void closeForgotIDScreen() {
 		modalOverlay.setVisible(false);
 		modalOverlay.setManaged(false);
 		mainPane.setEffect(null);

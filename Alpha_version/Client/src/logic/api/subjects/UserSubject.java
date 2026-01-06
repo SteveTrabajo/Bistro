@@ -72,32 +72,39 @@ public class UserSubject {
 		// Employee creation response handlers
 		router.on("staff", "create.ok", msg -> {
 			User newEmployee = (User) msg.getData();
-			userController.setStaffCreationSuccess(true);
-			userController.setStaffCreationErrorMessage(null);
+			BistroClientGUI.client.getUserCTRL().setStaffCreationSuccess(true);
+			BistroClientGUI.client.getUserCTRL().setStaffCreationErrorMessage(null);
 		});
 		
 		router.on("staff", "create.invalidData", msg -> {
-			userController.setStaffCreationSuccess(false);
-			userController.setStaffCreationErrorMessage("Invalid staff data provided. Please check all fields.");
+			BistroClientGUI.client.getUserCTRL().setStaffCreationSuccess(false);
+			BistroClientGUI.client.getUserCTRL().setStaffCreationErrorMessage("Invalid staff data provided. Please check all fields.");
 		});
 		
 		router.on("staff", "create.usernameExists", msg -> {
-			userController.setStaffCreationSuccess(false);
-			userController.setStaffCreationErrorMessage("Username already exists. Please choose a different username.");
+			BistroClientGUI.client.getUserCTRL().setStaffCreationSuccess(false);
+			BistroClientGUI.client.getUserCTRL().setStaffCreationErrorMessage("Username already exists. Please choose a different username.");
 		});
 		
 		router.on("staff", "create.failed", msg -> {
-			userController.setStaffCreationSuccess(false);
-			userController.setStaffCreationErrorMessage("Failed to create staff account. Please try again.");
+			BistroClientGUI.client.getUserCTRL().setStaffCreationSuccess(false);
+			BistroClientGUI.client.getUserCTRL().setStaffCreationErrorMessage("Failed to create staff account. Please try again.");
 		});
 		router.on("user", "forgotMemberID.ok", msg -> {
 		    String memberID = (String) msg.getData();
-		    userController.handleForgotIDResponse(memberID);
+		    BistroClientGUI.client.getUserCTRL().handleForgotIDResponse(memberID);
 		    });
 		
 		router.on("user", "forgotMemberID.fail", msg -> {
-		        userController.handleForgotIDResponse("NOT_FOUND");
+			BistroClientGUI.client.getUserCTRL().handleForgotIDResponse("NOT_FOUND");
 		    });
+		router.on("reservation", "forgotConfirmationCode.ok", msg -> {
+		    String confirmationCode = (String) msg.getData();
+		    BistroClientGUI.client.getReservationCTRL().handleForgotConfirmationCodeResponse(confirmationCode);
+		});
+		router.on("reservation", "forgotConfirmationCode.fail", msg -> {
+			BistroClientGUI.client.getReservationCTRL().handleForgotConfirmationCodeResponse("NOT_FOUND");
+		});
 		
 	}
 }

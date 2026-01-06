@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import logic.BistroClientGUI;
 
@@ -25,6 +26,10 @@ public class ClientCheckInTableScreen {
 	private Label lblError;
 	@FXML
 	private Button btnBack;
+	
+	private StackPane currentScreen;
+	@FXML
+	private StackPane ScreenContainer;
 	
 	// ****************************** Instance Methods ******************************
 
@@ -72,5 +77,22 @@ public class ClientCheckInTableScreen {
 			e.printStackTrace();
 		}
 	}
+	/**
+	 * Displays an error message on the screen.
+	 *
+	 * @param message The error message to display.
+	 */
+	public void showSuccessMessage(String message) {
+        BistroClientGUI.display(lblError, message, Color.GREEN);
+    }
+	public void closeForgotCodeScreen() {
+        // Logic to remove the modal from the screen
+        if (ScreenContainer != null && currentScreen != null) {
+            ScreenContainer.getChildren().remove(currentScreen);
+            currentScreen = null;
+        } else {
+            System.out.println("Modal closed.");
+        }
+    }
 }
 //End of ClientCheckInTableScreen.java

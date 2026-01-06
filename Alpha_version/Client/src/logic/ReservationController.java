@@ -39,6 +39,7 @@ public class ReservationController {
 	private Order orderReady;
 	
 	private Consumer<List<Order>> allReservationsCallback;
+    private Consumer<String> onCodeRetrieveResult;
 	
 	//******************************** Constructors ***********************************//
 	
@@ -178,5 +179,26 @@ public class ReservationController {
     public void setAllReservationsListener(Consumer<List<Order>> callback) {
         this.allReservationsCallback = callback;
     }
+
+    public void setOnConfirmationCodeRetrieveResult(Consumer<String> listener) {
+        this.onCodeRetrieveResult = listener;
+    }
+
+    public void handleForgotConfirmationCodeResponse(String result) {
+        if (onCodeRetrieveResult != null) {
+            Platform.runLater(() -> {
+                onCodeRetrieveResult.accept(result);
+                onCodeRetrieveResult = null;
+            });
+        }
+    }
+
+	public void retrieveConfirmationCode(String email, String phoneNum) {
+			    Map<String, String> requestData = new HashMap<>();
+	    requestData.put("email", email);
+	    requestData.put("phoneNum", phoneNum);
+	    client.handleMessageFromClientUI(new Message(Api.ASK_FORGOT_CONFIRMATION_CODE, requestData));
+		
+	}
 	
 }
