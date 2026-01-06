@@ -4,6 +4,7 @@ import entities.User;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
@@ -18,14 +19,19 @@ public class ClientCheckInTableScreen {
 	// ****************************** FXML Elements ******************************
 	@FXML
 	private Button btnCheckIn;
+	
+	@FXML
+	private Button btnBack;
+	
+	@FXML
+	private Hyperlink lnkForgot;
+	
 	@FXML
 	private TextField txtConfirmCode;
 	@FXML
 	private Label lblUser;
 	@FXML
 	private Label lblError;
-	@FXML
-	private Button btnBack;
 	
 	private StackPane currentScreen;
 	@FXML
@@ -77,6 +83,14 @@ public class ClientCheckInTableScreen {
 			e.printStackTrace();
 		}
 	}
+	
+	@FXML
+	public void lnkForgot(Event event) {
+		//TODO: Open Forgot Confirmation Code modal
+		return;
+	}
+	
+	
 	/**
 	 * Displays an error message on the screen.
 	 *
@@ -85,6 +99,12 @@ public class ClientCheckInTableScreen {
 	public void showSuccessMessage(String message) {
         BistroClientGUI.display(lblError, message, Color.GREEN);
     }
+	
+	
+	
+	/**
+	 * Closes the Forgot Code modal screen.
+	 */
 	public void closeForgotCodeScreen() {
         // Logic to remove the modal from the screen
         if (ScreenContainer != null && currentScreen != null) {

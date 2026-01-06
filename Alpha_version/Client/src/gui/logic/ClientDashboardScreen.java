@@ -109,6 +109,7 @@ public class ClientDashboardScreen {
 	        btnCheckInForTable.setDisable(false);
 	    }
 	}
+	
 	/**
 	 * Method to edit the Join Waiting List button text based on user's waiting list status.
 	 */

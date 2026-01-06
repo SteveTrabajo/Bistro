@@ -29,7 +29,7 @@ public class ClientEditPersonalDetailsScreen {
 	@FXML
 	private TextField txtPhoneNumber;
 	@FXML
-	private TextField txtEmailAddress;
+	private TextField txtEmail;
 	@FXML
 	private TextField txtAddress;
 	@FXML
@@ -37,8 +37,7 @@ public class ClientEditPersonalDetailsScreen {
 	@FXML
 	private Label lblError;
 
-	// ****************************** Instance Methods
-	// ******************************
+	// ****************************** Instance Methods ******************************
 
 	/**
 	 * Initializes the Client Edit Personal screen.
@@ -50,10 +49,9 @@ public class ClientEditPersonalDetailsScreen {
 		txtFirstName.setText(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getFirstName());
 		txtLastName.setText(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getLastName());
 		txtPhoneNumber.setText(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getPhoneNumber());
-		txtEmailAddress.setText(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getEmail());
+		txtEmail.setText(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getEmail());
 		txtAddress.setText(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getAddress());
 		lblError.setText("");
-		// TODO: change input restriction to use the input check class on common folder
 		// Added: Restriction for First Name - only English letters allowed during
 		// typing
 		txtFirstName.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -94,7 +92,7 @@ public class ClientEditPersonalDetailsScreen {
 		String firstName = txtFirstName.getText().trim();
 		String lastName = txtLastName.getText().trim();
 		String phoneNumber = txtPhoneNumber.getText().trim();
-		String email = txtEmailAddress.getText().trim();
+		String email = txtEmail.getText().trim();
 		String address = txtAddress.getText().trim();
 		lblError.setText("");
 
