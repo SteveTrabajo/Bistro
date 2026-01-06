@@ -15,8 +15,7 @@ import enums.UserType;
 import javafx.scene.control.Alert;
 public class UserSubject {
 
-	public static void register(ClientRouter router) {
-		UserController userController = BistroClientGUI.client.getUserCTRL();
+	public static void register(ClientRouter router,UserController userController) {
 		for (UserType type : UserType.values()) {
 			String typeKey = type.name().toLowerCase();
 

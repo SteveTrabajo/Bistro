@@ -136,14 +136,13 @@ public class BistroClient extends AbstractClient {
 	 */
 	private void registerHandlers() {
 		// Register API subjects
-		UserSubject.register(router);
+		UserSubject.register(router, this.userCTRL);
 		OrderSubject.register(router);
-		WaitListSubject.register(router);
+		WaitListSubject.register(router,this.waitingListCTRL);
 		TablesSubject.register(router);
 		ConnectionSubject.register(router);
 		PaymentSubject.register(router);
-		SystemSubject.register(router);		
-        
+		SystemSubject.register(router);	
 	}
 
 	/**

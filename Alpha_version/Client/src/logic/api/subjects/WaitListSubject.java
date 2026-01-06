@@ -14,9 +14,7 @@ public class WaitListSubject {
 	private WaitListSubject() {
 	}
 
-	public static void register(ClientRouter router) {
-		WaitingListController wlController = BistroClientGUI.client.getWaitingListCTRL();
-
+	public static void register(ClientRouter router,WaitingListController wlController) {
 				//Staff: Get All Data
 				router.on("waitinglist", "getAll.ok", msg -> {
 					@SuppressWarnings
