@@ -133,6 +133,7 @@
                         </VBox>
 
                         <!-- Buttons row: Save centered wide, Cancel at right -->
+                        <Label fx:id="lblError" alignment="CENTER" textAlignment="CENTER" wrapText="true" maxWidth="Infinity"/>
                         <HBox alignment="CENTER" spacing="18" styleClass="buttons-row">
                             <Button fx:id="btnSave" onAction="#btnSave" text="Save Changes">
                         <styleClass>
@@ -140,9 +141,7 @@
                            <String fx:value="btn-wide" />
                         </styleClass></Button>
                         </HBox>
-
                     </VBox>
-               <Label fx:id="lblError" />
                <BorderPane prefHeight="16.0" prefWidth="1218.0">
                   <left>
                      <HBox prefHeight="33.0" prefWidth="457.0" BorderPane.alignment="CENTER">

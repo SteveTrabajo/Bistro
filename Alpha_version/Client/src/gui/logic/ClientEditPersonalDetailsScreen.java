@@ -10,6 +10,7 @@ import logic.BistroClientGUI;
 import common.InputCheck;
 import entities.User;
 import entities.UserData;
+import enums.UserType;
 
 /**
  * This class represents the controller for the Client Edit Personal screen in
@@ -37,6 +38,7 @@ public class ClientEditPersonalDetailsScreen {
 	@FXML
 	private Label lblError;
 
+	private User originalUser;
 	// ****************************** Instance Methods ******************************
 
 	/**
@@ -44,25 +46,38 @@ public class ClientEditPersonalDetailsScreen {
 	 */
 	@FXML
 	public void initialize() {
-		// Load initial data
-		lblMemberID.setText(String.valueOf(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getUserId()));
-		txtFirstName.setText(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getFirstName());
-		txtLastName.setText(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getLastName());
-		txtPhoneNumber.setText(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getPhoneNumber());
-		txtEmail.setText(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getEmail());
-		txtAddress.setText(BistroClientGUI.client.getUserCTRL().getLoggedInUser().getAddress());
+		lblError.setStyle("-fx-text-fill: red;");
 		lblError.setText("");
-		// Added: Restriction for First Name - only English letters allowed during
-		// typing
+		// Load initial data
+		originalUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
+		lblMemberID.setText(originalUser.getMemberCode());
+		txtFirstName.setText(originalUser.getFirstName());
+		txtLastName.setText(originalUser.getLastName());
+		txtPhoneNumber.setText(originalUser.getPhoneNumber());
+		txtEmail.setText(originalUser.getEmail());
+		txtAddress.setText(originalUser.getAddress());
+		
+		// Restriction for First Name - only English letters
 		txtFirstName.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (!newValue.matches("[a-zA-Z]*")) {
 				txtFirstName.setText(oldValue);
 			}
 		});
+		
+		// Restriction for Last Name - only English letters
+		txtLastName.textProperty().addListener((observable, oldValue, newValue) -> {
+			if (!newValue.matches("[a-zA-Z]*")) {
+				txtLastName.setText(oldValue);
+			}
+		});
 
-		// Added: Restriction for Phone - only digits and max 10 characters
+		// Restriction for Phone - digits only, optional + at start, dynamic length check
 		txtPhoneNumber.textProperty().addListener((observable, oldValue, newValue) -> {
-			if (!newValue.matches("\\d*") || newValue.length() > 10) {
+			if (newValue == null) return;
+			// Allow 13 chars if it starts with +, otherwise 10
+			int maxLength = newValue.startsWith("+") ? 13 : 10;
+			
+			if (!newValue.matches("^\\+?\\d*$") || newValue.length() > maxLength) {
 				txtPhoneNumber.setText(oldValue);
 			}
 		});
@@ -97,48 +112,34 @@ public class ClientEditPersonalDetailsScreen {
 		lblError.setText("");
 
 		// Input validation using InputCheck methods
-		String errorMessage;
-
-		errorMessage = InputCheck.validateFirstName(firstName);
+		String errorMessage = InputCheck.validatePersonalDetails(firstName, lastName, phoneNumber, email, address);
 		if (!errorMessage.isEmpty()) {
 			lblError.setText(errorMessage);
 			return;
 		}
 
-		errorMessage = InputCheck.validateLastName(lastName);
-		if (!errorMessage.isEmpty()) {
-			lblError.setText(errorMessage);
-			return;
-		}
+		String currentCombinedName = originalUser.getFirstName() + "|" + originalUser.getLastName() + "|" + originalUser.getAddress();
+		String newCombinedName = firstName + "|" + lastName + "|" + address;
 
-		errorMessage = InputCheck.validatePhoneNumber(phoneNumber);
-		if (!errorMessage.isEmpty()) {
-			lblError.setText(errorMessage);
-			return;
-		}
-
-		errorMessage = InputCheck.validateEmail(email);
-		if (!errorMessage.isEmpty()) {
-			lblError.setText(errorMessage);
-			return;
-		}
-
-		// Get the current user object once to avoid long, repetitive lines
-		User currentUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
-
-		UserData updatedUser = new UserData(firstName + "|" + lastName + "|" + address, //changed to| to separate address
-				email, phoneNumber, currentUser.getMemberCode(), currentUser.getUserType());
-		boolean isChanged = !updatedUser.getEmail().equals(currentUser.getEmail())
-				|| !updatedUser.getPhone().equals(currentUser.getPhoneNumber())
-				|| !updatedUser.getName().equals(currentUser.getFirstName() + "|" + currentUser.getLastName() + "|" + currentUser.getAddress());
+		boolean isChanged = !email.equals(originalUser.getEmail())
+				|| !phoneNumber.equals(originalUser.getPhoneNumber())
+				|| !newCombinedName.equals(currentCombinedName);
 
 		if (!isChanged) {
 			lblError.setText("No changes were made.");
 			return;
 		}
+
+		UserData updatedUser = new UserData(
+				newCombinedName, 
+				email, 
+				phoneNumber, 
+				originalUser.getMemberCode(), 
+				originalUser.getUserType()
+		);
 		BistroClientGUI.client.getUserCTRL().updateUserDetails(updatedUser);
 
-		if (!BistroClientGUI.client.getUserCTRL().isUpdateSuccessful(currentUser)) {
+		if (!BistroClientGUI.client.getUserCTRL().isUpdateSuccessful(originalUser)) {
 			lblError.setText("Error: Failed to save details. Please try again.");
 			return;
 		}

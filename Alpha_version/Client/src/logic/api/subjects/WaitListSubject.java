@@ -104,5 +104,27 @@ public class WaitListSubject {
 						alert.showAndWait();
 					});
 				});
+				
+				router.on("waitinglist", "addWalkIn.ok", msg -> {
+		            BistroClient.awaitResponse = false;
+		            Platform.runLater(() -> {
+		                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		                alert.setTitle("Success");
+		                alert.setHeaderText(null);
+		                alert.setContentText("Walk-in party added to the list.");
+		                alert.show();
+		                wlController.askWaitingList();
+		            });
+		        });
+
+		        router.on("waitinglist", "addWalkIn.fail", msg -> {
+		            BistroClient.awaitResponse = false;
+		            Platform.runLater(() -> {
+		                Alert alert = new Alert(Alert.AlertType.ERROR);
+		                alert.setTitle("Error");
+		                alert.setContentText("Failed to add walk-in.");
+		                alert.show();
+		            });
+		        });
 	}
 }

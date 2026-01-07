@@ -31,11 +31,15 @@
                               <Image url="@../../resources/icons/backIcon.png" />
                            </image>
                         </ImageView>
-                     </graphic></Button>
+                     </graphic>
+                  </Button>
                     </left>
 
                     <center>
-                        <Label styleClass="page-title" text="Join Waiting List" BorderPane.alignment="CENTER" />
+                        <Label styleClass="page-title" text="Join Waiting List" BorderPane.alignment="CENTER">
+                     <BorderPane.margin>
+                        <Insets right="65.0" />
+                     </BorderPane.margin></Label>
                     </center>
                 </BorderPane>
             </top>

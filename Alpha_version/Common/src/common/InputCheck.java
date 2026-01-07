@@ -127,6 +127,28 @@ public class InputCheck {
 		return "";
 	}
 	
+	public static String validatePersonalDetails(String firstName, String lastName, String phoneNumber, String email, String address) {
+		StringBuilder errorMsg = new StringBuilder();
+		String temp;
+		
+		temp = validateFirstName(firstName);
+		if(!temp.isEmpty()) errorMsg.append("• ").append(temp).append("\n");
+		
+		temp = validateLastName(lastName);
+		if(!temp.isEmpty()) errorMsg.append("• ").append(temp).append("\n");
+		
+		temp = validatePhoneNumber(phoneNumber);
+		if(!temp.isEmpty()) errorMsg.append("• ").append(temp).append("\n");
+		
+		temp = validateEmail(email);
+		if(!temp.isEmpty()) errorMsg.append("• ").append(temp).append("\n");
+		
+		temp = validateAddress(address);
+		if(!temp.isEmpty()) errorMsg.append("• ").append(temp).append("\n");
+		
+		return errorMsg.toString().trim();
+	}
+	
 	// ==================== User Validation Methods ====================
 	
 	// Regex patterns for phone number and email validation
@@ -146,9 +168,11 @@ public class InputCheck {
 		if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
 			return "Phone number is required.";
 		}
-		if (!phoneNumber.matches("\\d{10}")) {
+
+		if (!PHONE_PATTERN.matcher(phoneNumber).matches()) {
 			return "Invalid phone number. Must be 05XXXXXXXX or +9725XXXXXXXX";
 		}
+		
 		return "";
 	}
 
