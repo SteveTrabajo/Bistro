@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import comms.*;
+import dto.UserData;
 import entities.User;
-import entities.UserData;
 import enums.UserType;
 import javafx.application.Platform;
 

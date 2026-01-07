@@ -3,7 +3,7 @@ package gui.logic.staff;
 import java.util.List;
 
 import common.InputCheck;
-import entities.UserData;
+import dto.UserData;
 import enums.UserType;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
