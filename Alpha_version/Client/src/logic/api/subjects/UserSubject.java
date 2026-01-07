@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import dto.UserData;
 import entities.User;
-import entities.UserData;
 import logic.BistroClient;
 import logic.BistroClientGUI;
 import logic.UserController;
@@ -47,14 +47,15 @@ public class UserSubject {
 			BistroClient.awaitResponse = false;
 			UserData updatedUser = (UserData) msg.getData();
 			User currentUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
-			currentUser.setFirstName(updatedUser.getName().split("|")[0]);
-			currentUser.setLastName(updatedUser.getName().split("|")[1]);
-			currentUser.setAddress(updatedUser.getName().split("|")[2]);
+			currentUser.setFirstName(updatedUser.getFirstName());
+			currentUser.setLastName(updatedUser.getLastName());
+			currentUser.setAddress(updatedUser.getAddress());
 			currentUser.setEmail(updatedUser.getEmail());
 			currentUser.setPhoneNumber(updatedUser.getPhone());
 			currentUser.setMemberCode(updatedUser.getMemberCode());
 			BistroClientGUI.client.getUserCTRL().setLoggedInUser(currentUser);
 		});
+		
 		router.on("member", "updateInfo.fail", msg -> {
 			Alert alert = new Alert(Alert.AlertType.ERROR);
 			alert.setTitle("Update Failed");

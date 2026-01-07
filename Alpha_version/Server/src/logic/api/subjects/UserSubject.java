@@ -116,7 +116,7 @@ public final class UserSubject {
 			boolean success = userService.updateMemberInfo(updatedUser);
 			if (success) {
 				logger.log("[INFO] Client " + client + " updated member info: successful");
-				client.sendToClient(new Message(Api.REPLY_MEMBER_UPDATE_INFO_OK, null));
+				client.sendToClient(new Message(Api.REPLY_MEMBER_UPDATE_INFO_OK, updatedUser));
 			} else {
 				logger.log("[ERROR] Client " + client + " updated member info: failed");
 				client.sendToClient(new Message(Api.REPLY_MEMBER_UPDATE_INFO_FAILED, null));

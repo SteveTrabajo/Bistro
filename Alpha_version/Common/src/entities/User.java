@@ -115,12 +115,21 @@ public class User implements Serializable {
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
 	}
+	
 	public String getFullName() {
 		return fullName;
 	}
 	
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
+	}
+	
 	public String getAddress() {
 		return this.address;
+	}
+	
+	public void setAddress(String address) {
+		this.address = address;
 	}
 	
 	public String getUsername() {

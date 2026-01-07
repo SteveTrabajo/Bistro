@@ -132,7 +132,7 @@ public class ClientEditPersonalDetailsScreen {
 		}
 
 		UserData updatedUser = new UserData(firstName, lastName, originalUser.getMemberCode(), phoneNumber, email,
-				originalUser.getUserType());
+				originalUser.getUserType(), address);
 		 
 		BistroClientGUI.client.getUserCTRL().updateUserDetails(updatedUser);
 

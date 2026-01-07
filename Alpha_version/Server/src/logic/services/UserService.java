@@ -111,7 +111,6 @@ public class UserService {
 	}
 
 	public boolean updateMemberInfo(UserData updatedUser) {
-			
 		return dbController.setUpdatedMemberData(updatedUser);	
 	}
 }
