@@ -21,7 +21,7 @@ public class OrderSubject {
 			Platform.runLater(() -> BistroClientGUI.client.getReservationCTRL().setConfirmationCode(confirmationCode));
 		});
 		router.on("orders","createReservation.fail", msg -> {
-						BistroClient.awaitResponse = false;
+			BistroClient.awaitResponse = false;
 			Alert alert = new Alert(Alert.AlertType.ERROR);
 			alert.setTitle("Reservation Failed");
 			alert.setHeaderText("Could not create reservation");
