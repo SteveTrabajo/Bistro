@@ -26,9 +26,9 @@ public class OrdersService {
 	private final ServerLogger logger;
 	
 	//Variables for reservation slots calculation:
-	private final List<Integer> tableSizes; // [2,2,4,4,6,6,8]
-	private final int slotStepMinutes; // 30
-	private final int reservationDurationMinutes;// 120 
+	private List<Integer> tableSizes; // [2,2,4,4,6,6,8]
+	private int slotStepMinutes; // 30
+	private int reservationDurationMinutes;// 120 
 
 	
 	// ******************************** Constructors***********************************
@@ -39,21 +39,21 @@ public class OrdersService {
 		this.tableSizes = new ArrayList<Integer>();
 		this.slotStepMinutes = 30;
 		this.reservationDurationMinutes = 120;
-		//getTableSizes();
 	}
 	// ********************************Instance Methods ***********************************
 	
 	/*
 	 * Fetches all table sizes from the database and stores them in the tableSizes list.
 	 */
-	/* public void getTableSizes() {
+	public void getTableSizes() {
 		List<Table> tables = dbController.getAllTablesFromDB();
+		tableSizes.clear();
 		for (Table table : tables) {
 			tableSizes.add(table.getCapacity());
 		}
 		return;
 	}
-	*/
+	
 
 
 	public boolean createNewOrder(List<Object> data, OrderType orderType) {
@@ -101,15 +101,33 @@ public class OrdersService {
 	 * @return A list of available reservation hours in "HH:mm" format.
 	 */
 	public List<String> getAvailableReservationHours(Map<String, Object> requestData) {
+		getTableSizes(); // Fetch table sizes from DB
 		List<LocalTime> openingHours = dbController.getOpeningHoursFromDB();
+		printOpeningHours(openingHours);
 		LocalTime openingTime = openingHours.get(0);
 		LocalTime closingTime = openingHours.get(1);
 		LocalDate date = (LocalDate) requestData.get("date");
 		int dinersAmount = (int) requestData.get("dinersAmount");
 		List<Order> reservationsByDate = dbController.getReservationsbyDate(date);
+		printReservationsByDate(reservationsByDate);
 		return computeAvailableSlots(openingTime, closingTime, dinersAmount, reservationsByDate);
 	}
 	
+	private void printReservationsByDate(List<Order> reservationsByDate) {
+		System.out.println("Reservations fetched from DB for the given date: ");
+		for (Order o : reservationsByDate) {
+			System.out.println( "Time: " + o.getOrderHour().toString() + ", Diners: " + o.getDinersAmount());
+		}
+		
+	}
+
+	private void printOpeningHours(List<LocalTime> openingHours) {
+		System.out.println("Opening Hours fetched from DB: ");
+		System.out.println("Opening Time: " + openingHours.get(0).toString());
+		System.out.println("Closing Time: " + openingHours.get(1).toString());
+		
+	}
+
 	public int getAllocatedTableForReservation(String confirmationCode) {
 		
 		return server.getTablesService().getTableNumberByReservationConfirmationCode(confirmationCode);
@@ -134,41 +152,55 @@ public class OrdersService {
 	 * @return A list of available reservation slots in "HH:mm" format.
 	 */
 	public List<String> computeAvailableSlots(LocalTime openingTime, LocalTime closingTime, int newDinersAmount,
-			List<Order> reservationsByDate) {
-		// Build all possible time slots within opening hours
-		List<LocalTime> possibleTimeSlots = buildPossibleTimeSlots(openingTime, closingTime);
-		// Map from time slot to list of diners amounts overlapping with that slot
-		Map<LocalTime, List<Integer>> tablesPerTime = new HashMap<>();
-		for (LocalTime slot : possibleTimeSlots){
-			tablesPerTime.put(slot, new ArrayList<>()); 
-		}
-		//loop over existing reservations and mark overlapping time slots:
-		for (Order o : reservationsByDate) {// for each existing reservation
-			LocalTime orderStart = o.getOrderHour();
-			LocalTime orderEnd = orderStart.plusMinutes(reservationDurationMinutes);
-			// for each possible time slot
-			for (LocalTime slot : possibleTimeSlots) {
-				LocalTime slotStartTime = slot;
-				LocalTime slotEndTime = slotStartTime.plusMinutes(reservationDurationMinutes);
-				// Check overlap between reservation and time slot to avoid double-booking:
-				if (overlaps(slotStartTime, slotEndTime, orderStart, orderEnd)) {
-					tablesPerTime.get(slot).add(o.getDinersAmount());
-				}
-			}
-		}
-		// Check each time slot if it can contain the new diners amount:
-		List<String> available = new ArrayList<>(); // available time slots
-		for (LocalTime slot : possibleTimeSlots) {// for each possible time slot
-			// Get overlapping diners amounts for this slot and add the new diners amount
-			List<Integer> overlappingDinersAmounts = new ArrayList<>(tablesPerTime.get(slot));
-			overlappingDinersAmounts.add(newDinersAmount);// add new diners amount
-			// Check if all diners amounts can be assigned to available tables
-			if (canAssignAllDinersToTables(overlappingDinersAmounts, tableSizes)) {
-				available.add(timeToString(slot));
-			}
-		}
-		printListbeforeReturn(available);
-		return available;
+	        List<Order> reservationsByDate) {
+	    
+	    // --- דיבאג: בדיקת נתונים קריטיים ---
+	    System.out.println("--- DEBUG: Starting computeAvailableSlots ---");
+	    System.out.println("Table Sizes Loaded: " + this.tableSizes); // האם זה ריק?
+	    System.out.println("New Diners Amount: " + newDinersAmount);
+	    System.out.println("Opening: " + openingTime + ", Closing: " + closingTime);
+	    
+	    if (this.tableSizes == null || this.tableSizes.isEmpty()) {
+	        System.err.println("ERROR: tableSizes is EMPTY! No tables to seat diners.");
+	        return new ArrayList<>();
+	    }
+	    // ------------------------------------
+
+	    List<LocalTime> possibleTimeSlots = buildPossibleTimeSlots(openingTime, closingTime);
+	    Map<LocalTime, List<Integer>> tablesPerTime = new HashMap<>();
+	    for (LocalTime slot : possibleTimeSlots){
+	        tablesPerTime.put(slot, new ArrayList<>()); 
+	    }
+
+	    for (Order o : reservationsByDate) {
+	        LocalTime orderStart = o.getOrderHour();
+	        LocalTime orderEnd = orderStart.plusMinutes(reservationDurationMinutes);
+	        for (LocalTime slot : possibleTimeSlots) {
+	            LocalTime slotStartTime = slot;
+	            LocalTime slotEndTime = slotStartTime.plusMinutes(reservationDurationMinutes);
+	            if (overlaps(slotStartTime, slotEndTime, orderStart, orderEnd)) {
+	                tablesPerTime.get(slot).add(o.getDinersAmount());
+	            }
+	        }
+	    }
+
+	    List<String> available = new ArrayList<>(); 
+	    for (LocalTime slot : possibleTimeSlots) {
+	        List<Integer> overlappingDinersAmounts = new ArrayList<>(tablesPerTime.get(slot));
+	        overlappingDinersAmounts.add(newDinersAmount);
+	        
+	        // --- דיבאג: לראות למה שעה ספציפית נפסלת ---
+	        // System.out.println("Checking " + slot + " with groups: " + overlappingDinersAmounts);
+	        
+	        if (canAssignAllDinersToTables(overlappingDinersAmounts, tableSizes)) {
+	            available.add(timeToString(slot));
+	        } else {
+	             // System.out.println("Slot " + slot + " REJECTED (Not enough tables)");
+	        }
+	    }
+	    
+	    printListbeforeReturn(available);
+	    return available;
 	}
 	
 	private void printListbeforeReturn(List<String> available) {

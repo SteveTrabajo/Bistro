@@ -546,63 +546,61 @@ public class BistroDataBase_Controller {
 	
 	
 	public List<Order> getReservationsbyDate(LocalDate date) {
-		
-		List<Order> orders = new ArrayList<>();
-		String qry = "";
-		if (date == null) {
-		 return null;
-		}
-		if( LocalDate.now().equals(date))
-		{
-			 qry = 		"SELECT order_time, number_of_guests "
-				        + "FROM orders "
-				        + "WHERE order_type = 'RESERVATION' "
-				        + "AND order_date = ? "
-				        + "AND status IN ('PENDING', 'NOTIFIED', 'SEATED') "
-				        + "ORDER BY order_time ASC";		//Order by first hour to last hour
-			 
-					
-		}
-		else
-		{
+	    List<Order> orders = new ArrayList<>();
+	    
+	    if (date == null) {
+	        return orders; 
+	    }
 
-		  qry =		"SELECT order_time, number_of_guests "
-		    			+ "FROM orders "
-		          		+ "WHERE order_type = 'RESERVATION' "
-		          		+ "AND status = 'PENDING' "
-		          		+ "AND order_date = ? "
-		          		+ "ORDER BY order_time ASC";			//Order by first hour to last hour
-		}
+	    String qry;
+	    
+	    if (LocalDate.now().equals(date)) {
+	        qry = "SELECT order_time, number_of_guests "
+	            + "FROM orders "
+	            + "WHERE order_type = 'RESERVATION' "
+	            + "AND order_date = ? "
+	            + "AND status IN ('PENDING', 'NOTIFIED', 'SEATED') "
+	            + "ORDER BY order_time ASC";
+	    } else {
+	        qry = "SELECT order_time, number_of_guests "
+	            + "FROM orders "
+	            + "WHERE order_type = 'RESERVATION' "
+	            + "AND order_date = ? "
+	            + "AND status IN ('PENDING', 'NOTIFIED') " 
+	            + "ORDER BY order_time ASC";
+	    }
 
-		Connection conn = null;
-		 
-		    try {
-		        conn = borrow();
+	    Connection conn = null;
 
-		        try (PreparedStatement ps = conn.prepareStatement(qry)) {
-		            ps.setDate(1, java.sql.Date.valueOf(date));
-		            
-		            try (ResultSet rs = ps.executeQuery()) {
-		                while (rs.next()) {
+	    try {
+	        conn = borrow();
 
-		                    LocalTime orderHour =	rs.getTime("order_time").toLocalTime();		                    						
-		                    int dinersAmount =	rs.getInt("number_of_guests");
-		                            
-		                    orders.add(new Order(orderHour, dinersAmount));                    			                   
-		                }
-		            }
-		        }
+	        try (PreparedStatement ps = conn.prepareStatement(qry)) {
+	            ps.setDate(1, Date.valueOf(date));
 
-		    } catch (SQLException ex) {
-		        logger.log("[ERROR] SQLException in getReservationsbyDate: " + ex.getMessage());
-		        ex.printStackTrace();
-		        return null;
+	            try (ResultSet rs = ps.executeQuery()) {
+	                while (rs.next()) {
+	                    Time sqlTime = rs.getTime("order_time");
+	                    LocalTime orderHour = (sqlTime != null) ? sqlTime.toLocalTime() : null;
+	                    
+	                    int dinersAmount = rs.getInt("number_of_guests");
+	                    
+	                    if (orderHour != null) {
+	                        orders.add(new Order(orderHour, dinersAmount));
+	                    }
+	                }
+	            }
+	        }
 
-		    } finally {
-		        release(conn);
-		    }
+	    } catch (SQLException ex) {
+	        logger.log("[ERROR] SQLException in getReservationsbyDate: " + ex.getMessage());
+	        ex.printStackTrace();
+	        return orders; 
+	    } finally {
+	        release(conn);
+	    }
 
-		    return orders;
+	    return orders;
 	}
 	
 
@@ -758,10 +756,28 @@ public class BistroDataBase_Controller {
 	
 	// ****************************** Table Operations ******************************
 	public List<Table> getAllTablesFromDB() {
-		// TODO Auto-generated method stub
-		return null;
+	    List<Table> tablesList = new ArrayList<>();
+	    String qry = "SELECT tableNum, capacity FROM tables"; // ודא ששמות העמודות נכונים!
+
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(qry);
+	             ResultSet rs = ps.executeQuery()) {
+	            while (rs.next()) {
+	                // שים לב: זה מניח שיש לך בנאי ב-Table שמקבל (מספר, קיבולת)
+	                tablesList.add(new Table(rs.getInt("tableNum"), rs.getInt("capacity")));
+	            }
+	        }
+	    } catch (SQLException ex) {
+	        ex.printStackTrace();
+	    } finally {
+	        release(conn);
+	    }
+	    
+	    System.out.println("Controller: Fetched " + tablesList.size() + " tables from DB."); // הדפסה לבדיקה
+	    return tablesList;
 	}
-	
 	
 
 	public int getTableNumberByConfirmationCode(String confirmationCode) {

@@ -13,6 +13,12 @@ public class Table {
 		this.capacity = capacity;
 		this.occupiedNow = occupiedNow;
 	}
+	
+	public Table(int tableID, int capacity) {
+		this.tableID = tableID;
+		this.capacity = capacity;
+		this.occupiedNow = false;
+	}
 
 	// ****************************** Getters / Setters ******************************
 	public int getTableID() {
