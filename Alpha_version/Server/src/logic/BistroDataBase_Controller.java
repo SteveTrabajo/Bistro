@@ -757,7 +757,7 @@ public class BistroDataBase_Controller {
 	// ****************************** Table Operations ******************************
 	public List<Table> getAllTablesFromDB() {
 	    List<Table> tablesList = new ArrayList<>();
-	    String qry = "SELECT tableNum, capacity FROM tables"; // ודא ששמות העמודות נכונים!
+	    String qry = "SELECT tableNum, capacity FROM tables"; 
 
 	    Connection conn = null;
 	    try {
@@ -765,7 +765,7 @@ public class BistroDataBase_Controller {
 	        try (PreparedStatement ps = conn.prepareStatement(qry);
 	             ResultSet rs = ps.executeQuery()) {
 	            while (rs.next()) {
-	                // שים לב: זה מניח שיש לך בנאי ב-Table שמקבל (מספר, קיבולת)
+	               
 	                tablesList.add(new Table(rs.getInt("tableNum"), rs.getInt("capacity")));
 	            }
 	        }
@@ -775,7 +775,7 @@ public class BistroDataBase_Controller {
 	        release(conn);
 	    }
 	    
-	    System.out.println("Controller: Fetched " + tablesList.size() + " tables from DB."); // הדפסה לבדיקה
+	    System.out.println("Controller: Fetched " + tablesList.size() + " tables from DB.");  
 	    return tablesList;
 	}
 	
@@ -800,7 +800,7 @@ public class BistroDataBase_Controller {
 			
 			try(PreparedStatement ps = conn.prepareStatement(qry))
 			{
-				ps.setString(1, confirmationCode); 				//change id db table orders confirmationCode from int to varchar
+				ps.setString(1, confirmationCode); 				
 				
 				try(ResultSet rs = ps.executeQuery())
 				{
@@ -848,7 +848,7 @@ public class BistroDataBase_Controller {
 
 	    Connection conn = null;
 	    try {
-	        conn = borrow(); // הנחת שיש לך Connection Pool
+	        conn = borrow(); 
 	        
 	        try (PreparedStatement ps = conn.prepareStatement(qry)) {
 	            ps.setDate(1, Date.valueOf(today));
