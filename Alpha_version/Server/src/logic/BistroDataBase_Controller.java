@@ -472,44 +472,31 @@ public class BistroDataBase_Controller {
 		}
 	}
     
-    public boolean setUpdatedMemberData(User updatedUser) 
-    {
-    	if( updatedUser == null  || updatedUser.getUserType() == UserType.GUEST)
-    	{
-    		return false;
-    	}
-		
-    	final String qry = "UPDATE users " +
-    						"SET phoneNumber = ?, email = ? " +
-    						"WHERE user_id = ?";
-    	
-    	Connection conn = null;
-    	
-    	try {
+	public boolean setUpdatedMemberData(User updatedUser) {
+		if (updatedUser == null || updatedUser.getUserType() == UserType.GUEST) {
+			return false;
+		}
+		final String qry = "UPDATE users " + "SET phoneNumber = ?, email = ? " + "WHERE user_id = ?";
+		Connection conn = null;
+		try {
 			conn = borrow();
-			
-			try(PreparedStatement ps = conn.prepareStatement(qry))
-			{
+
+			try (PreparedStatement ps = conn.prepareStatement(qry)) {
 				ps.setString(1, updatedUser.getPhoneNumber());
 				ps.setString(2, updatedUser.getEmail());
 				ps.setInt(3, updatedUser.getUserId());
-				
+
 				int success = ps.executeUpdate();
-				
-				return success == 1;			//when success get 1 the updated worked and changed the row well in table
+
+				return success == 1; // when success get 1 the updated worked and changed the row well in table
 			}
-			
-			
-    	}
-    	catch (SQLException ex) {
+		} catch (SQLException ex) {
 			logger.log("[ERROR] SQLException in setUpdatedMemberData: " + ex.getMessage());
 			ex.printStackTrace();
 			return false;
+		} finally {
+			release(conn);
 		}
-    	finally{
-    		release(conn);
-    	}
-  	
 	}
     
     // ****************************** Order Operations ******************************	

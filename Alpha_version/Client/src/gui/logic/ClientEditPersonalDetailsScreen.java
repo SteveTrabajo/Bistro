@@ -118,25 +118,22 @@ public class ClientEditPersonalDetailsScreen {
 			return;
 		}
 
-		String currentCombinedName = originalUser.getFirstName() + "|" + originalUser.getLastName() + "|" + originalUser.getAddress();
-		String newCombinedName = firstName + "|" + lastName + "|" + address;
-
-		boolean isChanged = !email.equals(originalUser.getEmail())
-				|| !phoneNumber.equals(originalUser.getPhoneNumber())
-				|| !newCombinedName.equals(currentCombinedName);
-
+	
+		  boolean isChanged =
+		            !email.equals(originalUser.getEmail()) ||
+		            !phoneNumber.equals(originalUser.getPhoneNumber()) ||
+		            !firstName.equals(originalUser.getFirstName()) ||
+		            !lastName.equals(originalUser.getLastName()) ||
+		            !address.equals(originalUser.getAddress());
+		  
 		if (!isChanged) {
 			lblError.setText("No changes were made.");
 			return;
 		}
 
-		UserData updatedUser = new UserData(
-				newCombinedName, 
-				email, 
-				phoneNumber, 
-				originalUser.getMemberCode(), 
-				originalUser.getUserType()
-		);
+		UserData updatedUser = new UserData(firstName, lastName, originalUser.getMemberCode(), phoneNumber, email,
+				originalUser.getUserType());
+		 
 		BistroClientGUI.client.getUserCTRL().updateUserDetails(updatedUser);
 
 		if (!BistroClientGUI.client.getUserCTRL().isUpdateSuccessful(originalUser)) {
