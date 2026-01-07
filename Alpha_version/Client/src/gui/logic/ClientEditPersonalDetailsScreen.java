@@ -130,7 +130,7 @@ public class ClientEditPersonalDetailsScreen {
 				email, phoneNumber, currentUser.getMemberCode(), currentUser.getUserType());
 		boolean isChanged = !updatedUser.getEmail().equals(currentUser.getEmail())
 				|| !updatedUser.getPhone().equals(currentUser.getPhoneNumber())
-				|| !updatedUser.getName().equals(currentUser.getFirstName() + " " + currentUser.getLastName());
+				|| !updatedUser.getName().equals(currentUser.getFirstName() + "|" + currentUser.getLastName() + "|" + currentUser.getAddress());
 
 		if (!isChanged) {
 			lblError.setText("No changes were made.");

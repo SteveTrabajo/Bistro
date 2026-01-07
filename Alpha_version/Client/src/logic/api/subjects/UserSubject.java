@@ -11,7 +11,7 @@ import logic.BistroClientGUI;
 import logic.UserController;
 import logic.api.ClientRouter;
 import enums.UserType;
-
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
 public class UserSubject {
 
@@ -31,6 +31,10 @@ public class UserSubject {
 			});
 
 			router.on("login", typeKey + ".notFound", msg -> {
+				Alert alert = new Alert(Alert.AlertType.INFORMATION);
+				alert.setTitle("Login Failed");
+				alert.setHeaderText("User Not Found");
+				alert.setContentText("The username not found. Please check your username and try again.");
 	            BistroClient.awaitResponse = false;
 			});
 
@@ -40,7 +44,15 @@ public class UserSubject {
 		}
 		router.on("member", "updateInfo.ok", msg -> {
             BistroClient.awaitResponse = false;
-			BistroClientGUI.client.getUserCTRL().setLoggedInUser((User) msg.getData());
+            UserData updatedUser = (UserData) msg.getData();
+            User currentUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
+            currentUser.setFirstName(updatedUser.getName().split("|")[0]);
+            currentUser.setLastName(updatedUser.getName().split("|")[1]);
+            currentUser.setEmail(updatedUser.getEmail());
+            currentUser.setPhoneNumber(updatedUser.getPhone());
+            currentUser.setMemberCode(updatedUser.getMemberCode());
+            currentUser.setUserType(updatedUser.getUserType());
+			BistroClientGUI.client.getUserCTRL().setLoggedInUser(currentUser);
 		});
 		router.on("member", "updateInfo.fail", msg -> {
 			BistroClient.awaitResponse = false;
@@ -123,6 +135,37 @@ public class UserSubject {
 		router.on("reservation", "forgotConfirmationCode.fail", msg -> {
             BistroClient.awaitResponse = false;
 			BistroClientGUI.client.getReservationCTRL().handleForgotConfirmationCodeResponse("NOT_FOUND");
+		});
+		
+		router.on("login", "^\\(employee|manager)\\.invalidCredentials$", msg -> {
+		    
+		    BistroClient.awaitResponse = false;
+
+		    Platform.runLater(() -> {
+		        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		        alert.setTitle("Login Failed");
+		        alert.setHeaderText("Invalid Credentials");
+		        String content = String.format(
+		            "The username or password is incorrect.\nAttempts left: %s", 
+		            msg.getData()
+		        );
+		        
+		        alert.setContentText(content);
+		        alert.showAndWait();
+		    });
+		});
+		router.on("login", "^\\(employee|manager)\\.accountLocked$", msg -> {
+		    
+		    BistroClient.awaitResponse = false;
+
+		    Platform.runLater(() -> {
+		        Alert alert = new Alert(Alert.AlertType.ERROR);
+		        alert.setTitle("Account Locked");
+		        alert.setHeaderText("Too Many Failed Login Attempts");
+		        String content = "Your account has been locked due to multiple failed login attempts. Please wait 1 minutes before trying again.";
+		        alert.setContentText(content);
+		        alert.showAndWait();
+		    });
 		});
 		
 	}
