@@ -49,10 +49,10 @@ public class UserSubject {
 			User currentUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
 			currentUser.setFirstName(updatedUser.getName().split("|")[0]);
 			currentUser.setLastName(updatedUser.getName().split("|")[1]);
+			currentUser.setAddress(updatedUser.getName().split("|")[2]);
 			currentUser.setEmail(updatedUser.getEmail());
 			currentUser.setPhoneNumber(updatedUser.getPhone());
 			currentUser.setMemberCode(updatedUser.getMemberCode());
-			currentUser.setUserType(updatedUser.getUserType());
 			BistroClientGUI.client.getUserCTRL().setLoggedInUser(currentUser);
 		});
 		router.on("member", "updateInfo.fail", msg -> {
