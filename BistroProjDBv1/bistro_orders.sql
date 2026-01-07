@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `orders`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `orders` (
   `order_number` int NOT NULL AUTO_INCREMENT,
-  `confirmation_code` int NOT NULL,
+  `confirmation_code` VARCHAR(50) NOT NULL,
   `user_id` int NOT NULL,
   `number_of_guests` int NOT NULL,
   `order_date` date DEFAULT NULL,
@@ -41,7 +41,7 @@ CREATE TABLE `orders` (
   KEY `idx_orders_status` (`status`),
   CONSTRAINT `fk_orders_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
   CONSTRAINT `chk_guests_amount` CHECK ((`number_of_guests` > 0)),
-  CONSTRAINT `chk_order_slot_rules` CHECK ((((`order_type` = _utf8mb4'WAITLIST') and (`order_date` is null) and (`order_time` is null)) or ((`order_type` = _utf8mb4'RESERVATION') and (`order_date` is not null) and (`order_time` is not null) and (second(`order_time`) = 0) and (minute(`order_time`) in (0,30)))))
+  CONSTRAINT `chk_order_slot_rules` CHECK ((((`order_type` = 'WAITLIST') and (`order_date` is null) and (`order_time` is null)) or ((`order_type` = 'RESERVATION') and (`order_date` is not null) and (`order_time` is not null) and (second(`order_time`) = 0) and (minute(`order_time`) in (0,30)))))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
