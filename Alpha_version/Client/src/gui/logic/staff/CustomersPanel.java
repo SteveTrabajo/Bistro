@@ -1,9 +1,11 @@
 package gui.logic.staff;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import common.InputCheck;
 import dto.UserData;
+import entities.User;
 import enums.UserType;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -14,6 +16,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -219,37 +222,48 @@ public class CustomersPanel {
 		GridPane grid = new GridPane();
 		grid.setHgap(10);
 		grid.setVgap(10);
-		grid.setPadding(new javafx.geometry.Insets(20, 150, 10, 10));
+		grid.setPadding(new Insets(20, 150, 10, 10));
 
 		TextField nameField = new TextField(editUser.getFirstName());
+		TextField lastNameField = new TextField(editUser.getLastName());
+		TextField addressField = new TextField(editUser.getAddress());
 		TextField emailField = new TextField(editUser.getEmail());
 		TextField phoneField = new TextField(editUser.getPhone());
 
+		ComboBox<UserType> typeComboBox = new ComboBox<>();
+		typeComboBox.getItems().setAll(java.util.Arrays.stream(UserType.values())
+				.filter(type -> type != UserType.MANAGER).collect(Collectors.toList()));
+		typeComboBox.setValue(editUser.getUserType());
+		typeComboBox.setMaxWidth(Double.MAX_VALUE);
+		typeComboBox.setDisable(true); 
+		typeComboBox.setOpacity(0.9);
+		
 		// Member code is usually read-only
 		TextField memberCodeField = new TextField(editUser.getMemberCode());
 		memberCodeField.setEditable(false);
 		memberCodeField.setDisable(true);
+		memberCodeField.setOpacity(0.9);
 
-		ComboBox<UserType> typeComboBox = new ComboBox<>();
-		typeComboBox.getItems().setAll(java.util.Arrays.stream(UserType.values())
-				.filter(type -> type != UserType.MANAGER).collect(java.util.stream.Collectors.toList()));
-		typeComboBox.setValue(editUser.getUserType());
-		typeComboBox.setMaxWidth(Double.MAX_VALUE);
-
-		grid.add(new Label("Full Name:"), 0, 0);
+		grid.add(new Label("First Name:"), 0, 0);
 		grid.add(nameField, 1, 0);
+		
+		grid.add(new Label("Last Name:"), 0, 1);
+		grid.add(nameField, 1, 1);
+		
+		grid.add(new Label("Adress:"), 0, 2);
+		grid.add(nameField, 1, 2);
 
-		grid.add(new Label("Email:"), 0, 1);
-		grid.add(emailField, 1, 1);
+		grid.add(new Label("Email:"), 0, 3);
+		grid.add(emailField, 1, 3);
 
-		grid.add(new Label("Phone:"), 0, 2);
-		grid.add(phoneField, 1, 2);
+		grid.add(new Label("Phone:"), 0, 4);
+		grid.add(phoneField, 1, 4);
 
-		grid.add(new Label("Member Code:"), 0, 3);
-		grid.add(memberCodeField, 1, 3);
-
-		grid.add(new Label("User Type:"), 0, 4);
-		grid.add(typeComboBox, 1, 4);
+		grid.add(new Label("Member Code:"), 0, 5);
+		grid.add(memberCodeField, 1, 5);
+		
+		grid.add(new Label("User Type:"), 0, 6);
+		grid.add(typeComboBox, 1, 6);
 
 		dialog.getDialogPane().setContent(grid);
 		Platform.runLater(nameField::requestFocus);
@@ -257,19 +271,32 @@ public class CustomersPanel {
 		Node saveButton = dialog.getDialogPane().lookupButton(saveButtonType);
 
 		saveButton.disableProperty().bind(Bindings.createBooleanBinding(
-				() -> nameField.getText().trim().isEmpty() || !InputCheck.validateEmail(emailField.getText()).isEmpty()
-						|| !InputCheck.validatePhoneNumber(phoneField.getText()).isEmpty(),
+	            () -> nameField.getText().trim().isEmpty() 
+	                    || lastNameField.getText().trim().isEmpty()
+	                    || addressField.getText().trim().isEmpty()
+	                    || !InputCheck.validateEmail(emailField.getText()).isEmpty()
+	                    || !InputCheck.validatePhoneNumber(phoneField.getText()).isEmpty(),
 
-				nameField.textProperty(), emailField.textProperty(), phoneField.textProperty()));
+	            nameField.textProperty(), 
+	            lastNameField.textProperty(), 
+	            addressField.textProperty(),
+	            emailField.textProperty(), 
+	            phoneField.textProperty()));
 
 		// Convert the result when save is clicked
 		dialog.setResultConverter(dialogButton -> {
-			if (dialogButton == saveButtonType) {
-				// Return a new UserData object with updated fields
-				return new UserData(nameField.getText().trim(), emailField.getText().trim(),
-						phoneField.getText().trim(), editUser.getMemberCode(), typeComboBox.getValue());
-			}
-			return null;
+	        if (dialogButton == saveButtonType) {
+	            // Update your UserData constructor call to match your class structure
+	            return new UserData(
+	                nameField.getText().trim(),
+	                lastNameField.getText().trim(),
+	                emailField.getText().trim(),
+	                phoneField.getText().trim(),
+	                addressField.getText().trim(),
+	                typeComboBox.getValue(),memberCodeField.getText().trim()
+	            );
+	        }
+	        return null;
 		});
 
 		// Show dialog and handle the result
