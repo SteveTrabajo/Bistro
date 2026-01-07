@@ -126,7 +126,7 @@ public class ClientEditPersonalDetailsScreen {
 		// Get the current user object once to avoid long, repetitive lines
 		User currentUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
 
-		UserData updatedUser = new UserData(firstName + "_" + lastName + "_" + address, 
+		UserData updatedUser = new UserData(firstName + "|" + lastName + "|" + address, //changed to| to separate address
 				email, phoneNumber, currentUser.getMemberCode(), currentUser.getUserType());
 		boolean isChanged = !updatedUser.getEmail().equals(currentUser.getEmail())
 				|| !updatedUser.getPhone().equals(currentUser.getPhoneNumber())

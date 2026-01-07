@@ -161,7 +161,7 @@ public class UserController {
 		client.handleMessageFromClientUI(new Message(Api.ASK_MEMBER_UPDATE_INFO, updatedUser));
 	}
 
-	public void RegisterNewMember(Object newMemberData) {
+	public void RegisterNewMember(ArrayList<String> newMemberData) {
 		this.setRegistrationSuccessFlag(false);
 		client.handleMessageFromClientUI(new Message(Api.ASK_REGISTER_NEW_MEMBER, newMemberData));
 	}
