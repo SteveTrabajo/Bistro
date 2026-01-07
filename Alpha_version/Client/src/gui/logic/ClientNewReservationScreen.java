@@ -2,6 +2,9 @@ package gui.logic;
 
 import java.time.LocalDate;
 import java.util.List;
+
+import entities.User;
+import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -9,6 +12,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.GridPane;
@@ -24,18 +28,16 @@ public class ClientNewReservationScreen {
 	
 	@FXML
 	private DatePicker datePicker;
-	
 	@FXML
 	private ComboBox<String> dinersAmountComboBox;
-	
 	@FXML
 	private GridPane timeSlotsGridPane;
-	
 	@FXML
 	private Button btnConfirmReservation;
-	
 	@FXML
 	private Button btnBack;
+	@FXML
+	private Label lblUser;
 	
 	private String selectedTimeSlot = null;
 	
@@ -48,6 +50,12 @@ public class ClientNewReservationScreen {
 	public void initialize() {
 		setupDinersAmountComboBox(); //
 		setupDatePicker();
+		if (BistroClientGUI.client != null && BistroClientGUI.client.getUserCTRL().getLoggedInUser() != null) {
+			User currentUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
+			if (lblUser != null) {
+				lblUser.setText(currentUser.getUserType().name());
+			}
+		}
 		// Start with default time slots for local date and 1 diner:
 		dinersAmountComboBox.valueProperty().addListener((obs, oldV, newV) -> refreshTimeSlots());
 		datePicker.valueProperty().addListener((obs, oldDate, newDate) -> refreshTimeSlots());
@@ -59,13 +67,19 @@ public class ClientNewReservationScreen {
 	 * Sends a request to the server to fetch available hours.
 	 */
 	private void refreshTimeSlots() {
+		// Safety Check
+		if (timeSlotsGridPane == null) return;
 	    LocalDate date = datePicker.getValue();
 	    if (date == null) return;
+
 	    int diners = parseDiners(dinersAmountComboBox.getValue());
+
 	    //Clear grid immediately so user knows it's refreshing
 	    timeSlotsGridPane.getChildren().clear(); 
-	    //Register the method reference (handles the callback)
-	    BistroClientGUI.client.getReservationCTRL().setUIUpdateListener(this::generateTimeSlots);
+
+	    BistroClientGUI.client.getReservationCTRL().setUIUpdateListener((availableSlots) -> {
+			Platform.runLater(() -> generateTimeSlots(availableSlots));
+		});
 	    //Send Request
 	    BistroClientGUI.client.getReservationCTRL().askAvailableHours(date, diners);
 	}
@@ -96,7 +110,7 @@ public class ClientNewReservationScreen {
 	        @Override
 	        public void updateItem(LocalDate date, boolean empty) {
 	            super.updateItem(date, empty);
-	            setDisable(empty || date.isBefore(LocalDate.now()));
+	            setDisable(empty || date.isBefore(LocalDate.now()) || date.isAfter(LocalDate.now().plusMonths(1)));
 	        }
 	    });
 	}
@@ -117,6 +131,8 @@ public class ClientNewReservationScreen {
 	 * @param availableTimeSlots A list of available time slots as strings.
 	 */
 	private void generateTimeSlots(List<String> availableTimeSlots) {
+		if (timeSlotsGridPane == null) return;
+		if (availableTimeSlots == null) return;
 	    timeSlotsGridPane.getChildren().clear(); // Clear existing buttons
 	    //initialize ToggleGroup and row/col counters
 	    ToggleGroup timeSlotToggleGroup = new ToggleGroup();
