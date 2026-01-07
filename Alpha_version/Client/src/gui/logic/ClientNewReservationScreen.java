@@ -70,7 +70,10 @@ public class ClientNewReservationScreen {
 		// Safety Check
 		if (timeSlotsGridPane == null) return;
 	    LocalDate date = datePicker.getValue();
-	    if (date == null) return;
+	    if (date == null) {
+	    	timeSlotsGridPane.getChildren().clear();
+	    	return;
+	    }
 
 	    int diners = parseDiners(dinersAmountComboBox.getValue());
 
@@ -132,8 +135,15 @@ public class ClientNewReservationScreen {
 	 */
 	private void generateTimeSlots(List<String> availableTimeSlots) {
 		if (timeSlotsGridPane == null) return;
-		if (availableTimeSlots == null) return;
+		
 	    timeSlotsGridPane.getChildren().clear(); // Clear existing buttons
+	    if (availableTimeSlots == null || availableTimeSlots.isEmpty()) {
+			Label lblNoSlots = new Label("No time slots available for this date.");
+			lblNoSlots.setStyle("-fx-text-fill: red; -fx-font-size: 14px;");
+			timeSlotsGridPane.add(lblNoSlots, 0, 0);
+			GridPane.setColumnSpan(lblNoSlots, 4);
+			return;
+		}
 	    //initialize ToggleGroup and row/col counters
 	    ToggleGroup timeSlotToggleGroup = new ToggleGroup();
 	    int col = 0;
