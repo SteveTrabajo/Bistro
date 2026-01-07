@@ -53,7 +53,6 @@ public class UserSubject {
 			currentUser.setEmail(updatedUser.getEmail());
 			currentUser.setPhoneNumber(updatedUser.getPhone());
 			currentUser.setMemberCode(updatedUser.getMemberCode());
-			BistroClientGUI.client.getUserCTRL().setLoggedInUser(currentUser);
 		});
 		
 		router.on("member", "updateInfo.fail", msg -> {
