@@ -558,8 +558,8 @@ public class BistroDataBase_Controller {
 		    			+ "FROM orders "
 		          		+ "WHERE order_type = 'RESERVATION' "
 		          		+ "AND status = 'PENDING' "
-		          		+ "AND status = 'NOTIFIED' "
-		          		+ "AND status = 'SEATED' "
+		          		+ "OR status = 'NOTIFIED' "
+		          		+ "OR status = 'SEATED' "
 		          		+ "AND order_date = ? "
 		          		+ "ORDER BY order_time ASC";  		//Order by first hour to last hour
 			 
