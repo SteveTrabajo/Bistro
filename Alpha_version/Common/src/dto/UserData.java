@@ -15,13 +15,14 @@ public class UserData implements Serializable {
     private String phone;
     private String MemberCode;
     private UserType userType;
-
     
-    public UserData(String firstName, String lastName, String MemberCode, String phone, String email, UserType userType) {
-		this.MemberCode = MemberCode;
+    public UserData(String firstName, String lastName, String MemberCode, String phone, String email, UserType userType, String address) {
+    	this.firstName = firstName;
+    	this.lastName = lastName;
+    	this.address = address;
 		this.phone = phone;
 		this.email = email;
-		this.userType = userType;
+		this.MemberCode = MemberCode;
 	}
     
   public String getFirstName() {
@@ -42,11 +43,10 @@ public class UserData implements Serializable {
 	public String getMemberCode() {
 		return MemberCode;
 	}
-
-	public UserType getUserType() {
-		return userType;
-	}
 	public String getAddress() {
 		return address;
+	}
+	public UserType getUserType() {
+		return userType;
 	}
 }
