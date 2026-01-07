@@ -39,6 +39,14 @@ public class Order implements Serializable {
 		this.status = status;
 		this.dateOfPlacingOrder = dateOfPlacingOrder;
 	}
+	
+	//constructor for display order
+	public Order(LocalTime orderHour, int dinersAmount)
+	{
+		this.orderHour = orderHour;
+		this.dinersAmount = dinersAmount;
+	}
+	
 
 	// Convenience flags
 	public boolean isWaitList() {

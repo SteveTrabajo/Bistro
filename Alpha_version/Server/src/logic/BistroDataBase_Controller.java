@@ -546,9 +546,49 @@ public class BistroDataBase_Controller {
 	
 	
 	public List<Order> getReservationsbyDate(LocalDate date) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+		
+		List<Order> orders = new ArrayList<>();
+
+		if (date == null) {
+		 return null;
+		}
+
+		 final String qry = 	"SELECT order_time, number_of_guests "
+		    					+ "FROM orders "
+		          				+ "WHERE order_type = 'RESERVATION' "
+		          				+ "AND order_date = ? "
+		          				+ "ORDER BY order_time ASC";			//Order by first hour to last hour
+
+		 Connection conn = null;
+
+		    try {
+		        conn = borrow();
+
+		        try (PreparedStatement ps = conn.prepareStatement(qry)) {
+		            ps.setDate(1, java.sql.Date.valueOf(date));
+		            
+		            try (ResultSet rs = ps.executeQuery()) {
+		                while (rs.next()) {
+
+		                    LocalTime orderHour =	rs.getTime("order_time").toLocalTime();		                    						
+		                    int dinersAmount =	rs.getInt("number_of_guests");
+		                            
+		                    orders.add(new Order(orderHour, dinersAmount));                    			                   
+		                }
+		            }
+		        }
+
+		    } catch (SQLException ex) {
+		        logger.log("[ERROR] SQLException in getReservationsbyDate: " + ex.getMessage());
+		        ex.printStackTrace();
+		        return null;
+
+		    } finally {
+		        release(conn);
+		    }
+
+		    return orders;
+		}
 	
 
 	
@@ -895,9 +935,7 @@ public class BistroDataBase_Controller {
 						usersList.add(user);
 					}
 				}
-			}
-			return usersList;
-
+			}		
 		}
 		catch (SQLException ex) {
 			logger.log("[ERROR] SQLException in getOrderByConfirmationCodeInDB: " + ex.getMessage());
@@ -907,7 +945,7 @@ public class BistroDataBase_Controller {
 		finally{
 			release(conn);
 		}  	
-	}
-
+		return usersList;
+	}	
 
 }
