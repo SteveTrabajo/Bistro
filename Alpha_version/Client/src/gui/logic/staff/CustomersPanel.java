@@ -84,7 +84,7 @@ public class CustomersPanel {
 
 // Send updated user data to server
 	private void setupColumns() {
-		colFullName.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
+		colFullName.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFirstName()));
 		colEmail.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEmail()));
 		colPhone.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPhone()));
 		colMemberCode.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getMemberCode()));
@@ -120,9 +120,17 @@ public class CustomersPanel {
 
 				String lowerCaseFilter = newValue.toLowerCase();
 
-				// Check Full Name
-				if (user.getName() != null && user.getName().toLowerCase().contains(lowerCaseFilter)) {
+				// Check Name
+				if (user.getFirstName() != null && user.getFirstName().toLowerCase().contains(lowerCaseFilter)) {
 					return true;
+				// Check Last Name
+				}
+				if (user.getLastName() != null && user.getLastName().toLowerCase().contains(lowerCaseFilter)) {
+					return true;
+				// Check Address
+				}
+				if (user.getAddress() != null && user.getAddress().toLowerCase().contains(lowerCaseFilter)) {
+				    return true;
 				}
 
 				// Check Email
@@ -200,8 +208,8 @@ public class CustomersPanel {
 	private void handleCustomerDoubleClick(UserData editUser) {
 		// Create the custom dialog
 		Dialog<UserData> dialog = new Dialog<>();
-		dialog.setTitle("Edit Customer: " + editUser.getName());
-		dialog.setHeaderText("Update details for " + editUser.getName());
+		dialog.setTitle("Edit Customer: " + editUser.getFirstName());
+		dialog.setHeaderText("Update details for " + editUser.getFirstName());
 
 		// Set the button types (Save and Cancel)
 		ButtonType saveButtonType = new ButtonType("Save Changes", ButtonBar.ButtonData.OK_DONE);
@@ -213,7 +221,7 @@ public class CustomersPanel {
 		grid.setVgap(10);
 		grid.setPadding(new javafx.geometry.Insets(20, 150, 10, 10));
 
-		TextField nameField = new TextField(editUser.getName());
+		TextField nameField = new TextField(editUser.getFirstName());
 		TextField emailField = new TextField(editUser.getEmail());
 		TextField phoneField = new TextField(editUser.getPhone());
 

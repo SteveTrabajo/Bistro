@@ -10,10 +10,12 @@ public class UserData implements Serializable {
 
     private String firstName;
     private String lastName;
+    private String address;
     private String email;
     private String phone;
     private String MemberCode;
     private UserType userType;
+
     
     public UserData(String firstName, String lastName, String MemberCode, String phone, String email, UserType userType) {
 		this.MemberCode = MemberCode;
@@ -22,11 +24,11 @@ public class UserData implements Serializable {
 		this.userType = userType;
 	}
     
-  public String getfirstName() {
+  public String getFirstName() {
 	  		return firstName;
   }
   
-  public String getlastName() {
+  public String getLastName() {
   		return lastName;
   }
 	public String getEmail() {
@@ -43,5 +45,8 @@ public class UserData implements Serializable {
 
 	public UserType getUserType() {
 		return userType;
+	}
+	public String getAddress() {
+		return address;
 	}
 }
