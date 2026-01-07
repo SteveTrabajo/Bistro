@@ -11,6 +11,7 @@ import logic.LoginAttemptTracker;
 import logic.ServerLogger;
 import logic.api.Router;
 import logic.services.UserService;
+import dto.UserData;
 
 public final class UserSubject {
 
@@ -111,7 +112,7 @@ public final class UserSubject {
 
 		// Request: "member.updateInfo"
 		router.on("member", "updateInfo", (msg, client) -> {
-			User updatedUser = (User) msg.getData();
+			UserData updatedUser = (UserData) msg.getData();
 			boolean success = userService.updateMemberInfo(updatedUser);
 			if (success) {
 				logger.log("[INFO] Client " + client + " updated member info: successful");

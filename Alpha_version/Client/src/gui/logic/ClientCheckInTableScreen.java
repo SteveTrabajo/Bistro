@@ -1,6 +1,7 @@
 package gui.logic;
 
 import entities.User;
+import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -13,47 +14,44 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import logic.BistroClientGUI;
+import common.InputCheck;
 
 /**
  * This class represents the controller for the Client Check-In Table screen in
  * the BistroClientGUI.
  */
 public class ClientCheckInTableScreen {
+	
 	// ****************************** FXML Elements ******************************
-	@FXML
-	private Button btnCheckIn;
+	@FXML private Button btnCheckIn;
+	@FXML private Button btnBack;
+	@FXML private Hyperlink lnkForgot;
+	@FXML private TextField txtConfirmCode;
+	@FXML private Label lblUser;
+	@FXML private Label lblError;
 	
-	@FXML
-	private Button btnBack;
-	
-	@FXML
-	private Hyperlink lnkForgot;
-	
-	@FXML
-	private TextField txtConfirmCode;
-	@FXML
-	private Label lblUser;
-	@FXML
-	private Label lblError;
-	@FXML
-	private StackPane modalOverlay;
-	
-	private StackPane currentScreen;
-	@FXML
-	private StackPane ScreenContainer;
+	// Modal containers
+	@FXML private StackPane modalOverlay;
 	
 	private ClientForgotConfirmCodeScreen forgotModalsCTRL;
-	
+	private Parent ForgotIDModalRoot;
+
 	// ****************************** Instance Methods ******************************
 
 	/**
 	 * Initializes the Client Check-In Table screen.
 	 */
-	private Parent ForgotIDModalRoot;
 	@FXML
 	public void initialize() {
-		User currentUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
-		lblUser.setText(currentUser.getUserType().name());
+		// 1. Safe User Loading (Prevents crash if client not fully ready)
+		if (BistroClientGUI.client != null && BistroClientGUI.client.getUserCTRL().getLoggedInUser() != null) {
+			User currentUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
+			if (lblUser != null) {
+				lblUser.setText(currentUser.getUserType().name());
+			}
+		}
+
+		// 2. Length Limiter (UX)
 		int maxLength = 8;
 		txtConfirmCode.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue.length() > maxLength) {
@@ -64,80 +62,103 @@ public class ClientCheckInTableScreen {
 	
 	/**
 	 * Handles the Check-In button click event.
-	 *
-	 * @param event The event triggered by clicking the Check-In button.
+	 * Now uses ASYNC listener logic instead of immediate checking.
 	 */
 	@FXML
 	public void btnCheckIn(Event event) {
-		String testConfirmationCode = txtConfirmCode.getText();
-		BistroClientGUI.client.getReservationCTRL().CheckConfirmationCodeCorrect(testConfirmationCode);
-		if (BistroClientGUI.client.getTableCTRL().isCheckInTableSuccess()) {
-			BistroClientGUI.switchScreen(event, "clientCheckInTableSucces", "clientCheckIn error messege");
-		} else {
-			BistroClientGUI.display(lblError, "Error has been occured!", Color.RED);																		
+		String code = txtConfirmCode.getText();
+
+		// 1. Input Validation (Client Side)
+		String errorMsg = InputCheck.checkConfirmationCode(code);
+		if (errorMsg != null) {
+			BistroClientGUI.display(lblError, errorMsg, Color.RED);
+			return;
 		}
+
+		// 2. Clear previous errors
+		lblError.setText(""); 
+		btnCheckIn.setDisable(true); // Prevent double-clicking
+
+		// 3. Register Listener for Server Response (Async)
+		BistroClientGUI.client.getTableCTRL().setCheckInListener((isSuccess, message) -> {
+			Platform.runLater(() -> {
+				btnCheckIn.setDisable(false); // Re-enable button
+				
+				if (isSuccess) {
+					BistroClientGUI.switchScreen(event, "clientCheckInTableSucces", "Error loading Success Screen");
+				} else {
+					BistroClientGUI.display(lblError, message, Color.RED);
+				}
+			});
+		});
+
+		// 4. Send Request
+		BistroClientGUI.client.getReservationCTRL().CheckConfirmationCodeCorrect(code);
 	}
 	
 	/**
 	 * Handles the Back button click event.
-	 *
-	 * @param event The event triggered by clicking the Back button.
 	 */
 	@FXML
 	public void btnBack(Event event) {
-		try {
-			BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client back error messege");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		BistroClientGUI.switchScreen(event, "ClientDashboardScreen", "Error returning to Dashboard");
 	}
 	
+	/**
+	 * Opens the Forgot Code Modal.
+	 */
 	@FXML
 	public void lnkForgot(Event event) {
+		if (modalOverlay == null) {
+			System.err.println("Error: modalOverlay is null in FXML.");
+			return;
+		}
+
 		if (ForgotIDModalRoot == null) {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/fxml/ClientForgotConfirmationCode.fxml"));
 			try {
 				ForgotIDModalRoot = loader.load();
+				forgotModalsCTRL = loader.getController();
+				// Link the modal back to this parent so it can call close()
+				forgotModalsCTRL.setParent(this);
 			} catch (Exception e) {
 				e.printStackTrace();
-				BistroClientGUI.display(lblError, "Unable to open Forgot Member ID screen.", Color.RED);
+				BistroClientGUI.display(lblError, "Unable to open Forgot Code screen.", Color.RED);
+				return;
 			}
-			forgotModalsCTRL = loader.getController();
-			forgotModalsCTRL.setParent(this);
-			modalOverlay.getChildren().add(ForgotIDModalRoot);
-			modalOverlay.setVisible(true);
-			modalOverlay.setManaged(true);
 		}
-		return;
+		
+		// Add to overlay if not already there
+		if (!modalOverlay.getChildren().contains(ForgotIDModalRoot)) {
+			modalOverlay.getChildren().add(ForgotIDModalRoot);
+		}
+		
+		modalOverlay.setVisible(true);
+		modalOverlay.setManaged(true);
 	}
-	
 	
 	/**
 	 * Displays an error message on the screen.
-	 *
-	 * @param message The error message to display.
 	 */
 	public void showSuccessMessage(String message) {
-        BistroClientGUI.display(lblError, message, Color.GREEN);
-    }
-	
-	
+		BistroClientGUI.display(lblError, message, Color.GREEN);
+	}
 	
 	/**
 	 * Closes the Forgot Code modal screen.
+	 * Fixed logic to correctly hide the overlay.
 	 */
 	public void closeForgotCodeScreen() {
-        // Logic to remove the modal from the screen
-        if (ScreenContainer != null && currentScreen != null) {
-            ScreenContainer.getChildren().remove(currentScreen);
-            currentScreen = null;
-        } else {
-        	Alert alert = new Alert(Alert.AlertType.ERROR);
-        	alert.setTitle("Error");
-        	alert.setHeaderText(null);
-        	alert.setContentText("Unable to close the Forgot Code screen.");
-        	alert.showAndWait();
-        }
-    }
+		if (modalOverlay != null) {
+			modalOverlay.setVisible(false);
+			modalOverlay.setManaged(false);
+			// Optional: Remove it to save memory or keep it to load faster next time
+			// modalOverlay.getChildren().clear(); 
+			// ForgotIDModalRoot = null; 
+		} else {
+			Alert alert = new Alert(Alert.AlertType.ERROR);
+			alert.setContentText("Unable to close the Forgot Code screen (Overlay not found).");
+			alert.showAndWait();
+		}
+	}
 }
-//End of ClientCheckInTableScreen.java

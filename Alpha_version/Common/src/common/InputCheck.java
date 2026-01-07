@@ -284,4 +284,15 @@ public class InputCheck {
         }
     }
 	
+	public static String checkConfirmationCode(String code) {
+		if (code == null || code.trim().isEmpty()) {
+			return "Confirmation code is required.";
+		}
+		String c = code.trim();
+		if (!c.matches("^\\d{8}$")) {
+			return "Confirmation code must be exactly 8 digits.";
+		}
+		return null;
+	}
+	
 }

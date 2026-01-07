@@ -4,18 +4,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import comms.Api;
 import comms.Message;
 import entities.Order;
 import entities.Table;
 import enums.OrderStatus;
+
 public class TableController {
 	//****************************** Instance variables ******************************
 	private final BistroClient client;
 	private HashMap<Table,String> tableStatuses;
 	private Order userAllocatedOrderForTable;
 	private int userAllocatedTable;
+	private BiConsumer<Boolean, String> checkInListener;
 	
 	//******************************** Constructors ***********************************//
 	public TableController(BistroClient client) {
@@ -50,7 +53,9 @@ public class TableController {
 		this.userAllocatedTable = userAllocatedTable;
 	}
 	
-	
+	public void setCheckInListener(BiConsumer<Boolean, String> checkInListener) {
+		this.checkInListener = checkInListener;
+	}
 	
 	//******************************** Instance Methods ***********************************//
 	public boolean isCheckInTableSuccess() {
@@ -73,4 +78,9 @@ public class TableController {
 	}
 
 
+	public void notifyCheckInResult(boolean success, String message) {
+		if (checkInListener != null) {
+			checkInListener.accept(success, message);
+		}
+	}
 }

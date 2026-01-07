@@ -9,6 +9,7 @@ import logic.LoginAttemptTracker;
 import logic.PasswordUtil;
 import logic.ServerLogger;
 import common.InputCheck;
+import dto.UserData;
 
 public class UserService {
 	private final BistroDataBase_Controller dbController;
@@ -109,7 +110,7 @@ public class UserService {
 		return newUser;
 	}
 
-	public boolean updateMemberInfo(User updatedUser) {
+	public boolean updateMemberInfo(UserData updatedUser) {
 			
 		return dbController.setUpdatedMemberData(updatedUser);	
 	}

@@ -20,6 +20,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import dto.UserData;
 import entities.Order;
 import entities.Table;
 import entities.User;
@@ -472,23 +473,27 @@ public class BistroDataBase_Controller {
 		}
 	}
     
-	public boolean setUpdatedMemberData(User updatedUser) {
+	public boolean setUpdatedMemberData(UserData updatedUser) {
 		if (updatedUser == null || updatedUser.getUserType() == UserType.GUEST) {
 			return false;
 		}
-		final String qry = "UPDATE users " + "SET phoneNumber = ?, email = ? " + "WHERE user_id = ?";
+		//join from members and users table to update both
+		final String sql = "UPDATE members m JOIN users u ON m.user_id = u.user_id SET m.f_name = ?,m.l_name = ?,m.address = ?, u.email = ?, u.phoneNumber = ? WHERE m.member_code = ?";
+	
 		Connection conn = null;
 		try {
 			conn = borrow();
+			try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
-			try (PreparedStatement ps = conn.prepareStatement(qry)) {
-				ps.setString(1, updatedUser.getPhoneNumber());
-				ps.setString(2, updatedUser.getEmail());
-				ps.setInt(3, updatedUser.getUserId());
+				ps.setString(1, updatedUser.getFirstName());
+				ps.setString(2, updatedUser.getLastName());
+				ps.setString(3, updatedUser.getAddress());
+				ps.setString(4, updatedUser.getEmail());
+				ps.setString(5, updatedUser.getPhone());
+				ps.setInt(6, Integer.parseInt(updatedUser.getMemberCode()));
 
-				int success = ps.executeUpdate();
-
-				return success == 1; // when success get 1 the updated worked and changed the row well in table
+				int rowsAffected = ps.executeUpdate();
+				return rowsAffected > 0;
 			}
 		} catch (SQLException ex) {
 			logger.log("[ERROR] SQLException in setUpdatedMemberData: " + ex.getMessage());
@@ -498,7 +503,7 @@ public class BistroDataBase_Controller {
 			release(conn);
 		}
 	}
-    
+	
     // ****************************** Order Operations ******************************	
 	
 	public boolean setNewOrderToDataBase(List<Object> orderData) {

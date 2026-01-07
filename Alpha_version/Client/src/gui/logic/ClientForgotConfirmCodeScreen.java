@@ -17,13 +17,10 @@ public class ClientForgotConfirmCodeScreen {
 
     @FXML
     private TextField txtPhoneNum;
-    
     @FXML
     private TextField txtEmail;
-    
     @FXML
     private Label lblError;
-    
     @FXML
     private Button btnFindCode;
 
@@ -52,11 +49,6 @@ public class ClientForgotConfirmCodeScreen {
         String phoneNum = txtPhoneNum.getText().trim();
 
         // Validation Logic
-        if (email.isEmpty() && phoneNum.isEmpty()) {
-            BistroClientGUI.display(lblError, "Please fill in at least one field.", Color.RED);
-            return;
-        }
-
         String validationError = InputCheck.isValidGuestInfo(phoneNum, email);
         if (!validationError.isEmpty()) {
             BistroClientGUI.display(lblError, validationError, Color.RED);

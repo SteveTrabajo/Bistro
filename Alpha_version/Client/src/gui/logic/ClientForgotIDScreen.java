@@ -17,22 +17,16 @@ public class ClientForgotIDScreen {
 
     // ****************************** FXML Variables ******************************
     private ClientLoginScreen parentCtrl;
-
     @FXML
     private Button btnClose;
-    
     @FXML
     private Button btnCancel;
-    
     @FXML
     private Button btnFindMemberID;
-    
     @FXML
     private TextField txtEmail;
-    
     @FXML
     private TextField txtPhoneNum;
-    
     @FXML
     private Label lblError;
 
@@ -64,13 +58,7 @@ public class ClientForgotIDScreen {
     private void btnFindMemberID(Event event) {
         String email = txtEmail.getText().trim();
         String phoneNum = txtPhoneNum.getText().trim();
-
         // Client-Side Validation: Ensure at least one field is filled and formats are correct
-        if (email.isEmpty() && phoneNum.isEmpty()) {
-            BistroClientGUI.display(lblError, "Please fill in at least one field.", Color.RED);
-            return;
-        }
-
         String validationError = InputCheck.isValidGuestInfo(phoneNum, email);
         if (!validationError.isEmpty()) {
             BistroClientGUI.display(lblError, validationError, Color.RED);
