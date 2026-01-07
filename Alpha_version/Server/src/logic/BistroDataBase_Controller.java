@@ -761,8 +761,51 @@ public class BistroDataBase_Controller {
 	
 	// ******************** Restaurant Management  Operations ******************
 	public List<LocalTime> getOpeningHoursFromDB() {
-		// TODO Auto-generated method stub
-		return null;
+	    List<LocalTime> hours = new ArrayList<>();
+	    
+	    LocalDate today = LocalDate.now();
+	   
+	    int currentDayOfWeek = (today.getDayOfWeek().getValue() % 7) + 1;
+
+	    String qry = "SELECT " +
+	                 "  COALESCE(s.is_closed, 0) as is_closed_final, " +
+	                 "  COALESCE(s.open_time, w.open_time) as open_final, " +
+	                 "  COALESCE(s.close_time, w.close_time) as close_final " +
+	                 "FROM opening_hours_weekly w " +
+	                 "LEFT JOIN opening_hours_special s ON s.special_date = ? " +
+	                 "WHERE w.day_of_week = ?";
+
+	    Connection conn = null;
+	    try {
+	        conn = borrow(); // הנחת שיש לך Connection Pool
+	        
+	        try (PreparedStatement ps = conn.prepareStatement(qry)) {
+	            ps.setDate(1, Date.valueOf(today));
+	            ps.setInt(2, currentDayOfWeek);              
+	            try (ResultSet rs = ps.executeQuery()) {
+	                if (rs.next()) {
+	                    boolean isClosed = rs.getInt("is_closed_final") == 1;
+	                    
+	                    // אם המקום פתוח, נשלוף את השעות
+	                    if (!isClosed) {
+	                        Time openSql = rs.getTime("open_final");
+	                        Time closeSql = rs.getTime("close_final");
+
+	                        if (openSql != null && closeSql != null) {
+	                            hours.add(openSql.toLocalTime());  
+	                            hours.add(closeSql.toLocalTime()); 
+	                        }
+	                    }
+	                }
+	            }
+	        }
+	    } catch (SQLException ex) {
+	        ex.printStackTrace(); 
+	    } finally {
+	        release(conn);
+	    }
+	    
+	    return hours;
 	}
 	
 	
