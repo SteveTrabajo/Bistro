@@ -1,4 +1,4 @@
-package entities;
+package dto;
 
 import java.io.Serializable;
 
@@ -8,24 +8,27 @@ public class UserData implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String Name;
+    private String firstName;
+    private String lastName;
     private String email;
     private String phone;
     private String MemberCode;
     private UserType userType;
     
-    public UserData(String MemberCode, String fullName, String phone, String email, UserType userType) {
+    public UserData(String firstName, String lastName, String MemberCode, String phone, String email, UserType userType) {
 		this.MemberCode = MemberCode;
-		this.Name = fullName;
 		this.phone = phone;
 		this.email = email;
 		this.userType = userType;
 	}
-
-	public String getName() {
-		return Name;
-	}
-
+    
+  public String getfirstName() {
+	  		return firstName;
+  }
+  
+  public String getlastName() {
+  		return lastName;
+  }
 	public String getEmail() {
 		return email;
 	}

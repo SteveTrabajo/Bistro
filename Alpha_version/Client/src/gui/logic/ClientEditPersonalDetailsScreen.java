@@ -8,8 +8,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import logic.BistroClientGUI;
 import common.InputCheck;
+import dto.UserData;
 import entities.User;
-import entities.UserData;
 import enums.UserType;
 
 /**
