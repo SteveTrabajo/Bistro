@@ -53,15 +53,17 @@ public class UserSubject {
 			currentUser.setEmail(updatedUser.getEmail());
 			currentUser.setPhoneNumber(updatedUser.getPhone());
 			currentUser.setMemberCode(updatedUser.getMemberCode());
+			BistroClientGUI.client.getUserCTRL().setUserUpdateSuccessFlag(true);
 		});
 		
 		router.on("member", "updateInfo.fail", msg -> {
+			BistroClient.awaitResponse = false;
+			BistroClientGUI.client.getUserCTRL().setUserUpdateSuccessFlag(false);
 			Alert alert = new Alert(Alert.AlertType.ERROR);
 			alert.setTitle("Update Failed");
 			alert.setHeaderText("Failed to Update User Information");
 			alert.setContentText("An error occurred while updating your information. Please try again later.");
 			alert.showAndWait();
-			BistroClient.awaitResponse = false;
 		});
 		router.on("user", "registerNewMember.ok", msg -> {
 			BistroClient.awaitResponse = false;

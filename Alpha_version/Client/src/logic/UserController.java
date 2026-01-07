@@ -93,8 +93,12 @@ public class UserController {
 	public void setRegistrationSuccessFlag(boolean registrationSuccessFlag) {
 		this.registrationSuccessFlag = registrationSuccessFlag;
 	}
-	// ******************************** Instance Methods
-	// ***********************************
+	
+	public void setUserUpdateSuccessFlag(boolean success) {
+		this.userUpdateSuccessFlag = success;
+	}
+	
+	// ******************************** Instance Methods ***********************************
 
 	/**
 	 * Method to sign in a user with the provided login data.
@@ -187,21 +191,12 @@ public class UserController {
 	public void updateUserDetails(UserData updatedUser) {
 		client.handleMessageFromClientUI(new Message(Api.ASK_MEMBER_UPDATE_INFO, updatedUser));
 	}
+	
+	
 
 	public void RegisterNewMember(ArrayList<String> newMemberData) {
 		this.setRegistrationSuccessFlag(false);
 		client.handleMessageFromClientUI(new Message(Api.ASK_REGISTER_NEW_MEMBER, newMemberData));
-	}
-
-	/**
-	 * Method to check if the user update was successful by comparing the old user
-	 * details with the current logged-in user details.
-	 * 
-	 * @param oldUser
-	 * @return
-	 */
-	public boolean isUpdateSuccessful(User oldUser) {
-		return !oldUser.equals(this.loggedInUser);
 	}
 
 	/**

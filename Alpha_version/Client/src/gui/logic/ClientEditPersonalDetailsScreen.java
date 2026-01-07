@@ -118,14 +118,9 @@ public class ClientEditPersonalDetailsScreen {
 			return;
 		}
 
-	
-		  boolean isChanged =
-		            !email.equals(originalUser.getEmail()) ||
-		            !phoneNumber.equals(originalUser.getPhoneNumber()) ||
-		            !firstName.equals(originalUser.getFirstName()) ||
-		            !lastName.equals(originalUser.getLastName()) ||
-		            !address.equals(originalUser.getAddress());
-		  
+		boolean isChanged = !email.equals(originalUser.getEmail()) || !phoneNumber.equals(originalUser.getPhoneNumber())
+				|| !firstName.equals(originalUser.getFirstName()) || !lastName.equals(originalUser.getLastName())
+				|| !address.equals(originalUser.getAddress());
 		if (!isChanged) {
 			lblError.setText("No changes were made.");
 			return;
@@ -133,10 +128,10 @@ public class ClientEditPersonalDetailsScreen {
 
 		UserData updatedUser = new UserData(firstName, lastName, originalUser.getMemberCode(), phoneNumber, email,
 				originalUser.getUserType(), address);
-		 
+
 		BistroClientGUI.client.getUserCTRL().updateUserDetails(updatedUser);
 
-		if (!BistroClientGUI.client.getUserCTRL().isUpdateSuccessful(originalUser)) {
+		if (!BistroClientGUI.client.getUserCTRL().isUserUpdateSuccessful()) {
 			lblError.setText("Error: Failed to save details. Please try again.");
 			return;
 		}
