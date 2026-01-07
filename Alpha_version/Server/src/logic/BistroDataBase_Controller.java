@@ -548,19 +548,36 @@ public class BistroDataBase_Controller {
 	public List<Order> getReservationsbyDate(LocalDate date) {
 		
 		List<Order> orders = new ArrayList<>();
-
+		String qry = "";
 		if (date == null) {
 		 return null;
 		}
+		if(date == LocalDate.now())
+		{
+			 qry = 	"SELECT order_time, number_of_guests "
+		    			+ "FROM orders "
+		          		+ "WHERE order_type = 'RESERVATION' "
+		          		+ "AND status = 'PENDING' "
+		          		+ "AND status = 'NOTIFIED' "
+		          		+ "AND status = 'SEATED' "
+		          		+ "AND order_date = ? "
+		          		+ "ORDER BY order_time ASC";  		//Order by first hour to last hour
+			 
+					
+		}
+		else
+		{
 
-		 final String qry = 	"SELECT order_time, number_of_guests "
-		    					+ "FROM orders "
-		          				+ "WHERE order_type = 'RESERVATION' "
-		          				+ "AND order_date = ? "
-		          				+ "ORDER BY order_time ASC";			//Order by first hour to last hour
+		  qry =		"SELECT order_time, number_of_guests "
+		    			+ "FROM orders "
+		          		+ "WHERE order_type = 'RESERVATION' "
+		          		+ "AND status = 'PENDING' "
+		          		+ "AND order_date = ? "
+		          		+ "ORDER BY order_time ASC";			//Order by first hour to last hour
+		}
 
-		 Connection conn = null;
-
+		Connection conn = null;
+		 
 		    try {
 		        conn = borrow();
 
@@ -588,7 +605,7 @@ public class BistroDataBase_Controller {
 		    }
 
 		    return orders;
-		}
+	}
 	
 
 	
