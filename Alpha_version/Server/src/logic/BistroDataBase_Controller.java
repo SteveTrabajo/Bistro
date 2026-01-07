@@ -552,16 +552,14 @@ public class BistroDataBase_Controller {
 		if (date == null) {
 		 return null;
 		}
-		if(date == LocalDate.now())
+		if( LocalDate.now().equals(date))
 		{
-			 qry = 	"SELECT order_time, number_of_guests "
-		    			+ "FROM orders "
-		          		+ "WHERE order_type = 'RESERVATION' "
-		          		+ "AND status = 'PENDING' "
-		          		+ "OR status = 'NOTIFIED' "
-		          		+ "OR status = 'SEATED' "
-		          		+ "AND order_date = ? "
-		          		+ "ORDER BY order_time ASC";  		//Order by first hour to last hour
+			 qry = 		"SELECT order_time, number_of_guests "
+				        + "FROM orders "
+				        + "WHERE order_type = 'RESERVATION' "
+				        + "AND order_date = ? "
+				        + "AND status IN ('PENDING', 'NOTIFIED', 'SEATED') "
+				        + "ORDER BY order_time ASC";		//Order by first hour to last hour
 			 
 					
 		}
