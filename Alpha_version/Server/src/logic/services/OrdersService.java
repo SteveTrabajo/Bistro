@@ -167,9 +167,17 @@ public class OrdersService {
 				available.add(timeToString(slot));
 			}
 		}
+		printListbeforeReturn(available);
 		return available;
 	}
 	
+	private void printListbeforeReturn(List<String> available) {
+		System.out.println("Available slots computed: ");
+		for (String s : available) {
+			System.out.println(s);
+		}
+	}
+
 	/**
 	 * 
 	 * Builds all possible time slots within opening hours that can accommodate

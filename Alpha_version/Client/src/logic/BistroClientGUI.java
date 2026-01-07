@@ -1,8 +1,7 @@
 package logic;
 
-import java.awt.event.ActionEvent;
-import java.io.IOException;
 
+import java.io.IOException;
 import gui.logic.ServerConnectionFrame;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -129,13 +128,13 @@ public class BistroClientGUI extends Application {
 			safeExit();
 			return;
 		}
-
+		// Get the current scene
 		Scene scene = primaryStage.getScene();
 		if (scene == null) {
 			safeExit();
 			return;
 		}
-
+		
 		Parent root = scene.getRoot();
 
 		// Disable interaction with the entire app

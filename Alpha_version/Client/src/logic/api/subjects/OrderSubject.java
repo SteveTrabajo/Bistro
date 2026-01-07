@@ -32,9 +32,9 @@ public class OrderSubject {
             BistroClient.awaitResponse = false;
             @SuppressWarnings("unchecked")
             List<String> slots = (List<String>) msg.getData();
-            BistroClientGUI.client.getReservationCTRL().setAvailableTimeSlots(slots);  
-            BistroClient.awaitResponse = false; 
+            Platform.runLater(() -> BistroClientGUI.client.getReservationCTRL().setAvailableTimeSlots(slots));  
         });
+		
 		router.on("orders", "getAvailableHours.fail", (msg) -> {
 			BistroClient.awaitResponse = false;
 			Platform.runLater(() -> {

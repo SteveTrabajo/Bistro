@@ -1,25 +1,8 @@
 package logic;
 
 import javafx.application.Platform;
-import javafx.event.Event;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.paint.Color;
-import javafx.stage.Stage;
-
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.TreeSet;
-
 import comms.*;
-import entities.*;
-import enums.*;
 import logic.api.*;
 import logic.api.subjects.*;
 import ocsf.client.*;
@@ -100,7 +83,7 @@ public class BistroClient extends AbstractClient {
 	}
 	
 	//****************************** Getters and Setters ******************************
-		/*
+		/**
 		 * Getter for the User_Controller associated with this client.
 		 * 
 		 * @return The User_Controller instance.
@@ -108,28 +91,52 @@ public class BistroClient extends AbstractClient {
 		public UserController getUserCTRL() {
 			return this.userCTRL;
 		}
-
+		
+		/**
+		 * Getter for the Reservation_Controller associated with this client.
+		 * 
+		 * @return The Reservation_Controller instance.
+		 */
 		public ReservationController getReservationCTRL() {
 			return this.reservationCTRL;
 		}
 		
+		/**
+		 * Getter for the WaitingList_Controller associated with this client.
+		 * 
+		 * @return The WaitingList_Controller instance.
+		 */
 		public WaitingListController getWaitingListCTRL() {
 			return this.waitingListCTRL;
 		}
 		
+		/**
+		 * Getter for the Table_Controller associated with this client.
+		 * 
+		 * @return The Table_Controller instance.
+		 */
 		public TableController getTableCTRL() {
 			return this.tableCTRL;
 		}
+		
+		/**
+		 * Getter for the Payment_Controller associated with this client.
+		 * 
+		 * @return The Payment_Controller instance.
+		 */
 		public PaymentController getPaymentCTRL() {
 			return this.paymentCTRL;
 		}
 		
+		/**
+		 * Getter for the MonthlyReports_Controller associated with this client.
+		 * 
+		 * @return The MonthlyReports_Controller instance.
+		 */
 		public MonthlyReportsController getMonthlyReportsCTRL() {
 			return this.monthlyReportsCTRL;
 		}
 		
-		
-	
 	//******************************** Instance methods ********************************
 		
 	/**
@@ -216,17 +223,29 @@ public class BistroClient extends AbstractClient {
 		handleMessageFromClientUI(new Message(Api.ASK_CONNECTION_CONNECT, null));	
 	}
 
-	// Server connection closed or lost handling
+	/**
+	 * Handle connection closure by notifying the GUI.
+	 */
 	@Override
     protected void connectionClosed() {
         notifyServerDisconnected("The connection to the server was closed, please exit the application.");
     }
-
+	
+	/**
+	 * Handle connection exceptions by notifying the GUI.
+	 * 
+	 * @param exception The exception that occurred.
+	 */
     @Override
     protected void connectionException(Exception exception) {
         notifyServerDisconnected("A connection error occurred, please exit the application.");
     }
-
+    
+    /**
+	 * Notify the GUI that the server has disconnected.
+	 * 
+	 * @param message The message to display to the user.
+	 */
     private void notifyServerDisconnected(String message) {
         // This is called from the client's thread � we must switch to JavaFX thread
         Platform.runLater(() -> {
@@ -246,6 +265,5 @@ public class BistroClient extends AbstractClient {
 		}
 		System.exit(0); // Exit the program
 	}
-
-
 }
+// End of BistroClient.java

@@ -8,8 +8,6 @@ import java.util.Map;
 import comms.Api;
 import comms.Message;
 import entities.Order;
-import logic.BistroDataBase_Controller;
-import logic.BistroServerGUI;
 import logic.ServerLogger;
 import logic.api.Router;
 import logic.services.OrdersService;
@@ -81,7 +79,7 @@ public final class OrdersSubject {
 			@SuppressWarnings("unchecked")
 			Map<String,Object> requestData = (Map<String,Object>) msg.getData();
 			List<String> availableHours = ordersService.getAvailableReservationHours(requestData);
-			if(availableHours != null) {
+			if(availableHours != null && !availableHours.isEmpty()) {
 				client.sendToClient(new Message(Api.REPLY_ORDER_AVAILABLE_HOURS_OK, availableHours));
 			}else {
 				client.sendToClient(new Message(Api.REPLY_ORDER_AVAILABLE_HOURS_FAIL, null));

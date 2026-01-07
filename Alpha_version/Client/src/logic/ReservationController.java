@@ -66,13 +66,12 @@ public class ReservationController {
     // Set by the Client when Server replies with REPLY_ORDER_AVAILABLE_HOURS_OK
 	public void setAvailableTimeSlots(List<String> slots) {
         this.availableTimeSlots = slots;
-        
         // Trigger the callback to update the screen!
-        if (uiUpdateCallback != null) {
-            Platform.runLater(() -> {
-                uiUpdateCallback.accept(slots);
-            });
-        }
+//        if (uiUpdateCallback != null) {
+//            Platform.runLater(() -> {
+//                uiUpdateCallback.accept(slots);
+//            });
+//        }
     }
 
 	public List<String> getAvailableTimeSlots() {
@@ -121,7 +120,7 @@ public class ReservationController {
 	public void askAvailableHours(LocalDate date, int diners) {
         Map<String, Object> requestData = new HashMap<>();
         requestData.put("date", date);
-        requestData.put("diners", diners);
+        requestData.put("dinersAmount", diners);
         client.handleMessageFromClientUI(new Message(Api.ASK_ORDER_AVAILABLE_HOURS, requestData));
     }
 	
