@@ -1,5 +1,6 @@
 package logic.api.subjects;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import comms.Api;
@@ -21,7 +22,7 @@ public final class UserSubject {
 		// Request: "login.guest"
 		router.on("login", "guest", (msg, client) -> {
 			@SuppressWarnings("unchecked")
-			String loginData = "GUEST|" + (String) msg.getData();
+			Map<String, Object> loginData = (Map<String, Object>) msg.getData();
 			User user = userService.getUserInfo(loginData);
 			if (user != null) {
 				client.sendToClient(new Message(Api.REPLY_LOGIN_GUEST_OK, user));
@@ -33,7 +34,7 @@ public final class UserSubject {
 		// Request: "login.member"
 		router.on("login", "member", (msg, client) -> {
 			@SuppressWarnings("unchecked")
-			String loginData = "MEMBER|" + (String) msg.getData();
+			Map<String, Object> loginData = (Map<String, Object>) msg.getData();
 			User user = userService.getUserInfo(loginData);
 			if (user != null) {
 				client.sendToClient(new Message(Api.REPLY_LOGIN_MEMBER_OK, user));
@@ -43,46 +44,46 @@ public final class UserSubject {
 		});
 
 		// Request: "login.employee"
-//		router.on("login", "employee", (msg, client) -> {
-//			@SuppressWarnings("unchecked")
-//			Map<String, Object> loginData = (Map<String, Object>) msg.getData();
-//			String username = String.valueOf(loginData.get("username"));
-//			
-//			// Check if account is locked
-//			if (LoginAttemptTracker.isAccountLocked(username)) {
-//				logger.log("[LOGIN] Account locked for EMPLOYEE: " + username);
-//				client.sendToClient(new Message(Api.REPLY_LOGIN_EMPLOYEE_ACCOUNT_LOCKED, null));
-//				return;
-//			}
-//			
-//			User user = userService.getUserInfo(loginData);
-//			if (user != null) {
-//				client.sendToClient(new Message(Api.REPLY_LOGIN_EMPLOYEE_OK, user));
-//			} else {
-//				client.sendToClient(new Message(Api.REPLY_LOGIN_EMPLOYEE_INVALID_CREDENTIALS, null));
-//			}
-//		});
-//
-//		// Request: "login.manager"
-//		router.on("login", "manager", (msg, client) -> {
-//			@SuppressWarnings("unchecked")
-//			Map<String, Object> loginData = (Map<String, Object>) msg.getData();
-//			String username = String.valueOf(loginData.get("username"));
-//			
-//			// Check if account is locked
-//			if (LoginAttemptTracker.isAccountLocked(username)) {
-//				logger.log("[LOGIN] Account locked for MANAGER: " + username);
-//				client.sendToClient(new Message(Api.REPLY_LOGIN_MANAGER_ACCOUNT_LOCKED, null));
-//				return;
-//			}
-//			
-//			User user = userService.getUserInfo(loginData);
-//			if (user != null) {
-//				client.sendToClient(new Message(Api.REPLY_LOGIN_MANAGER_OK, user));
-//			} else {
-//				client.sendToClient(new Message(Api.REPLY_LOGIN_MANAGER_INVALID_CREDENTIALS, null));
-//			}
-//		});
+		router.on("login", "employee", (msg, client) -> {
+			@SuppressWarnings("unchecked")
+			Map<String, Object> loginData = (Map<String, Object>) msg.getData();
+			String username = String.valueOf(loginData.get("username"));
+			
+			// Check if account is locked
+			if (LoginAttemptTracker.isAccountLocked(username)) {
+				logger.log("[LOGIN] Account locked for EMPLOYEE: " + username);
+				client.sendToClient(new Message(Api.REPLY_LOGIN_EMPLOYEE_ACCOUNT_LOCKED, null));
+				return;
+			}
+			
+			User user = userService.getUserInfo(loginData);
+			if (user != null) {
+				client.sendToClient(new Message(Api.REPLY_LOGIN_EMPLOYEE_OK, user));
+			} else {
+				client.sendToClient(new Message(Api.REPLY_LOGIN_EMPLOYEE_INVALID_CREDENTIALS, null));
+			}
+		});
+
+		// Request: "login.manager"
+		router.on("login", "manager", (msg, client) -> {
+			@SuppressWarnings("unchecked")
+			Map<String, Object> loginData = (Map<String, Object>) msg.getData();
+			String username = String.valueOf(loginData.get("username"));
+			
+			// Check if account is locked
+			if (LoginAttemptTracker.isAccountLocked(username)) {
+				logger.log("[LOGIN] Account locked for MANAGER: " + username);
+				client.sendToClient(new Message(Api.REPLY_LOGIN_MANAGER_ACCOUNT_LOCKED, null));
+				return;
+			}
+			
+			User user = userService.getUserInfo(loginData);
+			if (user != null) {
+				client.sendToClient(new Message(Api.REPLY_LOGIN_MANAGER_OK, user));
+			} else {
+				client.sendToClient(new Message(Api.REPLY_LOGIN_MANAGER_INVALID_CREDENTIALS, null));
+			}
+		});
 
 		// Request: "signout.guest"
 		router.on("signout", "guest", (msg, client) -> {

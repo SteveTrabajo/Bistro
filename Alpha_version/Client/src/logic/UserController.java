@@ -101,7 +101,8 @@ public class UserController {
 	 * 
 	 * @param userLoginData An ArrayList containing user login information.
 	 */
-	public void signInUser(String userLoginData, UserType userType) {
+	public void signInUser(Map<String, Object> userLoginData) {
+		UserType userType = ((UserType) userLoginData.get("userType"));
 		switch (userType) {
 		case GUEST:
 			client.handleMessageFromClientUI(new Message(Api.ASK_LOGIN_GUEST, userLoginData));

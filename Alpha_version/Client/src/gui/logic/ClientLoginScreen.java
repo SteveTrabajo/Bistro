@@ -106,22 +106,15 @@ public class ClientLoginScreen {
 		String phoneNumber = txtPhoneNumber.getText();
 		String emailAddress = txtEmailAddress.getText();
 		String errorMessage = InputCheck.isValidGuestInfo(phoneNumber, emailAddress);
-		if (phoneNumber == null) {
-			phoneNumber = "";
-		} else {
-			phoneNumber = phoneNumber.trim();
-		}
-		if (emailAddress == null) {
-			emailAddress = "";
-		} else {
-			emailAddress = emailAddress.trim();
-		}
 		UserType userType = UserType.GUEST;
 		if (!errorMessage.equals("")) {
 			BistroClientGUI.display(lblError, errorMessage.trim(), Color.RED);
 		} else {
-			String userLoginData = phoneNumber.trim() + "|" + emailAddress.trim();
-			BistroClientGUI.client.getUserCTRL().signInUser(userLoginData,userType);
+			userLoginData = new HashMap<>();
+			userLoginData.put("userType", userType);
+			userLoginData.put("phoneNumber", phoneNumber);
+			userLoginData.put("emailAddress", emailAddress);
+			BistroClientGUI.client.getUserCTRL().signInUser(userLoginData);
 			if (BistroClientGUI.client.getUserCTRL().isUserLoggedInAs(userType)) {
 				BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
 			} else {
@@ -149,7 +142,10 @@ public class ClientLoginScreen {
 			lblError.setText(err);
 			return;
 		}
-		BistroClientGUI.client.getUserCTRL().signInUser(memberCodeText, userType);
+		userLoginData = new HashMap<>();
+		userLoginData.put("userType", userType);
+		userLoginData.put("memberCode", Integer.parseInt(memberCodeText));
+		BistroClientGUI.client.getUserCTRL().signInUser(userLoginData);
 
 		if (BistroClientGUI.client.getUserCTRL().isUserLoggedInAs(userType)) {
 			BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
@@ -193,7 +189,7 @@ public class ClientLoginScreen {
 
 			modalOverlay.getChildren().add(ForgotIDModalRoot);
 		}
-		contentPane.setEffect(new GaussianBlur(18));
+		mainPane.setEffect(new GaussianBlur(18));
 		modalOverlay.setVisible(true);
 		modalOverlay.setManaged(true);
 	}
@@ -214,7 +210,7 @@ public class ClientLoginScreen {
 	 * Closes the forgot member ID modal dialog.
 	 */
 	public void closeForgotIDScreen() {
-		contentPane.setEffect(null);
+		mainPane.setEffect(null);
 		modalOverlay.setVisible(false);
 		modalOverlay.setManaged(false);
 	}

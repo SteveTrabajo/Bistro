@@ -13,6 +13,9 @@
   -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.18), 18, 0.15, 0, 8);
   -fx-border-color: rgba(226,232,240,0.9);
   -fx-border-radius: 14;
+  -fx-pref-width: 250px;
+  -fx-pref-height: 250px;
+  -fx-alignment: center;
 }
 
 /* Typography */
