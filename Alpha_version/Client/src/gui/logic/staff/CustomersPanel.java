@@ -309,7 +309,7 @@ public class CustomersPanel {
 				try {
 					// Perform the update
 					BistroClientGUI.client.getUserCTRL().updateUserDetails(updatedUser);
-					boolean success = BistroClientGUI.client.getUserCTRL().isUserUpdateSuccessful();
+					boolean success = BistroClientGUI.client.getUserCTRL().getUserUpdateSuccessful();
 
 					Platform.runLater(() -> {
 						if (success)

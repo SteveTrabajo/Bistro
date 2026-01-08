@@ -46,6 +46,7 @@ public class WaitingListSubject {
 		
 		//join to waiting list
 		router.on("waitingList", "join", (msg, client) -> {
+			//TODO: change logic.
 			Map<String, Object> userData = (Map<String, Object>) msg.getData();
 			Order createdOrder = waitingListService.addToWaitingList(userData);
 			//successful joining to waiting list:

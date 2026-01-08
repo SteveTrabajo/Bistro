@@ -238,8 +238,8 @@ public class ClientDashboardScreen {
 	 */
 	@FXML
 	public void btnSignOut(Event event) {
-		boolean isLoggedOut = BistroClientGUI.client.getUserCTRL().signOutUser();
-		if (isLoggedOut) {
+		BistroClientGUI.client.getUserCTRL().signOutUser();
+		if (BistroClientGUI.client.getUserCTRL().getLoggedInUser()== null) {
 			BistroClientGUI.switchScreen(event, "clientLoginScreen", "Failed to load Login Screen.");
 		} else {
 			display(lblError, "Failed to sign out. Please try again.", Color.RED);

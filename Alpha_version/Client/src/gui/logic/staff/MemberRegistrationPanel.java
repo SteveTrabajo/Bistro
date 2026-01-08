@@ -63,13 +63,13 @@ public class MemberRegistrationPanel{
         String email = txtEmail.getText().trim();
         String phone = txtPhone.getText().trim();
         String address = txtAddress.getText().trim();
-        String errorMassage = "";
-        errorMassage =InputCheck.validateFirstName(firstName);
-        errorMassage +=InputCheck.validateLastName(lastName);
-        errorMassage +=InputCheck.validateEmail(email);
-        errorMassage +=InputCheck.validatePhoneNumber(phone);
-        errorMassage +=InputCheck.validateAddress(address);
-        if (!errorMassage.isEmpty()) {
+        String errorMessage = InputCheck.validatePersonalDetails(firstName, lastName, phone, email, address);
+		if (!errorMessage.isEmpty()) {
+			lblError.setText(errorMessage);
+			return;
+		}
+		
+		else{
 			ArrayList<String> newMemberData = new ArrayList<String>();
 			newMemberData.add(firstName);
 			newMemberData.add(lastName);
@@ -79,13 +79,10 @@ public class MemberRegistrationPanel{
 			BistroClientGUI.client.getUserCTRL().RegisterNewMember(newMemberData);
 			if(BistroClientGUI.client.getUserCTRL().getRegistrationSuccessFlag()) {
 				ArrayList<Integer> updatedStats = BistroClientGUI.client.getUserCTRL().getMemberRegistrationStats();
-			    
 			    showInfo("Registration Successful", "New member has been registered successfully.");
 			    refreshStatsLabels(updatedStats);
 			    clearForm();
 			}
-		}else {
-        	showError("Invalid Input", errorMassage);
         }
     }
     

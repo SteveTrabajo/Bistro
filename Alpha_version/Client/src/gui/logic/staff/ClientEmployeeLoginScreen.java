@@ -1,5 +1,9 @@
 package gui.logic.staff;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import enums.UserType;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -65,14 +69,21 @@ public class ClientEmployeeLoginScreen {
 		}
 	}
 
-	public void btnSignIn(ActionEvent event) {
+	public void btnSignIn(Event event) {
 	    String username = txtUserName.getText().trim();
 	    String password = txtPassword.getText().trim();
-
-	    BistroClientGUI.client.getUserCTRL().staffLogin(username, password);
+	    Map<String, Object> loginData = new HashMap<>();
+	    loginData.put("userType", UserType.EMPLOYEE);
+	    loginData.put("username", username);
+	    loginData.put("password", password);
+	    BistroClientGUI.client.getUserCTRL().signInUser(loginData);
+	    if(BistroClientGUI.client.getUserCTRL().getLoggedInUser() != null) {
+	    	// Successful login
+	    	BistroClientGUI.switchScreen(event, "staff/clientStaffDashboardScreen", "Failed to load staff dashboard");
+	    }
 	}
 
-	public void btnForgotPassword(ActionEvent event) {
+	public void btnForgotPassword(Event event) {
 		BistroClientGUI.switchScreen(event, "employeeForgotPasswordScreen", "employee forgot password error messege");
 	}
 

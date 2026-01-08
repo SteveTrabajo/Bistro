@@ -108,7 +108,9 @@ public class ClientStaffDashboardScreen {
 	@FXML
 	public void btnLogout(Event event) {
 		BistroClientGUI.client.getUserCTRL().signOutUser();
-		BistroClientGUI.switchScreen(event, "clientLoginScreen", "Could not return to login screen.");
+		if (BistroClientGUI.client.getUserCTRL().getLoggedInUser() == null) {
+			BistroClientGUI.switchScreen(event, "clientLoginScreen", "Failed to load Login Screen.");
+		}
 	}
 	
 	/**

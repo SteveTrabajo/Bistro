@@ -131,7 +131,7 @@ public class ClientEditPersonalDetailsScreen {
 
 		BistroClientGUI.client.getUserCTRL().updateUserDetails(updatedUser);
 
-		if (!BistroClientGUI.client.getUserCTRL().isUserUpdateSuccessful()) {
+		if (!BistroClientGUI.client.getUserCTRL().getUserUpdateSuccessful()) {
 			lblError.setText("Error: Failed to save details. Please try again.");
 			return;
 		}

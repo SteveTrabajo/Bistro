@@ -26,6 +26,8 @@ public class Order implements Serializable {
 	private OrderStatus status; // PENDING / ...
 	// ---- constructors ----		
 
+	public Order() {} // default constructor
+	
 	public Order(int orderNumber, LocalDate orderDate, LocalTime orderHour, int dinersAmount, String confirmationCode,
 			int userId, OrderType orderType, OrderStatus status, LocalDate dateOfPlacingOrder) {
 
@@ -47,6 +49,7 @@ public class Order implements Serializable {
 		this.dinersAmount = dinersAmount;
 	}
 	
+
 
 	// Convenience flags
 	public boolean isWaitList() {

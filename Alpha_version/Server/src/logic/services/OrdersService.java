@@ -32,6 +32,7 @@ public class OrdersService {
 
 	
 	// ******************************** Constructors***********************************
+	
 	public OrdersService(BistroServer server,BistroDataBase_Controller dbController, ServerLogger logger) {
 		this.dbController = dbController;
 		this.logger = logger;
@@ -40,12 +41,26 @@ public class OrdersService {
 		this.slotStepMinutes = 30;
 		this.reservationDurationMinutes = 120;
 	}
+	// ******************************* Getters and Setters ***********************************
+	
+	public int getSlotStepMinutes() {
+		return slotStepMinutes;
+	}
+	
+	public int getReservationDurationMinutes() {
+		return this.reservationDurationMinutes;
+	}
+	
+	public List<Integer> getTableSizes(){
+		return this.tableSizes;
+	}
+	
 	// ********************************Instance Methods ***********************************
 	
 	/*
 	 * Fetches all table sizes from the database and stores them in the tableSizes list.
 	 */
-	public void getTableSizes() {
+	public void getTablesCapacity() {
 		List<Table> tables = dbController.getAllTablesFromDB();
 		tableSizes.clear();
 		for (Table table : tables) {
@@ -56,41 +71,56 @@ public class OrdersService {
 	
 
 
+	/**
+	 * Creates a new standard Reservation (future order).
+	 * Generates a code starting with "R-".
+	 */
 	public boolean createNewOrder(List<Object> data, OrderType orderType) {
-		List<Object> orderData = data; //Received data contain : userId, date ,dinersAmount , time
-		String confimationCode = generateConfirmationCode();
-		int orderNumber = generateOrderNumber();
-		orderData.add(orderNumber);
-		orderData.add(confimationCode);
-		orderData.add(orderType);
-		orderData.add("PENDING");
-		//orderData order: userId, date ,dinersAmount , time, orderNumber, confirmationCode, orderType, status
-		return dbController.setNewOrderToDataBase(orderData); //DB should provide date of placing order
+		// data received: [0]userId, [1]date , [2]dinersAmount , [3]time
 		
+		// 1. Generate a UNIQUE confirmation code with 'R' prefix
+		String confirmationCode = generateConfirmationCode("R");
+		data.add(confirmationCode); // Index 4 in the list
+		
+		// 2. Send to DB Controller using the generic method
+		// We rely on the DB to generate the order_number (AUTO_INCREMENT)
+		return dbController.setNewOrder(data, orderType, OrderStatus.PENDING);
 	}
 	
-	
-	private int generateOrderNumber() {
-		int num = 100000 + new Random().nextInt(900000);
-		return num;
-	}
-
-
-	private String generateConfirmationCode() {
-		int num = 100000 + new Random().nextInt(900000);
-	    return "R-" + num;
-	}
 	
 	
 	public Order getOrderByConfirmationCode(String confirmationCode) {
-		Order order  = dbController.getOrderByConfirmationCodeInDB(confirmationCode);
-		return order;
+		return dbController.getOrderByConfirmationCodeInDB(confirmationCode);
 	}
 
 	public boolean checkOrderExists(String confirmationCode) {
-		boolean exists = dbController.checkOrderExistsInDB(confirmationCode);
-		return exists;
+		return dbController.checkOrderExistsInDB(confirmationCode);
 	}
+	
+	/**
+	 * Generates a unique 6-digit code with a prefix (e.g., "R-123456").
+	 * Verifies against the DB to ensure no duplicates exist.
+	 * @param prefix The prefix for the code (e.g., "R" for reservations).
+	 */
+	public String generateConfirmationCode(String prefix) {
+		String code;
+		boolean exists;
+		do {
+			// Generate random number 100000-999999
+			int num = 100000 + new Random().nextInt(900000);
+			code = prefix + "-" + num;
+			
+			// Check DB to avoid collision
+			exists = dbController.checkOrderExistsInDB(code);
+			
+			if (exists) {
+				System.out.println("Duplicate code generated: " + code + ". Retrying...");
+			}
+		} while (exists);
+		
+		return code;
+	}
+	
 	
 	
 	/**
@@ -101,18 +131,20 @@ public class OrdersService {
 	 * @return A list of available reservation hours in "HH:mm" format.
 	 */
 	public List<String> getAvailableReservationHours(Map<String, Object> requestData) {
-		getTableSizes(); // Fetch table sizes from DB
+		getTablesCapacity(); // Fetch table sizes from DB
 		List<LocalTime> openingHours = dbController.getOpeningHoursFromDB();
-		printOpeningHours(openingHours);
+		printOpeningHours(openingHours); //TODO: Remove debug prints later
 		LocalTime openingTime = openingHours.get(0);
 		LocalTime closingTime = openingHours.get(1);
 		LocalDate date = (LocalDate) requestData.get("date");
 		int dinersAmount = (int) requestData.get("dinersAmount");
 		List<Order> reservationsByDate = dbController.getReservationsbyDate(date);
-		printReservationsByDate(reservationsByDate);
+		printReservationsByDate(reservationsByDate); //TODO: Remove debug prints later
 		return computeAvailableSlots(openingTime, closingTime, dinersAmount, reservationsByDate);
 	}
 	
+	
+	//TODO: Remove debug prints later ---------------------------------------------
 	private void printReservationsByDate(List<Order> reservationsByDate) {
 		System.out.println("Reservations fetched from DB for the given date: ");
 		for (Order o : reservationsByDate) {
@@ -127,6 +159,7 @@ public class OrdersService {
 		System.out.println("Closing Time: " + openingHours.get(1).toString());
 		
 	}
+	//-----------------------------------------------------------------------
 
 	public int getAllocatedTableForReservation(String confirmationCode) {
 		
@@ -154,17 +187,17 @@ public class OrdersService {
 	public List<String> computeAvailableSlots(LocalTime openingTime, LocalTime closingTime, int newDinersAmount,
 	        List<Order> reservationsByDate) {
 	    
-	    // --- דיבאג: בדיקת נתונים קריטיים ---
+	    //TODO: Remove debug prints later
 	    System.out.println("--- DEBUG: Starting computeAvailableSlots ---");
-	    System.out.println("Table Sizes Loaded: " + this.tableSizes); // האם זה ריק?
+	    System.out.println("Table Sizes Loaded: " + this.tableSizes); 
 	    System.out.println("New Diners Amount: " + newDinersAmount);
 	    System.out.println("Opening: " + openingTime + ", Closing: " + closingTime);
+	    // ----------------------------------------------
 	    
 	    if (this.tableSizes == null || this.tableSizes.isEmpty()) {
 	        System.err.println("ERROR: tableSizes is EMPTY! No tables to seat diners.");
 	        return new ArrayList<>();
 	    }
-	    // ------------------------------------
 
 	    List<LocalTime> possibleTimeSlots = buildPossibleTimeSlots(openingTime, closingTime);
 	    Map<LocalTime, List<Integer>> tablesPerTime = new HashMap<>();
@@ -189,8 +222,10 @@ public class OrdersService {
 	        List<Integer> overlappingDinersAmounts = new ArrayList<>(tablesPerTime.get(slot));
 	        overlappingDinersAmounts.add(newDinersAmount);
 	        
-	        // --- דיבאג: לראות למה שעה ספציפית נפסלת ---
-	        // System.out.println("Checking " + slot + " with groups: " + overlappingDinersAmounts);
+	        //TODO: Remove debug prints later
+	        System.out.println("Checking " + slot + " with groups: " + overlappingDinersAmounts);
+	        // ----------------------------------------------
+	        
 	        
 	        if (canAssignAllDinersToTables(overlappingDinersAmounts, tableSizes)) {
 	            available.add(timeToString(slot));
@@ -203,7 +238,7 @@ public class OrdersService {
 	    return available;
 	}
 	
-	private void printListbeforeReturn(List<String> available) {
+	public void printListbeforeReturn(List<String> available) {
 		System.out.println("Available slots computed: ");
 		for (String s : available) {
 			System.out.println(s);
@@ -219,7 +254,7 @@ public class OrdersService {
 	 * @param closingTime The restaurant's closing time.
 	 * @return A list of possible time slots.
 	 */
-	private List<LocalTime> buildPossibleTimeSlots(LocalTime openingTime, LocalTime closingTime) {
+	public List<LocalTime> buildPossibleTimeSlots(LocalTime openingTime, LocalTime closingTime) {
 		// The last possible time slot starts at closingTime minus reservationDuration
 		LocalTime lastTimeSlot = closingTime.minusMinutes(reservationDurationMinutes);
 		// Build time slots from openingTime to lastTimeSlot
@@ -241,7 +276,7 @@ public class OrdersService {
 	 * @param orderEnd End time of the order.
 	 * @return true if the intervals overlap, false otherwise.
 	 */
-    private boolean overlaps(LocalTime slotStartTime, LocalTime slotEndTime, LocalTime orderStart, LocalTime orderEnd) {
+    public boolean overlaps(LocalTime slotStartTime, LocalTime slotEndTime, LocalTime orderStart, LocalTime orderEnd) {
         return slotStartTime.isBefore(orderEnd) && orderStart.isBefore(slotEndTime);
     }
 
@@ -252,7 +287,7 @@ public class OrdersService {
 	 * @param tableSizes A list of available table sizes.
 	 * @return true if all diners amounts can be assigned to tables, false otherwise.
 	 */
-	public static boolean canAssignAllDinersToTables(List<Integer> overlappingDinersAmounts, List<Integer> tableSizes) {
+	public boolean canAssignAllDinersToTables(List<Integer> overlappingDinersAmounts, List<Integer> tableSizes) {
 		// Sort diners amounts in descending order:
 		List<Integer> overlappingDinersAmountsCopy = new ArrayList<>(overlappingDinersAmounts);
 		overlappingDinersAmountsCopy.sort(Comparator.reverseOrder());
@@ -289,7 +324,7 @@ public class OrdersService {
 	 * @param time
 	 * @return
 	 */
-    private String timeToString(LocalTime time) {
+	public String timeToString(LocalTime time) {
         // "HH:mm"
         return String.format("%02d:%02d", time.getHour(), time.getMinute());
     }

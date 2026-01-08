@@ -2,7 +2,6 @@ package logic.api.subjects;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import dto.UserData;
 import entities.User;
@@ -12,15 +11,16 @@ import logic.UserController;
 import logic.api.ClientRouter;
 import enums.UserType;
 import javafx.application.Platform;
-import javafx.event.Event;
 import javafx.scene.control.Alert;
 
 public class UserSubject {
 
 	public static void register(ClientRouter router, UserController userController) {
-		for (UserType type : List.of(UserType.GUEST, UserType.MEMBER)) {
+		
+		// Login-Signout Customers responses:
+		for (UserType type : List.of(UserType.GUEST, UserType.MEMBER, UserType.EMPLOYEE, UserType.MANAGER)) {
 			String typeKey = type.name().toLowerCase();
-
+			
 			router.on("login", typeKey + ".ok", msg -> {
 				BistroClient.awaitResponse = false;
 				User user = (User) msg.getData();
@@ -44,6 +44,58 @@ public class UserSubject {
 				BistroClient.awaitResponse = false;
 			});
 		}
+		// Unified staff login responses:
+		router.on("login", "staff.ok", msg -> {
+			BistroClient.awaitResponse = false;
+			User user = (User) msg.getData();
+			if(user!=null && (user.getUserType() == UserType.EMPLOYEE || user.getUserType() == UserType.MANAGER)) {
+				userController.setLoggedInUser(user);
+			}else {
+				Platform.runLater(() -> {
+					Alert alert = new Alert(Alert.AlertType.ERROR);
+					alert.setTitle("Login Failed");
+					alert.setHeaderText("Invalid User Type");
+					alert.setContentText("The logged in user is not a staff member.");
+					alert.showAndWait();
+				});
+			}
+		});
+		
+		router.on("login", "staff.invalidCredentials", msg -> {
+			BistroClient.awaitResponse = false;
+			Platform.runLater(() -> {
+				Alert alert = new Alert(Alert.AlertType.INFORMATION);
+				alert.setTitle("Login Failed");
+				alert.setHeaderText("Invalid Credentials");
+				alert.setContentText("The username or password is incorrect.");
+				alert.showAndWait();
+			});
+		});
+		
+		router.on("login", "staff.accountLocked", msg -> {
+			BistroClient.awaitResponse = false;
+			Platform.runLater(() -> {
+				Alert alert = new Alert(Alert.AlertType.ERROR);
+				alert.setTitle("Account Locked");
+				alert.setHeaderText("Too Many Failed Login Attempts");
+				alert.setContentText(
+						"Your account has been locked due to multiple failed login attempts. Please wait and try again later.");
+				alert.showAndWait();
+			});
+		});
+		
+		router.on("user", "forgotMemberID.ok", msg -> {
+			BistroClient.awaitResponse = false;
+			String memberID = (String) msg.getData();
+			BistroClientGUI.client.getUserCTRL().handleForgotIDResponse(memberID);
+		});
+		
+		router.on("user", "forgotMemberID.fail", msg -> {
+			BistroClient.awaitResponse = false;
+			BistroClientGUI.client.getUserCTRL().handleForgotIDResponse("NOT_FOUND");
+		});
+		
+		// Member info update responses:
 		router.on("member", "updateInfo.ok", msg -> {
 			BistroClient.awaitResponse = false;
 			UserData updatedUser = (UserData) msg.getData();
@@ -66,23 +118,29 @@ public class UserSubject {
 			alert.setContentText("An error occurred while updating your information. Please try again later.");
 			alert.showAndWait();
 		});
+		
+		// Member registration responses:
 		router.on("user", "registerNewMember.ok", msg -> {
 			BistroClient.awaitResponse = false;
 			BistroClientGUI.client.getUserCTRL().setRegistrationSuccessFlag(true);
 		});
+		
 		router.on("user", "registerNewMember.fail", msg -> {
 			BistroClient.awaitResponse = false;
 			BistroClientGUI.client.getUserCTRL().setRegistrationSuccessFlag(false);
 		});
+		
 		router.on("member", "registerationStats.ok", msg -> {
 			BistroClient.awaitResponse = false;
 			ArrayList<Integer> count = (ArrayList<Integer>) msg.getData();
 			BistroClientGUI.client.getUserCTRL().setMemberRegistrationStats(count);
 		});
+		
 		router.on("member", "registerationStats.fail", msg -> {
 			BistroClient.awaitResponse = false;
 		});
-
+		
+		// Get all customers data responses:
 		router.on("customers", "getalldata.ok", msg -> {
 			BistroClient.awaitResponse = false;
 			List<UserData> customersData = (List<UserData>) msg.getData();
@@ -99,14 +157,14 @@ public class UserSubject {
 			alert.showAndWait();
 		});
 
-		// Employee creation response handlers
+		// Staff creation responses:
 		router.on("staff", "create.ok", msg -> {
 			BistroClient.awaitResponse = false;
 			User newEmployee = (User) msg.getData();
 			BistroClientGUI.client.getUserCTRL().setStaffCreationSuccess(true);
 			BistroClientGUI.client.getUserCTRL().setStaffCreationErrorMessage(null);
 		});
-
+		
 		router.on("staff", "create.invalidData", msg -> {
 			BistroClient.awaitResponse = false;
 			BistroClientGUI.client.getUserCTRL().setStaffCreationSuccess(false);
@@ -127,47 +185,7 @@ public class UserSubject {
 			BistroClientGUI.client.getUserCTRL()
 					.setStaffCreationErrorMessage("Failed to create staff account. Please try again.");
 		});
-		router.on("user", "forgotMemberID.ok", msg -> {
-			BistroClient.awaitResponse = false;
-			String memberID = (String) msg.getData();
-			BistroClientGUI.client.getUserCTRL().handleForgotIDResponse(memberID);
-		});
-
-		router.on("user", "forgotMemberID.fail", msg -> {
-			BistroClient.awaitResponse = false;
-			BistroClientGUI.client.getUserCTRL().handleForgotIDResponse("NOT_FOUND");
-		});
 		
-		// Unified staff login responses
 		
-		router.on("login", "staff.ok", msg -> {
-		    BistroClient.awaitResponse = false;
-		    User user = (User) msg.getData();
-		    userController.setLoggedInUser(user);
-
-		});
-
-		router.on("login", "staff.invalidCredentials", msg -> {
-		    BistroClient.awaitResponse = false;
-		    Platform.runLater(() -> {
-		        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-		        alert.setTitle("Login Failed");
-		        alert.setHeaderText("Invalid Credentials");
-		        alert.setContentText("The username or password is incorrect.");
-		        alert.showAndWait();
-		    });
-		});
-
-		router.on("login", "staff.accountLocked", msg -> {
-		    BistroClient.awaitResponse = false;
-		    Platform.runLater(() -> {
-		        Alert alert = new Alert(Alert.AlertType.ERROR);
-		        alert.setTitle("Account Locked");
-		        alert.setHeaderText("Too Many Failed Login Attempts");
-		        alert.setContentText(
-		            "Your account has been locked due to multiple failed login attempts. Please wait and try again later.");
-		        alert.showAndWait();
-		    });
-		});
 	}
 }
