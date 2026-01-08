@@ -4,6 +4,7 @@ import java.util.Map;
 
 import comms.Api;
 import comms.Message;
+import dto.WaitListResponse;
 import entities.Order;
 import entities.User;
 import enums.OrderType;
@@ -45,25 +46,18 @@ public class WaitingListSubject {
 		
 		
 		//join to waiting list
-		router.on("waitingList", "join", (msg, client) -> {
-			//TODO: change logic.
-			Map<String, Object> userData = (Map<String, Object>) msg.getData();
-			Order createdOrder = waitingListService.addToWaitingList(userData);
-			//successful joining to waiting list:
-			if (createdOrder.getOrderType()==OrderType.WAITLIST) {
-				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_JOIN_OK, createdOrder));
-				logger.log("[INFO] Client: "+ client +" created a waiting list order successfully.");
-			}
-			//Skip the waiting list and get a reservation directly if there is place immediately available:
-			else if(createdOrder.getOrderType()==OrderType.RESERVATION) {
-				int tableNumber = waitingListService.assignTableForWaitingListOrder(createdOrder);
-				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_SKIPPED, tableNumber));
-				logger.log("[INFO] Client: "+ client + " joined the waiting list and got a reservation successfully.");
-			}
-			//in case of failure:
-			else {
-				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_JOIN_FAIL, null));
-				logger.log("[ERROR] Client: "+ client + " failed to join the waiting list.");
+		router.on("waitingList", "checkAvailability", (msg, client) -> {
+			int dinersAmount = (int) msg.getData();
+			WaitListResponse response = waitingListService.checkAvailabilityForWalkIn(dinersAmount);
+			if(response.isCanSeatImmediately()) {
+				//can be seated immediately
+				//TODO:implement notification
+				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_SKIPPED, response));
+				logger.log("[INFO] Client: "+ client + " can be seated immediately for diners amount: " + dinersAmount);
+			} else {
+				//added to waiting list
+				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_CHECK_AVAILABILITY_OK, response));
+				logger.log("[INFO] Client: "+ client + " added to waiting list for diners amount: " + dinersAmount);
 			}
 		});
 		

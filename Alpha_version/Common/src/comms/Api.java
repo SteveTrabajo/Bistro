@@ -128,6 +128,7 @@ public final class Api {
 // == WaitList subject == //
 	
 	// Requests
+	public static final String ASK_WAITING_LIST_CHECK_AVAILABILITY = "waitingList.checkAvailability";
 	public static final String ASK_WAITING_LIST_JOIN = "waitingList.join";
 	public static final String ASK_WAITING_LIST_LEAVE = "waitingList.leave";
 	public static final String ASK_IS_IN_WAITLIST = "waitinglist.isInWaitingList";
@@ -138,6 +139,7 @@ public final class Api {
 	public static final String REPLY_WAITING_LIST_IS_IN_LIST = "waitinglist.isInWaitingList.yes";
 	public static final String REPLY_WAITING_LIST_IS_NOT_IN_LIST = "waitinglist.isInWaitingList.no";
 	public static final String REPLY_WAITING_LIST_IS_IN_LIST_FAIL = "waitinglist.isInWaitingList.fail";
+	public static final String REPLY_WAITING_LIST_CHECK_AVAILABILITY_OK = "waitinglist.checkAvailability.ok";
     public static final String REPLY_WAITING_LIST_JOIN_OK = "waitinglist.join.ok";
     public static final String REPLY_WAITING_LIST_SKIPPED = "waitinglist.join.skipped";
     public static final String REPLY_WAITING_LIST_JOIN_FAIL = "waitinglist.join.fail";
