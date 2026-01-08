@@ -12,12 +12,13 @@ import logic.UserController;
 import logic.api.ClientRouter;
 import enums.UserType;
 import javafx.application.Platform;
+import javafx.event.Event;
 import javafx.scene.control.Alert;
 
 public class UserSubject {
 
 	public static void register(ClientRouter router, UserController userController) {
-		for (UserType type : UserType.values()) {
+		for (UserType type : List.of(UserType.GUEST, UserType.MEMBER)) {
 			String typeKey = type.name().toLowerCase();
 
 			router.on("login", typeKey + ".ok", msg -> {
@@ -136,34 +137,37 @@ public class UserSubject {
 			BistroClient.awaitResponse = false;
 			BistroClientGUI.client.getUserCTRL().handleForgotIDResponse("NOT_FOUND");
 		});
-		router.on("login", "^\\(employee|manager)\\.invalidCredentials$", msg -> {
+		
+		// Unified staff login responses
+		
+		router.on("login", "staff.ok", msg -> {
+		    BistroClient.awaitResponse = false;
+		    User user = (User) msg.getData();
+		    userController.setLoggedInUser(user);
 
-			BistroClient.awaitResponse = false;
-
-			Platform.runLater(() -> {
-				Alert alert = new Alert(Alert.AlertType.INFORMATION);
-				alert.setTitle("Login Failed");
-				alert.setHeaderText("Invalid Credentials");
-				String content = String.format("The username or password is incorrect.\nAttempts left: %s",
-						msg.getData());
-
-				alert.setContentText(content);
-				alert.showAndWait();
-			});
-		});
-		router.on("login", "^\\(employee|manager)\\.accountLocked$", msg -> {
-
-			BistroClient.awaitResponse = false;
-
-			Platform.runLater(() -> {
-				Alert alert = new Alert(Alert.AlertType.ERROR);
-				alert.setTitle("Account Locked");
-				alert.setHeaderText("Too Many Failed Login Attempts");
-				String content = "Your account has been locked due to multiple failed login attempts. Please wait 1 minutes before trying again.";
-				alert.setContentText(content);
-				alert.showAndWait();
-			});
 		});
 
+		router.on("login", "staff.invalidCredentials", msg -> {
+		    BistroClient.awaitResponse = false;
+		    Platform.runLater(() -> {
+		        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		        alert.setTitle("Login Failed");
+		        alert.setHeaderText("Invalid Credentials");
+		        alert.setContentText("The username or password is incorrect.");
+		        alert.showAndWait();
+		    });
+		});
+
+		router.on("login", "staff.accountLocked", msg -> {
+		    BistroClient.awaitResponse = false;
+		    Platform.runLater(() -> {
+		        Alert alert = new Alert(Alert.AlertType.ERROR);
+		        alert.setTitle("Account Locked");
+		        alert.setHeaderText("Too Many Failed Login Attempts");
+		        alert.setContentText(
+		            "Your account has been locked due to multiple failed login attempts. Please wait and try again later.");
+		        alert.showAndWait();
+		    });
+		});
 	}
 }

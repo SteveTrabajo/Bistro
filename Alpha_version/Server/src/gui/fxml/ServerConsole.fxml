@@ -61,6 +61,11 @@
 				<Button fx:id="btnClear" onAction="#btnClear"
 					prefHeight="29.0" prefWidth="86.0" styleClass="button-primary"
 					text="Clear Log" />
+				<Button fx:id="btnAddStaff" onAction="#btnAddStaff"
+        			prefHeight="29.0" prefWidth="86.0"
+        			styleClass="button-secondary"
+        			text="Add Staff" />
+				
 			</children>
 		</VBox>
 	</left>

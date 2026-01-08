@@ -66,17 +66,10 @@ public class ClientEmployeeLoginScreen {
 	}
 
 	public void btnSignIn(ActionEvent event) {
-		String username = txtUserName.getText().trim();
-		String password = txtPassword.getText().trim();
-		BistroClientGUI.client.getUserCTRL().staffLogin(username, password);
-		if (BistroClientGUI.client.getUserCTRL().isEmployeeLoginSuccess()) {
-			BistroClientGUI.switchScreen(event, "clientstaffDashboardScreen", "employee login error messege");
-		} else {
-			if (BistroClientGUI.client.getUserCTRL().isManagerLoginSuccess()) {
-				BistroClientGUI.switchScreen(event, "clientstaffDashboardScreen", "manager login error messege");
-			}
-			// Handle login failure (e.g., show error message)
-		}
+	    String username = txtUserName.getText().trim();
+	    String password = txtPassword.getText().trim();
+
+	    BistroClientGUI.client.getUserCTRL().staffLogin(username, password);
 	}
 
 	public void btnForgotPassword(ActionEvent event) {

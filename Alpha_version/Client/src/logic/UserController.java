@@ -11,6 +11,7 @@ import dto.UserData;
 import entities.User;
 import enums.UserType;
 import javafx.application.Platform;
+import javafx.event.Event;
 
 /*
  * This class represents the controller for user-related operations in the BistroClient.
@@ -111,15 +112,16 @@ public class UserController {
 		case GUEST:
 			client.handleMessageFromClientUI(new Message(Api.ASK_LOGIN_GUEST, userLoginData));
 			break;
-		case EMPLOYEE:
-			client.handleMessageFromClientUI(new Message(Api.ASK_LOGIN_EMPLOYEE, userLoginData));
-			break;
 		case MEMBER:
 			client.handleMessageFromClientUI(new Message(Api.ASK_LOGIN_MEMBER, userLoginData));
 			break;
-		case MANAGER:
-			client.handleMessageFromClientUI(new Message(Api.ASK_LOGIN_MANAGER, userLoginData));
-			break;
+		case EMPLOYEE, MANAGER:
+		    // Unified staff login. Server determines whether the account is EMPLOYEE or MANAGER.
+		    Map<String, Object> staffLogin = new HashMap<>();
+		    staffLogin.put("username", userLoginData.get("username"));
+		    staffLogin.put("password", userLoginData.get("password"));
+		    client.handleMessageFromClientUI(new Message(Api.ASK_LOGIN_STAFF, staffLogin));
+		    break;
 		default:
 			System.out.println("Unknown user type");
 		}
@@ -233,14 +235,11 @@ public class UserController {
 	}
 
 	public void staffLogin(String username, String password) {
-		String userLoginData = username + "_" + password;
-		client.handleMessageFromClientUI(new Message(Api.ASK_LOGIN_EMPLOYEE, userLoginData));
-		if (isEmployeeLoginSuccess()) {
-			return;
-		} else {
-			client.handleMessageFromClientUI(new Message(Api.ASK_LOGIN_MANAGER, userLoginData));
-		}
-
+	    // Single staff login call. Server decides role (EMPLOYEE / MANAGER)
+	    Map<String, Object> loginData = new HashMap<>();
+	    loginData.put("username", username);
+	    loginData.put("password", password);
+	    client.handleMessageFromClientUI(new Message(Api.ASK_LOGIN_STAFF, loginData));
 	}
 
 	public void loadCustomersData() {
@@ -275,7 +274,7 @@ public class UserController {
 		staffData.put("password", password);
 		staffData.put("email", email);
 		staffData.put("phoneNumber", phoneNumber);
-		staffData.put("userType", UserType.EMPLOYEE);
+		staffData.put("userType", UserType.EMPLOYEE.name());
 
 		client.handleMessageFromClientUI(new Message(Api.ASK_STAFF_CREATE, staffData));
 	}

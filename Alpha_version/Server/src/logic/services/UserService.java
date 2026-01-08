@@ -74,7 +74,8 @@ public class UserService {
 		String password = (String) staffData.get("password");
 		String email = (String) staffData.get("email");
 		String phoneNumber = (String) staffData.get("phoneNumber");
-		String userTypeStr = (String) staffData.get("userType");
+		String userTypeStr = String.valueOf(staffData.get("userType"));
+
 		
 		// Validate all fields
 		String validationError = InputCheck.validateAllStaffData(username, password, email, phoneNumber);
@@ -112,6 +113,14 @@ public class UserService {
 
 	public boolean updateMemberInfo(UserData updatedUser) {
 		return dbController.setUpdatedMemberData(updatedUser);	
+	}
+	
+	public boolean staffUsernameExists(String username) {
+	    return dbController.employeeUsernameExists(username);
+	}
+	
+	public User findStaffUser(String username, String password) {
+	    return dbController.findEmployeeUser(username, password);
 	}
 }
 

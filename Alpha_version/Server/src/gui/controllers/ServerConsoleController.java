@@ -1,11 +1,18 @@
 package gui.controllers;
 
+import java.io.IOException;
+
 import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import logic.BistroServer;
 import logic.BistroServerGUI;
 
@@ -33,6 +40,9 @@ public class ServerConsoleController {
 
 	@FXML
 	private TextField txtCommand; // Command input field
+	
+	@FXML
+	private Button btnAddStaff; // Open add staff form button
 
 	/*
 	 * Method to handle the Start button click event. Starts the Bistro server and
@@ -159,6 +169,34 @@ public class ServerConsoleController {
 		txtCommand.clear();
 	}
 
+	
+	@FXML
+	public void btnAddStaff(Event event) {
+	    // Require a running server so DB connection is available
+	    if (BistroServerGUI.server == null || !BistroServerGUI.server.isListening()) {
+	        displayMessageToConsole("Server is not running. Please start the server first.");
+	        return;
+	    }
+
+	    try {
+	        FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/fxml/AddStaffForm.fxml"));
+	        Parent root = loader.load();
+
+	        AddStaffFormController controller = loader.getController();
+	        controller.setServer(BistroServerGUI.server);
+
+	        Stage stage = new Stage();
+	        stage.initModality(Modality.APPLICATION_MODAL);
+	        stage.setTitle("Add Staff Account");
+	        stage.setScene(new Scene(root));
+	        stage.centerOnScreen();
+	        stage.showAndWait();
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	        displayMessageToConsole("Error opening Add Staff form: " + e.getMessage());
+	    }
+	}
+	
 	/*
 	 * Method to display a message in the console log area.
 	 * 

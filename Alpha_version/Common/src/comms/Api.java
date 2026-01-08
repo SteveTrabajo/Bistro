@@ -25,40 +25,33 @@ public final class Api {
     public static final String REPLY_CONNECTION_CONNECT_OK = "connection.connect.ok";
     public static final String REPLY_CONNECTION_DISCONNECT_OK = "connection.disconnect.ok";
 
-// == Login/signOut subject == //
-    
+ // == Login/signOut subject == //
+
     // Requests
     public static final String ASK_LOGIN_GUEST = "login.guest";
     public static final String ASK_LOGIN_MEMBER = "login.member";
-    public static final String ASK_LOGIN_EMPLOYEE = "login.employee";
-    public static final String ASK_LOGIN_MANAGER = "login.manager";
+    public static final String ASK_LOGIN_STAFF = "login.staff";
+
     public static final String ASK_SIGNOUT_GUEST = "signout.guest";
     public static final String ASK_SIGNOUT_MEMBER = "signout.member";
     public static final String ASK_SIGNOUT_EMPLOYEE = "signout.employee";
     public static final String ASK_SIGNOUT_MANAGER = "signout.manager";
-    
+
     // Responses
     public static final String REPLY_LOGIN_GUEST_OK = "login.guest.ok";
     public static final String REPLY_LOGIN_MEMBER_OK = "login.member.ok";
-    public static final String REPLY_LOGIN_EMPLOYEE_OK = "login.employee.ok";
-    public static final String REPLY_LOGIN_MANAGER_OK = "login.manager.ok";
+
+    public static final String REPLY_LOGIN_STAFF_OK = "login.staff.ok";
+    public static final String REPLY_LOGIN_STAFF_INVALID_CREDENTIALS = "login.staff.invalidCredentials";
+    public static final String REPLY_LOGIN_STAFF_ACCOUNT_LOCKED = "login.staff.accountLocked";
+
     public static final String REPLY_LOGIN_GUEST_NOT_FOUND = "login.guest.notFound";
     public static final String REPLY_LOGIN_MEMBER_NOT_FOUND = "login.member.notFound";
-    public static final String REPLY_LOGIN_EMPLOYEE_NOT_FOUND = "login.employee.notFound";
-    public static final String REPLY_LOGIN_MANAGER_NOT_FOUND = "login.manager.notFound";
-    public static final String REPLY_LOGIN_EMPLOYEE_INVALID_CREDENTIALS = "login.employee.invalidCredentials";
-    public static final String REPLY_LOGIN_MANAGER_INVALID_CREDENTIALS = "login.manager.invalidCredentials";
-    public static final String REPLY_LOGIN_EMPLOYEE_ACCOUNT_LOCKED = "login.employee.accountLocked";
-    public static final String REPLY_LOGIN_MANAGER_ACCOUNT_LOCKED = "login.manager.accountLocked";
+
     public static final String REPLY_SIGNOUT_GUEST_OK = "signout.guest.ok";
     public static final String REPLY_SIGNOUT_MEMBER_OK = "signout.member.ok";
     public static final String REPLY_SIGNOUT_EMPLOYEE_OK = "signout.employee.ok";
     public static final String REPLY_SIGNOUT_MANAGER_OK = "signout.manager.ok";
-    public static final String REPLY_SIGNOUT_GUEST_FAIL = "signout.guest.fail";
-    public static final String REPLY_SIGNOUT_MEMBER_FAIL = "signout.member.fail";
-    public static final String REPLY_SIGNOUT_EMPLOYEE_FAIL = "signout.employee.fail";
-    public static final String REPLY_SIGNOUT_MANAGER_FAIL = "signout.manager.fail";
-
 // == User subject == //
     
     // Requests

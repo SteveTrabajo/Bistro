@@ -44,47 +44,33 @@ public final class UserSubject {
 			}
 		});
 
-		// Request: "login.employee"
-		router.on("login", "employee", (msg, client) -> {
-			@SuppressWarnings("unchecked")
-			Map<String, Object> loginData = (Map<String, Object>) msg.getData();
-			String username = String.valueOf(loginData.get("username"));
-			
-			// Check if account is locked
-			if (LoginAttemptTracker.isAccountLocked(username)) {
-				logger.log("[LOGIN] Account locked for EMPLOYEE: " + username);
-				client.sendToClient(new Message(Api.REPLY_LOGIN_EMPLOYEE_ACCOUNT_LOCKED, null));
-				return;
-			}
-			
-			User user = userService.getUserInfo(loginData);
-			if (user != null) {
-				client.sendToClient(new Message(Api.REPLY_LOGIN_EMPLOYEE_OK, user));
-			} else {
-				client.sendToClient(new Message(Api.REPLY_LOGIN_EMPLOYEE_INVALID_CREDENTIALS, null));
-			}
+		// Request: "login.staff" (unified EMPLOYEE/MANAGER login)
+		router.on("login", "staff", (msg, client) -> {
+		    @SuppressWarnings("unchecked")
+		    Map<String, Object> loginData = (Map<String, Object>) msg.getData();
+		    String username = String.valueOf(loginData.get("username"));
+
+		    // Check if account is locked
+		    if (LoginAttemptTracker.isAccountLocked(username)) {
+		        logger.log("[LOGIN] Account locked for STAFF: " + username);
+		        client.sendToClient(new Message(Api.REPLY_LOGIN_STAFF_ACCOUNT_LOCKED, null));
+		        return;
+		    }
+
+		    // Force staff lookup. DB returns the correct role (EMPLOYEE or MANAGER).
+		    Map<String, Object> staffLoginData = new HashMap<>(loginData);
+		    staffLoginData.put("userType", UserType.EMPLOYEE); // userService routes staff lookup for EMPLOYEE/MANAGER
+
+		    User user = userService.getUserInfo(staffLoginData);
+		    if (user != null && (user.getUserType() == UserType.EMPLOYEE || user.getUserType() == UserType.MANAGER)) {
+		        // Store session user for authorization (e.g., staff.create)
+		        client.setInfo("user", user);
+		        client.sendToClient(new Message(Api.REPLY_LOGIN_STAFF_OK, user));
+		    } else {
+		        client.sendToClient(new Message(Api.REPLY_LOGIN_STAFF_INVALID_CREDENTIALS, null));
+		    }
 		});
 
-		// Request: "login.manager"
-		router.on("login", "manager", (msg, client) -> {
-			@SuppressWarnings("unchecked")
-			Map<String, Object> loginData = (Map<String, Object>) msg.getData();
-			String username = String.valueOf(loginData.get("username"));
-			
-			// Check if account is locked
-			if (LoginAttemptTracker.isAccountLocked(username)) {
-				logger.log("[LOGIN] Account locked for MANAGER: " + username);
-				client.sendToClient(new Message(Api.REPLY_LOGIN_MANAGER_ACCOUNT_LOCKED, null));
-				return;
-			}
-			
-			User user = userService.getUserInfo(loginData);
-			if (user != null) {
-				client.sendToClient(new Message(Api.REPLY_LOGIN_MANAGER_OK, user));
-			} else {
-				client.sendToClient(new Message(Api.REPLY_LOGIN_MANAGER_INVALID_CREDENTIALS, null));
-			}
-		});
 
 		// Request: "signout.guest"
 		router.on("signout", "guest", (msg, client) -> {
@@ -125,17 +111,47 @@ public final class UserSubject {
 
 		// Request: "staff.create"
 		router.on("staff", "create", (msg, client) -> {
-			@SuppressWarnings("unchecked")
-			Map<String, Object> staffData = (Map<String, Object>) msg.getData();
-			
-			User newStaff = userService.createStaffAccount(staffData);
-			if (newStaff != null) {
-				logger.log("[ADMIN] New staff account created: " + staffData.get("username"));
-				client.sendToClient(new Message(Api.REPLY_STAFF_CREATE_OK, newStaff));
-			} else {
-				logger.log("[ADMIN] Staff creation failed: " + staffData.get("username"));
-				client.sendToClient(new Message(Api.REPLY_STAFF_CREATE_INVALID_DATA, null));
-			}
+		    @SuppressWarnings("unchecked")
+		    Map<String, Object> staffData = (Map<String, Object>) msg.getData();
+		    if (staffData == null) {
+		        client.sendToClient(new Message(Api.REPLY_STAFF_CREATE_INVALID_DATA, "Missing staff data"));
+		        return;
+		    }
+
+		    // Authorization: Only a logged-in MANAGER (from the client) may create an EMPLOYEE.
+		    User requester = (User) client.getInfo("user");
+		    if (requester == null || requester.getUserType() != UserType.MANAGER) {
+		        client.sendToClient(new Message(Api.REPLY_STAFF_CREATE_UNAUTHORIZED, null));
+		        return;
+		    }
+
+		    String username = (String) staffData.get("username");
+		    String password = (String) staffData.get("password");
+		    String email = (String) staffData.get("email");
+		    String phoneNumber = (String) staffData.get("phoneNumber");
+
+		    String validationError = common.InputCheck.validateAllStaffData(username, password, email, phoneNumber);
+		    if (validationError != null) {
+		        client.sendToClient(new Message(Api.REPLY_STAFF_CREATE_INVALID_DATA, validationError));
+		        return;
+		    }
+
+		    if (userService.staffUsernameExists(username)) {
+		        client.sendToClient(new Message(Api.REPLY_STAFF_CREATE_USERNAME_EXISTS, null));
+		        return;
+		    }
+
+		    // Enforce employee-only creation from the client.
+		    staffData.put("userType", UserType.EMPLOYEE.name());
+
+		    User newStaff = userService.createStaffAccount(staffData);
+		    if (newStaff != null) {
+		        logger.log("[MANAGER] New employee created: " + username + " by manager user_id=" + requester.getUserId());
+		        client.sendToClient(new Message(Api.REPLY_STAFF_CREATE_OK, newStaff));
+		    } else {
+		        logger.log("[MANAGER] Employee creation failed for username=" + username);
+		        client.sendToClient(new Message(Api.REPLY_STAFF_CREATE_FAILED, null));
+		    }
 		});
 	}
 }
