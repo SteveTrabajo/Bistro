@@ -5,8 +5,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.collections.FXCollections;
 
 import java.util.ArrayList;
@@ -38,7 +40,15 @@ public class ClientCheckoutScreen {
     @FXML
     private Label totalLabel;
     @FXML
-    private TableView<Object> billTable;
+    private TableView<Item> billTable;
+    @FXML 
+    private TableColumn<Item, String> colItem;
+    @FXML 
+    private TableColumn<Item, Integer> colQty;
+    @FXML 
+    private TableColumn<Item, Double> colPrice;
+    @FXML 
+    private TableColumn<Item, Double> colTotal;
     @FXML
     private Button btnBack;
     private double finalAmount = 0.0;
@@ -52,6 +62,10 @@ public class ClientCheckoutScreen {
     // ======================== Initialization ========================
 	@FXML
 	public void initialize() {
+		colItem.setCellValueFactory(new PropertyValueFactory<>("name"));
+        colQty.setCellValueFactory(new PropertyValueFactory<>("quantity")); 
+        colPrice.setCellValueFactory(new PropertyValueFactory<>("price"));
+        colTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
 		int DinersAmount = BistroClientGUI.client.getTableCTRL().getUserAllocatedOrderForTable().getDinersAmount();
 		Random random = new Random();
         Item[] menu = {
@@ -69,7 +83,7 @@ public class ClientCheckoutScreen {
             
             if (qty > 0) {
                 // Create the final item with the randomized quantity
-                entities.Item orderedItem = new Item(
+                Item orderedItem = new Item(
                     menuItem.getItemId(), 
                     menuItem.getName(), 
                     menuItem.getPrice(), 
