@@ -888,6 +888,10 @@ public class BistroDataBase_Controller {
 		return earliestTime;
 	}
 
+	
+	
+	
+	
 	// ******************** Restaurant Management  Operations ******************
 	
 	public List<LocalTime> getOpeningHoursFromDB() {
@@ -1022,5 +1026,7 @@ public class BistroDataBase_Controller {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	
 
 }

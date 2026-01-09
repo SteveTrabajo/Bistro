@@ -1,8 +1,12 @@
 package logic.services;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import entities.Table;
+import enums.OrderStatus;
+import enums.OrderType;
 import logic.BistroDataBase_Controller;
 import logic.ServerLogger;
 
@@ -21,6 +25,11 @@ public class TableService {
 	
 	public List<Table> getAllTables() {
 		return dbController.getAllTablesFromDB();
+	}
+
+	public int allocateTable(String ConfimationCode) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

@@ -12,70 +12,114 @@ import logic.BistroDataBase_Controller;
 import logic.ServerLogger;
 import logic.api.Router;
 import logic.services.WaitingListService;
+
 /**
- * WaitingListSubject class that registers handlers related to waiting list operations.
+ * WaitingListSubject class that registers handlers related to waiting list
+ * operations.
  */
 public class WaitingListSubject {
-	// ******************************** Constructors***********************************
+	// ********************************
+	// Constructors***********************************
 	private WaitingListSubject() {
 	}
-	// ******************************** Static Methods***********************************
+
+	// ******************************** Static
+	// Methods***********************************
 	/**
 	 * Registers handlers related to waiting list operations.
 	 * 
-	 * @param router       The Router instance to register handlers with.
-	 * @param waitingListService The BistroDataBase_Controller instance for database operations.
-	 * @param logger       The ServerLogger instance for logging.
+	 * @param router             The Router instance to register handlers with.
+	 * @param waitingListService The BistroDataBase_Controller instance for database
+	 *                           operations.
+	 * @param logger             The ServerLogger instance for logging.
 	 */
 	public static void register(Router router, WaitingListService waitingListService, ServerLogger logger) {
-		// Handlers related to waiting list can be added here
-		
-		router.on("WaitingList","isInWaitingList", (msg, client) -> {
-			int userID = (int) msg.getData();
-			boolean isInWaitingList = waitingListService.isUserInWaitingList(userID);
+		// 1. Check if user is in waiting list
+		router.on("WaitingList", "isInWaitingList", (msg, client) -> {
+			String confirmationCode = (String) msg.getData();
+			boolean isInWaitingList = waitingListService.isUserInWaitingList(confirmationCode);
+
 			if (isInWaitingList) {
-				logger.log("[INFO] Client: "+ client + " checked and found to be in the waiting list.");
-				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_IS_IN_LIST, null));
-			}
-			else {
-				logger.log("[INFO] Client: "+ client + " checked and found NOT to be in the waiting list.");
-				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_IS_NOT_IN_LIST, null));
-			}
-		});
-		
-		
-		
-		//join to waiting list
-		router.on("waitingList", "checkAvailability", (msg, client) -> {
-			int dinersAmount = (int) msg.getData();
-			WaitListResponse response = waitingListService.checkAvailabilityForWalkIn(dinersAmount);
-			if(response.isCanSeatImmediately()) {
-				//can be seated immediately
-				//TODO:implement notification
-				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_SKIPPED, response));
-				logger.log("[INFO] Client: "+ client + " can be seated immediately for diners amount: " + dinersAmount);
+				logger.log("[INFO] Client: " + client + " is in waiting list.");
+				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_IS_IN_LIST, true));
 			} else {
-				//added to waiting list
-				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_CHECK_AVAILABILITY_OK, response));
-				logger.log("[INFO] Client: "+ client + " added to waiting list for diners amount: " + dinersAmount);
+				logger.log("[INFO] Client: " + client + " is NOT in waiting list.");
+				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_IS_NOT_IN_LIST, false));
 			}
 		});
-		
-		//leave waiting list
+
+		// 2. Check Availability AND Seat if possible (Optimistic Scheduling)
+		// Client sends: int (dinersAmount)
+		// Server uses: client.getInfo("user") to get contact info
+		router.on("waitingList", "checkAvailability", (msg, client) -> {
+			//TODO : add option to staff to add users to waitlist
+			// A. Get Data from Message
+			int dinersAmount = (int) msg.getData();
+
+			// B. Get User from Session (The crucial change)
+			User currentUser = (User) client.getInfo("user");
+
+			if (currentUser == null) {
+				logger.log("[ERROR] Check Availability failed: No user found in session.");
+				return; // Or send an error message
+			}
+
+			int userID = currentUser.getUserId();
+
+			// C. Call Service
+			Object result = waitingListService.checkAvailabilityAndSeat(dinersAmount, userID);
+
+			// D. Handle Result (Order vs WaitListResponse)
+			if (result instanceof Map) {
+				// SUCCESS: Seated Immediately
+				Map<String, Object> resMap = (Map<String, Object>) result;
+				logger.log("[INFO] Immediate Seating Success. Order: " + ((Order)resMap.get("order")).getConfirmationCode());
+				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_SKIPPED, resMap));
+
+			} else if (result instanceof WaitListResponse) {
+				// FULL: Must Wait
+				WaitListResponse resp = (WaitListResponse) result;
+				logger.log("[INFO] Table full. Wait time: " + resp.getEstimatedWaitTimeMinutes());
+				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_CHECK_AVAILABILITY_OK, resp));
+			}
+		});
+
+		// 3. Add to Waitlist (User accepted the wait time)
+		// This handles the explicit request to join the queue
+		router.on("waitingList", "addToWaitList", (msg, client) -> {
+			// Expecting a Map or Object, but we can extract User ID from session too!
+			// Assuming for simplicity the client sends specific data,
+			// OR we can use the session user again:
+
+			@SuppressWarnings("unchecked")
+			java.util.Map<String, Object> data = (java.util.Map<String, Object>) msg.getData();
+			int dinersAmount = (int) data.get("diners");
+			int waitTime = (int) data.get("waitTime");
+
+			User currentUser = (User) client.getInfo("user");
+
+			// Create the waitlist order
+			String code = waitingListService.createWaitListOrder(dinersAmount, currentUser.getUserId(), true, waitTime);
+
+			if (code != null) {
+				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_JOIN_OK, code));
+				logger.log("[INFO] Added to waitlist. Code: " + code);
+			} else {
+				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_JOIN_FAIL, null));
+			}
+		});
+
+		// 4. Leave Waiting List
 		router.on("waitingList", "leave", (msg, client) -> {
 			String confirmationCode = (String) msg.getData();
 			boolean success = waitingListService.removeFromWaitingList(confirmationCode);
-			//successful leaving the waiting list:
+
 			if (success) {
 				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_LEAVE_OK, null));
-				logger.log("[INFO] Client: "+ client + " left the waiting list successfully.");
-			//failure to leave the waiting list:
 			} else {
 				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_LEAVE_FAIL, null));
-				logger.log("[ERROR] Client: "+ client + " failed to leave the waiting list.");
 			}
 		});
-		
 	}
 }
 // End of WaitingListSubject class
