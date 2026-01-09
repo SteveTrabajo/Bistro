@@ -25,6 +25,7 @@ public class WaitingListController {
 	private boolean canSeatImmediately = false;
 	private boolean userOnWaitingList = false;
 	private boolean leaveWaitingListSuccess = false;
+	private long estimatedWaitTimeMinutes = 0;
 	
 	// Data Holders
 	private ArrayList<Order> waitingList = new ArrayList<>();
@@ -49,6 +50,15 @@ public class WaitingListController {
 			waitingListPanelController.updateListFromServer(waitingList);
 		}
 	}
+	
+	public long getEstimatedWaitTimeMinutes() {
+		return estimatedWaitTimeMinutes;
+	}
+	
+	public void setEstimatedWaitTimeMinutes(long estimatedWaitTimeMinutes) {
+		this.estimatedWaitTimeMinutes = estimatedWaitTimeMinutes;
+	}
+	
 	
 	public void setCanSeatImmediately(boolean canSeatImmediately) {
 		this.canSeatImmediately = canSeatImmediately;

@@ -1,20 +1,15 @@
 package gui.logic;
 
-import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
-import java.util.Optional;
 
+import java.util.Optional;
 import entities.User;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.paint.Color;
 import logic.BistroClientGUI;
 
 /**
@@ -105,55 +100,34 @@ public class ClientJoinWaitingListScreen {
 			return;
 		}
 		else {
-			openAskToJoinWaitingListScreen(event, dinersAmount);
+			showAskJoinWaitlistDialog(BistroClientGUI.client.getWaitingListCTRL().getEstimatedWaitTimeMinutes(), dinersAmount);
 			
 		}
 	}
 	
-	private void openAskToJoinWaitingListScreen(LocalTime earliestTime, int dinersAmount) {
-	    
-	    long minutesToWait = 0;
-	    if (earliestTime != null) {
-	        minutesToWait = ChronoUnit.MINUTES.between(LocalTime.now(), earliestTime);
-	        if (minutesToWait < 0) minutesToWait = 0;
-	    } else {
-	        showAlert("Error", "No suitable tables found for this group size.");
-	        return;
-	    }
+	/**
+	 * Displays a confirmation dialog asking the user if they want to join the waiting list.
+	 * 
+	 * @param estimatedMinutes The estimated wait time in minutes.
+	 * @param dinersAmount The number of diners.
+	 */
+	public void showAskJoinWaitlistDialog(long estimatedMinutes, int dinersAmount) {
+		//TODO: add css styling
+	    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+	    alert.setTitle("Waiting List Confirmation");
+	    alert.setHeaderText(null);
+	    alert.setContentText("Estimated wait time is " + estimatedMinutes + " minutes. Do you want to join the waiting list?");
 
-	    Alert alert = new Alert(AlertType.CONFIRMATION);
-	    alert.setTitle("No Tables Available");
-	    alert.setHeaderText("The restaurant is currently full.");
-	    alert.setContentText("Next table for " + dinersAmount + " diners will be free in approx.\n" 
-	                         + minutesToWait + " minutes (" + earliestTime.toString() + ").\n\n"
-	                         + "Would you like to join the Waiting List?");
-
-	    ButtonType btnJoin = new ButtonType("Join Waitlist", ButtonData.OK_DONE);
-	    ButtonType btnCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
-	    
-	    alert.getButtonTypes().setAll(btnJoin, btnCancel);
-
+	    ButtonType joinButton = new ButtonType("Sure add me! ", ButtonData.OK_DONE);
+	    ButtonType cancelButton = new ButtonType("No never mind :(", ButtonData.CANCEL_CLOSE);
+	    alert.getButtonTypes().setAll(joinButton, cancelButton);
 	    Optional<ButtonType> result = alert.showAndWait();
-	    
-	    if (result.isPresent() && result.get() == btnJoin) {
-	        openContactDetailsDialog(dinersAmount); 
+	    if (result.isPresent() && result.get() == joinButton) {
+	        System.out.println("User agreed to join the waiting list.");
+	        BistroClientGUI.client.getWaitingListCTRL().joinWaitingList(dinersAmount);
 	    } else {
-	        System.out.println("User declined waiting list.");
+	        System.out.println("User declined to join the waiting list.");
 	    }
-	}
-	private void openContactDetailsDialog(int dinersAmount) {
-	    TextInputDialog dialog = new TextInputDialog();
-	    dialog.setTitle("Contact Details");
-	    dialog.setHeaderText("Enter Phone Number or Email");
-	    dialog.setContentText("To notify you when the table is ready:");
-
-	    Optional<String> result = dialog.showAndWait();
-	    
-	    result.ifPresent(contactInfo -> {
-	        if (!contactInfo.trim().isEmpty()) {
-	            BistroClientGUI.client.getWaitingListCTRL().askJoinWaitingList(dinersAmount, true, contactInfo);
-	        }
-	    });
 	}
 
 	/**
