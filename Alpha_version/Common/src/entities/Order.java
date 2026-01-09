@@ -17,6 +17,7 @@ public class Order implements Serializable {
 	private int dinersAmount;
 	private String confirmationCode;
 	private Item[] orderedItems=null;
+	private String idempotencyKey;
 
 	// This field existed in your old schema as member_id.
 	// Now its a user_id for both guests and members.
@@ -138,5 +139,12 @@ public class Order implements Serializable {
 	}
 	public void setOrderedItems(Item[] orderedItems) {
 		this.orderedItems = orderedItems;
+	}
+
+	public String getIdempotencyKey() {// for payment processing
+		return null;
+	}
+	public void setIdempotencyKey(String idempotencyKey) {// for payment processing
+		this.idempotencyKey = idempotencyKey;
 	}
 }
