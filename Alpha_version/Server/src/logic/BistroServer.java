@@ -1,6 +1,7 @@
 package logic;
 
 import java.util.List;
+import java.util.concurrent.*;
 
 import comms.Api;
 import comms.Message;
@@ -37,6 +38,9 @@ public class BistroServer extends AbstractServer {
 	private final UserService userService;
 	private final ReportsService reportService;
 	private final PaymentService paymentService;
+	// Scheduler for background tasks:
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	
 	// ******************************** Constructors***********************************
 
 	/**
@@ -54,7 +58,7 @@ public class BistroServer extends AbstractServer {
 		// Initialize services:
 		this.ordersService = new OrdersService(this, this.dbController, this.logger);
 		this.tableService = new TableService(this.dbController, this.logger);
-		this.waitingListService = new WaitingListService(this,this.dbController,this.ordersService, this.logger);
+		this.waitingListService = new WaitingListService(this,this.dbController,this.ordersService,this.tableService, this.logger);
 		this.notificationService = new NotificationService(this.dbController, this.logger);
 		this.userService = new UserService(this.dbController, this.logger);
 		this.reportService = new ReportsService(this.dbController, this.logger);
@@ -164,7 +168,7 @@ public class BistroServer extends AbstractServer {
 	}
 
 	// ****************************** Instance methods ******************************
-
+	
 	/**
 	 * Registers API subjects and their handlers with the router.
 	 * 

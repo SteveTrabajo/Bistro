@@ -89,7 +89,6 @@ public class OrdersService {
 				return false; 
 			}
 		}
-		// ------------------------------------------------------------
 
 		// 2. Generate Code
 		String confirmationCode = generateConfirmationCode("R");
