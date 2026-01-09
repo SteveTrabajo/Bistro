@@ -135,6 +135,7 @@ public class BistroServer extends AbstractServer {
 		boolean isConnectToDB = dbController.openConnection();
 		if (isConnectToDB) {
 			logger.log("Connected to database successfully");
+			notificationService.startBackgroundTasks(); // Start notification background tasks
 		} else {
 			logger.log("Failed to connect to database");
 		}
@@ -145,6 +146,7 @@ public class BistroServer extends AbstractServer {
 	 */
 	protected void serverStopped() {
 		logger.log("Server stopped");
+		notificationService.stop(); // Stop notification background tasks
 		dbController.closeConnection();
 	}
 
@@ -188,6 +190,10 @@ public class BistroServer extends AbstractServer {
 
 	public TableService getTablesService() {
 		return this.tableService;
+	}
+	
+	public NotificationService getNotificationService() {
+		return this.notificationService;
 	}
 
 }
