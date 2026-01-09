@@ -45,7 +45,7 @@ public class WaitListSubject {
 		            BistroClient.awaitResponse = false;
 					Order order = (Order) msg.getData();
 					BistroClientGUI.client.getReservationCTRL().setReadyUserReservation(order);
-					wlController.setskipWaitingListJoin(true);
+					wlController.setCanSeatImmediately(true);
 				});
 
 				//Client/Staff: Leave Status
