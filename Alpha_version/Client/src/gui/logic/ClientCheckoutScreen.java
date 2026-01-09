@@ -127,6 +127,7 @@ public class ClientCheckoutScreen {
 		
 		// Setup Text Field Listeners
 		setupTextFieldListeners();
+		
 	}
 	
 	// ======================== Text Field Listeners ========================
