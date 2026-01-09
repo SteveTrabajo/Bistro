@@ -37,7 +37,6 @@ public class PaymentService {
             
             // return PaymentGateway.authorize(idempotencyKey, amount);
             boolean isAuthorized = callExternalPaymentApi(idempotencyKey, amount);
-            
             return isAuthorized;
         } catch (Exception e) {
             logger.log("[CRITICAL] External Payment Gateway connection error: " + e.getMessage());
@@ -109,11 +108,10 @@ public class PaymentService {
 
     public int calculateTotal(List<Item> items, User requester) {
         int total = 0;
-        for (Item item : items) total += item.getPrice();
-        
-        int discount = (requester.getUserType() == UserType.MEMBER) ? 10 : 0;
-        total -= (total * discount) / 100;
-        return (int) (total * 1.18);
+        for (Item item : items) total += item.getPrice();// Sum item prices
+        int discount = (requester.getUserType() == UserType.MEMBER) ? 10 : 0;// 10% discount for members
+        total -= (total * discount) / 100;// Apply discount
+        return (int) (total * 1.18);// Including 18% tax
     }
 
 	public boolean processManualPayment(int orderNumber) {

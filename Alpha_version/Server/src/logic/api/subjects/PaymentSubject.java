@@ -20,7 +20,7 @@ public class PaymentSubject {
 	private PaymentSubject() {
 	}
 	private static final int MAX_FAILURES = 5;
-	private final static Map<Integer, Integer> userFailureMap = new ConcurrentHashMap<>();
+	private static Map<Integer, Integer> userFailureMap = new ConcurrentHashMap<>();
 	public static void register(Router router, TableService tableService, ServerLogger logger, PaymentService paymentService) {
 		router.on("payment", "complete", (msg, client) -> {
 			User requester = (User) client.getInfo("user");
@@ -94,7 +94,6 @@ public class PaymentSubject {
 			if (requester.getUserType() == UserType.GUEST || requester.getUserType() == UserType.MEMBER) {
 				client.sendToClient(new Message(Api.REPLY_LOAD_PENDING_BILLS_FAIL,
 						"Only employees and managers can load pending bills."));
-				return;
 			}
 			List<Bill> pendingBills = paymentService.getPendingBillsForUser();
 			client.sendToClient(new Message(Api.REPLY_LOAD_PENDING_BILLS_OK, pendingBills));
