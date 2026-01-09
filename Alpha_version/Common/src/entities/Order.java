@@ -16,6 +16,7 @@ public class Order implements Serializable {
 	private LocalTime orderHour; // NULL for waitlist
 	private int dinersAmount;
 	private String confirmationCode;
+	private Item[] orderedItems=null;
 
 	// This field existed in your old schema as member_id.
 	// Now its a user_id for both guests and members.
@@ -131,5 +132,11 @@ public class Order implements Serializable {
 
 	public void setStatus(OrderStatus status) {
 		this.status = status;
+	}
+	public Item[] getOrderedItems() {
+		return orderedItems;
+	}
+	public void setOrderedItems(Item[] orderedItems) {
+		this.orderedItems = orderedItems;
 	}
 }

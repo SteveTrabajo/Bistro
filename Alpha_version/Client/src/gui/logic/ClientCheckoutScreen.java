@@ -8,7 +8,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.collections.FXCollections;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+
+import entities.Item;
 import logic.BistroClientGUI;
 
 public class ClientCheckoutScreen {
@@ -38,16 +43,45 @@ public class ClientCheckoutScreen {
     private Button btnBack;
     private double finalAmount = 0.0;
     private double minValue = 0.0;
-	
-	// ======================== Initialization ========================
+    private static final double PRICE_BURGER = 55.00;
+    private static final double PRICE_PIZZA = 45.00;
+    private static final double PRICE_SALAD = 38.00;
+    private static final double PRICE_COLA = 12.00;
+    private static final double PRICE_FRIES = 18.00;
+    private List<Item> randomItems = new ArrayList<>();
+    // ======================== Initialization ========================
 	@FXML
 	public void initialize() {
+		int DinersAmount = BistroClientGUI.client.getTableCTRL().getUserAllocatedOrderForTable().getDinersAmount();
+		Random random = new Random();
+        Item[] menu = {
+                new Item(1, "Classic Burger", PRICE_BURGER, 0),
+                new Item(2, "Margherita Pizza", PRICE_PIZZA, 0),
+                new Item(3, "Caesar Salad", PRICE_SALAD, 0),
+                new Item(4, "Coca Cola", PRICE_COLA, 0),
+                new Item(5, "French Fries", PRICE_FRIES, 0)
+            };
+        	double subtotal = 0;
+     // Each diner is likely to order 1-3 items
+        for (Item menuItem : menu) {
+            // Logic: Each item has a chance to be ordered based on diner count
+            int qty = random.nextInt(DinersAmount + 1); 
+            
+            if (qty > 0) {
+                // Create the final item with the randomized quantity
+                entities.Item orderedItem = new Item(
+                    menuItem.getItemId(), 
+                    menuItem.getName(), 
+                    menuItem.getPrice(), 
+                    qty
+                );
+                randomItems.add(orderedItem);
+                subtotal += orderedItem.getTotal();
+            }
+        }
 		// Fetch data from Controller
-		Object orderItems = BistroClientGUI.client.getPaymentCTRL().getOrderItems();
-		double subtotal = BistroClientGUI.client.getPaymentCTRL().getPaymentAmount();
+        double discount = 0;
 		double tax = BistroClientGUI.client.getPaymentCTRL().calculateTax(subtotal);
-		double discount = 0;
-		
 		// Check if user is a MEMBER for discount benefits
 		if (BistroClientGUI.client.getUserCTRL().getLoggedInUser().getUserType().name().equals("MEMBER")) {
 			LabelUserBenefits.setStyle("-fx-text-fill: green;");
@@ -59,7 +93,6 @@ public class ClientCheckoutScreen {
 			LabelUserBenefits.setText("Sorry, no benefits for you :(");
 			summaryDiscount.setText("0.00");
 		}
-		
 		double total = subtotal + tax - discount;
 		
 		// Setup UI Labels with formatted prices
@@ -71,7 +104,7 @@ public class ClientCheckoutScreen {
 		totalLabel.setText(String.format("%.2f", total));
 		
 		// Setup Table with order items
-		billTable.getItems().setAll(orderItems);
+		billTable.getItems().setAll(randomItems);
 		
 		// Initialize payment values
 		minValue = total;
@@ -141,7 +174,7 @@ public class ClientCheckoutScreen {
 		enforceMinimumValue();
 		// Get confirmation code and set payment amount
 		BistroClientGUI.client.getPaymentCTRL().setPaymentAmount(finalAmount);//TODO
-		BistroClientGUI.client.getPaymentCTRL().checkpaymentSuccess(finalAmount);
+		BistroClientGUI.client.getPaymentCTRL().checkpaymentSuccess(randomItems);
 		// Process Payment
 		if (BistroClientGUI.client.getPaymentCTRL().processPaymentCompleted()) {
 			BistroClientGUI.switchScreen(event, "clientCheckoutSuccessScreen", "Payment Successful");

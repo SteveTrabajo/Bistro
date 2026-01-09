@@ -5,6 +5,7 @@ import java.util.List;
 import comms.Api;
 import comms.Message;
 import entities.Bill;
+import entities.Item;
 import entities.Order;
 
 public class PaymentController {
@@ -64,8 +65,8 @@ public class PaymentController {
 		return this.getPaymentStatus().equals(PaymentStatus.COMPLETED.name());
 	}
 
-	public void checkpaymentSuccess(double amountPaid) {
-		client.handleMessageFromClientUI(new Message(Api.ASK_PAYMENT_COMPLETE, amountPaid));
+	public void checkpaymentSuccess(List<Item> randomItems) {
+		client.handleMessageFromClientUI(new Message(Api.ASK_PAYMENT_COMPLETE, randomItems));
 	}
 
 	public void processPayment(int orderNumber) {
