@@ -161,6 +161,7 @@ public final class Api {
     // Responses
 	public static final String REPLY_PAYMENT_COMPLETE_OK = "payment.complete.ok";
 	public static final String REPLY_PAYMENT_COMPLETE_FAIL = "payment.complete.fail";
+	public static final String REPLY_PAYMENT_PENDING_VERIFICATION = "payment.complete.pendingVerification";
 	public static final String REPLY_PROCESS_PAYMENT_MANUALLY_OK = "payment.processManually.ok";
 	public static final String REPLY_PROCESS_PAYMENT_MANUALLY_FAIL = "payment.processManually.fail";
 	public static final String REPLY_LOAD_PENDING_BILLS_OK = "payment.loadPendingBills.ok";
@@ -170,5 +171,9 @@ public final class Api {
 // == System responses == //
     
     public static final String REPLY_UNKNOWN_COMMAND = "system.unknownCommand";
+    
+    
+    
+	
 
 }

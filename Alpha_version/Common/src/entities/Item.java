@@ -31,5 +31,8 @@ public class Item implements Serializable {
     public double getTotal() { 
     	return price * quantity; 
     }
+    public int getItemId() {
+		return itemId;
+	}
     
 }
