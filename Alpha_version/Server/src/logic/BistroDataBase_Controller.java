@@ -555,6 +555,7 @@ public class BistroDataBase_Controller {
 	    String qry;
 	    
 	    if (LocalDate.now().equals(date)) {
+	    	// TODO check todo in discord for logic update (check waitlist orders too?)
 	        qry = "SELECT order_time, number_of_guests "
 	            + "FROM orders "
 	            + "WHERE order_type = 'RESERVATION' "
@@ -1008,6 +1009,18 @@ public class BistroDataBase_Controller {
 			release(conn);
 		}
 		return usersList;
+	}
+
+	//TODO complete the function
+	public List<Order> getOrdersBetweenTimes(LocalDateTime startWindow, LocalDateTime endWindow, OrderStatus seated) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	//TODO complete the function
+	public User getUserById(int userId) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -75,19 +75,49 @@ public class OrdersService {
 	 * Creates a new standard Reservation (future order).
 	 * Generates a code starting with "R-".
 	 */
-	public boolean createNewOrder(List<Object> data, OrderType orderType) {
-		// data received: [0]userId, [1]date , [2]dinersAmount , [3]time
+	public synchronized boolean createNewOrder(List<Object> data, OrderType orderType) {
+		// data: [0]userId, [1]date, [2]dinersAmount, [3]time, [4]Code (added later)
 		
-		// 1. Generate a UNIQUE confirmation code with 'R' prefix
+		LocalDate date = (LocalDate) data.get(1);
+		int diners = (int) data.get(2);
+		LocalTime time = (LocalTime) data.get(3);
+
+		if (orderType == OrderType.RESERVATION) {
+			boolean isSlotStillFree = checkSpecificSlotAvailability(date, time, diners);
+			if (!isSlotStillFree) {
+				System.out.println("Race Condition Avoided: Slot " + time + " was taken just before insertion.");
+				return false; 
+			}
+		}
+		// ------------------------------------------------------------
+
+		// 2. Generate Code
 		String confirmationCode = generateConfirmationCode("R");
-		data.add(confirmationCode); // Index 4 in the list
+		data.add(confirmationCode); 
 		
-		// 2. Send to DB Controller using the generic method
-		// We rely on the DB to generate the order_number (AUTO_INCREMENT)
+		// 3. Insert
 		return dbController.setNewOrder(data, orderType, OrderStatus.PENDING);
 	}
 	
-	
+	/*
+	 * Checks if a specific reservation slot is still available for the given date, time, and diners amount.
+	 * @param date The date of the reservation.
+	 * @param targetTime The specific time slot to check.
+	 * @param diners The number of diners for the reservation.
+	 * @return true if the slot is available, false otherwise.
+	 */
+	private boolean checkSpecificSlotAvailability(LocalDate date, LocalTime targetTime, int diners) {
+		List<Order> existingReservations = dbController.getReservationsbyDate(date);
+		List<LocalTime> openingHours = dbController.getOpeningHoursFromDB();
+		
+		if (openingHours == null || openingHours.size() < 2) return false;
+		LocalTime open = openingHours.get(0);
+		LocalTime close = openingHours.get(1);
+
+		List<String> availableSlots = computeAvailableSlots(open, close, diners, existingReservations);		
+		String targetString = timeToString(targetTime);
+		return availableSlots.contains(targetString);
+	}
 	
 	public Order getOrderByConfirmationCode(String confirmationCode) {
 		return dbController.getOrderByConfirmationCodeInDB(confirmationCode);

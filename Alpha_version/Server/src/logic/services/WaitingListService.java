@@ -34,14 +34,18 @@ public class WaitingListService {
 		return false;
 	}
 	
+	//TODO complete the function
 	public int assignTableForWaitingListOrder(Order createdOrder) {
-		// TODO Auto-generated method stub
+		boolean success = dbController.updateOrderStatusInDB(createdOrder.getConfirmationCode(), OrderStatus.NOTIFIED);
+		if (success) {
+			server.getNotificationService().notifyWaitlistUser(createdOrder);
+			return 1;
+		}
 		return 0;
 	}
 
 	public boolean removeFromWaitingList(String confirmationCode) {
-		// TODO Auto-generated method stub
-		return false;
+		return dbController.updateOrderStatusInDB(confirmationCode, OrderStatus.CANCELLED);
 	}
 
 	public boolean isUserInWaitingList(int confirmationCode) {
