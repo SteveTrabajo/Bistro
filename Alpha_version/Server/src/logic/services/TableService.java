@@ -1,5 +1,8 @@
 package logic.services;
 
+import java.util.List;
+
+import entities.Table;
 import logic.BistroDataBase_Controller;
 import logic.ServerLogger;
 
@@ -14,6 +17,10 @@ public class TableService {
 
 	public int getTableNumberByReservationConfirmationCode(String confirmationCode) {
 		return dbController.getTableNumberByConfirmationCode(confirmationCode);
+	}
+	
+	public List<Table> getAllTables() {
+		return dbController.getAllTablesFromDB();
 	}
 
 }

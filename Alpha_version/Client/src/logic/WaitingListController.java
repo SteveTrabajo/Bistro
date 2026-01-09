@@ -22,9 +22,10 @@ public class WaitingListController {
 	private final BistroClient client;
 	
 	// State variables
+	private boolean canSeatImmediately = false;
 	private boolean userOnWaitingList = false;
 	private boolean leaveWaitingListSuccess = false;
-	private boolean skipWaitingListJoin = false;
+	private long estimatedWaitTimeMinutes = 0;
 	
 	// Data Holders
 	private ArrayList<Order> waitingList = new ArrayList<>();
@@ -50,12 +51,21 @@ public class WaitingListController {
 		}
 	}
 	
-	public void setskipWaitingListJoin(boolean skipWaitingListJoin) {
-		this.skipWaitingListJoin = skipWaitingListJoin;
+	public long getEstimatedWaitTimeMinutes() {
+		return estimatedWaitTimeMinutes;
 	}
 	
-	public boolean getskipWaitingListJoin() {
-		return skipWaitingListJoin;
+	public void setEstimatedWaitTimeMinutes(long estimatedWaitTimeMinutes) {
+		this.estimatedWaitTimeMinutes = estimatedWaitTimeMinutes;
+	}
+	
+	
+	public void setCanSeatImmediately(boolean canSeatImmediately) {
+		this.canSeatImmediately = canSeatImmediately;
+	}
+	
+	public boolean getcanSeatImmediately() {
+		return this.canSeatImmediately;
 	}
 	
 	public void setUserOnWaitingList(boolean status) {
@@ -95,10 +105,12 @@ public class WaitingListController {
 		client.handleMessageFromClientUI(new Message(Api.ASK_IS_IN_WAITLIST, userID));
 	}
 
+	public void checkWaitingListAvailability(int dinersAmount) {
+		client.handleMessageFromClientUI(new Message(Api.ASK_WAITING_LIST_CHECK_AVAILABILITY, dinersAmount));
+	}
+	
 	public void joinWaitingList(int dinersAmount) {
-		Map<String, Object> req = new HashMap<>();
-        req.put("diners", dinersAmount);
-		client.handleMessageFromClientUI(new Message(Api.ASK_WAITING_LIST_JOIN, req));
+		client.handleMessageFromClientUI(new Message(Api.ASK_WAITING_LIST_JOIN, dinersAmount));
 	}
 
 	public void leaveWaitingList() {

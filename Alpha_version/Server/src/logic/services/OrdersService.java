@@ -103,25 +103,22 @@ public class OrdersService {
 	 * @param prefix The prefix for the code (e.g., "R" for reservations).
 	 */
 	public String generateConfirmationCode(String prefix) {
-		String code;
-		boolean exists;
-		do {
+		String code = null;
+		boolean exists = true;
+		while (exists){
 			// Generate random number 100000-999999
 			int num = 100000 + new Random().nextInt(900000);
 			code = prefix + "-" + num;
 			
 			// Check DB to avoid collision
 			exists = dbController.checkOrderExistsInDB(code);
-			
 			if (exists) {
 				System.out.println("Duplicate code generated: " + code + ". Retrying...");
 			}
-		} while (exists);
+		}
 		
 		return code;
 	}
-	
-	
 	
 	/**
 	 * 

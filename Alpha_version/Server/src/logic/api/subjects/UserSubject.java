@@ -3,6 +3,7 @@ package logic.api.subjects;
 import java.util.HashMap;
 import java.util.Map;
 
+import common.InputCheck;
 import comms.Api;
 import comms.Message;
 import entities.User;
@@ -26,6 +27,7 @@ public final class UserSubject {
 			Map<String, Object> loginData = (Map<String, Object>) msg.getData();
 			User user = userService.getUserInfo(loginData);
 			if (user != null) {
+				client.setInfo("user", user); // Store session user for authorization
 				client.sendToClient(new Message(Api.REPLY_LOGIN_GUEST_OK, user));
 			} else {
 				client.sendToClient(new Message(Api.REPLY_LOGIN_GUEST_NOT_FOUND, null));
@@ -38,6 +40,7 @@ public final class UserSubject {
 			Map<String, Object> loginData = (Map<String, Object>) msg.getData();
 			User user = userService.getUserInfo(loginData);
 			if (user != null) {
+				client.setInfo("user", user); // Store session user for authorization
 				client.sendToClient(new Message(Api.REPLY_LOGIN_MEMBER_OK, user));
 			} else {
 				client.sendToClient(new Message(Api.REPLY_LOGIN_MEMBER_NOT_FOUND, null));
@@ -74,30 +77,38 @@ public final class UserSubject {
 
 		// Request: "signout.guest"
 		router.on("signout", "guest", (msg, client) -> {
+			client.setInfo("user", null); // Clear session user
 			logger.log("[INFO] Client " + client + " signed out as GUEST");
 			client.sendToClient(new Message(Api.REPLY_SIGNOUT_GUEST_OK, null));
 		});
 
 		// Request: "signout.member"
 		router.on("signout", "member", (msg, client) -> {
+			client.setInfo("user", null); // Clear session user
 			logger.log("[INFO] Client " + client + " signed out as MEMBER");
 			client.sendToClient(new Message(Api.REPLY_SIGNOUT_MEMBER_OK, null));
 		});
 
 		// Request: "signout.employee"
 		router.on("signout", "employee", (msg, client) -> {
+			client.setInfo("user", null); // Clear session user
 			logger.log("[INFO] Client " + client + " signed out as EMPLOYEE");
 			client.sendToClient(new Message(Api.REPLY_SIGNOUT_EMPLOYEE_OK, null));
 		});
 
 		// Request: "signout.manager"
 		router.on("signout", "manager", (msg, client) -> {
+			client.setInfo("user", null); // Clear session user
 			logger.log("[INFO] Client " + client + " signed out as MANAGER");
 			client.sendToClient(new Message(Api.REPLY_SIGNOUT_MANAGER_OK, null));
 		});
 
 		// Request: "member.updateInfo"
 		router.on("member", "updateInfo", (msg, client) -> {
+			if (client.getInfo("user") == null) {
+				client.sendToClient(new Message(Api.REPLY_MEMBER_UPDATE_INFO_FAILED, null));
+				return;
+			}
 			UserData updatedUser = (UserData) msg.getData();
 			boolean success = userService.updateMemberInfo(updatedUser);
 			if (success) {
@@ -130,7 +141,7 @@ public final class UserSubject {
 		    String email = (String) staffData.get("email");
 		    String phoneNumber = (String) staffData.get("phoneNumber");
 
-		    String validationError = common.InputCheck.validateAllStaffData(username, password, email, phoneNumber);
+		    String validationError = InputCheck.validateAllStaffData(username, password, email, phoneNumber);
 		    if (validationError != null) {
 		        client.sendToClient(new Message(Api.REPLY_STAFF_CREATE_INVALID_DATA, validationError));
 		        return;

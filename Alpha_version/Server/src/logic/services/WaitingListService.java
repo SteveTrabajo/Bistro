@@ -44,7 +44,7 @@ public class WaitingListService {
 		return false;
 	}
 
-	public boolean isUserInWaitingList(String confirmationCode) {
+	public boolean isUserInWaitingList(int confirmationCode) {
 		return dbController.isUserInWaitingList(confirmationCode);
 	}
 	

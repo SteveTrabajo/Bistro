@@ -1,11 +1,15 @@
 package gui.logic;
 
+
+import java.util.Optional;
 import entities.User;
 import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
-import javafx.scene.paint.Color;
 import logic.BistroClientGUI;
 
 /**
@@ -89,19 +93,43 @@ public class ClientJoinWaitingListScreen {
 	@FXML
 	public void btnCheckAvail(Event event) {
 		int dinersAmount = Integer.parseInt(lblDinersAmount.getText());
-		BistroClientGUI.client.getWaitingListCTRL().joinWaitingList(dinersAmount);
-		if( BistroClientGUI.client.getWaitingListCTRL().getskipWaitingListJoin()) {
-			BistroClientGUI.switchScreen(event, "clientCheckInTableSuccesScreen", "client Join Waiting List messege");
-			BistroClientGUI.client.getWaitingListCTRL().setskipWaitingListJoin(false);
+		BistroClientGUI.client.getWaitingListCTRL().checkWaitingListAvailability(dinersAmount);
+		if(BistroClientGUI.client.getWaitingListCTRL().getcanSeatImmediately()) {
+			BistroClientGUI.client.getWaitingListCTRL().setCanSeatImmediately(false);
+			BistroClientGUI.switchScreen(event, "clientWaitingOverScreen", "failed to load waiting over screen");
 			return;
 		}
-		if (BistroClientGUI.client.getWaitingListCTRL().isUserOnWaitingList()) {
-			BistroClientGUI.switchScreen(event, "clientDashboardScreen", "client Join Waiting List messege");
-		} else {
-			BistroClientGUI.display(lblError, "Error has been accoured!", Color.RED);
+		else {
+			showAskJoinWaitlistDialog(BistroClientGUI.client.getWaitingListCTRL().getEstimatedWaitTimeMinutes(), dinersAmount);
+			
 		}
 	}
 	
+	/**
+	 * Displays a confirmation dialog asking the user if they want to join the waiting list.
+	 * 
+	 * @param estimatedMinutes The estimated wait time in minutes.
+	 * @param dinersAmount The number of diners.
+	 */
+	public void showAskJoinWaitlistDialog(long estimatedMinutes, int dinersAmount) {
+		//TODO: add css styling
+	    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+	    alert.setTitle("Waiting List Confirmation");
+	    alert.setHeaderText(null);
+	    alert.setContentText("Estimated wait time is " + estimatedMinutes + " minutes. Do you want to join the waiting list?");
+
+	    ButtonType joinButton = new ButtonType("Sure add me! ", ButtonData.OK_DONE);
+	    ButtonType cancelButton = new ButtonType("No never mind :(", ButtonData.CANCEL_CLOSE);
+	    alert.getButtonTypes().setAll(joinButton, cancelButton);
+	    Optional<ButtonType> result = alert.showAndWait();
+	    if (result.isPresent() && result.get() == joinButton) {
+	        System.out.println("User agreed to join the waiting list.");
+	        BistroClientGUI.client.getWaitingListCTRL().joinWaitingList(dinersAmount);
+	    } else {
+	        System.out.println("User declined to join the waiting list.");
+	    }
+	}
+
 	/**
 	 * Handles the action when the "Back" button is clicked.
 	 * It navigates back to the client dashboard screen.

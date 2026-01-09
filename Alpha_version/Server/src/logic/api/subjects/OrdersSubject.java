@@ -8,6 +8,7 @@ import java.util.Map;
 import comms.Api;
 import comms.Message;
 import entities.Order;
+import entities.User;
 import logic.ServerLogger;
 import logic.api.Router;
 import logic.services.OrdersService;
@@ -36,9 +37,20 @@ public final class OrdersSubject {
     	
     	
 		// New reservation order
-		router.on("orders", "newReservation", (msg, client) -> {
+		router.on("orders", "createReservation", (msg, client) -> {
+			User sessionUser = (User) client.getInfo("user");
+			if (sessionUser == null) {
+				logger.log("[SECURITY] Unauthorized reservation attempt from " + client);
+				client.sendToClient(new Message(Api.REPLY_CREATE_RESERVATION_FAIL, "Unauthorized"));
+				return;
+			}
+			
 			@SuppressWarnings("unchecked")
 			List<Object> orderData = (ArrayList<Object>)msg.getData();
+			// ignore any userId sent from client and use the session userId for security reasons
+			if (orderData.size() > 0) {
+				orderData.set(0, sessionUser.getUserId()); 
+			}
 			boolean orderCreated= ordersService.createNewOrder(orderData, OrderType.RESERVATION);
 			if (orderCreated) {
 				client.sendToClient(new Message(Api.REPLY_CREATE_RESERVATION_OK, null));
@@ -71,6 +83,7 @@ public final class OrdersSubject {
 				logger.log("[INFO] Client: "+ client + " confirmed existence of order with confirmation code: " + confirmationCode + " successfully.");
 				}else {
 					client.sendToClient(new Message(Api.REPLY_ORDER_NOT_EXISTS, null));
+					logger.log("[INFO] Client: "+ client + " confirmed non-existence of order with confirmation code: " + confirmationCode + " successfully.");
 				}
 		});
 		
@@ -81,6 +94,7 @@ public final class OrdersSubject {
 			List<String> availableHours = ordersService.getAvailableReservationHours(requestData);
 			if(availableHours != null && !availableHours.isEmpty()) {
 				client.sendToClient(new Message(Api.REPLY_ORDER_AVAILABLE_HOURS_OK, availableHours));
+				logger.log("[INFO] Client: "+ client + " retrieved available reservation hours successfully.");
 			}else {
 				client.sendToClient(new Message(Api.REPLY_ORDER_AVAILABLE_HOURS_FAIL, null));
 				logger.log("[ERROR] Client: "+ client + " failed to get available reservation hours.");
