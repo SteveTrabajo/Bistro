@@ -2,6 +2,8 @@ package entities;
 
 import java.io.Serializable;
 import java.sql.Time;
+
+import enums.BillType;
 import enums.UserType;
 
 public class Bill implements Serializable {
@@ -13,6 +15,7 @@ public class Bill implements Serializable {
     private UserType userType;
     private Time date;
     private double total;
+    private BillType billType;
 
     // Constructor
     public Bill(int tableId, int orderNumber, String confirmationCode, UserType userType, Time date, double total) {
@@ -31,6 +34,7 @@ public class Bill implements Serializable {
     public UserType getUserType() { return userType; }
     public Time getDate() { return date; }
     public double getTotal() { return total; }
+    public BillType getBillType() { return billType; }
 
     // Setters
     public void setTableId(int tableId) { this.tableId = tableId; }
@@ -39,6 +43,7 @@ public class Bill implements Serializable {
     public void setUserType(UserType userType) { this.userType = userType; }
     public void setDate(Time date) { this.date = date; }
     public void setTotal(double total) { this.total = total; }
+    public void setBillType(BillType billType) { this.billType = billType; }
 
 
 }

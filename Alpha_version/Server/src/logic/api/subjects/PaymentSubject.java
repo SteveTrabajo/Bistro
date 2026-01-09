@@ -7,6 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import comms.Api;
 import comms.Message;
 import entities.User;
+import enums.UserType;
+import entities.Bill;
 import entities.Item;
 import logic.ServerLogger;
 import logic.api.Router;
@@ -81,5 +83,24 @@ public class PaymentSubject {
                 logger.log("[ERROR] Payment System Error: " + e.getMessage());
             }
         });
+        router.on("payment", "processmanually", (msg, client) -> {
+        				int orderNumber = (int) msg.getData();
+			boolean isSuccessful = paymentService.processManualPayment(orderNumber);
+
+			if (isSuccessful) {
+				client.sendToClient(new Message(Api.REPLY_PROCESS_PAYMENT_MANUALLY_OK, "Manual Payment Successful"));
+			} else {
+				client.sendToClient(new Message(Api.REPLY_PROCESS_PAYMENT_MANUALLY_FAIL, "Manual Payment Failed"));
+			}
+		});
+        router.on("payment", "loadpendingbills", (msg, client) -> {
+        				User requester = (User) client.getInfo("user");
+        				if (requester.getUserType() == UserType.GUEST||requester.getUserType() == UserType.MEMBER) {
+							client.sendToClient(new Message(Api.REPLY_LOAD_PENDING_BILLS_FAIL, "Only employees and managers can load pending bills."));
+							return;
+        				}
+        							List<Bill> pendingBills = paymentService.getPendingBillsForUser();
+        										client.sendToClient(new Message(Api.REPLY_LOAD_PENDING_BILLS_OK, pendingBills));
+        		});
     }
 }

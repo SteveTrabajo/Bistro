@@ -142,7 +142,7 @@ public class Order implements Serializable {
 	}
 
 	public String getIdempotencyKey() {// for payment processing
-		return null;
+		return this.idempotencyKey; //
 	}
 	public void setIdempotencyKey(String idempotencyKey) {// for payment processing
 		this.idempotencyKey = idempotencyKey;
