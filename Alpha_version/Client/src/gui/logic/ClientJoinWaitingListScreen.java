@@ -96,7 +96,7 @@ public class ClientJoinWaitingListScreen {
 		BistroClientGUI.client.getWaitingListCTRL().checkWaitingListAvailability(dinersAmount);
 		if(BistroClientGUI.client.getWaitingListCTRL().getcanSeatImmediately()) {
 			BistroClientGUI.client.getWaitingListCTRL().setCanSeatImmediately(false);
-			BistroClientGUI.switchScreen(event, "clientWaitingOverScreen", "failed to load waiting over screen");
+			BistroClientGUI.switchScreen(event, "clientCheckInTableSuccesScreen", "Client Check-In Table Success error messege");
 			return;
 		}
 		else {

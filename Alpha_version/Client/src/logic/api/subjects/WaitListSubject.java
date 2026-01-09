@@ -126,5 +126,20 @@ public class WaitListSubject {
 		                alert.show();
 		            });
 		        });
+		        router.on("waitinglist", "checkAvailability.ok", msg -> {
+		            BistroClient.awaitResponse = false;
+		            long estimatedWaitTime = (long) msg.getData();
+		            wlController.setEstimatedWaitTimeMinutes(estimatedWaitTime);
+		            });
+		        router.on("waitinglist", "checkAvailability.fail", msg -> {
+		        			            BistroClient.awaitResponse = false;
+		            Platform.runLater(() -> {
+		                Alert alert = new Alert(Alert.AlertType.ERROR);
+		                alert.setTitle("Error");
+		                alert.setContentText("Failed to check availability.");
+		                alert.show();
+		            });
+		            
+		        });
 	}
 }
