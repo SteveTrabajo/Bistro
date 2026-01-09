@@ -14,6 +14,7 @@ import logic.ServerLogger;
 import logic.api.Router;
 import logic.services.PaymentService;
 import logic.services.TableService;
+import logic.services.WaitingListService;
 
 public class PaymentSubject {
 
@@ -55,6 +56,7 @@ public class PaymentSubject {
 
 						client.sendToClient(new Message(Api.REPLY_PAYMENT_COMPLETE_OK, "Success"));
 						userFailureMap.remove(requester.getUserId());
+						WaitingListService.notifyPaymentCompletion(requester, tableService, logger);
 					} catch (Exception dbEx) {
 						logger.log("[CRITICAL] Payment captured but DB update failed. Key: " + idempotencyKey);
 						client.sendToClient(new Message(Api.REPLY_PAYMENT_PENDING_VERIFICATION, "Verifying..."));
