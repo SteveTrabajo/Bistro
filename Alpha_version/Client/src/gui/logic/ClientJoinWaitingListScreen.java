@@ -1,10 +1,19 @@
 package gui.logic;
 
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Optional;
+
 import entities.User;
 import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.paint.Color;
 import logic.BistroClientGUI;
 
@@ -89,19 +98,64 @@ public class ClientJoinWaitingListScreen {
 	@FXML
 	public void btnCheckAvail(Event event) {
 		int dinersAmount = Integer.parseInt(lblDinersAmount.getText());
-		BistroClientGUI.client.getWaitingListCTRL().joinWaitingList(dinersAmount);
-		if( BistroClientGUI.client.getWaitingListCTRL().getskipWaitingListJoin()) {
-			BistroClientGUI.switchScreen(event, "clientCheckInTableSuccesScreen", "client Join Waiting List messege");
-			BistroClientGUI.client.getWaitingListCTRL().setskipWaitingListJoin(false);
+		BistroClientGUI.client.getWaitingListCTRL().checkWaitingListAvailability(dinersAmount);
+		if(BistroClientGUI.client.getWaitingListCTRL().getcanSeatImmediately()) {
+			BistroClientGUI.client.getWaitingListCTRL().setCanSeatImmediately(false);
+			BistroClientGUI.switchScreen(event, "clientWaitingOverScreen", "failed to load waiting over screen");
 			return;
 		}
-		if (BistroClientGUI.client.getWaitingListCTRL().isUserOnWaitingList()) {
-			BistroClientGUI.switchScreen(event, "clientDashboardScreen", "client Join Waiting List messege");
-		} else {
-			BistroClientGUI.display(lblError, "Error has been accoured!", Color.RED);
+		else {
+			openAskToJoinWaitingListScreen(event, dinersAmount);
+			
 		}
 	}
 	
+	private void openAskToJoinWaitingListScreen(LocalTime earliestTime, int dinersAmount) {
+	    
+	    long minutesToWait = 0;
+	    if (earliestTime != null) {
+	        minutesToWait = ChronoUnit.MINUTES.between(LocalTime.now(), earliestTime);
+	        if (minutesToWait < 0) minutesToWait = 0;
+	    } else {
+	        showAlert("Error", "No suitable tables found for this group size.");
+	        return;
+	    }
+
+	    Alert alert = new Alert(AlertType.CONFIRMATION);
+	    alert.setTitle("No Tables Available");
+	    alert.setHeaderText("The restaurant is currently full.");
+	    alert.setContentText("Next table for " + dinersAmount + " diners will be free in approx.\n" 
+	                         + minutesToWait + " minutes (" + earliestTime.toString() + ").\n\n"
+	                         + "Would you like to join the Waiting List?");
+
+	    ButtonType btnJoin = new ButtonType("Join Waitlist", ButtonData.OK_DONE);
+	    ButtonType btnCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+	    
+	    alert.getButtonTypes().setAll(btnJoin, btnCancel);
+
+	    Optional<ButtonType> result = alert.showAndWait();
+	    
+	    if (result.isPresent() && result.get() == btnJoin) {
+	        openContactDetailsDialog(dinersAmount); 
+	    } else {
+	        System.out.println("User declined waiting list.");
+	    }
+	}
+	private void openContactDetailsDialog(int dinersAmount) {
+	    TextInputDialog dialog = new TextInputDialog();
+	    dialog.setTitle("Contact Details");
+	    dialog.setHeaderText("Enter Phone Number or Email");
+	    dialog.setContentText("To notify you when the table is ready:");
+
+	    Optional<String> result = dialog.showAndWait();
+	    
+	    result.ifPresent(contactInfo -> {
+	        if (!contactInfo.trim().isEmpty()) {
+	            BistroClientGUI.client.getWaitingListCTRL().askJoinWaitingList(dinersAmount, true, contactInfo);
+	        }
+	    });
+	}
+
 	/**
 	 * Handles the action when the "Back" button is clicked.
 	 * It navigates back to the client dashboard screen.

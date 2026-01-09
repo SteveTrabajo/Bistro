@@ -31,7 +31,7 @@ public class WaitingListSubject {
 		// Handlers related to waiting list can be added here
 		
 		router.on("WaitingList","isInWaitingList", (msg, client) -> {
-			String userID = (String) msg.getData();
+			int userID = (int) msg.getData();
 			boolean isInWaitingList = waitingListService.isUserInWaitingList(userID);
 			if (isInWaitingList) {
 				logger.log("[INFO] Client: "+ client + " checked and found to be in the waiting list.");

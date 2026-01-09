@@ -700,18 +700,7 @@ public class BistroDataBase_Controller {
 	
 	// ********************Waiting List Operations ******************************
 	
-	public boolean isUserInWaitingList(String userId) {
-		if (userId == null || userId.isEmpty()) {
-			return false;
-		}
-		
-		int userIdInt;
-		try {
-			userIdInt = Integer.parseInt(userId);
-		} catch (NumberFormatException e) {
-			logger.log("[ERROR] Invalid userId format: " + userId);
-			return false;
-		}
+	public boolean isUserInWaitingList(int userId) {
 		
 		final String qry = "SELECT 1 " + "FROM orders " + "WHERE user_id = ? " + "AND order_type = 'WAITLIST' "
 				+ "AND status = 'PENDING'";
@@ -723,7 +712,7 @@ public class BistroDataBase_Controller {
 			
 			try (PreparedStatement ps = conn.prepareStatement(qry)) {
 				
-				ps.setInt(1, userIdInt); 
+				ps.setInt(1, userId); 
 				
 				try (ResultSet rs = ps.executeQuery()) {
 					return rs.next();
