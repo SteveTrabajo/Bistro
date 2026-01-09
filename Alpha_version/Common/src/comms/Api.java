@@ -118,12 +118,17 @@ public final class Api {
     public static final String ASK_TABLE_STATUS = "tables.getStatus";
 	public static final String ASK_LOAD_CUSTOMERS_DATA = "customers.getalldata";
 	public static final String ASK_MONTHLY_REPORT_DATA = "monthlyReports.getData";
+	public static final String ASK_USER_ALLOCATED_TABLE = "tables.getUserAllocatedTable";
     
 	// Responses
 	public static final String REPLY_TABLE_STATUS_OK = "tables.getStatus.ok";
 	public static final String REPLY_TABLE_STATUS_FAIL = "tables.getStatus.fail";
 	public static final String REPLY_LOAD_CUSTOMERS_DATA_OK = "customers.getalldata.ok";
 	public static final String REPLY_LOAD_CUSTOMERS_DATA_FAIL = "customers.getalldata.fail";
+	public static final String REPLY_USER_ALLOCATED_TABLE_OK = "tables.getUserAllocatedTable.ok";
+	public static final String REPLY_USER_ALLOCATED_TABLE_FAIL = "tables.getUserAllocatedTable.fail";
+	public static final String REPLY_MONTHLY_REPORT_DATA_OK = "monthlyReports.getData.ok";
+	public static final String REPLY_MONTHLY_REPORT_DATA_FAIL = "monthlyReports.getData.fail";
 	
 // == WaitList subject == //
 	

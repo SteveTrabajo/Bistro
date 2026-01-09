@@ -48,4 +48,7 @@ public class Table {
 	public void setOccupiedNow(boolean occupiedNow) {
 		this.occupiedNow = occupiedNow;
 	}
+	public void setTableNumber(int tableNumber) {
+		this.tableID = tableNumber;
+	}
 }

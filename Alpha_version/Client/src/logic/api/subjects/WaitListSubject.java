@@ -1,7 +1,10 @@
 package logic.api.subjects;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+
 import entities.Order;
+import entities.Table;
 import enums.OrderStatus;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -43,8 +46,11 @@ public class WaitListSubject {
 
 				router.on("waitinglist", "join.skipped", msg -> {
 		            BistroClient.awaitResponse = false;
-					Order order = (Order) msg.getData();
+		            HashMap<String, Object> data = (HashMap<String, Object>) msg.getData();
+		            Order order = (Order) data.get("order");
+		            int table = (int) data.get("table");
 					BistroClientGUI.client.getReservationCTRL().setReadyUserReservation(order);
+					BistroClientGUI.client.getTableCTRL().setUserAllocatedTable(table);
 					wlController.setCanSeatImmediately(true);
 				});
 

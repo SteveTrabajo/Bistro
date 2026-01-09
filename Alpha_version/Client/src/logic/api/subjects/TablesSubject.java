@@ -27,6 +27,20 @@ public class TablesSubject {
 			alert.showAndWait();
 			
 		});
+		router.on("tables", "getUserAllocatedTable.ok", msg -> {
+						BistroClient.awaitResponse = false;
+			Integer tableNumber = (Integer) msg.getData();
+			BistroClientGUI.client.getTableCTRL().setUserAllocatedTable(tableNumber);
+		});
+		router.on("table", "getUserAllocatedTable.fail", msg -> {
+			BistroClient.awaitResponse = false;
+			Alert alert = new Alert(Alert.AlertType.ERROR);
+			alert.setTitle("Error");
+			alert.setHeaderText("Could not retrieve allocated table");
+			alert.setContentText("An error occurred while fetching your allocated table. Please try again later.");
+			alert.showAndWait();
+			
+		});
 	}
 
 }

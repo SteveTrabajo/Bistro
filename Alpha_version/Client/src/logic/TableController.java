@@ -83,4 +83,9 @@ public class TableController {
 			checkInListener.accept(success, message);
 		}
 	}
+
+	public void fetchUserAllocatedTable() {
+		client.handleMessageFromClientUI(new Message(Api.ASK_USER_ALLOCATED_TABLE, null));
+		
+	}
 }

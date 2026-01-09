@@ -26,6 +26,7 @@ public class ClientCheckInTableSuccesScreen {
 	//****************** FXML Methods ******************//
 	@FXML
 	public void initialize() {
+		BistroClientGUI.client.getTableCTRL().fetchUserAllocatedTable();
 		int currentTable = BistroClientGUI.client.getTableCTRL().getUserAllocatedTable();
 		String confirmationCode = BistroClientGUI.client.getReservationCTRL().getConfirmationCode();
 		lblTableNum.setText(String.valueOf(currentTable));
