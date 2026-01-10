@@ -46,7 +46,7 @@ public final class OrdersSubject {
 			List<Object> orderData = (ArrayList<Object>)msg.getData();
 			// ignore any userId sent from client and use the session userId for security reasons
 			if (orderData.size() > 0) {
-				orderData.set(0, sessionUser.getUserId()); 
+				orderData.add(0, sessionUser.getUserId());
 			}
 			boolean orderCreated= ordersService.createNewOrder(orderData, OrderType.RESERVATION);
 			if (orderCreated) {
