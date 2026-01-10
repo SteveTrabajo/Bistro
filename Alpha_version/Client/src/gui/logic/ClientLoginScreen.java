@@ -130,30 +130,44 @@ public class ClientLoginScreen {
 	 * If valid, attempts to log in the member user and switch to the client
 	 * dashboard screen. Displays error messages for invalid inputs or login
 	 * failures.
-	 * 
-	 * @param event The event triggered by clicking the member sign-in button.
+	 * * @param event The event triggered by clicking the member sign-in button.
 	 */
 	@FXML
 	public void btnSignIn(Event event) {
 		String memberCodeText = txtMemberID.getText();
 		UserType userType = UserType.MEMBER;
 		String err = InputCheck.validateMemberCode6DigitsNoLeadingZero(memberCodeText);
+		
 		if (!err.isEmpty()) {
 			lblError.setText(err);
 			return;
 		}
+
 		userLoginData = new HashMap<>();
 		userLoginData.put("userType", userType);
 		userLoginData.put("memberCode", Integer.parseInt(memberCodeText));
+
+		// Send sign-in request to the server
 		BistroClientGUI.client.getUserCTRL().signInUser(userLoginData);
 
-		if (BistroClientGUI.client.getUserCTRL().isUserLoggedInAs(userType)) {
-			BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
-		} else {
-			lblError.setText("Member code does not exist.");
-		}
+		// Using Platform.runLater to ensure UI updates happen on the JavaFX Application Thread
+		// and giving the client-server communication a moment to update the local state.
+		javafx.application.Platform.runLater(() -> {
+			try {
+				// Small delay to wait for server response sync
+				Thread.sleep(150); 
+				
+				if (BistroClientGUI.client.getUserCTRL().isUserLoggedInAs(userType)) {
+					BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
+				} else {
+					lblError.setText("Login failed: Member code does not exist.");
+				}
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				lblError.setText("Login interrupted.");
+			}
+		});
 	}
-
 	/**
 	 * Handles the QR code scanning button click event. (Functionality to be
 	 * implemented)
