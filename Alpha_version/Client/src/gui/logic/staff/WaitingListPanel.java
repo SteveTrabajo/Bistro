@@ -137,40 +137,12 @@ public class WaitingListPanel {
 		// if (BistroClientGUI.client != null) {
 		// BistroClientGUI.client.getWaitingListCTRL().askWaitingList();
 		// }
-
-		// dummy data for testing
-		loadDummyData();
-
 		// In reality: get from WaitingListController
 		updateQueueTitle();
 		updateStats();
 	}
 
-	// Helper method to generate 5 fake entries
-	private void loadDummyData() {
-		LocalDate today = LocalDate.now();
-		LocalTime now = LocalTime.now();
 
-		// 1. A Member waiting for a while (45 mins ago)
-		waitingList.add(new Order(101, today, now.minusMinutes(45), 2, "WL-202", 5002, OrderType.WAITLIST,
-				OrderStatus.WAITING_LIST, today));
-
-		// 2. A Guest notified to enter (30 mins ago)
-		waitingList.add(new Order(102, today, now.minusMinutes(30), 4, "WL-305", 5003, OrderType.WAITLIST,
-				OrderStatus.NOTIFIED, today));
-
-		// 3. Large party waiting (15 mins ago)
-		waitingList.add(new Order(103, today, now.minusMinutes(15), 6, "WL-410", 5004, OrderType.WAITLIST,
-				OrderStatus.WAITING_LIST, today));
-
-		// 4. Couple just arrived (5 mins ago)
-		waitingList.add(new Order(104, today, now.minusMinutes(5), 2, "WL-550", 5005, OrderType.WAITLIST,
-				OrderStatus.WAITING_LIST, today));
-
-		// 5. Another notified guest (2 mins ago)
-		waitingList.add(new Order(105, today, now.minusMinutes(2), 3, "WL-600", 5001, OrderType.WAITLIST,
-				OrderStatus.NOTIFIED, today));
-	}
 
 	private void updateQueueTitle() {
 		lblQueueTitleLabel.setText("Current Queue (" + waitingList.size() + ")");

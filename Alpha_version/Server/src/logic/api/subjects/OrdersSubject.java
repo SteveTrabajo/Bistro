@@ -15,8 +15,6 @@ import logic.ServerLogger;
 import logic.api.Router;
 import logic.services.OrdersService;
 
-
-
 /**
  * API handlers related to orders.
  */
@@ -44,7 +42,6 @@ public final class OrdersSubject {
 				client.sendToClient(new Message(Api.REPLY_CREATE_RESERVATION_FAIL, "Unauthorized"));
 				return;
 			}
-			
 			@SuppressWarnings("unchecked")
 			List<Object> orderData = (ArrayList<Object>)msg.getData();
 			// ignore any userId sent from client and use the session userId for security reasons

@@ -2,6 +2,7 @@ package entities;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import enums.OrderStatus;
@@ -22,7 +23,7 @@ public class Order implements Serializable {
 	// This field existed in your old schema as member_id.
 	// Now its a user_id for both guests and members.
 
-	private LocalDate dateOfPlacingOrder;
+	private LocalDateTime dateOfPlacingOrder;
 
 	private OrderType orderType; // RESERVATION / WAITLIST
 	private OrderStatus status; // PENDING / ...
@@ -31,7 +32,7 @@ public class Order implements Serializable {
 	public Order() {} // default constructor
 	
 	public Order(int orderNumber, LocalDate orderDate, LocalTime orderHour, int dinersAmount, String confirmationCode,
-			int userId, OrderType orderType, OrderStatus status, LocalDate dateOfPlacingOrder) {
+			int userId, OrderType orderType, OrderStatus status, LocalDateTime dateOfPlacingOrder) {
 
 		this.orderNumber = orderNumber;
 		this.orderDate = orderDate;
@@ -111,11 +112,11 @@ public class Order implements Serializable {
 		this.userId = userId;
 	}
 
-	public LocalDate getDateOfPlacingOrder() {
+	public LocalDateTime getDateOfPlacingOrder() {
 		return dateOfPlacingOrder;
 	}
 
-	public void setDateOfPlacingOrder(LocalDate dateOfPlacingOrder) {
+	public void setDateOfPlacingOrder(LocalDateTime dateOfPlacingOrder) {
 		this.dateOfPlacingOrder = dateOfPlacingOrder;
 	}
 

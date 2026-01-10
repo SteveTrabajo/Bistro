@@ -35,47 +35,33 @@ public class WaitingListService {
 	}
 
 	/**
-     * Creates a new order.
-     * Logic: 
-     * - If addToWaitlist is TRUE: Status is WAITING_LIST -> SQL Trigger adds to 'waiting_list' -> We UPDATE the time.
-     * - If addToWaitlist is FALSE: Status is SEATED -> SQL Trigger ignores it -> We manually seat the customer.
-     * @return The generated confirmation code if successful, null otherwise.
-     */
+	 * Creates a WaitList Order in the database.
+	 * @param dinersAmount Number of diners in the group.
+	 * @param userID ID of the user making the request.
+	 * @param addToWaitlist True if adding to waitlist, false for immediate seating.
+	 * @param calculatedWaitTime Estimated wait time in minutes (if adding to waitlist).
+	 * @return Confirmation code of the created order, or null if creation failed.
+	 */
     public String createWaitListOrder(int dinersAmount, int userID, boolean addToWaitlist, int calculatedWaitTime) {
-        List<Object> data = new ArrayList<>();
-        
+        // Prepare data for new order
+    	List<Object> data = new ArrayList<>();
         data.add(userID);
         data.add(LocalDate.now());
         data.add(dinersAmount);
         data.add(LocalTime.now());
-        
         String confirmationCode = ordersService.generateConfirmationCode("W");
         data.add(confirmationCode);
-        
-        // Determine Status: WAITING_LIST or SEATED (for Immediate)
-        OrderStatus initialStatus = addToWaitlist ? OrderStatus.WAITING_LIST : OrderStatus.SEATED;
-        
-        // 1. Insert into Orders Table (Trigger fires automatically if PENDING)
-        boolean success = dbController.setNewOrder(data, OrderType.WAITLIST, initialStatus);
-        
-        if (success) {
-            if (addToWaitlist) {
-                // SCENARIO: WAITING LIST
-                // The trigger inserted NULL for time, so we must update it manually
-                dbController.updateWaitTimeForOrder(confirmationCode, calculatedWaitTime);
-            } else {
-                // SCENARIO: IMMEDIATE SEATING
-                // Allocate a physical table and seat the customer
-                int tableNum = tableService.allocateTable(confirmationCode);
-                if (tableNum >= 0) {
-                     Order newOrder = dbController.getOrderByConfirmationCodeInDB(confirmationCode);
-                     dbController.seatCustomerInDB(newOrder.getOrderNumber(), tableNum);
-                }
-            }
-            return confirmationCode;
-        }
-        
-        return null; // Failed to create
+        //create the order in the DB
+        boolean success = dbController.setNewOrder(data, OrderType.WAITLIST, OrderStatus.PENDING);
+        // If adding to waitlist, we need to set the wait time
+		if (success) {
+			if (addToWaitlist) {
+				// The trigger inserted NULL for time, so we must update it manually
+				dbController.addWaitTimeToWaitListOrder(confirmationCode, calculatedWaitTime);
+			}
+			return confirmationCode; // Successfully created
+		}
+		return null; // Failed to create
     }
 
     /**
@@ -83,20 +69,20 @@ public class WaitingListService {
      * @return Order object (if seated) OR WaitListResponse object (if full).
      */
     public Object checkAvailabilityAndSeat(int dinersAmount, int userID) {
-        
+        //Data Preparation
         LocalTime now = LocalTime.now();
         int duration = ordersService.getReservationDurationMinutes();
         LocalTime walkInEndTime = now.plusMinutes(duration);
-      
-        // 1. Retrieve conflicts
-        List<Order> ordersConflicts = dbController.getOrdersThatCouldConflictFromNow(LocalDate.now(), now, walkInEndTime);
+        //Retrieve active and upcoming orders that may conflict
+        List<Order> ordersConflicts = dbController.getActiveAndUpcomingOrders(LocalDate.now(), now, walkInEndTime);
         List<Integer> currentLoad = new ArrayList<>();
         
-        // 2. Calculate Load
+        //loop through orders to calculate current load that could conflict:
         for (Order o : ordersConflicts) {
-            if (o.getStatus() == OrderStatus.SEATED) {
+            if (o.getStatus() == OrderStatus.SEATED) { //in case of seated orders, they always count
                 currentLoad.add(o.getDinersAmount());
             }
+            // For reservations that pending, check for time overlap
             else if (o.getOrderType() == OrderType.RESERVATION && o.getStatus() == OrderStatus.PENDING) {
                 LocalTime resStartTime = o.getOrderHour();
                 LocalTime resEndTime = resStartTime.plusMinutes(duration);
@@ -105,12 +91,11 @@ public class WaitingListService {
                 }
             }
         }
-        currentLoad.add(dinersAmount);
-        
-        // 3. Logic Check
+        currentLoad.add(dinersAmount); // Include the new walk-in group
+        // Check if seating is possible with current load and table sizes
         boolean canSeat = ordersService.canAssignAllDinersToTables(currentLoad, ordersService.getTableSizes());
         
-        // --- SCENARIO A: IMMEDIATE SEATING (Success) ---
+        //In case seating is possible, create order and allocate table
         if (canSeat) {
         	String code = createWaitListOrder(dinersAmount, userID, false, 0);
             int tableNum = tableService.allocateTable(code);
@@ -120,8 +105,7 @@ public class WaitingListService {
             data.put("table", tableNum);
             return data;
         }
-        
-        // --- SCENARIO B: NO TABLE (Failure/Wait) ---
+        //In case seating is NOT possible, calculate estimated wait time and return WaitListResponse to get client approval
         long waitTime = calculateEstimatedWaitTime(dinersAmount);
         String msg = "No table available. Estimated wait: " + waitTime + " min.";
         return new WaitListResponse(false, waitTime, msg);
@@ -135,15 +119,12 @@ public class WaitingListService {
     private long calculateEstimatedWaitTime(int dinersAmount) {
         // Query DB for the earliest 'expected_end_at' of a suitable table
         LocalTime earliestFreeTime = dbController.getEarliestExpectedEndTime(dinersAmount);
-        
         if (earliestFreeTime == null) {
             return 60; // Fallback: Default wait if data is missing
         }
-
         LocalTime now = LocalTime.now();
         long minutes = Duration.between(now, earliestFreeTime).toMinutes();
-        
-        // UX Polish: If table is technically free (minutes <= 0) but algorithm said no,
+        // If table is technically free (minutes <= 0) but algorithm said no,
         // it means staff is clearing it. Give a 5-minute buffer.
         if (minutes > 0) {
             return minutes;
@@ -152,29 +133,27 @@ public class WaitingListService {
         }
     }
     
-    public int assignTableForWaitingListOrder(Order createdOrder) {
-        // Just updates status. The Trigger handles removal from waitlist if needed (though NOTIFIED usually stays in list).
-        boolean success = dbController.updateOrderStatusInDB(createdOrder.getConfirmationCode(), OrderStatus.NOTIFIED);
-        if (success) {
-            server.getNotificationService().notifyWaitlistUser(createdOrder);
-            return 1;
-        }
-        return 0;
-    }
-
+    
+    /**
+	 * Removes a user from the waiting list by updating their order status to CANCELLED.
+	 * @param confirmationCode The confirmation code of the waitlist order.
+	 * @return True if the operation was successful, false otherwise.
+	 */
     public boolean removeFromWaitingList(String confirmationCode) {
         // Setting to CANCELLED triggers the SQL cleanup automatically
-        return dbController.updateOrderStatusInDB(confirmationCode, OrderStatus.CANCELLED);
+        return dbController.removeFromWaitingList(confirmationCode);
     }
 
     public boolean isUserInWaitingList(String confirmationCode) { 
         return dbController.isUserInWaitingList(confirmationCode);
     }
     
-    /**
-     * Logic for Members: Standard search by memberId.
-     */
-
+   /**
+	* Logic for Members using the existing getUserInfo logic in UserService
+	* @param dinersAmount Number of diners in the group.
+	* @param memberIdStr Member ID string.
+	* @return Result object containing seating or waitlist information.
+	*/
    public Object handleMemberWalkIn(int dinersAmount, String memberIdStr) {
        Map<String, Object> loginData = new HashMap<>();
        loginData.put("userType", "MEMBER");
@@ -187,7 +166,11 @@ public class WaitingListService {
    }
 
    /**
-    * Logic for Guests using the existing findOrCreate logic in UserService
+    * Logic for Guests using the existing getUserInfo logic in UserService
+    * @param dinersAmount
+    * @param phone
+    * @param email
+    * @return
     */
    public Object handleGuestWalkIn(int dinersAmount, String phone, String email) {
        Map<String, Object> loginData = new HashMap<>();
@@ -241,6 +224,7 @@ public class WaitingListService {
        }
        return null; // Registration failed
    }
+   
     public List<Order> getCurrentQueue() {
         // We return a list of Order entities that are currently in the waitlist
         return dbController.getWaitingQueueFromView();

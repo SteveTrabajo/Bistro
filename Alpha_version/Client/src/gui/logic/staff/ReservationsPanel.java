@@ -179,7 +179,6 @@ public class ReservationsPanel {
         
         if (BistroClientGUI.client == null) {
             System.out.println("DEBUG: Preview Mode");
-            loadDummyData(); 
             return; 
         }
 
@@ -196,12 +195,6 @@ public class ReservationsPanel {
         });
     }
 
-    private void loadDummyData() {
-        masterData.clear();
-        Order o1 = new Order(101, LocalDate.now(), LocalTime.of(18, 30), 4, "RES-998", 6001, null, OrderStatus.PENDING, LocalDate.now());
-        Order o2 = new Order(102, LocalDate.now(), LocalTime.of(19, 00), 2, "RES-112", 205, null, OrderStatus.SEATED, LocalDate.now());
-        masterData.addAll(o1, o2);
-    }
     
     @FXML
     void btnMarkSeated(ActionEvent event) {

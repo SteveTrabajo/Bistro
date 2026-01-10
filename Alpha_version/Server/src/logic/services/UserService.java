@@ -10,16 +10,72 @@ import logic.PasswordUtil;
 import logic.ServerLogger;
 import common.InputCheck;
 import dto.UserData;
-
+/**
+ * Service class for handling user-related operations such as login and account creation.
+ */
 public class UserService {
+	//*************************Instance Variables*************************
 	private final BistroDataBase_Controller dbController;
 	private final ServerLogger logger;
-	
+	//************************* Constructor *************************
 	public UserService(BistroDataBase_Controller dbController, ServerLogger logger) {
 		this.dbController = dbController;
 		this.logger = logger;
 	}
-
+	//************************* Instance Methods *************************
+	
+	//TODO : Add method to register memeber account by staff
+	
+	/**
+	 * Creates a new staff account with password hashing and validation.
+	 * 
+	 * @param staffData Map containing: username, password, email, phoneNumber, userType
+	 * @return The created User object, or null if creation failed
+	 */
+	public User createStaffAccount(Map<String, Object> staffData) {
+		// Validate input data
+		String username = (String) staffData.get("username");
+		String password = (String) staffData.get("password");
+		String email = (String) staffData.get("email");
+		String phoneNumber = (String) staffData.get("phoneNumber");
+		String userTypeStr = String.valueOf(staffData.get("userType"));
+		// Validate all fields
+		String validationError = InputCheck.validateAllStaffData(username, password, email, phoneNumber);
+		if (validationError != null) {
+			logger.log("[STAFF_CREATE] Validation failed: " + validationError);
+			return null;
+		}
+		// Validate user type
+		UserType userType;
+		try {
+			userType = UserType.valueOf(userTypeStr);
+			if (userType != UserType.EMPLOYEE && userType != UserType.MANAGER) {
+				logger.log("[STAFF_CREATE] Invalid user type: " + userTypeStr);
+				return null;
+			}
+		} catch (IllegalArgumentException e) {
+			logger.log("[STAFF_CREATE] Invalid user type: " + userTypeStr);
+			return null;
+		}
+		// Check if username already exists
+		if (dbController.employeeUsernameExists(username)) {
+			logger.log("[STAFF_CREATE] Username already exists: " + username);
+			return null;
+		}
+		// Create the employee account
+		User newUser = dbController.createEmployeeUser(username, password, email, phoneNumber, userType);
+		if (newUser != null) {
+			logger.log("[STAFF_CREATE] Successfully created new staff account: " + username);
+		}
+		return newUser;
+	}
+	
+	/**
+	 * Retrieves user information based on login data.
+	 * 
+	 * @param loginData Map containing login credentials and user type
+	 * @return The User object if found, otherwise null
+	 */
 	public User getUserInfo(Map<String, Object> loginData) {
 		logger.log("[LOGIN] Received login data=" + loginData);
 		User userfound = null;
@@ -61,66 +117,35 @@ public class UserService {
 		return userfound;
 	}
 
-	
 	/**
-	 * Creates a new staff account with password hashing and validation.
+	 * Updates member information in the database.
 	 * 
-	 * @param staffData Map containing: username, password, email, phoneNumber, userType
-	 * @return The created User object, or null if creation failed
+	 * @param updatedUser UserData object containing updated member information
+	 * @return true if the update was successful, false otherwise
 	 */
-	public User createStaffAccount(Map<String, Object> staffData) {
-		// Validate input data
-		String username = (String) staffData.get("username");
-		String password = (String) staffData.get("password");
-		String email = (String) staffData.get("email");
-		String phoneNumber = (String) staffData.get("phoneNumber");
-		String userTypeStr = String.valueOf(staffData.get("userType"));
-
-		
-		// Validate all fields
-		String validationError = InputCheck.validateAllStaffData(username, password, email, phoneNumber);
-		if (validationError != null) {
-			logger.log("[STAFF_CREATE] Validation failed: " + validationError);
-			return null;
-		}
-		
-		// Validate user type
-		UserType userType;
-		try {
-			userType = UserType.valueOf(userTypeStr);
-			if (userType != UserType.EMPLOYEE && userType != UserType.MANAGER) {
-				logger.log("[STAFF_CREATE] Invalid user type: " + userTypeStr);
-				return null;
-			}
-		} catch (IllegalArgumentException e) {
-			logger.log("[STAFF_CREATE] Invalid user type: " + userTypeStr);
-			return null;
-		}
-		
-		// Check if username already exists
-		if (dbController.employeeUsernameExists(username)) {
-			logger.log("[STAFF_CREATE] Username already exists: " + username);
-			return null;
-		}
-		
-		// Create the employee account
-		User newUser = dbController.createEmployeeUser(username, password, email, phoneNumber, userType);
-		if (newUser != null) {
-			logger.log("[STAFF_CREATE] Successfully created new staff account: " + username);
-		}
-		return newUser;
-	}
-
 	public boolean updateMemberInfo(UserData updatedUser) {
 		return dbController.setUpdatedMemberData(updatedUser);	
 	}
 	
+	/**
+	 * Checks if a staff username already exists in the database.
+	 * 
+	 * @param username The staff username to check
+	 * @return true if the username exists, false otherwise
+	 */
 	public boolean staffUsernameExists(String username) {
 	    return dbController.employeeUsernameExists(username);
 	}
 	
+	/**
+	 * Finds a staff user by username and password.
+	 * 
+	 * @param username The staff username
+	 * @param password The staff password
+	 * @return The User object if found, otherwise null
+	 */
 	public User findStaffUser(String username, String password) {
 	    return dbController.findEmployeeUser(username, password);
 	}
 }
-
+// End of UserService.java

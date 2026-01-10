@@ -18,13 +18,11 @@ import logic.services.WaitingListService;
  * operations.
  */
 public class WaitingListSubject {
-	// ********************************
-	// Constructors***********************************
+	// ******************************** Constructors ***********************************
 	private WaitingListSubject() {
 	}
 
-	// ******************************** Static
-	// Methods***********************************
+	// ******************************** Static Methods***********************************
 	/**
 	 * Registers handlers related to waiting list operations.
 	 * 

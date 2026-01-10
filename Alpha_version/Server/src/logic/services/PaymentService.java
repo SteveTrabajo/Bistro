@@ -1,153 +1,118 @@
 package logic.services;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
-import entities.Order;
-import entities.User;
 import entities.Bill;
 import entities.Item;
-import enums.OrderStatus;
+import entities.User;
 import enums.UserType;
 import logic.BistroDataBase_Controller;
 import logic.ServerLogger;
+import logic.services.payment_simulator.MockPaymentGateway;
+import logic.services.payment_simulator.PaymentGateway;
 
 public class PaymentService {
 
-	private final BistroDataBase_Controller dbController;
-	private final ServerLogger logger;
+    private final BistroDataBase_Controller dbController;
+    private final ServerLogger logger;
+    private final PaymentGateway paymentGateway;
 
-	public PaymentService(BistroDataBase_Controller dbController, ServerLogger logger) {
-		this.dbController = dbController;
-		this.logger = logger;
-	}
+    public PaymentService(BistroDataBase_Controller dbController, ServerLogger logger) {
+        this.dbController = dbController;
+        this.logger = logger;
+        // Initialize with the Mock gateway for now. 
+        // In the future, this can be swapped for a RealPaymentGateway.
+        this.paymentGateway = new MockPaymentGateway();
+    }
 
-	/**
-	 * Step 1: Initialize the record in the Database.
-	 */
-	public void preparePendingOrder(User requester, int totalAmount, String idempotencyKey) {
-		logger.log("[DB] Preparing record for Key: " + idempotencyKey);
-		dbController.createNewPayment(requester.getUserId(), totalAmount, OrderStatus.PENDING, idempotencyKey);
-	}
+    /**
+     * Calculates the total bill amount including tax and discounts.
+     * @param items The list of items ordered.
+     * @param requester The user requesting the bill (for member discounts).
+     * @return The final total amount as a double.
+     */
+    public double calculateTotal(List<Item> items, User requester) {
+        double total = 0.0;
+        for (Item item : items) {
+            total += item.getPrice();
+        }
 
-	/**
-	 * Step 2: Real transaction attempt via External Provider.
-	 */
-	public boolean processPayment(int amount, String idempotencyKey) {
-		try {
-			logger.log("[PAYMENT] Requesting authorization from provider for: " + idempotencyKey);
+        // Apply 10% discount for MEMBERS
+        if (requester.getUserType() == UserType.MEMBER) {
+            total = total * 0.90; 
+        }
 
-			// return PaymentGateway.authorize(idempotencyKey, amount);
-			boolean isAuthorized = callExternalPaymentApi(idempotencyKey, amount);
-			return isAuthorized;
-		} catch (Exception e) {
-			logger.log("[CRITICAL] External Payment Gateway connection error: " + e.getMessage());
-			return false;
-		}
-	}
+        // Add 18% Tax/VAT
+        return total * 1.18;
+    }
 
-	/**
-	 * Recovery Logic: Synchronizes local DB with the External Provider's truth.
-	 */
-	public void reconcilePendingPayments() {
-		List<Order> stuckOrders = dbController.getOrdersByStatus(OrderStatus.PENDING);
+    /**
+     * Processes a credit card payment for a specific bill.
+     * @param billId The ID of the bill to pay.
+     * @param amount The amount to charge.
+     * @param creditCardToken The dummy token (or real token in the future).
+     * @return true if payment succeeded, false otherwise.
+     */
+    public boolean processCreditCardPayment(int billId, double amount, String creditCardToken) {
+        // 1. Validate the Bill exists and is UNPAID
+        Bill bill = dbController.getBillById(billId);
+        if (bill == null) {
+            logger.log("[ERROR] Bill not found: " + billId);
+            return false;
+        }
+        
+        // Assuming your Bill entity has a method getPaymentStatus() returning a String or Enum
+        if ("PAID".equals(bill.getPaymentStatus().toString())) {
+            logger.log("[INFO] Bill " + billId + " is already paid.");
+            return false;
+        }
 
-		if (stuckOrders == null || stuckOrders.isEmpty())
-			return;
+        // 2. Call the External Payment Gateway (Future-Proofing step)
+        String transactionId = paymentGateway.processPayment(amount, creditCardToken);
 
-		for (Order order : stuckOrders) {
-			String key = order.getIdempotencyKey();
-			if (key == null)
-				continue;
+        if (transactionId != null) {
+            // 3. Success: Update Database with the Transaction ID
+            dbController.markBillAsPaid(billId, "CREDIT", transactionId);
+            logger.log("[SUCCESS] Bill " + billId + " paid. Transaction Ref: " + transactionId);
+            return true;
+        } else {
+            logger.log("[FAILURE] Payment failed for Bill " + billId);
+            return false;
+        }
+    }
 
-			try {
-				// Query the external provider for the status of this specific key
-				if (checkIfTransactionExistsWithProvider(key)) {
-					int billAmount = dbController.getAmountByBillId(key);
+    /**
+     * Processes a manual payment (Cash).
+     */
+    public boolean processCashPayment(int billId, double amount) {
+        Bill bill = dbController.getBillById(billId);
+        if (bill == null) return false;
 
-					// Proceed with DB updates since payment is confirmed externally
-					dbController.saveTransactionRecord(order.getConfirmationCode(), billAmount);
-					dbController.updateOrderStatusInDB(order.getConfirmationCode(), OrderStatus.COMPLETED);
+        // Mark as paid with 'CASH' and no external transaction ID
+        dbController.markBillAsPaid(billId, "CASH", null);
+        logger.log("[SUCCESS] Bill " + billId + " paid via CASH.");
+        return true;
+    }
+    
+    /**
+     * Finds the bill ID linked to a specific Order Number.
+     */
+    public Integer getBillIdByOrderNumber(int orderNumber) {
+        return dbController.getBillIdByOrderNumber(orderNumber);
+    }
 
-					logger.log("[RECOVERY] Order " + order.getOrderNumber() + " verified and COMPLETED.");
-				} else {
-					// No record found at provider; transaction never occurred or failed
-					dbController.updateOrderStatusInDB(order.getConfirmationCode(), OrderStatus.PENDING);
-					logger.log("[RECOVERY] No external record for " + key + ". Order set to FAILED.");
-				}
-			} catch (Exception e) {
-				logger.log("[ERROR] Could not reconcile key " + key + ": " + e.getMessage());
-			}
-		}
-	}
+    /**
+     * Retrieves the full Bill object by its ID.
+     */
+    public Bill getBillById(Integer billId) {
+        if (billId == null) return null;
+        return dbController.getBillById(billId);
+    }
 
-	/**
-	 * Performs a real check against the external provider's API.
-	 */
-	private boolean checkIfTransactionExistsWithProvider(String idempotencyKey) {
-		return callExternalStatusCheckApi(idempotencyKey);
-	}
+    /**
+     * Gets all UNPAID bills associated with a specific user.
+     */
+    public List<Bill> getPendingBillsForUser(int userId) {
+        return dbController.getPendingBillsByUserId(userId);
+    }
 
-	// --- Placeholder methods for actual API implementation ---
-
-	private boolean callExternalPaymentApi(String key, int amount) {
-		// Implementation for actual payment API call goes here
-		return true;
-	}
-
-	private boolean callExternalStatusCheckApi(String key) {
-		// Implementation for actual status check API call goes here
-		return true;
-	}
-
-	// --- Standard logic methods ---
-
-	public void recordPayment(User user, int amount) {
-		Order userOrder = getPendingOrderForUser(user.getUserId());
-		if (userOrder != null) {
-			dbController.saveTransactionRecord(userOrder.getConfirmationCode(), amount);
-		} else {
-			logger.log("[ERROR] No pending order found for user: " + user.getUserId());
-		}
-	}
-
-	public void updateOrderStatusAfterPayment(User user, int amount) {
-		Order userOrder = getPendingOrderForUser(user.getUserId());
-		if (userOrder != null) {
-			dbController.updateOrderStatusInDB(userOrder.getConfirmationCode(), OrderStatus.COMPLETED);
-		}
-	}
-
-	public int calculateTotal(List<Item> items, User requester) {
-		int total = 0;
-		for (Item item : items)
-			total += item.getPrice();// Sum item prices
-		int discount = (requester.getUserType() == UserType.MEMBER) ? 10 : 0;// 10% discount for members
-		total -= (total * discount) / 100;// Apply discount
-		return (int) (total * 1.18);// Including 18% tax
-	}
-
-	public boolean processManualPayment(int orderNumber) {
-		List<Order> Orders = dbController.getOrdersByStatus(OrderStatus.PENDING);
-		Order Order = Orders.stream().filter(order -> order.getOrderNumber() == orderNumber).findFirst().orElse(null);
-		if (Order == null) {
-			logger.log("[ERROR] No pending order found with order number: " + orderNumber);
-			return false;
-		}
-		dbController.saveTransactionRecordByOrderNumber(orderNumber);
-		dbController.updateOrderStatusInDB(Order.getConfirmationCode(), OrderStatus.COMPLETED);
-		return true;
-	}
-
-	public List<Bill> getPendingBillsForUser() {
-		return dbController.getPendingBills();
-	}
-
-	private Order getPendingOrderForUser(int userId) {
-		List<Order> orders = dbController.getOrdersByStatus(OrderStatus.PENDING);
-		if (orders == null)
-			return null;
-
-		return orders.stream().filter(order -> order.getUserId() == userId).findFirst().orElse(null);
-	}
 }

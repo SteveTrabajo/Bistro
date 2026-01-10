@@ -13,12 +13,22 @@ import logic.ServerLogger;
 import logic.api.Router;
 import logic.services.UserService;
 import dto.UserData;
-
+/**
+ * UserSubject handles user-related requests such as login, signout, member info update, and staff creation.
+ */
 public final class UserSubject {
-
+	
+	// Private constructor to prevent instantiation
 	private UserSubject() {
 	}
-
+	
+	/**
+	 * Registers user-related request handlers to the provided router.
+	 *
+	 * @param router      The router to register handlers with.
+	 * @param userService The user service for user operations.
+	 * @param logger      The server logger for logging events.
+	 */
 	public static void register(Router router, UserService userService, ServerLogger logger) {
 
 		// Request: "login.guest"
@@ -52,7 +62,6 @@ public final class UserSubject {
 		    @SuppressWarnings("unchecked")
 		    Map<String, Object> loginData = (Map<String, Object>) msg.getData();
 		    String username = String.valueOf(loginData.get("username"));
-
 		    // Check if account is locked
 		    if (LoginAttemptTracker.isAccountLocked(username)) {
 		        logger.log("[LOGIN] Account locked for STAFF: " + username);
@@ -63,7 +72,6 @@ public final class UserSubject {
 		    // Force staff lookup. DB returns the correct role (EMPLOYEE or MANAGER).
 		    Map<String, Object> staffLoginData = new HashMap<>(loginData);
 		    staffLoginData.put("userType", UserType.EMPLOYEE); // userService routes staff lookup for EMPLOYEE/MANAGER
-
 		    User user = userService.getUserInfo(staffLoginData);
 		    if (user != null && (user.getUserType() == UserType.EMPLOYEE || user.getUserType() == UserType.MANAGER)) {
 		        // Store session user for authorization (e.g., staff.create)
@@ -73,7 +81,6 @@ public final class UserSubject {
 		        client.sendToClient(new Message(Api.REPLY_LOGIN_STAFF_INVALID_CREDENTIALS, null));
 		    }
 		});
-
 
 		// Request: "signout.guest"
 		router.on("signout", "guest", (msg, client) -> {
@@ -128,33 +135,27 @@ public final class UserSubject {
 		        client.sendToClient(new Message(Api.REPLY_STAFF_CREATE_INVALID_DATA, "Missing staff data"));
 		        return;
 		    }
-
 		    // Authorization: Only a logged-in MANAGER (from the client) may create an EMPLOYEE.
 		    User requester = (User) client.getInfo("user");
 		    if (requester == null || requester.getUserType() != UserType.MANAGER) {
 		        client.sendToClient(new Message(Api.REPLY_STAFF_CREATE_UNAUTHORIZED, null));
 		        return;
 		    }
-
 		    String username = (String) staffData.get("username");
 		    String password = (String) staffData.get("password");
 		    String email = (String) staffData.get("email");
 		    String phoneNumber = (String) staffData.get("phoneNumber");
-
 		    String validationError = InputCheck.validateAllStaffData(username, password, email, phoneNumber);
 		    if (validationError != null) {
 		        client.sendToClient(new Message(Api.REPLY_STAFF_CREATE_INVALID_DATA, validationError));
 		        return;
 		    }
-
 		    if (userService.staffUsernameExists(username)) {
 		        client.sendToClient(new Message(Api.REPLY_STAFF_CREATE_USERNAME_EXISTS, null));
 		        return;
 		    }
-
 		    // Enforce employee-only creation from the client.
 		    staffData.put("userType", UserType.EMPLOYEE.name());
-
 		    User newStaff = userService.createStaffAccount(staffData);
 		    if (newStaff != null) {
 		        logger.log("[MANAGER] New employee created: " + username + " by manager user_id=" + requester.getUserId());

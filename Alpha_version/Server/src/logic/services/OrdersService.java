@@ -24,6 +24,7 @@ public class OrdersService {
 	private final BistroServer server;
 	private final BistroDataBase_Controller dbController;
 	private final ServerLogger logger;
+	private final TableService tableService;
 	
 	//Variables for reservation slots calculation:
 	private List<Integer> tableSizes; // [2,2,4,4,6,6,8]
@@ -33,10 +34,11 @@ public class OrdersService {
 	
 	// ******************************** Constructors***********************************
 	
-	public OrdersService(BistroServer server,BistroDataBase_Controller dbController, ServerLogger logger) {
+	public OrdersService(BistroServer server,BistroDataBase_Controller dbController,TableService tableService, ServerLogger logger) {
 		this.dbController = dbController;
 		this.logger = logger;
 		this.server = server;
+		this.tableService = tableService;
 		this.tableSizes = new ArrayList<Integer>();
 		this.slotStepMinutes = 30;
 		this.reservationDurationMinutes = 120;
@@ -57,31 +59,22 @@ public class OrdersService {
 	
 	// ********************************Instance Methods ***********************************
 	
-	/*
-	 * Fetches all table sizes from the database and stores them in the tableSizes list.
-	 */
-	public void getTablesCapacity() {
-		List<Table> tables = dbController.getAllTablesFromDB();
-		tableSizes.clear();
-		for (Table table : tables) {
-			tableSizes.add(table.getCapacity());
-		}
-		return;
-	}
 	
 
 
 	/**
-	 * Creates a new standard Reservation (future order).
-	 * Generates a code starting with "R-".
+	 * Creates a new Reservation in a thread-safe manner.
+	 * For reservations, it checks slot availability before insertion to avoid conflicts while handling concurrent requests.
+	 * @param data A list containing order details: [0]userId, [1]date, [2]dinersAmount, [3]time, [4]Code
+	 * @param orderType The type of order (RESERVATION or TAKEOUT).
+	 * @return true if the order was created successfully, false otherwise.
 	 */
 	public synchronized boolean createNewOrder(List<Object> data, OrderType orderType) {
-		// data: [0]userId, [1]date, [2]dinersAmount, [3]time, [4]Code (added later)
-		
+		// data: [0]userId, [1]date, [2]dinersAmount, [3]time, [4]Code
 		LocalDate date = (LocalDate) data.get(1);
 		int diners = (int) data.get(2);
 		LocalTime time = (LocalTime) data.get(3);
-
+		//condition that checks to ensure reservation slot is still free before insertion and type is RESERVATION and not WAITLIST by mistake
 		if (orderType == OrderType.RESERVATION) {
 			boolean isSlotStillFree = checkSpecificSlotAvailability(date, time, diners);
 			if (!isSlotStillFree) {
@@ -89,16 +82,12 @@ public class OrdersService {
 				return false; 
 			}
 		}
-
-		// 2. Generate Code
 		String confirmationCode = generateConfirmationCode("R");
 		data.add(confirmationCode); 
-		
-		// 3. Insert
 		return dbController.setNewOrder(data, orderType, OrderStatus.PENDING);
 	}
 	
-	/*
+	/**
 	 * Checks if a specific reservation slot is still available for the given date, time, and diners amount.
 	 * @param date The date of the reservation.
 	 * @param targetTime The specific time slot to check.
@@ -106,13 +95,11 @@ public class OrdersService {
 	 * @return true if the slot is available, false otherwise.
 	 */
 	private boolean checkSpecificSlotAvailability(LocalDate date, LocalTime targetTime, int diners) {
-		List<Order> existingReservations = dbController.getReservationsbyDate(date);
+		List<Order> existingReservations = dbController.getOrderbyDate(date);
 		List<LocalTime> openingHours = dbController.getOpeningHoursFromDB();
-		
 		if (openingHours == null || openingHours.size() < 2) return false;
 		LocalTime open = openingHours.get(0);
 		LocalTime close = openingHours.get(1);
-
 		List<String> availableSlots = computeAvailableSlots(open, close, diners, existingReservations);		
 		String targetString = timeToString(targetTime);
 		return availableSlots.contains(targetString);
@@ -132,22 +119,59 @@ public class OrdersService {
 	 * @param prefix The prefix for the code (e.g., "R" for reservations).
 	 */
 	public String generateConfirmationCode(String prefix) {
-		String code = null;
-		boolean exists = true;
-		while (exists){
-			// Generate random number 100000-999999
-			int num = 100000 + new Random().nextInt(900000);
-			code = prefix + "-" + num;
-			
-			// Check DB to avoid collision
-			exists = dbController.checkOrderExistsInDB(code);
-			if (exists) {
-				System.out.println("Duplicate code generated: " + code + ". Retrying...");
-			}
-		}
-		
-		return code;
+	    String code = null;
+	    boolean exists = true;
+	    int attempts = 0;
+	    final int MAX_ATTEMPTS = 3;
+	    Random random = new Random();
+
+	    while (exists) {
+	        // Increment attempt counter
+	        attempts++;
+
+	        // If we failed 3 times, throw an error to the server
+	        if (attempts > MAX_ATTEMPTS) {
+	            String errorMsg = "Critical Error: Failed to generate a unique confirmation code after " + MAX_ATTEMPTS + " attempts.";
+	            logger.log("[ERROR] " + errorMsg);
+	            throw new RuntimeException(errorMsg);
+	        }
+	        // Generate random number 100000-999999
+	        int num = 100000 + random.nextInt(900000);
+	        code = prefix + "-" + num;
+	        // Check DB to avoid collision
+	        exists = dbController.checkOrderExistsInDB(code);
+
+	        if (exists) {
+	            System.out.println("Duplicate code generated: " + code + ". Attempt " + attempts + " failed. Retrying...");
+	        }
+	    }
+	    return code;
 	}
+	
+	/**
+	 * 
+	 * Retrieves the allocated table number for a reservation based on its confirmation code.
+	 * 
+	 * @param confirmationCode The confirmation code of the reservation.
+	 * @return The allocated table number, or -1 if not found.
+	 */
+	public int getAllocatedTableForReservation(String confirmationCode) {
+		return tableService.getTableNumberByReservationConfirmationCode(confirmationCode);
+	}
+	
+	/**
+	 * 
+	 * Updates the status of an order in the database.
+	 * 
+	 * @param confirmationCode The confirmation code of the order.
+	 * @param completed The new status to set for the order.
+	 * @return true if the update was successful, false otherwise.
+	 */
+	public boolean updateOrderStatus(String confirmationCode, OrderStatus completed) {
+		return dbController.updateOrderStatusInDB(confirmationCode, completed);
+	}
+	
+	// ******************************** Reservation Available Time Slots Calculation Methods ***********************************
 	
 	/**
 	 * 
@@ -158,15 +182,29 @@ public class OrdersService {
 	 */
 	public List<String> getAvailableReservationHours(Map<String, Object> requestData) {
 		getTablesCapacity(); // Fetch table sizes from DB
+		//Get opening hours and existing reservations from DB:
 		List<LocalTime> openingHours = dbController.getOpeningHoursFromDB();
 		printOpeningHours(openingHours); //TODO: Remove debug prints later
 		LocalTime openingTime = openingHours.get(0);
 		LocalTime closingTime = openingHours.get(1);
 		LocalDate date = (LocalDate) requestData.get("date");
 		int dinersAmount = (int) requestData.get("dinersAmount");
-		List<Order> reservationsByDate = dbController.getReservationsbyDate(date);
+		List<Order> reservationsByDate = dbController.getOrderbyDate(date);
 		printReservationsByDate(reservationsByDate); //TODO: Remove debug prints later
+		//Compute available slots:
 		return computeAvailableSlots(openingTime, closingTime, dinersAmount, reservationsByDate);
+	}
+	
+	/*
+	 * Fetches all table sizes from the database and stores them in the tableSizes list.
+	 */
+	public void getTablesCapacity() {
+		List<Table> tables = tableService.getAllTables();
+		tableSizes.clear();
+		for (Table table : tables) {
+			tableSizes.add(table.getCapacity());
+		}
+		return;
 	}
 	
 	
@@ -185,20 +223,9 @@ public class OrdersService {
 		System.out.println("Closing Time: " + openingHours.get(1).toString());
 		
 	}
-	//-----------------------------------------------------------------------
-
-	public int getAllocatedTableForReservation(String confirmationCode) {
-		
-		return server.getTablesService().getTableNumberByReservationConfirmationCode(confirmationCode);
-	}
-	
-	public boolean updateOrderStatus(String confirmationCode, OrderStatus completed) {
-		return dbController.updateOrderStatusInDB(confirmationCode, completed);
-	}
-	
-	// ****************************** Instance Private Methods ******************************
 	
 	
+	//TODO: add more comments to the methods below ---------------------------------------------
 	/**
 	 * 
 	 * Computes available reservation slots within opening hours that can accommodate
@@ -219,7 +246,7 @@ public class OrdersService {
 	    System.out.println("New Diners Amount: " + newDinersAmount);
 	    System.out.println("Opening: " + openingTime + ", Closing: " + closingTime);
 	    // ----------------------------------------------
-	    
+	    //
 	    if (this.tableSizes == null || this.tableSizes.isEmpty()) {
 	        System.err.println("ERROR: tableSizes is EMPTY! No tables to seat diners.");
 	        return new ArrayList<>();
@@ -256,7 +283,7 @@ public class OrdersService {
 	        if (canAssignAllDinersToTables(overlappingDinersAmounts, tableSizes)) {
 	            available.add(timeToString(slot));
 	        } else {
-	             // System.out.println("Slot " + slot + " REJECTED (Not enough tables)");
+	             System.out.println("Slot " + slot + " REJECTED (Not enough tables)");
 	        }
 	    }
 	    
@@ -316,7 +343,7 @@ public class OrdersService {
 	public boolean canAssignAllDinersToTables(List<Integer> overlappingDinersAmounts, List<Integer> tableSizes) {
 		// Sort diners amounts in descending order:
 		List<Integer> overlappingDinersAmountsCopy = new ArrayList<>(overlappingDinersAmounts);
-		overlappingDinersAmountsCopy.sort(Comparator.reverseOrder());
+		overlappingDinersAmountsCopy.sort(Comparator.reverseOrder()); //TODO: refactor to alternative way without using Comparator
 		// Build a TreeMap of table sizes to their counts:
 		TreeMap<Integer, Integer> tableSizeCounts = new TreeMap<>();
 		//loop over table sizes and count occurrences:

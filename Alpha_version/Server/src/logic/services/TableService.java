@@ -4,6 +4,7 @@ import java.util.List;
 
 import entities.Order;
 import entities.Table;
+import entities.User;
 import enums.OrderStatus;
 import logic.BistroDataBase_Controller;
 import logic.ServerLogger;
@@ -24,6 +25,16 @@ public class TableService {
 	public List<Table> getAllTables() {
 		return dbController.getAllTablesFromDB();
 	}
+	
+	/**
+    * Logic to handle table status after a successful payment.
+    */
+	//TODO: Expand this method in the future as needed to clear the table or update its status.
+   public static void notifyPaymentCompletion(User user, TableService tableService, ServerLogger logger) {
+       logger.log("[INFO] Payment completed for User: " + user.getUserId());
+       // Future logic: You might want to auto-mark the table as "DIRTY" or "FREE" here,
+       // or simply log that the session is financially settled.
+   }
 
 	public int allocateTable(String confirmationCode) {
 	    Order order = dbController.getOrderByConfirmationCodeInDB(confirmationCode);
