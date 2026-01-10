@@ -6,6 +6,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.effect.GaussianBlur;
@@ -18,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import common.InputCheck;
 import comms.Api;
+import javafx.application.Platform;
 import javafx.event.Event;
 import entities.*;
 import enums.UserType;
@@ -126,10 +128,7 @@ public class ClientLoginScreen {
 
 	
 	/**
-	 * Handles the member sign-in button click event. Validates the member ID input.
-	 * If valid, attempts to log in the member user and switch to the client
-	 * dashboard screen. Displays error messages for invalid inputs or login
-	 * failures.
+	 * Handles the member sign-in button click event with a loading indicator.
 	 * * @param event The event triggered by clicking the member sign-in button.
 	 */
 	@FXML
@@ -143,30 +142,41 @@ public class ClientLoginScreen {
 			return;
 		}
 
+		// 1. Prepare UI for loading state
+		lblError.setText("");
+		btnSignIn.setDisable(true); // Disable button to prevent double clicks
+		
+		// Create a simple loading indicator
+		ProgressIndicator loadingIndicator = new ProgressIndicator();
+		loadingIndicator.setMaxSize(50, 50);
+		
+		// Add the indicator to your main StackPane to show it over the content
+		mainPane.getChildren().add(loadingIndicator);
+		contentPane.setDisable(true); // Soft-disable the background content
+
 		userLoginData = new HashMap<>();
 		userLoginData.put("userType", userType);
 		userLoginData.put("memberCode", Integer.parseInt(memberCodeText));
 
-		// Send sign-in request to the server
-		BistroClientGUI.client.getUserCTRL().signInUser(userLoginData);
+		// 2. Run the blocking call in a background thread
+		new Thread(() -> {
+			// This is where the code "waits" for the server
+			BistroClientGUI.client.getUserCTRL().signInUser(userLoginData);
 
-		// Using Platform.runLater to ensure UI updates happen on the JavaFX Application Thread
-		// and giving the client-server communication a moment to update the local state.
-		javafx.application.Platform.runLater(() -> {
-			try {
-				// Small delay to wait for server response sync
-				Thread.sleep(150); 
-				
+			// 3. Update UI after response arrives
+			Platform.runLater(() -> {
+				// Remove loading indicator and re-enable UI
+				mainPane.getChildren().remove(loadingIndicator);
+				contentPane.setDisable(false);
+				btnSignIn.setDisable(false);
+
 				if (BistroClientGUI.client.getUserCTRL().isUserLoggedInAs(userType)) {
 					BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
 				} else {
-					lblError.setText("Login failed: Member code does not exist.");
+					lblError.setText("Member code does not exist.");
 				}
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				lblError.setText("Login interrupted.");
-			}
-		});
+			});
+		}).start();
 	}
 	/**
 	 * Handles the QR code scanning button click event. (Functionality to be
