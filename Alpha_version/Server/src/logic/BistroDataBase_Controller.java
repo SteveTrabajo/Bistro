@@ -819,21 +819,7 @@ public class BistroDataBase_Controller {
 	
 	
 	// ****************************** Table Operations ******************************
-	public boolean updateOrderStatusInDB(String confirmationCode, OrderStatus status) {
-	    final String sql = "UPDATE orders SET status = ? WHERE user_id = ?";
-	    Connection conn = null;
-	    try {
-	        conn = borrow();
-	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-	            ps.setString(1, status.name());
-	            ps.setString(2, confirmationCode);
-	            return ps.executeUpdate() > 0;
-	        }
-	    } catch (SQLException ex) {
-	        logger.log("[ERROR] updateOrderStatusInDB: " + ex.getMessage());
-	        return false;
-	    } finally { release(conn); }
-	}
+	
 	public List<Table> getAllTablesFromDB() {
 	    List<Table> tablesList = new ArrayList<>();
 	    String qry = "SELECT tableNum, capacity FROM tables"; 
@@ -989,33 +975,38 @@ public class BistroDataBase_Controller {
 	    return hours;
 	}
 	
+	public boolean updateOrderStatusInDB(String confirmationCode, OrderStatus status) {
+	    if (confirmationCode == null || confirmationCode.trim().isEmpty()) {
+	        return false;
+	    }
 
-	public boolean updateOrderStatusInDB(String confirmationCode, OrderStatus completed) {
-		if (confirmationCode == null || confirmationCode.trim().isEmpty()) {
-			return false;
-		}
-		final String qry = "UPDATE orders " + "SET status = ? " + "WHERE confirmation_code = ?";
-		Connection conn = null;
-		try {
-			conn = borrow();
+	    // We use 'user_id' because you stated that for waitlist entries, 
+	    // the code is stored in the 'user_id' column.
+	    final String qry = "UPDATE orders SET status = ? WHERE user_id = ?";
+	    
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
 
-			try (PreparedStatement ps = conn.prepareStatement(qry)) {
+	        try (PreparedStatement ps = conn.prepareStatement(qry)) {
+	            // Set the new status (e.g., 'COMPLETED', 'CANCELED')
+	            ps.setString(1, status.name());
+	            
+	            // Map the confirmationCode string to the 'user_id' column
+	            ps.setString(2, confirmationCode);
 
-				ps.setString(1, completed.name());
-				ps.setString(2, confirmationCode);
+	            int rowsAffected = ps.executeUpdate();
 
-				int success = ps.executeUpdate();
-
-				return success == 1; // when success get 1 the updated worked and changed the row well in table
-			}
-		} catch (SQLException ex) {
-			logger.log("[ERROR] SQLException in updateOrderStatusInDB: " + ex.getMessage());
-			ex.printStackTrace();
-			return false;
-
-		} finally {
-			release(conn);
-		}
+	            // Returns true if exactly one row was updated
+	            return rowsAffected > 0; 
+	        }
+	    } catch (SQLException ex) {
+	        logger.log("[ERROR] SQLException in updateOrderStatusInDB: " + ex.getMessage());
+	        ex.printStackTrace();
+	        return false;
+	    } finally {
+	        release(conn);
+	    }
 	}
 	
 	public List<User> getAllCustomersInDB() {
