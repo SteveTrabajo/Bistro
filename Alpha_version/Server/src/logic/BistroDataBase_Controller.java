@@ -701,42 +701,74 @@ public class BistroDataBase_Controller {
 	
 	// ********************Waiting List Operations ******************************
 	
-	public boolean isUserInWaitingList(int userId) {
-		
-		final String qry = "SELECT 1 " + "FROM orders " + "WHERE user_id = ? " + "AND order_type = 'WAITLIST' "
-				+ "AND status = 'PENDING'";
-		
-		Connection conn = null;
-		
-		try {
-			conn = borrow();
-			
-			try (PreparedStatement ps = conn.prepareStatement(qry)) {
-				
-				ps.setInt(1, userId); 
-				
-				try (ResultSet rs = ps.executeQuery()) {
-					return rs.next();
-				}
-			}
-			
-		} catch (SQLException ex) {
-			logger.log("[ERROR] SQLException in isUserInWaitingList: " + ex.getMessage());
-			ex.printStackTrace();
-			return false;
-		} finally {
-			release(conn);
-		}
+	public boolean isUserInWaitingList(String confirmationCode) {
+	    // We use the string confirmationCode to query the user_id column 
+	    // because that is where the code is stored in your logic.
+	    final String qry = "SELECT 1 " + "FROM orders " + "WHERE user_id = ? " + "AND order_type = 'WAITLIST' "
+	            + "AND status = 'PENDING'";
+	    
+	    Connection conn = null;
+	    
+	    try {
+	        conn = borrow();
+	        
+	        try (PreparedStatement ps = conn.prepareStatement(qry)) {
+	            // Updated to setString to match the confirmationCode type
+	            ps.setString(1, confirmationCode); 
+	            
+	            try (ResultSet rs = ps.executeQuery()) {
+	                return rs.next();
+	            }
+	        }
+	        
+	    } catch (SQLException ex) {
+	        logger.log("[ERROR] SQLException in isUserInWaitingList: " + ex.getMessage());
+	        ex.printStackTrace();
+	        return false;
+	    } finally {
+	        release(conn);
+	    }
+	}
+	public boolean removeFromWaitingList(String confirmationCode) {
+	    // We update the status to 'CANCELED' and set the timestamp for when it happened
+	    final String qry = "UPDATE orders SET status = 'CANCELED', canceled_at = ? "
+	                     + "WHERE user_id = ? AND order_type = 'WAITLIST' AND status = 'PENDING'";
+	    
+	    Connection conn = null;
+	    
+	    try {
+	        conn = borrow();
+	        
+	        try (PreparedStatement ps = conn.prepareStatement(qry)) {
+	            // Set the current time for canceled_at
+	            ps.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
+	            // Use the confirmationCode string to find the correct 'user_id' entry
+	            ps.setString(2, confirmationCode);
+	            
+	            int rowsAffected = ps.executeUpdate();
+	            
+	            // If rowsAffected > 0, the cancellation was successful
+	            if (rowsAffected > 0) {
+	                logger.log("[SUCCESS] User with code " + confirmationCode + " removed from Waitlist.");
+	                return true;
+	            } else {
+	                logger.log("[WARN] No pending Waitlist order found for code: " + confirmationCode);
+	                return false;
+	            }
+	        }
+	        
+	    } catch (SQLException ex) {
+	        logger.log("[ERROR] SQLException in removeFromWaitingList: " + ex.getMessage());
+	        ex.printStackTrace();
+	        return false;
+	    } finally {
+	        release(conn);
+	    }
 	}
 	
 	public Order addToWaitingList(Map<String, Object> userData) {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	public boolean removeFromWaitingList(String confirmationCode) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	public int assignTableForWaitingListOrder(Order createdOrder) {
