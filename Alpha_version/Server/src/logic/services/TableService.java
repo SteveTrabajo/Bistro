@@ -1,12 +1,10 @@
 package logic.services;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
+import entities.Order;
 import entities.Table;
 import enums.OrderStatus;
-import enums.OrderType;
 import logic.BistroDataBase_Controller;
 import logic.ServerLogger;
 
@@ -27,9 +25,23 @@ public class TableService {
 		return dbController.getAllTablesFromDB();
 	}
 
-	public int allocateTable(String ConfimationCode) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int allocateTable(String confirmationCode) {
+	    Order order = dbController.getOrderByConfirmationCodeInDB(confirmationCode);
+	    if (order == null) {
+	        logger.log("[ERROR] Allocation failed: Order not found for " + confirmationCode);
+	        return -1;
+	    }
+	    int tableNum = dbController.findFreeTableForGroup(order.getDinersAmount());	    
+	    if (tableNum != -1) {
+	        boolean sessionCreated = dbController.createTableSession(order.getOrderNumber(), tableNum);	        
+	        if (sessionCreated) {
+	            dbController.updateOrderStatusInDB(confirmationCode, OrderStatus.SEATED);
+	            logger.log("[INFO] Allocated Table " + tableNum + " to Order " + confirmationCode);
+	            return tableNum;
+	        }
+	    }	    
+	    logger.log("[WARN] No tables available for group size " + order.getDinersAmount());
+	    return -1;
 	}
 
 }
