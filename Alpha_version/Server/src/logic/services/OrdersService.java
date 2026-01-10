@@ -68,6 +68,7 @@ public class OrdersService {
 	 */
 	public synchronized boolean createNewOrder(List<Object> data, OrderType orderType) {
 		// data: [0]userId, [1]date, [2]dinersAmount, [3]time, [4]Code
+		int userId = (int) data.get(0);
 		LocalDate date = (LocalDate) data.get(1);
 		int diners = (int) data.get(2);
 		LocalTime time = (LocalTime) data.get(3);
