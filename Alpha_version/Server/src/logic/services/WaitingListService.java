@@ -50,7 +50,7 @@ public class WaitingListService {
         data.add(confirmationCode);
         
         // Determine Status: PENDING (for Waitlist) or SEATED (for Immediate)
-        OrderStatus initialStatus = addToWaitlist ? OrderStatus.PENDING : OrderStatus.SEATED;
+        OrderStatus initialStatus = addToWaitlist ? OrderStatus.WAITING_LIST : OrderStatus.SEATED;
         
         // 1. Insert into Orders Table (Trigger fires automatically if PENDING)
         boolean success = dbController.setNewOrder(data, OrderType.WAITLIST, initialStatus);
