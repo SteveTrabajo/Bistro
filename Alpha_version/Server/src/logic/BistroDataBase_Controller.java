@@ -1059,6 +1059,73 @@ public class BistroDataBase_Controller {
 		return null;
 	}
 
-	
+	//TODO double check the functions below for table sessions
+	/**
+	 * Finds the smallest available table that fits the group size.
+	 * Checks against table_sessions to ensure the table isn't currently occupied.
+	 */
+	public int findFreeTableForGroup(int groupSize) {
+	    // Select tables that fit the group AND are not currently in an active session
+	    String query = "SELECT t.tableNum FROM tables t " +
+	                   "WHERE t.capacity >= ? " +
+	                   "AND t.tableNum NOT IN (" +
+	                   "    SELECT s.tableNum FROM table_sessions s WHERE s.left_at IS NULL" +
+	                   ") " +
+	                   "ORDER BY t.capacity ASC LIMIT 1";
+	    
+	    try (Connection conn = borrow();
+	         PreparedStatement ps = conn.prepareStatement(query)) {
+	        
+	        ps.setInt(1, groupSize);
+	        
+	        try (ResultSet rs = ps.executeQuery()) {
+	            if (rs.next()) {
+	                return rs.getInt("tableNum");
+	            }
+	        }
+	    } catch (SQLException e) {
+	        logger.log("[DB ERROR] Failed to find free table: " + e.getMessage());
+	        e.printStackTrace();
+	    }
+	    return -1; // No table available
+	}
 
+	/**
+	 * Creates a new session linking the order to the table.
+	 */
+	public boolean createTableSession(int orderNumber, int tableNum) {
+	    String query = "INSERT INTO table_sessions (order_number, tableNum, seated_at) VALUES (?, ?, NOW())";
+	    
+	    try (Connection conn = borrow();
+	         PreparedStatement ps = conn.prepareStatement(query)) {
+	        
+	        ps.setInt(1, orderNumber);
+	        ps.setInt(2, tableNum);
+	        
+	        int rows = ps.executeUpdate();
+	        return rows > 0;
+	    } catch (SQLException e) {
+	        logger.log("[DB ERROR] Failed to create table session: " + e.getMessage());
+	        return false;
+	    }
+	}
+
+	/**
+	 * Closes the active session for a specific order.
+	 */
+	public void closeSessionForOrder(int orderNumber) {
+	    String query = "UPDATE table_sessions " +
+	                   "SET left_at = NOW(), end_reason = 'PAID' " +
+	                   "WHERE order_number = ? AND left_at IS NULL";
+	                   
+	    try (Connection conn = borrow();
+	         PreparedStatement ps = conn.prepareStatement(query)) {
+	        
+	        ps.setInt(1, orderNumber);
+	        ps.executeUpdate();
+	        
+	    } catch (SQLException e) {
+	        logger.log("[DB ERROR] Failed to close session: " + e.getMessage());
+	    }
+	}
 }
