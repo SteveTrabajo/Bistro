@@ -49,7 +49,7 @@ public class WaitingListService {
         String confirmationCode = ordersService.generateConfirmationCode("W");
         data.add(confirmationCode);
         
-        // Determine Status: PENDING (for Waitlist) or SEATED (for Immediate)
+        // Determine Status: WAITING_LIST or SEATED (for Immediate)
         OrderStatus initialStatus = addToWaitlist ? OrderStatus.WAITING_LIST : OrderStatus.SEATED;
         
         // 1. Insert into Orders Table (Trigger fires automatically if PENDING)

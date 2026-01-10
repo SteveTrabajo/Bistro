@@ -221,60 +221,6 @@ public class BistroDataBase_Controller {
         }
         throw new SQLException("Failed to generate unique 6-digit user_id after 50 attempts.");
     }
-
-//    public User findGuestUser(String phoneNumber, String email) {
-//    	//query to find guest user by phone number and email
-//        final String findQry="SELECT * FROM users WHERE type = ? AND (phoneNumber = ? OR email = ?)";
-//        String insertQry =
-//                "INSERT INTO users (user_id, phoneNumber, email, type) " +
-//                "VALUES (?, ?, ?, 'GUEST')";
-//        User foundUser = null;
-//    	Connection conn = null;
-//		try {
-//			conn = borrow();
-//			try (PreparedStatement ps = conn.prepareStatement(findQry)) {
-//				ps.setString(1, UserType.GUEST.name());
-//				ps.setString(2, phoneNumber);
-//				ps.setString(3, email);
-//				try (ResultSet rs = ps.executeQuery()) {
-//					if (rs.next()) {
-//						foundUser = new User(rs.getInt("id"), rs.getString("phoneNumber"), rs.getString("email"),
-//								UserType.GUEST);
-//					}
-//				}
-//			}
-//		} catch (SQLException ex) {
-//			logger.log("[ERROR] SQLException in findGuestUser: " + ex.getMessage());
-//			ex.printStackTrace();
-//		}
-//		// If guest user not found, create a new one
-//		if (foundUser == null) {
-//			try {
-//				conn = borrow();
-//				try (PreparedStatement psInsert = conn.prepareStatement(insertQry, PreparedStatement.RETURN_GENERATED_KEYS)) {
-//					psInsert.setNull(1, Types.INTEGER); // Assuming user_id is auto-incremented
-//					psInsert.setString(2, phoneNumber);
-//					psInsert.setString(3,  email);
-//					int affectedRows = psInsert.executeUpdate();
-//					if (affectedRows == 0) {
-//						throw new SQLException("Creating guest user failed, no rows affected.");
-//					}
-//					try (ResultSet generatedKeys = psInsert.getGeneratedKeys()) {
-//						if (generatedKeys.next()) {
-//							int newUserId = generatedKeys.getInt(1);
-//							foundUser = new User(newUserId, phoneNumber, email, UserType.GUEST);
-//						} else {
-//							throw new SQLException("Creating guest user failed, no ID obtained.");
-//						}
-//					}
-//				}
-//			} catch (SQLException ex) {
-//				logger.log("[ERROR] SQLException in creating new Guest user: " + ex.getMessage());
-//				ex.printStackTrace();
-//			}
-//		}
-//		return foundUser;
-//    }
     
     public User findMemberUserByCode(int memberCode) {
 
@@ -765,16 +711,7 @@ public class BistroDataBase_Controller {
 	        release(conn);
 	    }
 	}
-	
-	public Order addToWaitingList(Map<String, Object> userData) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
-	public int assignTableForWaitingListOrder(Order createdOrder) {
-		// TODO implement this method to return the assigned table number for the order
-		return 0;
-	}
 	public List<Order> getActiveAndUpcomingOrders(LocalDate today, LocalTime now, LocalTime walkInEndTime) {
 		List<Order> orders = new ArrayList<>();
 		String query = "SELECT * FROM orders " + "WHERE order_date = ? " + "AND (" + "   status = 'SEATED' " + "   OR "
