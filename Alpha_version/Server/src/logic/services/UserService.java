@@ -98,6 +98,7 @@ public class UserService {
 				return null;
 			}
 			userfound = dbController.findMemberUserByCode(memberCode);
+			System.out.println("Member login attempt: " + (userfound != null ? "Found member" : "Member not found"));
 			break;
 		}
 		case "EMPLOYEE", "MANAGER":
