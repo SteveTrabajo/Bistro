@@ -5,6 +5,7 @@ import java.util.concurrent.*;
 
 import comms.Api;
 import comms.Message;
+import entities.MonthlyReport;
 import entities.Order;
 import gui.controllers.ServerConsoleController;
 import logic.api.Router;
@@ -185,6 +186,7 @@ public class BistroServer extends AbstractServer {
 		OrdersSubject.register(router, ordersService, logger);
 		WaitingListSubject.register(router, waitingListService, logger);
 		TablesSubject.register(router, tableService, logger);
+		ReportsSubject.register(router, reportService, logger);
 	}
 	
 	// ******************************** Getters for Services ********************************

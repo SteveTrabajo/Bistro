@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import entities.MonthlyReport;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.LineChart;
@@ -66,7 +67,9 @@ public class AnalyticsPanel {
         arrivalBarChart.setAnimated(true);
         reservationsLineChart.setAnimated(true);
         BistroClientGUI.client.getMonthlyReportsCTRL().requestMonthlyReportData();
-        updateDashboard(BistroClientGUI.client.getMonthlyReportsCTRL().getCurrentMonthlyReport());
+        Platform.runLater(() -> {
+        	updateDashboard(BistroClientGUI.client.getMonthlyReportsCTRL().getCurrentMonthlyReport());
+        });
     }
 
     /**
@@ -77,17 +80,17 @@ public class AnalyticsPanel {
         if (data == null) return;
 
         // 1. Update KPIs 
-        totalReservationsLabel.setText(String.valueOf(data.getTotalReservationsInGivenYear()));
+        totalReservationsLabel.setText(String.valueOf(data.getTotalReservations()));
         // Assuming getter for delta exists in DTO
         setDeltaLabel(totalReservationsDelta, 5.2); // Example value, replace with data.get...
 
-        avgMonthlyLabel.setText(String.valueOf(data.getAvgMonthlyReservations()));
+        avgMonthlyLabel.setText("0");
         setDeltaLabel(avgMonthlyDelta, 2.1);
 
-        onTimeRateLabel.setText(String.format("%.1f%%", data.getOnTimeArrivalRate() * 100));
+        onTimeRateLabel.setText(String.format("%.1f%%", 0.52 * 100));
         setDeltaLabel(onTimeDelta, -0.5);
 
-        customersThisMonthLabel.setText(String.valueOf(data.getCustomersThisMonth())); // Add getter
+        customersThisMonthLabel.setText("0"); // Add getter
         currentMonthLabel.setText("January"); // Or data.getCurrentMonthName()
 
         // 2. Update Bar Chart (Arrival Times)
@@ -97,20 +100,20 @@ public class AnalyticsPanel {
         updateTrendChart(data);
 
         // 4. Update Summaries
-        totalOnTimeLabel.setText(String.valueOf(data.getTotalOnTime()));
-        totalLateLabel.setText(String.valueOf(data.getTotalLate()));
+        totalOnTimeLabel.setText("0");
+        totalLateLabel.setText("0");
         
-        peakMonthLabel.setText(data.getPeakMonth()); 
-        peakMonthValueLabel.setText(String.valueOf(data.getPeakMonthValue())); 
-        
-        lowestMonthLabel.setText(data.getLowestMonth()); 
-        lowestMonthValueLabel.setText(String.valueOf(data.getLowestMonthValue())); 
-        
-        growthRateLabel.setText(String.format("%+.1f%%", data.getGrowthRateYearly())); 
+//        data.getPeakMonth()); 
+//        peakMonthValueLabel.setText(String.valueOf(data.getPeakMonthValue())); 
+//        
+//        lowestMonthLabel.setText(data.getLowestMonth()); 
+//        lowestMonthValueLabel.setText(String.valueOf(data.getLowestMonthValue())); 
+//        
+//        growthRateLabel.setText(String.format("%+.1f%%", data.getGrowthRateYearly())); 
 
-        // 5. Build Dynamic Bottom Rows
-        populateDistributionRows(peakTimesBox, data.getPeakReservationTimes(), "ad-bar-blue");
-        populateDistributionRows(partySizeBox, data.getDinersAmountDistribution(), "ad-bar-green");
+//        // 5. Build Dynamic Bottom Rows
+//        populateDistributionRows(peakTimesBox, data.getPeakReservationTimes(), "ad-bar-blue");
+//        populateDistributionRows(partySizeBox, data.getDinersAmountDistribution(), "ad-bar-green");
     }
 
     /**
@@ -138,13 +141,13 @@ public class AnalyticsPanel {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Arrivals");
 
-        Map<String, Integer> dist = data.getArrivalTimeDistribution();
-        if (dist != null) {
-            dist.forEach((category, count) -> {
-                series.getData().add(new XYChart.Data<>(category, count));
-            });
-        }
-        arrivalBarChart.getData().add(series);
+//        Map<String, Integer> dist = data.getArrivalTimeDistribution();
+//        if (dist != null) {
+//            dist.forEach((category, count) -> {
+//                series.getData().add(new XYChart.Data<>(category, count));
+//            });
+//        }
+//        arrivalBarChart.getData().add(series);
     }
 
     /**
@@ -156,14 +159,14 @@ public class AnalyticsPanel {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName(data.getYear());
 
-        Map<String, Integer> trends = data.getMonthlyReservationsMap();
-        // Ensure month order is correct (Logic depends on Map implementation, LinkedHashMap is best)
-        if (trends != null) {
-            trends.forEach((month, count) -> {
-                series.getData().add(new XYChart.Data<>(month, count));
-            });
-        }
-        reservationsLineChart.getData().add(series);
+//        Map<String, Integer> trends = data.getMonthlyReservationsMap();
+//        // Ensure month order is correct (Logic depends on Map implementation, LinkedHashMap is best)
+//        if (trends != null) {
+//            trends.forEach((month, count) -> {
+//                series.getData().add(new XYChart.Data<>(month, count));
+//            });
+//        }
+//        reservationsLineChart.getData().add(series);
     }
 
 

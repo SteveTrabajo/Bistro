@@ -1352,6 +1352,40 @@ public class BistroDataBase_Controller {
 			// TODO Auto-generated method stub
 			return null;
 		}
+		
+	//*************************************** Reports ********************************
+	public int getTotalReservation(LocalDate date) {
+	    final String qry =
+	            "SELECT COUNT(*) AS total " +
+	            "FROM orders o " +
+	            "WHERE MONTH(o.order_date) = ? " +
+	            "AND YEAR(o.order_date) = ?";
+
+	    Connection conn = null;
+
+	    try {
+	        conn = borrow();
+
+	        try (PreparedStatement ps = conn.prepareStatement(qry)) {
+	            ps.setInt(1, date.getMonthValue());
+	            ps.setInt(2, date.getYear());
+
+	            try (ResultSet rs = ps.executeQuery()) {
+	                if (rs.next()) {
+	                    return rs.getInt("total");
+	                }
+	            }
+	        }
+	    } catch (SQLException ex) {
+	        logger.log("[ERROR] SQLException in getTotalMemberOrdersForMonth: " + ex.getMessage());
+	        ex.printStackTrace();
+	    } finally {
+	        release(conn);
+	    }
+
+	    return 0;
+	}
+
 
 
 }
