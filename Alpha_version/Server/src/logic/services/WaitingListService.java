@@ -66,7 +66,7 @@ public class WaitingListService {
             } else {
                 // SCENARIO: IMMEDIATE SEATING
                 // Allocate a physical table and seat the customer
-                int tableNum = tableService.allocateTable(dinersAmount, confirmationCode);
+                int tableNum = tableService.allocateTable(confirmationCode);
                 if (tableNum >= 0) {
                      Order newOrder = dbController.getOrderByConfirmationCodeInDB(confirmationCode);
                      dbController.seatCustomerInDB(newOrder.getOrderNumber(), tableNum);
