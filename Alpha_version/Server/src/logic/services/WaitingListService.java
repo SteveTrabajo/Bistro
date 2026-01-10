@@ -65,7 +65,7 @@ public class WaitingListService {
                 // Allocate a physical table and seat the customer
                 int tableNum = tableService.allocateTable(dinersAmount);
                 if (tableNum >= 0) {
-                     Order newOrder = dbController.getOrderByCode(confirmationCode);
+                     Order newOrder = dbController.getOrderByConfirmationCodeInDB(confirmationCode);
                      dbController.seatCustomerInDB(newOrder.getOrderNumber(), tableNum);
                 }
             }
@@ -164,7 +164,7 @@ public class WaitingListService {
         return dbController.updateOrderStatusInDB(confirmationCode, OrderStatus.CANCELLED);
     }
 
-    public boolean isUserInWaitingList(String confirmationCode) { // Changed int to String to match code type
+    public boolean isUserInWaitingList(String confirmationCode) { 
         return dbController.isUserInWaitingList(confirmationCode);
     }
     

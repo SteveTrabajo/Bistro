@@ -56,7 +56,7 @@ public class PaymentSubject {
 
 						client.sendToClient(new Message(Api.REPLY_PAYMENT_COMPLETE_OK, "Success"));
 						userFailureMap.remove(requester.getUserId());
-						WaitingListService.notifyPaymentCompletion(requester, tableService, logger);
+						TableService.notifyPaymentCompletion(requester, tableService, logger);
 					} catch (Exception dbEx) {
 						logger.log("[CRITICAL] Payment captured but DB update failed. Key: " + idempotencyKey);
 						client.sendToClient(new Message(Api.REPLY_PAYMENT_PENDING_VERIFICATION, "Verifying..."));

@@ -819,6 +819,21 @@ public class BistroDataBase_Controller {
 	
 	
 	// ****************************** Table Operations ******************************
+	public boolean updateOrderStatusInDB(String confirmationCode, OrderStatus status) {
+	    final String sql = "UPDATE orders SET status = ? WHERE user_id = ?";
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	            ps.setString(1, status.name());
+	            ps.setString(2, confirmationCode);
+	            return ps.executeUpdate() > 0;
+	        }
+	    } catch (SQLException ex) {
+	        logger.log("[ERROR] updateOrderStatusInDB: " + ex.getMessage());
+	        return false;
+	    } finally { release(conn); }
+	}
 	public List<Table> getAllTablesFromDB() {
 	    List<Table> tablesList = new ArrayList<>();
 	    String qry = "SELECT tableNum, capacity FROM tables"; 
