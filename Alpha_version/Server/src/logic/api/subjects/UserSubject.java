@@ -49,6 +49,7 @@ public final class UserSubject {
 			@SuppressWarnings("unchecked")
 			Map<String, Object> loginData = (Map<String, Object>) msg.getData();
 			User user = userService.getUserInfo(loginData);
+			System.out.println("UserType in login.member: " + (user != null ? user.getUserType() : "null"));
 			if (user != null) {
 				client.setInfo("user", user); // Store session user for authorization
 				client.sendToClient(new Message(Api.REPLY_LOGIN_MEMBER_OK, user));
