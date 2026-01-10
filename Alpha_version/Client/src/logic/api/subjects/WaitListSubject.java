@@ -97,6 +97,12 @@ public class WaitListSubject {
 						if(BistroClientGUI.client.getReservationCTRL().getReadyUserReservation() != null) {
 							BistroClientGUI.client.getReservationCTRL().getReadyUserReservation().setStatus(OrderStatus.NOTIFIED);
 						}
+						Alert alert = new Alert(Alert.AlertType.INFORMATION);
+						alert.setTitle("Notification Received");
+						alert.setHeaderText("You have been notified!");
+						alert.setContentText("Please proceed to the restaurant to be seated in table numer: "
+								+ msg.getData() + ". If you do not arrive within 15 minutes, you may lose your spot.");
+						alert.showAndWait();
 						BistroClientGUI.switchScreen("clientDashboardScreen", "Client Dashboard error message");
 					});
 				});
