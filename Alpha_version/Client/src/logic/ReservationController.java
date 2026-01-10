@@ -204,7 +204,7 @@ public class ReservationController {
 		Order userOrder = client.getReservationCTRL().getReadyUserReservation();
 		if (userOrder != null) {
 			return userOrder.getStatus() == OrderStatus.PENDING || userOrder.getStatus() == OrderStatus.NOTIFIED||
-					userOrder.getStatus() == OrderStatus.SEATED|| userOrder.getStatus() == OrderStatus.WAITING_LIST;
+					userOrder.getStatus() == OrderStatus.SEATED;
 		}
 		return false;
 	}

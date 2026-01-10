@@ -177,7 +177,7 @@ public class WaitingListPanel {
 
 		// Loop through the current list to count statuses
 		for (Order order : waitingList) {
-			if (order.getStatus() == OrderStatus.WAITING_LIST) {
+			if (order.getStatus() == OrderStatus.PENDING) {
 				waitingCount++;
 			} else if (order.getStatus() == OrderStatus.NOTIFIED) {
 				notifiedCount++;

@@ -11,6 +11,7 @@ import comms.Api;
 import comms.Message;
 import entities.Order;
 import enums.OrderStatus;
+import enums.OrderType;
 import gui.logic.staff.WaitingListPanel;
 
 /*
@@ -73,11 +74,7 @@ public class WaitingListController {
 	}
 	
 	public boolean isUserOnWaitingList() {
-		// Checks if user status locally is true OR if the active reservation says so
-		if (client.getReservationCTRL().getReadyUserReservation() != null) {
-			return client.getReservationCTRL().getReadyUserReservation().getStatus() == OrderStatus.WAITING_LIST;
-		}
-		return userOnWaitingList;
+	    return userOnWaitingList;
 	}
 	
 	public void setLeaveWaitingListSuccess(boolean status) {
