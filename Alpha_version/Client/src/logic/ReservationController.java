@@ -131,8 +131,8 @@ public class ReservationController {
 		LocalTime time = LocalTime.parse(selectedTimeSlot);
 		tempReservationData.clear();
 		tempReservationData.add(date);
-		tempReservationData.add(time);
 		tempReservationData.add(diners);
+		tempReservationData.add(time);
 		client.handleMessageFromClientUI(new Message(Api.ASK_CREATE_RESERVATION, tempReservationData));
 	}
 	
