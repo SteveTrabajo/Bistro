@@ -131,8 +131,8 @@ public class ReservationController {
 		LocalTime time = LocalTime.parse(selectedTimeSlot);
 		tempReservationData.clear();
 		tempReservationData.add(date);
-		tempReservationData.add(time);
 		tempReservationData.add(diners);
+		tempReservationData.add(time);
 		client.handleMessageFromClientUI(new Message(Api.ASK_CREATE_RESERVATION, tempReservationData));
 	}
 	
@@ -204,7 +204,7 @@ public class ReservationController {
 		Order userOrder = client.getReservationCTRL().getReadyUserReservation();
 		if (userOrder != null) {
 			return userOrder.getStatus() == OrderStatus.PENDING || userOrder.getStatus() == OrderStatus.NOTIFIED||
-					userOrder.getStatus() == OrderStatus.SEATED|| userOrder.getStatus() == OrderStatus.WAITING_LIST;
+					userOrder.getStatus() == OrderStatus.SEATED;
 		}
 		return false;
 	}

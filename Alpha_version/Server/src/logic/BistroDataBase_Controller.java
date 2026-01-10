@@ -601,15 +601,18 @@ public class BistroDataBase_Controller {
 		if (date == null) {
 			return orders;
 		}
+		boolean isToday = LocalDate.now().equals(date);
 		String qry;
 		// Different query logic for current date vs future dates
-		if (LocalDate.now().equals(date)) {
-		    qry = "SELECT order_time, number_of_guests " 
-		        + "FROM orders " 
-		        + "WHERE order_type IN ('RESERVATION', 'WAITLIST') "
-		        + "AND order_date = ? " 
-		        + "AND status IN ('PENDING', 'NOTIFIED', 'SEATED') "
-		        + "ORDER BY order_time ASC";
+		if (isToday) {
+			qry = "SELECT order_time, number_of_guests " 
+			           + "FROM orders " 
+			           + "WHERE order_type IN ('RESERVATION', 'WAITLIST') "
+			           + "AND order_date = ? " 
+			           + "AND status IN ('PENDING', 'NOTIFIED', 'SEATED') "
+			           + "AND order_time BETWEEN ? AND ? "
+			           + "ORDER BY order_time ASC";
+			System.out.println("is today query");
 		} else {
 			qry = "SELECT order_time, number_of_guests " + "FROM orders " + "WHERE order_type = 'RESERVATION' "
 					+ "AND order_date = ? " + "AND status IN ('PENDING') " + "ORDER BY order_time ASC";
@@ -619,7 +622,12 @@ public class BistroDataBase_Controller {
 			conn = borrow();
 			try (PreparedStatement ps = conn.prepareStatement(qry)) {
 				ps.setDate(1, Date.valueOf(date));
-
+				
+				if (isToday) {
+				    LocalTime now = LocalTime.now();
+				    ps.setTime(2, Time.valueOf(now));             
+				    ps.setTime(3, Time.valueOf(LocalTime.MAX)); 
+				}
 				try (ResultSet rs = ps.executeQuery()) {
 					while (rs.next()) {
 						Time sqlTime = rs.getTime("order_time");

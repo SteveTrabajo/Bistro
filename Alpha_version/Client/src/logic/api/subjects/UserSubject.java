@@ -33,11 +33,14 @@ public class UserSubject {
 			});
 
 			router.on("login", typeKey + ".notFound", msg -> {
+				BistroClient.awaitResponse = false;
+				Platform.runLater(() -> {
 				Alert alert = new Alert(Alert.AlertType.INFORMATION);
 				alert.setTitle("Login Failed");
 				alert.setHeaderText("User Not Found");
 				alert.setContentText("The username not found. Please check your username and try again.");
-				BistroClient.awaitResponse = false;
+				alert.showAndWait();
+				});
 			});
 
 			router.on("signout", typeKey + ".fail", msg -> {

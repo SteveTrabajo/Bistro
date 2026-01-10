@@ -19,15 +19,14 @@ public class WaitListSubject {
 	private WaitListSubject() {
 	}
 
-	public static void register(ClientRouter router,WaitingListController wlController) {
+	public static void register(ClientRouter router,WaitingListController waitingListCTRL) {
 				//Staff: Get All Data
 				router.on("waitinglist", "getAll.ok", msg -> {
 		            BistroClient.awaitResponse = false;
 					@SuppressWarnings
 					("unchecked")
 					ArrayList<Order> list = (ArrayList<Order>) msg.getData();
-					wlController.setWaitingList(list);
-					
+					waitingListCTRL.setWaitingList(list);
 				});
 				router.on("waitinglist", "getAll.fail", msg -> {
 		            BistroClient.awaitResponse = false;
@@ -38,7 +37,7 @@ public class WaitListSubject {
 		            BistroClient.awaitResponse = false;
 					Order order = (Order) msg.getData();
 					BistroClientGUI.client.getReservationCTRL().setReadyUserReservation(order);
-					wlController.setUserOnWaitingList(true);
+					waitingListCTRL.setUserOnWaitingList(true);
 				});
 
 				router.on("waitinglist", "join.fail", msg -> {
@@ -52,33 +51,31 @@ public class WaitListSubject {
 		            int table = (int) data.get("table");
 					BistroClientGUI.client.getReservationCTRL().setReadyUserReservation(order);
 					BistroClientGUI.client.getTableCTRL().setUserAllocatedTable(table);
-					wlController.setCanSeatImmediately(true);
+					waitingListCTRL.setCanSeatImmediately(true);
 				});
 
 				//Client/Staff: Leave Status
 				router.on("waitinglist", "leave.ok", msg -> {
 		            BistroClient.awaitResponse = false;
 					BistroClientGUI.client.getReservationCTRL().setReadyUserReservation(null);
-					wlController.setLeaveWaitingListSuccess(true);
-					wlController.setUserOnWaitingList(false);
+					waitingListCTRL.setLeaveWaitingListSuccess(true);
+					waitingListCTRL.setUserOnWaitingList(false);
 				});
 
 				router.on("waitinglist", "leave.fail", msg -> {
 		            BistroClient.awaitResponse = false;
-					wlController.setLeaveWaitingListSuccess(false);
+					waitingListCTRL.setLeaveWaitingListSuccess(false);
 				});
 
 				//Check if user is in waiting list
 				router.on("waitinglist", "isInWaitingList.yes", msg -> {
 		            BistroClient.awaitResponse = false;
-					if(BistroClientGUI.client.getReservationCTRL().getReadyUserReservation() != null) {
-						BistroClientGUI.client.getReservationCTRL().getReadyUserReservation().setStatus(OrderStatus.WAITING_LIST);
-					}
+					waitingListCTRL.setUserOnWaitingList(true);
 				});
 
 				router.on("waitinglist", "isInWaitingList.no", msg -> {
 		            BistroClient.awaitResponse = false;
-					wlController.setUserOnWaitingList(false);
+					waitingListCTRL.setUserOnWaitingList(false);
 					BistroClientGUI.client.getReservationCTRL().setReadyUserReservation(null);
 				});
 				router.on("waitinglist", "isInWaitingList.fail", msg -> {
@@ -150,7 +147,7 @@ public class WaitListSubject {
 				        alert.show();
 				        
 				        // Refresh the local waiting list view
-				        wlController.askWaitingList();
+				        waitingListCTRL.askWaitingList();
 				    });
 				});
 
@@ -170,7 +167,7 @@ public class WaitListSubject {
 		        router.on("waitinglist", "checkAvailability.ok", msg -> {
 		            BistroClient.awaitResponse = false;
 		            long estimatedWaitTime = (long) msg.getData();
-		            wlController.setEstimatedWaitTimeMinutes(estimatedWaitTime);
+		            waitingListCTRL.setEstimatedWaitTimeMinutes(estimatedWaitTime);
 		            });
 		        router.on("waitinglist", "checkAvailability.fail", msg -> {
 		        			            BistroClient.awaitResponse = false;

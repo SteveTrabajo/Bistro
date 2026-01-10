@@ -59,9 +59,6 @@ public class OrdersService {
 	
 	// ********************************Instance Methods ***********************************
 	
-	
-
-
 	/**
 	 * Creates a new Reservation in a thread-safe manner.
 	 * For reservations, it checks slot availability before insertion to avoid conflicts while handling concurrent requests.
@@ -71,6 +68,7 @@ public class OrdersService {
 	 */
 	public synchronized boolean createNewOrder(List<Object> data, OrderType orderType) {
 		// data: [0]userId, [1]date, [2]dinersAmount, [3]time, [4]Code
+		int userId = (int) data.get(0);
 		LocalDate date = (LocalDate) data.get(1);
 		int diners = (int) data.get(2);
 		LocalTime time = (LocalTime) data.get(3);
@@ -185,14 +183,26 @@ public class OrdersService {
 		//Get opening hours and existing reservations from DB:
 		List<LocalTime> openingHours = dbController.getOpeningHoursFromDB();
 		printOpeningHours(openingHours); //TODO: Remove debug prints later
+		LocalDate date = (LocalDate) requestData.get("date");
 		LocalTime openingTime = openingHours.get(0);
 		LocalTime closingTime = openingHours.get(1);
-		LocalDate date = (LocalDate) requestData.get("date");
+	    LocalTime effectiveOpeningTime = openingTime;
+	    // If the requested date is today, adjust the effective opening time:
+	    if (date.equals(LocalDate.now())) {
+	        LocalTime now = LocalTime.now();
+	        // If current time is after opening time, adjust effective opening time
+	        if (now.isAfter(openingTime)) {
+	            int minutes = now.getMinute();
+	            int remainder = minutes % slotStepMinutes; 
+	            int minutesToAdd = (remainder == 0) ? 0 : (slotStepMinutes - remainder);
+	            effectiveOpeningTime = now.plusMinutes(minutesToAdd).withSecond(0).withNano(0);
+	        }
+	    }
 		int dinersAmount = (int) requestData.get("dinersAmount");
 		List<Order> reservationsByDate = dbController.getOrderbyDate(date);
 		printReservationsByDate(reservationsByDate); //TODO: Remove debug prints later
 		//Compute available slots:
-		return computeAvailableSlots(openingTime, closingTime, dinersAmount, reservationsByDate);
+		return computeAvailableSlots(effectiveOpeningTime, closingTime, dinersAmount, reservationsByDate);
 	}
 	
 	/*
