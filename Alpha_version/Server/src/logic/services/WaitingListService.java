@@ -10,6 +10,7 @@ import java.util.Map;
 
 import dto.WaitListResponse;
 import entities.Order;
+import entities.User;
 import enums.OrderStatus;
 import enums.OrderType;
 import logic.BistroDataBase_Controller;
@@ -22,6 +23,7 @@ public class WaitingListService {
 	private final ServerLogger logger;
 	private final OrdersService ordersService;
 	private final TableService tableService;
+	private final UserService userService;
 	
 	public WaitingListService(BistroServer server,BistroDataBase_Controller dbController,OrdersService ordersService,TableService tableService, ServerLogger logger) {
 		this.dbController = dbController;
@@ -29,12 +31,13 @@ public class WaitingListService {
 		this.server = server;
 		this.ordersService = ordersService;
 		this.tableService = tableService;
+		this.userService = userService;
 	}
 
 	/**
      * Creates a new order.
      * Logic: 
-     * - If addToWaitlist is TRUE: Status is PENDING -> SQL Trigger adds to 'waiting_list' -> We UPDATE the time.
+     * - If addToWaitlist is TRUE: Status is WAITING_LIST -> SQL Trigger adds to 'waiting_list' -> We UPDATE the time.
      * - If addToWaitlist is FALSE: Status is SEATED -> SQL Trigger ignores it -> We manually seat the customer.
      * @return The generated confirmation code if successful, null otherwise.
      */
@@ -168,11 +171,79 @@ public class WaitingListService {
         return dbController.isUserInWaitingList(confirmationCode);
     }
     
-    // [NEW METHOD] - Optional: Use the View to get the live queue
-    /*
-    public List<WaitListEntry> getCurrentQueue() {
-         return dbController.getWaitingQueueFromView();
-    }
+    /**
+     * Logic for Members: Standard search by memberId.
+     */
+
+   public Object handleMemberWalkIn(int dinersAmount, String memberIdStr) {
+       Map<String, Object> loginData = new HashMap<>();
+       loginData.put("userType", "MEMBER");
+       loginData.put("memberCode", memberIdStr);
+
+       User user = userService.getUserInfo(loginData);
+       if (user == null) return null;
+
+       return processSeatingOrWaiting(dinersAmount, user.getUserId());
+   }
+
+   /**
+    * Logic for Guests using the existing findOrCreate logic in UserService
     */
+   public Object handleGuestWalkIn(int dinersAmount, String phone, String email) {
+       Map<String, Object> loginData = new HashMap<>();
+       loginData.put("userType", "GUEST");
+       loginData.put("phoneNumber", phone);
+       loginData.put("email", email);
+
+       User user = userService.getUserInfo(loginData);
+       if (user == null) return null;
+
+       return processSeatingOrWaiting(dinersAmount, user.getUserId());
+   }
+
+   /**
+    * Core algorithm logic
+    */
+   /**
+    * Shared logic for seating or waitlist registration.
+    * Returns a Map with the results.
+    */
+   private Object processSeatingOrWaiting(int dinersAmount, int userID) {
+       Object availability = checkAvailabilityAndSeat(dinersAmount, userID);
+       Map<String, Object> resultMap = new HashMap<>();
+
+       if (availability instanceof Map) {
+           // --- SCENARIO A: IMMEDIATE SEATING ---
+           @SuppressWarnings("unchecked")
+           Map<String, Object> successMap = (Map<String, Object>) availability;
+           Order order = (Order) successMap.get("order");
+           int tableNum = (int) successMap.get("table");
+
+           resultMap.put("status", "SEATED");
+           resultMap.put("userID", userID);
+           resultMap.put("confirmationCode", order.getConfirmationCode());
+           resultMap.put("tableNumber", tableNum);
+           return resultMap;
+       } 
+       else if (availability instanceof WaitListResponse) {
+           // --- SCENARIO B: ADDED TO WAITLIST ---
+           WaitListResponse res = (WaitListResponse) availability;
+           String code = createWaitListOrder(dinersAmount, userID, true, (int) res.getEstimatedWaitTimeMinutes());
+           
+           if (code != null) {
+               resultMap.put("status", "WAITING");
+               resultMap.put("userID", userID);
+               resultMap.put("confirmationCode", code);
+               resultMap.put("waitTime", res.getEstimatedWaitTimeMinutes());
+               resultMap.put("message", res.getMessage());
+               return resultMap;
+           }
+       }
+       return null; // Registration failed
+   }
+    public List<Order> getCurrentQueue() {
+        // We return a list of Order entities that are currently in the waitlist
+        return dbController.getWaitingQueueFromView();
+    }
 
 }

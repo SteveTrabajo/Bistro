@@ -109,8 +109,8 @@ public class WaitingListController {
 		client.handleMessageFromClientUI(new Message(Api.ASK_WAITING_LIST_CHECK_AVAILABILITY, dinersAmount));
 	}
 	
-	public void joinWaitingList(int dinersAmount) {
-		client.handleMessageFromClientUI(new Message(Api.ASK_WAITING_LIST_JOIN, dinersAmount));
+	public void joinWaitingList(Map<String, Object> details ) {
+		client.handleMessageFromClientUI(new Message(Api.ASK_WAITING_LIST_JOIN, details));
 	}
 
 	public void leaveWaitingList() {

@@ -1,6 +1,8 @@
 package gui.logic;
 
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import entities.User;
 import javafx.event.Event;
@@ -124,7 +126,10 @@ public class ClientJoinWaitingListScreen {
 	    Optional<ButtonType> result = alert.showAndWait();
 	    if (result.isPresent() && result.get() == joinButton) {
 	        System.out.println("User agreed to join the waiting list.");
-	        BistroClientGUI.client.getWaitingListCTRL().joinWaitingList(dinersAmount);
+	        Map<String, Object> details = new HashMap<>();
+	        details.put("dinersAmount", dinersAmount);
+	        details.put("estimatedWaitTimeMinutes", estimatedMinutes);
+	        BistroClientGUI.client.getWaitingListCTRL().joinWaitingList(details);
 	    } else {
 	        System.out.println("User declined to join the waiting list.");
 	    }

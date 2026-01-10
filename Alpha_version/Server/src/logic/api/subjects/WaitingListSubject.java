@@ -52,7 +52,7 @@ public class WaitingListSubject {
 		// Client sends: int (dinersAmount)
 		// Server uses: client.getInfo("user") to get contact info
 		router.on("waitingList", "checkAvailability", (msg, client) -> {
-			//TODO : add option to staff to add users to waitlist
+			// TODO : add option to staff to add users to waitlist
 			// A. Get Data from Message
 			int dinersAmount = (int) msg.getData();
 
@@ -73,8 +73,9 @@ public class WaitingListSubject {
 			if (result instanceof Map) {
 				// SUCCESS: Seated Immediately
 				Map<String, Object> resMap = (Map<String, Object>) result;
-				logger.log("[INFO] Immediate Seating Success. Order: " + ((Order)resMap.get("order")).getConfirmationCode());
-				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_SKIPPED, resMap));
+				logger.log("[INFO] Immediate Seating Success. Order: "
+						+ ((Order) resMap.get("order")).getConfirmationCode());
+				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_CHECK_AVALIBILTY_SKIPPED_TO_SEAT, resMap));
 
 			} else if (result instanceof WaitListResponse) {
 				// FULL: Must Wait
@@ -86,13 +87,13 @@ public class WaitingListSubject {
 
 		// 3. Add to Waitlist (User accepted the wait time)
 		// This handles the explicit request to join the queue
-		router.on("waitingList", "addToWaitList", (msg, client) -> {
+		router.on("waitingList", "join", (msg, client) -> {
 			// Expecting a Map or Object, but we can extract User ID from session too!
 			// Assuming for simplicity the client sends specific data,
 			// OR we can use the session user again:
 
 			@SuppressWarnings("unchecked")
-			java.util.Map<String, Object> data = (java.util.Map<String, Object>) msg.getData();
+			Map<String, Object> data = (Map<String, Object>) msg.getData();
 			int dinersAmount = (int) data.get("diners");
 			int waitTime = (int) data.get("waitTime");
 
@@ -119,6 +120,41 @@ public class WaitingListSubject {
 			} else {
 				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_LEAVE_FAIL, null));
 			}
+		});
+		router.on("waitingList", "getAll", (msg, client) -> {
+			client.sendToClient(new Message(Api.REPLY_GET_WAITING_LIST_OK, waitingListService.getCurrentQueue()));
+			if (waitingListService.getCurrentQueue() != null) {
+				logger.log("[INFO] Sent current waiting list to client: " + client);
+			} else {
+				logger.log("[ERROR] Failed to retrieve waiting list for client: " + client);
+				client.sendToClient(new Message(Api.REPLY_GET_WAITING_LIST_FAIL, null));
+			}
+		});
+		router.on("waitingList", "addWalkIn", (msg, client) -> {
+		    try {
+		        @SuppressWarnings("unchecked")
+		        Map<String, Object> data = (Map<String, Object>) msg.getData();
+		        
+		        int dinersAmount = ((Number) data.get("diners")).intValue();
+		        String type = (String) data.get("type");
+		        
+		        Object response = null;
+		        if ("MEMBER".equals(type)) {
+		            response = waitingListService.handleMemberWalkIn(dinersAmount, (String) data.get("memberId"));
+		        } else if ("GUEST".equals(type)) {
+		            response = waitingListService.handleGuestWalkIn(dinersAmount, (String) data.get("phone"), (String) data.get("email"));
+		        }
+
+		        if (response != null) {
+		            // Could be Order or WaitListResponse
+		            client.sendToClient(new Message(Api.REPLY_WAITING_LIST_ADD_WALKIN_OK, response));
+		        } else {
+		            client.sendToClient(new Message(Api.REPLY_WAITING_LIST_ADD_WALKIN_FAIL, "User registration failed"));
+		        }
+		    } catch (Exception e) {
+		        logger.log("[ERROR] addWalkIn critical failure: " + e.getMessage());
+		        client.sendToClient(new Message(Api.REPLY_WAITING_LIST_ADD_WALKIN_FAIL, "Internal Server Error"));
+		    }
 		});
 	}
 }

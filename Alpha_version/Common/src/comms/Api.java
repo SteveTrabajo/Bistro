@@ -145,8 +145,8 @@ public final class Api {
 	public static final String REPLY_WAITING_LIST_IS_NOT_IN_LIST = "waitinglist.isInWaitingList.no";
 	public static final String REPLY_WAITING_LIST_IS_IN_LIST_FAIL = "waitinglist.isInWaitingList.fail";
 	public static final String REPLY_WAITING_LIST_CHECK_AVAILABILITY_OK = "waitinglist.checkAvailability.ok";
+	public static final String REPLY_WAITING_LIST_CHECK_AVALIBILTY_SKIPPED_TO_SEAT = "waitinglist.checkAvailability.skipped";
     public static final String REPLY_WAITING_LIST_JOIN_OK = "waitinglist.join.ok";
-    public static final String REPLY_WAITING_LIST_SKIPPED = "waitinglist.join.skipped";
     public static final String REPLY_WAITING_LIST_JOIN_FAIL = "waitinglist.join.fail";
     public static final String REPLY_WAITING_LIST_LEAVE_OK = "waitinglist.leave.ok";
     public static final String REPLY_WAITING_LIST_LEAVE_FAIL = "waitinglist.leave.fail";
@@ -155,6 +155,7 @@ public final class Api {
     public static final String REPLY_GET_WAITING_LIST_OK = "waitinglist.getAll.ok";
     public static final String REPLY_GET_WAITING_LIST_FAIL = "waitinglist.getAll.fail";
     public static final String REPLY_WAITING_LIST_ADD_WALKIN_OK = "waitinglist.addWalkIn.ok";
+    public static final String REPLY_WAITING_LIST_ADD_WALKIN_FAIL = "waitinglist.addWalkIn.fail";
     
 // == Payment subject == //
     

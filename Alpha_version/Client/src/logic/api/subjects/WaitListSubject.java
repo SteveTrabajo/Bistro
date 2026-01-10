@@ -2,6 +2,7 @@ package logic.api.subjects;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import entities.Order;
 import entities.Table;
@@ -112,26 +113,54 @@ public class WaitListSubject {
 				});
 				
 				router.on("waitinglist", "addWalkIn.ok", msg -> {
-		            BistroClient.awaitResponse = false;
-		            Platform.runLater(() -> {
-		                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-		                alert.setTitle("Success");
-		                alert.setHeaderText(null);
-		                alert.setContentText("Walk-in party added to the list.");
-		                alert.show();
-		                wlController.askWaitingList();
-		            });
-		        });
+				    BistroClient.awaitResponse = false;
+				    
+				    // Extract the data map sent from the server
+				    @SuppressWarnings("unchecked")
+				    Map<String, Object> responseData = (Map<String, Object>) msg.getData();
+				    
+				    String status = (String) responseData.get("status");
+				    String code = (String) responseData.get("confirmationCode");
 
-		        router.on("waitinglist", "addWalkIn.fail", msg -> {
-		            BistroClient.awaitResponse = false;
-		            Platform.runLater(() -> {
-		                Alert alert = new Alert(Alert.AlertType.ERROR);
-		                alert.setTitle("Error");
-		                alert.setContentText("Failed to add walk-in.");
-		                alert.show();
-		            });
-		        });
+				    Platform.runLater(() -> {
+				        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+				        alert.setTitle("Walk-In Success");
+				        
+				        StringBuilder content = new StringBuilder();
+				        content.append("Successfully registered!\n");
+				        content.append("Confirmation Code: ").append(code).append("\n");
+
+				        if ("SEATED".equals(status)) {
+				            int tableNum = (int) responseData.get("tableNumber");
+				            alert.setHeaderText("Table Assigned Immediately!");
+				            content.append("Please proceed to Table Number: ").append(tableNum);
+				        } else {
+				            long waitTime = ((Number) responseData.get("waitTime")).longValue();
+				            alert.setHeaderText("Added to Waiting List");
+				            content.append("Estimated Wait Time: ").append(waitTime).append(" minutes.");
+				        }
+
+				        alert.setContentText(content.toString());
+				        alert.show();
+				        
+				        // Refresh the local waiting list view
+				        wlController.askWaitingList();
+				    });
+				});
+
+				router.on("waitinglist", "addWalkIn.fail", msg -> {
+				    BistroClient.awaitResponse = false;
+				    // Extract error message if the server sent one
+				    String errorMsg = (msg.getData() instanceof String) ? (String) msg.getData() : "Unknown error occurred.";
+				    
+				    Platform.runLater(() -> {
+				        Alert alert = new Alert(Alert.AlertType.ERROR);
+				        alert.setTitle("Error");
+				        alert.setHeaderText("Failed to add walk-in");
+				        alert.setContentText(errorMsg);
+				        alert.show();
+				    });
+				});
 		        router.on("waitinglist", "checkAvailability.ok", msg -> {
 		            BistroClient.awaitResponse = false;
 		            long estimatedWaitTime = (long) msg.getData();
