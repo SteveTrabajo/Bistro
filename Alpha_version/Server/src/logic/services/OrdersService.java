@@ -183,14 +183,26 @@ public class OrdersService {
 		//Get opening hours and existing reservations from DB:
 		List<LocalTime> openingHours = dbController.getOpeningHoursFromDB();
 		printOpeningHours(openingHours); //TODO: Remove debug prints later
+		LocalDate date = (LocalDate) requestData.get("date");
 		LocalTime openingTime = openingHours.get(0);
 		LocalTime closingTime = openingHours.get(1);
-		LocalDate date = (LocalDate) requestData.get("date");
+	    LocalTime effectiveOpeningTime = openingTime;
+	    // If the requested date is today, adjust the effective opening time:
+	    if (date.equals(LocalDate.now())) {
+	        LocalTime now = LocalTime.now();
+	        // If current time is after opening time, adjust effective opening time
+	        if (now.isAfter(openingTime)) {
+	            int minutes = now.getMinute();
+	            int remainder = minutes % slotStepMinutes; 
+	            int minutesToAdd = (remainder == 0) ? 0 : (slotStepMinutes - remainder);
+	            effectiveOpeningTime = now.plusMinutes(minutesToAdd).withSecond(0).withNano(0);
+	        }
+	    }
 		int dinersAmount = (int) requestData.get("dinersAmount");
 		List<Order> reservationsByDate = dbController.getOrderbyDate(date);
 		printReservationsByDate(reservationsByDate); //TODO: Remove debug prints later
 		//Compute available slots:
-		return computeAvailableSlots(openingTime, closingTime, dinersAmount, reservationsByDate);
+		return computeAvailableSlots(effectiveOpeningTime, closingTime, dinersAmount, reservationsByDate);
 	}
 	
 	/*
