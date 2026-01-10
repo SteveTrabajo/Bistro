@@ -44,4 +44,23 @@ public class TableService {
 	    return -1;
 	}
 
+	public int allocateTable(int dinersAmount, String confirmationCode) {
+			    int tableNum = dbController.findFreeTableForGroup(dinersAmount);	    
+	    if (tableNum != -1) {
+	        Order order = dbController.getOrderByConfirmationCodeInDB(confirmationCode);
+	        if (order == null) {
+	            logger.log("[ERROR] Allocation failed: Order not found for " + confirmationCode);
+	            return -1;
+	        }
+	        boolean sessionCreated = dbController.createTableSession(order.getOrderNumber(), tableNum);	        
+	        if (sessionCreated) {
+	            dbController.updateOrderStatusInDB(confirmationCode, OrderStatus.SEATED);
+	            logger.log("[INFO] Allocated Table " + tableNum + " to Order " + confirmationCode);
+	            return tableNum;
+	        }
+	    }	    
+	    logger.log("[WARN] No tables available for group size " + dinersAmount);
+	    return -1;
+	}
+
 }
