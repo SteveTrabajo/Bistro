@@ -90,31 +90,31 @@ public class UserSubject {
 		router.on("user", "forgotMemberID.ok", msg -> {
 			BistroClient.awaitResponse = false;
 			String memberID = (String) msg.getData();
-			BistroClientGUI.client.getUserCTRL().handleForgotIDResponse(memberID);
+			userController.handleForgotIDResponse(memberID);
 		});
 		
 		router.on("user", "forgotMemberID.fail", msg -> {
 			BistroClient.awaitResponse = false;
-			BistroClientGUI.client.getUserCTRL().handleForgotIDResponse("NOT_FOUND");
+			userController.handleForgotIDResponse("NOT_FOUND");
 		});
 		
 		// Member info update responses:
 		router.on("member", "updateInfo.ok", msg -> {
 			BistroClient.awaitResponse = false;
 			UserData updatedUser = (UserData) msg.getData();
-			User currentUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
+			User currentUser = userController.getLoggedInUser();
 			currentUser.setFirstName(updatedUser.getFirstName());
 			currentUser.setLastName(updatedUser.getLastName());
 			currentUser.setAddress(updatedUser.getAddress());
 			currentUser.setEmail(updatedUser.getEmail());
 			currentUser.setPhoneNumber(updatedUser.getPhone());
 			currentUser.setMemberCode(updatedUser.getMemberCode());
-			BistroClientGUI.client.getUserCTRL().setUserUpdateSuccessFlag(true);
+			userController.setUserUpdateSuccessFlag(true);
 		});
 		
 		router.on("member", "updateInfo.fail", msg -> {
 			BistroClient.awaitResponse = false;
-			BistroClientGUI.client.getUserCTRL().setUserUpdateSuccessFlag(false);
+			userController.setUserUpdateSuccessFlag(false);
 			Alert alert = new Alert(Alert.AlertType.ERROR);
 			alert.setTitle("Update Failed");
 			alert.setHeaderText("Failed to Update User Information");
@@ -125,7 +125,7 @@ public class UserSubject {
 		// Member registration responses:
 		router.on("user", "registerNewMember.ok", msg -> {
 			BistroClient.awaitResponse = false;
-			BistroClientGUI.client.getUserCTRL().setRegistrationSuccessFlag(true);
+			userController.setRegistrationSuccessFlag(true);
 		});
 		
 		router.on("user", "registerNewMember.fail", msg -> {

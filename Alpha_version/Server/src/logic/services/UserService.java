@@ -1,5 +1,7 @@
 package logic.services;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import entities.User;
@@ -24,7 +26,16 @@ public class UserService {
 	}
 	//************************* Instance Methods *************************
 	
-	//TODO : Add method to register memeber account by staff
+	/**
+	 * Registers a new member with the provided data.
+	 * 
+	 * @param newMemberData List of strings containing new member information
+	 * [0]: firstName, [1]: lastName, [2]: email, [3]: phoneNumber, [4]: address
+	 * @return true if registration was successful, false otherwise
+	 */
+	public boolean registerNewMember(List<String> newMemberData) {
+		return dbController.registerNewMember(newMemberData);
+	}
 	
 	/**
 	 * Creates a new staff account with password hashing and validation.

@@ -1,6 +1,8 @@
 package logic.api.subjects;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import common.InputCheck;
@@ -126,6 +128,21 @@ public final class UserSubject {
 				client.sendToClient(new Message(Api.REPLY_MEMBER_UPDATE_INFO_FAILED, null));
 			}
 		});
+		
+		router.on("user", "registerNewMember", (msg,client) -> {
+			@SuppressWarnings("unchecked")
+			List<String> newMemberData = (ArrayList<String>) msg.getData();
+			boolean success = userService.registerNewMember(newMemberData);
+			if (success) {
+				logger.log("[INFO] New member registered successfully.");
+				client.sendToClient(new Message(Api.REPLY_REGISTER_NEW_MEMBER_OK, null));
+			} else {
+				logger.log("[ERROR] New member registration failed.");
+				client.sendToClient(new Message(Api.REPLY_REGISTER_NEW_MEMBER_FAILED, null));
+			}
+		});
+		
+	
 
 		// Request: "staff.create"
 		router.on("staff", "create", (msg, client) -> {

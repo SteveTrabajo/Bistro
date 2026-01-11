@@ -10,141 +10,144 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane styleClass="ur-root" stylesheets="@../../css/staff/MemberRegistraionPanelStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.staff.MemberRegistrationScreen">
-  <padding>
-    <Insets bottom="18" left="18" right="18" top="18" />
-  </padding>
-  <top>
-    <HBox alignment="CENTER_LEFT" spacing="12">
-      <VBox spacing="4" HBox.hgrow="ALWAYS">
-        <Label styleClass="ur-title" text="User Registration" />
-        <Label styleClass="ur-subtitle" text="Register new club members" />
-      </VBox>
-    </HBox>
-  </top>
+<BorderPane styleClass="ur-root"
+	stylesheets="@../../css/staff/MemberRegistraionPanelStyles.css"
+	xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="gui.logic.staff.MemberRegistrationPanel">
+	<padding>
+		<Insets bottom="18" left="18" right="18" top="18" />
+	</padding>
+	<top>
+		<HBox alignment="CENTER_LEFT" spacing="12">
+			<VBox spacing="4" HBox.hgrow="ALWAYS">
+				<Label styleClass="ur-title" text="User Registration" />
+				<Label styleClass="ur-subtitle"
+					text="Register new club members" />
+			</VBox>
+		</HBox>
+	</top>
 
-  <center>
-    <HBox spacing="16">
-      <!-- LEFT: Form card -->
-      <VBox spacing="14" styleClass="ur-card" HBox.hgrow="ALWAYS">
-        <HBox alignment="CENTER_LEFT" spacing="8">
-          <Label styleClass="ur-card-title" text="New Member Registration">
-                  <graphic>
-                     <ImageView fitHeight="29.0" fitWidth="29.0">
-                        <image>
-                           <Image url="@resources/personIconBlue.png" />
-                        </image>
-                     </ImageView>
-                  </graphic></Label>
-        </HBox>
-        <!-- Permission Notice -->
-        <VBox spacing="6" styleClass="ur-notice">
-          <HBox alignment="CENTER_LEFT" spacing="8">
-            <Label styleClass="ur-notice-title" text="Permission Notice:" />
-          </HBox>
-          <Label styleClass="ur-notice-text" text="You are authorized to register new members. All registrations are logged and can be audited." wrapText="true" />
-        </VBox>
-        <!-- Fields -->
-        <GridPane hgap="12" vgap="10">
-          <columnConstraints>
-            <ColumnConstraints hgrow="ALWAYS" />
-          </columnConstraints>
-          <Label styleClass="ur-field-label" text="First Name *" GridPane.rowIndex="0">
-                  <graphic>
-                     <ImageView fitHeight="19.0" fitWidth="19.0">
-                        <image>
-                           <Image url="@resources/personIconGery.png" />
-                        </image>
-                     </ImageView>
-                  </graphic></Label>
-          <TextField fx:id="txtfirstName" promptText="Enter member's first name" styleClass="ur-field" GridPane.rowIndex="1" />
-          <Label styleClass="ur-field-label" text="Last Name *" GridPane.rowIndex="2">
-                  <graphic>
-                     <ImageView fitHeight="18.0" fitWidth="18.0">
-                        <image>
-                           <Image url="@resources/personIconGery.png" />
-                        </image>
-                     </ImageView>
-                  </graphic></Label>
-          <TextField fx:id="txtlastName" promptText="Enter member's last name" styleClass="ur-field" GridPane.rowIndex="3" />
-          <Label styleClass="ur-field-label" text="Email Address *" GridPane.rowIndex="4">
-                  <graphic>
-                     <ImageView fitHeight="19.0" fitWidth="19.0">
-                        <image>
-                           <Image url="@resources/mail.png" />
-                        </image>
-                     </ImageView>
-                  </graphic></Label>
-          <TextField fx:id="txtEmail" promptText="Enter member's email address" styleClass="ur-field" GridPane.rowIndex="5" />
-          <Label styleClass="ur-field-label" text="Phone Number *" GridPane.rowIndex="6">
-                  <graphic>
-                     <ImageView fitHeight="20.0" fitWidth="20.0">
-                        <image>
-                           <Image url="@resources/phone.png" />
-                        </image>
-                     </ImageView>
-                  </graphic></Label>
-          <TextField fx:id="txtPhone" promptText="Enter member's phone number" styleClass="ur-field" GridPane.rowIndex="7" />
-          <Label styleClass="ur-field-label" text="Address *" GridPane.rowIndex="8">
-                  <graphic>
-                     <ImageView fitHeight="15.0" fitWidth="15.0">
-                        <image>
-                           <Image url="@resources/location.png" />
-                        </image>
-                     </ImageView>
-                  </graphic></Label>
-          <TextField fx:id="txtAddress" promptText="Enter member's address" styleClass="ur-field" GridPane.rowIndex="9" />
-               <rowConstraints>
-                  <RowConstraints />
-                  <RowConstraints />
-                  <RowConstraints />
-                  <RowConstraints />
-                  <RowConstraints />
-                  <RowConstraints />
-                  <RowConstraints />
-                  <RowConstraints />
-                  <RowConstraints />
-                  <RowConstraints />
-                  <RowConstraints />
-                  <RowConstraints />
-                  <RowConstraints />
-               </rowConstraints>
-        </GridPane>
-        <!-- Submit -->
-        <Button fx:id="btnRegister" onAction="#btnRegister" styleClass="ur-primary-btn" text="Register New Member" />
-      </VBox>
-      <!-- RIGHT: Stats + Recent -->
-      <VBox prefWidth="340" spacing="16">
-        <!-- Stats card -->
-        <VBox spacing="10" styleClass="ur-card">
-          <Label styleClass="ur-card-title" text="Registration Stats" />
-          <GridPane hgap="10" vgap="10">
-            <columnConstraints>
-              <ColumnConstraints hgrow="ALWAYS" />
-              <ColumnConstraints halignment="RIGHT" />
-            </columnConstraints>
-            <Label styleClass="ur-small-muted" text="Total Members" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-            <Label fx:id="lblTotalMembers" styleClass="ur-stat-number" text="0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-            <Region styleClass="ur-divider" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="1" />
-            <Label styleClass="ur-small-muted" text="This Month" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-            <Label fx:id="lblThisMonth" styleClass="ur-stat-number-green" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <Region styleClass="ur-divider" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="3" />
-            <Label styleClass="ur-small-muted" text="This Week" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-            <Label fx:id="lblThisWeek" styleClass="ur-stat-number-orange" text="0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                  <rowConstraints>
-                     <RowConstraints />
-                     <RowConstraints />
-                     <RowConstraints />
-                     <RowConstraints />
-                     <RowConstraints />
-                  </rowConstraints>
-          </GridPane>
-        </VBox>
-      </VBox>
-    </HBox>
-  </center>
+	<center>
+		<HBox spacing="16">
+			<!-- LEFT: Form card -->
+			<VBox spacing="14" styleClass="ur-card" HBox.hgrow="ALWAYS">
+				<HBox alignment="CENTER_LEFT" spacing="8">
+					<Label styleClass="ur-card-title"
+						text="New Member Registration">
+						<graphic>
+							<ImageView fitHeight="29.0" fitWidth="29.0">
+								<image>
+									<Image url="@resources/personIconBlue.png" />
+								</image>
+							</ImageView>
+						</graphic>
+					</Label>
+				</HBox>
+				<!-- Permission Notice -->
+				<VBox spacing="6" styleClass="ur-notice">
+					<HBox alignment="CENTER_LEFT" spacing="8">
+						<Label styleClass="ur-notice-title"
+							text="Permission Notice:" />
+					</HBox>
+					<Label styleClass="ur-notice-text"
+						text="You are authorized to register new members. All registrations are logged and can be audited."
+						wrapText="true" />
+				</VBox>
+				<!-- Fields -->
+				<GridPane hgap="12" vgap="10">
+					<columnConstraints>
+						<ColumnConstraints hgrow="ALWAYS" />
+					</columnConstraints>
+					<Label styleClass="ur-field-label" text="First Name *"
+						GridPane.rowIndex="0">
+						<graphic>
+							<ImageView fitHeight="19.0" fitWidth="19.0">
+								<image>
+									<Image url="@resources/personIconGery.png" />
+								</image>
+							</ImageView>
+						</graphic>
+					</Label>
+					<TextField fx:id="txtfirstName"
+						promptText="Enter member's first name" styleClass="ur-field"
+						GridPane.rowIndex="1" />
+					<Label styleClass="ur-field-label" text="Last Name *"
+						GridPane.rowIndex="2">
+						<graphic>
+							<ImageView fitHeight="18.0" fitWidth="18.0">
+								<image>
+									<Image url="@resources/personIconGery.png" />
+								</image>
+							</ImageView>
+						</graphic>
+					</Label>
+					<TextField fx:id="txtlastName"
+						promptText="Enter member's last name" styleClass="ur-field"
+						GridPane.rowIndex="3" />
+					<Label styleClass="ur-field-label" text="Email Address *"
+						GridPane.rowIndex="4">
+						<graphic>
+							<ImageView fitHeight="19.0" fitWidth="19.0">
+								<image>
+									<Image url="@resources/mail.png" />
+								</image>
+							</ImageView>
+						</graphic>
+					</Label>
+					<TextField fx:id="txtEmail"
+						promptText="Enter member's email address" styleClass="ur-field"
+						GridPane.rowIndex="5" />
+					<Label styleClass="ur-field-label" text="Phone Number *"
+						GridPane.rowIndex="6">
+						<graphic>
+							<ImageView fitHeight="20.0" fitWidth="20.0">
+								<image>
+									<Image url="@resources/phone.png" />
+								</image>
+							</ImageView>
+						</graphic>
+					</Label>
+					<TextField fx:id="txtPhone"
+						promptText="Enter member's phone number" styleClass="ur-field"
+						GridPane.rowIndex="7" />
+					<Label styleClass="ur-field-label" text="Address *"
+						GridPane.rowIndex="8">
+						<graphic>
+							<ImageView fitHeight="15.0" fitWidth="15.0">
+								<image>
+									<Image url="@resources/location.png" />
+								</image>
+							</ImageView>
+						</graphic>
+					</Label>
+					<TextField fx:id="txtAddress"
+						promptText="Enter member's address" styleClass="ur-field"
+						GridPane.rowIndex="9" />
+					<rowConstraints>
+						<RowConstraints />
+						<RowConstraints />
+						<RowConstraints />
+						<RowConstraints />
+						<RowConstraints />
+						<RowConstraints />
+						<RowConstraints />
+						<RowConstraints />
+						<RowConstraints />
+						<RowConstraints />
+						<RowConstraints />
+						<RowConstraints />
+						<RowConstraints />
+					</rowConstraints>
+				</GridPane>
+				<!-- Submit -->
+				<Button fx:id="btnRegister" onAction="#btnRegister"
+					styleClass="ur-primary-btn" text="Register New Member" />
+			</VBox>
+			<!-- RIGHT: Stats + Recent -->
+			<VBox prefWidth="340" spacing="16" />
+		</HBox>
+	</center>
 </BorderPane>

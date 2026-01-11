@@ -3,6 +3,7 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
@@ -24,37 +25,23 @@ public class MemberRegistrationPanel{
     //****************************** FXML Variables ******************************
     @FXML 
     private TextField txtfirstName;
+    
     @FXML
     private TextField txtlastName;
+    
     @FXML
     private TextField txtEmail;
+    
     @FXML 
     private TextField txtPhone;
+    
     @FXML
     private TextField txtAddress;
 
-    @FXML 
-    private Label lblTotalMembers;
-    @FXML 
-    private Label lblThisMonth;
-    @FXML 
-    private Label lblThisWeek;
     @FXML
-    private Label lblError;
+    private Button btnRegister;
 
-    private int totalMembers = 0;
-    private int monthCount = 0;
-    private int weekCount = 0;
-
-    private LocalDate statsDateAnchor = LocalDate.now(); // used to reset week/month counters when time changes
-    
     //****************************** FXML Methods ******************************
-    
-    public void initialize() {
-    	BistroClientGUI.client.getUserCTRL().requestMemberRegistrationStats();
-		ArrayList<Integer> stats = BistroClientGUI.client.getUserCTRL().getMemberRegistrationStats();
-		refreshStatsLabels(stats);
-	}
     
     @FXML
     public void btnRegister(Event event) {
@@ -65,7 +52,7 @@ public class MemberRegistrationPanel{
         String address = txtAddress.getText().trim();
         String errorMessage = InputCheck.validatePersonalDetails(firstName, lastName, phone, email, address);
 		if (!errorMessage.isEmpty()) {
-			lblError.setText(errorMessage);
+			showError("Invalid Input", errorMessage);
 			return;
 		}
 		
@@ -78,15 +65,12 @@ public class MemberRegistrationPanel{
 			newMemberData.add(address);
 			BistroClientGUI.client.getUserCTRL().RegisterNewMember(newMemberData);
 			if(BistroClientGUI.client.getUserCTRL().getRegistrationSuccessFlag()) {
-				ArrayList<Integer> updatedStats = BistroClientGUI.client.getUserCTRL().getMemberRegistrationStats();
 			    showInfo("Registration Successful", "New member has been registered successfully.");
-			    refreshStatsLabels(updatedStats);
 			    clearForm();
 			}
         }
     }
     
-
     public void clearForm() {
     	txtfirstName.clear();
     	txtlastName.clear();
@@ -94,16 +78,6 @@ public class MemberRegistrationPanel{
     	txtPhone.clear();
     	txtAddress.clear();
     }
-
-    public void refreshStatsLabels(List<Integer> updatedStats) {
-    	this.totalMembers = updatedStats.get(0);
-		this.monthCount = updatedStats.get(1);
-		this.weekCount = updatedStats.get(2);
-    	lblTotalMembers.setText(String.valueOf(totalMembers));
-    	lblThisMonth.setText(String.valueOf(monthCount));
-    	lblThisWeek.setText(String.valueOf(weekCount));
-    }
-
     
     public void showError(String title, String content) {
         Alert a = new Alert(Alert.AlertType.ERROR);

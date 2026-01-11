@@ -535,6 +535,156 @@ public class BistroDataBase_Controller {
 		}
 		return usersList;
 	}
+	
+	/**
+	 * Generates a unique 6-digit member_code not already present in the members table.
+	 * * @param conn Active database connection
+	 * @return Unique 6-digit member_code
+	 * @throws SQLException if unable to generate a unique ID after multiple attempts
+	 */
+	public int generateUniqueMemberCode(Connection conn) throws SQLException {
+	    Random random = new Random();
+	    String checkSql = "SELECT 1 FROM members WHERE member_code = ?"; 
+	    
+	    try (PreparedStatement ps = conn.prepareStatement(checkSql)) {
+	        for (int i = 0; i < 50; i++) {
+	            int candidate = 100000 + random.nextInt(900000);
+	            ps.setInt(1, candidate);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                if (!rs.next()) {
+	                    return candidate;
+	                }
+	            }
+	        }
+	    }
+	    throw new SQLException("Failed to generate unique 6-digit member_code after 50 attempts.");
+	}
+	
+	
+	public boolean registerNewMember(List<String> newMemberData) {
+		String fName = newMemberData.get(0);
+		String lName = newMemberData.get(1);
+		String email = newMemberData.get(2);
+		String phoneNumber = newMemberData.get(3);
+		String address = newMemberData.get(4);
+
+		if (email != null && email.trim().isEmpty())
+			email = null;
+		if (phoneNumber != null && phoneNumber.trim().isEmpty())
+			phoneNumber = null;
+
+		Connection conn = null;
+		PreparedStatement psCheck = null;
+		PreparedStatement psUpdateUser = null;
+		PreparedStatement psInsertUser = null;
+		PreparedStatement psInsertMember = null;
+		ResultSet rs = null;
+
+		try {
+			conn = borrow();
+			conn.setAutoCommit(false);
+			int userId = -1;
+
+			// first step: check if user exists in users table by phone or email
+			String checkSql = "SELECT user_id, type FROM users WHERE (phoneNumber = ? AND phoneNumber IS NOT NULL) OR (email = ? AND email IS NOT NULL)";
+			psCheck = conn.prepareStatement(checkSql);
+			psCheck.setString(1, phoneNumber);
+			psCheck.setString(2, email);
+			rs = psCheck.executeQuery();
+
+			if (rs.next()) {
+				// case 1: user exists
+				String existingType = rs.getString("type");
+				userId = rs.getInt("user_id");
+
+				if ("GUEST".equals(existingType)) {
+					// case 1a: existing user is a GUEST - update to MEMBER
+					String updateSql = "UPDATE users SET type = 'MEMBER', email = COALESCE(?, email), phoneNumber = COALESCE(?, phoneNumber) WHERE user_id = ?";
+					psUpdateUser = conn.prepareStatement(updateSql);
+					psUpdateUser.setString(1, email);
+					psUpdateUser.setString(2, phoneNumber);
+					psUpdateUser.setInt(3, userId);
+					psUpdateUser.executeUpdate();
+				} else {
+					// case 1b: existing user is MEMBER or STAFF - cannot register
+					System.out.println("Registration failed: User already exists with type " + existingType);
+					conn.rollback();// cancel changes
+					return false;
+				}
+
+			} else {
+				// case 2: user does not exist - create new user
+				userId = generateRandomUserId(conn);
+				// insert new user as MEMBER
+				String insertUserSql = "INSERT INTO users (user_id, phoneNumber, email, type) VALUES (?, ?, ?, 'MEMBER')";
+				psInsertUser = conn.prepareStatement(insertUserSql);
+				psInsertUser.setInt(1, userId);
+				psInsertUser.setString(2, phoneNumber);
+				psInsertUser.setString(3, email);
+				psInsertUser.executeUpdate();
+			}
+
+			// case 3: insert new member record
+			int memberCode = generateUniqueMemberCode(conn);
+			// insert into members table
+			String insertMemberSql = "INSERT INTO members (user_id, member_code, f_name, l_name, address) VALUES (?, ?, ?, ?, ?)";
+			psInsertMember = conn.prepareStatement(insertMemberSql);
+			psInsertMember.setInt(1, userId);
+			psInsertMember.setInt(2, memberCode);
+			psInsertMember.setString(3, fName);
+			psInsertMember.setString(4, lName);
+			psInsertMember.setString(5, address);
+			psInsertMember.executeUpdate();
+			conn.commit(); // save changes
+			return true;
+		} catch (SQLException ex) {
+			logger.log("[ERROR] SQLException in registerNewMember: " + ex.getMessage());
+			ex.printStackTrace();
+			if (conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			return false;
+		} finally {
+			// close all resources
+			try {
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+			}
+			try {
+				if (psCheck != null)
+					psCheck.close();
+			} catch (SQLException e) {
+			}
+			try {
+				if (psUpdateUser != null)
+					psUpdateUser.close();
+			} catch (SQLException e) {
+			}
+			try {
+				if (psInsertUser != null)
+					psInsertUser.close();
+			} catch (SQLException e) {
+			}
+			try {
+				if (psInsertMember != null)
+					psInsertMember.close();
+			} catch (SQLException e) {
+			}
+			// finally block
+			if (conn != null) {
+				try {
+					conn.setAutoCommit(true); // החזרה למצב ברירת מחדל לפני החזרה ל-Pool
+				} catch (SQLException e) {
+				}
+				release(conn); // שחרור החיבור
+			}
+		}
+	}
 
 	// ****************************** Order Operations ******************************
 
@@ -1473,7 +1623,8 @@ public class BistroDataBase_Controller {
 	public void updateOrderTimeAndDateToNow(String confirmationCode) {
 		String sql = "UPDATE orders SET order_date = ?, order_time = ?, order_type = 'RESERVATION' WHERE confirmation_code = ?";
 		
-	}	
+	}
+
 
 
 }

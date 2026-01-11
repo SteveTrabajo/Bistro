@@ -192,7 +192,6 @@
         </VBox>
     </content>
    <stylesheets>
-      <URL value="@../../css/staff/analytics.css" />
       <URL value="@../../css/staff/AnalyticsPanelStyles.css" />
    </stylesheets>
 </ScrollPane>
