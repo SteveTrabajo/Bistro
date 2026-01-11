@@ -82,7 +82,7 @@ public class AnalyticsPanel {
         // 1. Update KPIs 
         totalReservationsLabel.setText(String.valueOf(data.getTotalReservations()));
         // Assuming getter for delta exists in DTO
-        setDeltaLabel(totalReservationsDelta, 5.2); // Example value, replace with data.get...
+        //setDeltaLabel(totalReservationsDelta, 5.2); // Example value, replace with data.get...
 
         avgMonthlyLabel.setText("0");
         setDeltaLabel(avgMonthlyDelta, 2.1);
@@ -90,8 +90,8 @@ public class AnalyticsPanel {
         onTimeRateLabel.setText(String.format("%.1f%%", 0.52 * 100));
         setDeltaLabel(onTimeDelta, -0.5);
 
-        customersThisMonthLabel.setText("0"); // Add getter
-        currentMonthLabel.setText("January"); // Or data.getCurrentMonthName()
+        customersThisMonthLabel.setText(String.valueOf(data.getTotalCostumer()));      
+        currentMonthLabel.setText(data.getMonth()); 
 
         // 2. Update Bar Chart (Arrival Times)
         updateArrivalChart(data);
@@ -101,7 +101,7 @@ public class AnalyticsPanel {
 
         // 4. Update Summaries
         totalOnTimeLabel.setText("0");
-        totalLateLabel.setText("0");
+        totalLateLabel.setText(String.valueOf(data.getTotalLateCostumer()));
         
 //        data.getPeakMonth()); 
 //        peakMonthValueLabel.setText(String.valueOf(data.getPeakMonthValue())); 

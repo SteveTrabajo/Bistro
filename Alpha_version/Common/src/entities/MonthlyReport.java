@@ -1,7 +1,9 @@
 package entities;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Map;
+
 
 /**
  * MonthlyReport entity representing the data structure for monthly reservation reports.
@@ -11,12 +13,16 @@ public class MonthlyReport implements Serializable {
     //************************ Instance Variables ************************//
     private String reportYear;
     private String reportMonth;
-	private int totalReservations; // can be for given year to compare year over year
+	private int totalReservations; 		//total Reservation in this month
+	private int totalCostumer; 			//total Costumer in this month
+	private int totalLateCostumer; 			//total late Costumer in this month
 
 
 	//************************ Constructors ************************//
 	
 	public MonthlyReport() {
+		this.reportMonth = String.valueOf(LocalDate.now().getMonth().name());
+		this.reportYear = String.valueOf(LocalDate.now().getYear());
 	}
 	
 	//************************ Getters and Setters ************************//
@@ -27,6 +33,22 @@ public class MonthlyReport implements Serializable {
 
 	public void setTotalReservations(int totalReservations) {
 		this.totalReservations = totalReservations;
+	}	
+	
+	public int getTotalCostumer() {
+		return totalCostumer;
+	}
+
+	public void setTotalCostumer(int totalCostumer) {
+		this.totalCostumer = totalCostumer;
+	}	
+	
+	public int getTotalLateCostumer() {
+		return totalLateCostumer;
+	}
+
+	public void setTotalLateCostumer(int totalLateCostumer) {
+		this.totalLateCostumer = totalLateCostumer;
 	}	
 
 	public String getYear() {

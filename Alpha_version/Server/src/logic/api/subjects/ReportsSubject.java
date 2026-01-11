@@ -18,6 +18,7 @@ public class ReportsSubject {
 	private ReportsSubject() {}
 	
 	public static void register(Router router, ReportsService reportsService, ServerLogger logger) {
+		
 		router.on("monthlyReports", "getData", (msg, client) -> {
 			User sessionUser = (User) client.getInfo("user");
 			if (sessionUser == null) {
@@ -41,20 +42,6 @@ public class ReportsSubject {
 			}
 
 //			@SuppressWarnings("unchecked")
-//			List<Object> orderData = (ArrayList<Object>)msg.getData();
-//			// ignore any userId sent from client and use the session userId for security reasons
-//			if (orderData.size() > 0) {
-//				orderData.set(0, sessionUser.getUserId()); 
-//			}
-//			boolean orderCreated= ordersService.createNewOrder(orderData, OrderType.RESERVATION);
-//			if (orderCreated) {
-//				client.sendToClient(new Message(Api.REPLY_CREATE_RESERVATION_OK, null));
-//				logger.log("[INFO] Client: "+ client + " created a new reservation order successfully.");
-//			} else {
-//				client.sendToClient(new Message(Api.REPLY_CREATE_RESERVATION_FAIL, null));
-//				logger.log("[ERROR] Client: "+ client + " failed to create a new reservation order.");
-//			}
-//		});
 		
 		});
 	}

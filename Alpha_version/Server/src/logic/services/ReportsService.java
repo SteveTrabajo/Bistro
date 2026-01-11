@@ -18,6 +18,8 @@ public class ReportsService {
 		MonthlyReport monthlyReport = new MonthlyReport();
 		
 		monthlyReport.setTotalReservations(this.dbController.getTotalReservation(date));
+		monthlyReport.setTotalCostumer(this.dbController.getTotalCostumersInMonth(date));
+		monthlyReport.setTotalLateCostumer(this.dbController.getTotalLateCostumersInMonth(date));
 		
 		
 		return monthlyReport;
