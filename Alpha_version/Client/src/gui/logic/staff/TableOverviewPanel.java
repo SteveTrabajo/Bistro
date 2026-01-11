@@ -26,11 +26,13 @@ public class TableOverviewPanel {
     @FXML
     public void initialize() {
     	BistroClientGUI.client.getTableCTRL().requestTableStatus();
+    	System.out.println("Requested table statuses");
     	updateTableStatus(BistroClientGUI.client.getTableCTRL().getTableStatuses());
 	}
 
   
     public void updateTableStatus(Map<Table, String> tableMap) {
+    	
         if (!Platform.isFxApplicationThread()) {
             Platform.runLater(() -> updateTableStatus(tableMap));
             return;
@@ -63,7 +65,7 @@ public class TableOverviewPanel {
     }
 
     
-    private VBox createTableNode(Table table, boolean isOccupied, String code) {
+    public VBox createTableNode(Table table, boolean isOccupied, String code) {
         VBox box = new VBox(2);
         box.getStyleClass().add("sm-table");
 

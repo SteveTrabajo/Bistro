@@ -33,8 +33,15 @@ public class UserService {
 	 * [0]: firstName, [1]: lastName, [2]: email, [3]: phoneNumber, [4]: address
 	 * @return true if registration was successful, false otherwise
 	 */
-	public boolean registerNewMember(List<String> newMemberData) {
-		return dbController.registerNewMember(newMemberData);
+	public int registerNewMember(List<String> newMemberData) {
+		int memberCode= dbController.registerNewMember(newMemberData);
+		if(memberCode != -1) {
+			logger.log("[MEMBER_REGISTER] Successfully registered new member: " + newMemberData.get(0) + " " + newMemberData.get(1) + ", Member Code: " + memberCode);
+			return memberCode;
+		} else {
+			logger.log("[MEMBER_REGISTER] Failed to register new member: " + newMemberData.get(0) + " " + newMemberData.get(1));
+			return -1;
+		}
 	}
 	
 	/**

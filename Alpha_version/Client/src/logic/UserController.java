@@ -28,6 +28,7 @@ public class UserController {
 	private Consumer<String> onMemberIDFoundListener; // Listener for forgot member ID responses
 	private boolean registrationSuccessFlag = false;
 	private boolean userUpdateSuccessFlag = false;
+	private int newMemberID; //to store newly registered member ID
 	
 	//staff pages related variables:
 	private List<UserData> customersData = new ArrayList<UserData>(); //to store customers data for manager/employee view
@@ -167,6 +168,14 @@ public class UserController {
 	}
 	
 	
+	public int getNewMemberID() {
+		return newMemberID;
+	}
+	
+	public void setNewMemberID(int newMemberID) {
+		this.newMemberID = newMemberID;
+	}
+	
 	// ******************************** Instance Methods ***********************************
 	
 	
@@ -294,7 +303,6 @@ public class UserController {
 	 */	
 	public void loadCustomersData() {
 		client.handleMessageFromClientUI(new Message(Api.ASK_LOAD_CUSTOMERS_DATA, null));
-
 	}
 	
 	/**

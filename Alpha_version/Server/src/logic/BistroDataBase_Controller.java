@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -560,8 +561,12 @@ public class BistroDataBase_Controller {
 	    throw new SQLException("Failed to generate unique 6-digit member_code after 50 attempts.");
 	}
 	
-	
-	public boolean registerNewMember(List<String> newMemberData) {
+	/**
+	 * Registers a new member in the database.
+	 * @param newMemberData
+	 * @return The newly generated member code if registration is successful, -1 otherwise
+	 */
+	public int registerNewMember(List<String> newMemberData) {
 		String fName = newMemberData.get(0);
 		String lName = newMemberData.get(1);
 		String email = newMemberData.get(2);
@@ -609,7 +614,7 @@ public class BistroDataBase_Controller {
 					// case 1b: existing user is MEMBER or STAFF - cannot register
 					System.out.println("Registration failed: User already exists with type " + existingType);
 					conn.rollback();// cancel changes
-					return false;
+					return -1;
 				}
 
 			} else {
@@ -636,7 +641,7 @@ public class BistroDataBase_Controller {
 			psInsertMember.setString(5, address);
 			psInsertMember.executeUpdate();
 			conn.commit(); // save changes
-			return true;
+			return memberCode;
 		} catch (SQLException ex) {
 			logger.log("[ERROR] SQLException in registerNewMember: " + ex.getMessage());
 			ex.printStackTrace();
@@ -647,7 +652,7 @@ public class BistroDataBase_Controller {
 					e.printStackTrace();
 				}
 			}
-			return false;
+			return -1;
 		} finally {
 			// close all resources
 			try {
@@ -1168,6 +1173,41 @@ public class BistroDataBase_Controller {
 		System.out.println("Controller: Fetched " + tablesList.size() + " tables from DB.");
 		return tablesList;
 	}
+	
+	public HashMap<Table, String> getTableMap() {
+	    HashMap<Table, String> tableSessionsMap = new HashMap<>();
+	    
+	    String qry = "SELECT t.tableNum, t.capacity, o.confirmation_code " +
+	                 "FROM tables t " +
+	                 "LEFT JOIN table_sessions ts ON t.tableNum = ts.tableNum AND ts.left_at IS NULL " +
+	                 "LEFT JOIN orders o ON ts.order_number = o.order_number";
+
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(qry); ResultSet rs = ps.executeQuery()) {
+	            while (rs.next()) {
+	                Table table = new Table(rs.getInt("tableNum"), rs.getInt("capacity"));
+	                
+	                String confirmationCode = rs.getString("confirmation_code");
+	                
+	                if (confirmationCode == null) {
+	                    confirmationCode = "";
+	                }
+	                
+	                tableSessionsMap.put(table, confirmationCode);
+	            }
+	        }
+	    } catch (SQLException ex) {
+	        ex.printStackTrace();
+	    } finally {
+	        release(conn);
+	    }
+
+	    System.out.println("Controller: Fetched " + tableSessionsMap.size() + " tables (total status).");
+	    return tableSessionsMap;
+	}
+	
 	
 	/**
 	 * Retrieves the table number associated with a given confirmation code.

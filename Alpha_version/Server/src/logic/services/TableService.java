@@ -1,6 +1,8 @@
 package logic.services;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import entities.Order;
 import entities.Table;
@@ -22,10 +24,20 @@ public class TableService {
 		return dbController.getTableNumberByConfirmationCode(confirmationCode);
 	}
 	
-	public List<Table> getAllTables() {
-		return dbController.getAllTablesFromDB();
+	public HashMap<Table,String> getTableMap() {
+		HashMap<Table,String> data =dbController.getTableMap();
+		printDATA(data);
+		return data;
 	}
 	
+	private void printDATA(HashMap<Table, String> data) {
+		for (Map.Entry<Table, String> entry : data.entrySet()) {
+			Table table = entry.getKey();
+			String code = entry.getValue();
+			System.out.println("Table ID: " + table.getTableID() + ", Capacity: " + table.getCapacity() + ", Occupied Code: " + code);
+		}
+	}
+
 	/**
     * Logic to handle table status after a successful payment.
     */
@@ -53,6 +65,10 @@ public class TableService {
 	    }	    
 	    logger.log("[WARN] No tables available for group size " + order.getDinersAmount());
 	    return -1;
+	}
+
+	public List<Table> getAllTables() {
+		return dbController.getAllTablesFromDB();
 	}
 
 }

@@ -132,10 +132,10 @@ public final class UserSubject {
 		router.on("user", "registerNewMember", (msg,client) -> {
 			@SuppressWarnings("unchecked")
 			List<String> newMemberData = (ArrayList<String>) msg.getData();
-			boolean success = userService.registerNewMember(newMemberData);
-			if (success) {
+			int code = userService.registerNewMember(newMemberData);
+			if (code != -1) {
 				logger.log("[INFO] New member registered successfully.");
-				client.sendToClient(new Message(Api.REPLY_REGISTER_NEW_MEMBER_OK, null));
+				client.sendToClient(new Message(Api.REPLY_REGISTER_NEW_MEMBER_OK, code));
 			} else {
 				logger.log("[ERROR] New member registration failed.");
 				client.sendToClient(new Message(Api.REPLY_REGISTER_NEW_MEMBER_FAILED, null));

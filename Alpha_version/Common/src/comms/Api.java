@@ -116,6 +116,7 @@ public final class Api {
     
     // Requests
     public static final String ASK_TABLE_STATUS = "tables.getStatus";
+    public static final String ASK_TABLES_AMOUNT = "tables.getAmount";
 	public static final String ASK_LOAD_CUSTOMERS_DATA = "customers.getalldata";
 	public static final String ASK_MONTHLY_REPORT_DATA = "monthlyReports.getData";
 	public static final String ASK_USER_ALLOCATED_TABLE = "tables.getUserAllocatedTable";

@@ -65,7 +65,9 @@ public class MemberRegistrationPanel{
 			newMemberData.add(address);
 			BistroClientGUI.client.getUserCTRL().RegisterNewMember(newMemberData);
 			if(BistroClientGUI.client.getUserCTRL().getRegistrationSuccessFlag()) {
-			    showInfo("Registration Successful", "New member has been registered successfully.");
+				int memberCode = BistroClientGUI.client.getUserCTRL().getNewMemberID();
+			    showInfo("Registration Successful", "New member has been registered successfully."+
+			    		"\nMember Code: " + memberCode);
 			    clearForm();
 			}
         }

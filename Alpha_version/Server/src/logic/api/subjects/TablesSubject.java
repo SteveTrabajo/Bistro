@@ -1,6 +1,8 @@
 package logic.api.subjects;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import comms.Api;
 import comms.Message;
@@ -18,7 +20,7 @@ public class TablesSubject {
         // Handle request for table map status
         router.on("tables", "getStatus", (msg, client) -> {
             // Get data from Service
-            List<Table> tables = tableService.getAllTables();
+        	HashMap<Table,String> tables = tableService.getTableMap();
             
             if (tables != null) {
                 client.sendToClient(new Message(Api.REPLY_TABLE_STATUS_OK, tables));
@@ -28,5 +30,6 @@ public class TablesSubject {
                 logger.log("[ERROR] Failed to fetch table statuses for " + client);
             }
         });
+        
     }
 }

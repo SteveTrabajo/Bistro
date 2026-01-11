@@ -125,6 +125,8 @@ public class UserSubject {
 		// Member registration responses:
 		router.on("user", "registerNewMember.ok", msg -> {
 			BistroClient.awaitResponse = false;
+			int newMemberCode = (int) msg.getData();
+			userController.setNewMemberID(newMemberCode);
 			userController.setRegistrationSuccessFlag(true);
 		});
 		

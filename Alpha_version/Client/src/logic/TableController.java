@@ -17,8 +17,9 @@ public class TableController {
 	private final BistroClient client;
 	private HashMap<Table,String> tableStatuses;
 	private Order seatdOrderDTO;
-	private int userAllocatedTable;
 	private BiConsumer<Boolean, String> checkInListener;
+	private int userAllocatedTable;
+	private int tablesAmount;
 	
 	//******************************** Constructors ***********************************//
 	public TableController(BistroClient client) {
@@ -55,6 +56,14 @@ public class TableController {
 	
 	public void setCheckInListener(BiConsumer<Boolean, String> checkInListener) {
 		this.checkInListener = checkInListener;
+	}
+	
+	public int getTablesAmount() {
+		return tablesAmount;
+	}
+	
+	public void setTablesAmount(int tablesAmount) {
+		this.tablesAmount = tablesAmount;
 	}
 	
 	//******************************** Instance Methods ***********************************//
