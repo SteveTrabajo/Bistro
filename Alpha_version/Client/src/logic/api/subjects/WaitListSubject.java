@@ -36,7 +36,7 @@ public class WaitListSubject {
 				router.on("waitinglist", "join.ok", msg -> {
 		            BistroClient.awaitResponse = false;
 					Order order = (Order) msg.getData();
-					BistroClientGUI.client.getReservationCTRL().setReadyUserReservation(order);
+					waitingListCTRL.setOrderWaitListDTO(order);
 					waitingListCTRL.setUserOnWaitingList(true);
 				});
 
@@ -49,7 +49,7 @@ public class WaitListSubject {
 		            HashMap<String, Object> data = (HashMap<String, Object>) msg.getData();
 		            Order order = (Order) data.get("order");
 		            int table = (int) data.get("table");
-					BistroClientGUI.client.getReservationCTRL().setReadyUserReservation(order);
+		            waitingListCTRL.setOrderWaitListDTO(order);
 					BistroClientGUI.client.getTableCTRL().setUserAllocatedTable(table);
 					waitingListCTRL.setCanSeatImmediately(true);
 				});
@@ -57,7 +57,7 @@ public class WaitListSubject {
 				//Client/Staff: Leave Status
 				router.on("waitinglist", "leave.ok", msg -> {
 		            BistroClient.awaitResponse = false;
-					BistroClientGUI.client.getReservationCTRL().setReadyUserReservation(null);
+		            waitingListCTRL.setOrderWaitListDTO(null);
 					waitingListCTRL.setLeaveWaitingListSuccess(true);
 					waitingListCTRL.setUserOnWaitingList(false);
 				});

@@ -50,7 +50,7 @@ public class ClientOnListScreen {
      */
     private String retrieveConfirmationCode() {
         // Check for a ready reservation specific to this session
-        Order activeOrder = BistroClientGUI.client.getReservationCTRL().getReadyUserReservation();
+        Order activeOrder = BistroClientGUI.client.getReservationCTRL().getOrderDTO();
         
         if (activeOrder != null && activeOrder.getConfirmationCode() != null) {
             return activeOrder.getConfirmationCode();

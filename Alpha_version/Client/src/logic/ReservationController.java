@@ -20,24 +20,20 @@ import javafx.application.Platform;
 
 public class ReservationController {
 	
-	//****************************** Static variables ******************************//
-	
-	public static final int SLOT_MINUTES = 15;//not used!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!?
-	
 	//****************************** Instance variables ******************************//
 	
 	private final BistroClient client;
-	private String confirmationCode;
+	private Order orderDTO;
 	private List<String> availableTimeSlots;
+	
+	
+	
 	private Consumer<List<String>> uiUpdateCallback;
-	private List<Object> tempReservationData=new ArrayList<>();
 	
 	private Consumer<Order> orderLoadedCallback;
 	private Consumer<List<String>> availableSlotsCallback;
 	private Consumer<Boolean> updateResultCallback;
 	private Consumer<Boolean> cancelResultCallback;
-	private Order orderReady;
-	
 	private Consumer<List<Order>> allReservationsCallback;
     private Consumer<String> onCodeRetrieveResult;
 	
@@ -45,19 +41,20 @@ public class ReservationController {
 	
 	public ReservationController(BistroClient client) {
 		this.client = client;
-		this.confirmationCode = "";
 		this.availableTimeSlots = new ArrayList<>();
+		this.orderDTO = null;
 	}
 	
 	//******************************** Getters, Setters and Listeners ***********************************//
-		
-	public String getConfirmationCode() {
-		return confirmationCode;
+	
+	public Order getOrderDTO() {
+		return orderDTO;
 	}
 	
-	public void setConfirmationCode(String confirmationCode) {
-		this.confirmationCode = confirmationCode;
+	public void setOrderDTO(Order orderDTO) {
+		this.orderDTO = orderDTO;
 	}
+	
 	
 	public void setUIUpdateListener(Consumer<List<String>> callback) {
         this.uiUpdateCallback = callback;
@@ -73,7 +70,7 @@ public class ReservationController {
             });
         }
     }
-
+	
 	public List<String> getAvailableTimeSlots() {
 		return availableTimeSlots;
 	}
@@ -92,14 +89,6 @@ public class ReservationController {
 	
 	public void setOrderLoadedListener(Consumer<Order> callback) {
 		this.orderLoadedCallback = callback;
-	}
-	
-	public Order getReadyUserReservation() {
-		return orderReady;
-	}
-	
-	public void setReadyUserReservation(Order orderReady) {
-		this.orderReady = orderReady;
 	}
 	
 	public void setUpdateListener(Consumer<Boolean> callback) {
@@ -129,6 +118,7 @@ public class ReservationController {
 	 */
 	public void createNewReservation(LocalDate date, String selectedTimeSlot, int diners) {
 		LocalTime time = LocalTime.parse(selectedTimeSlot);
+		List<Object> tempReservationData=new ArrayList<>();
 		tempReservationData.clear();
 		tempReservationData.add(date);
 		tempReservationData.add(diners);
@@ -139,14 +129,7 @@ public class ReservationController {
 	public void updateReservation(Order order) {
 		client.handleMessageFromClientUI(new Message(Api.ASK_UPDATE_RESERVATION, order));
 	}
-	
-	public List<Object> getTempReservationData() {
-		return tempReservationData;
-	}
-	
-	public void deleteTempReservationData(List<Object> tempReservationData) {
-		this.tempReservationData.removeAll(tempReservationData);
-	}
+
 			
 	/*
 	 * Checks if the provided confirmation code is correct by asking the server.
@@ -167,7 +150,7 @@ public class ReservationController {
 	 * Checks if a user's reservation is ready (for waiting list flow).
 	 */
 	public boolean isUserReservationReady() {
-		return orderReady.getStatus() == OrderStatus.COMPLETED;
+		return orderDTO.getStatus() == OrderStatus.COMPLETED;
 	}
 	
 
@@ -201,11 +184,9 @@ public class ReservationController {
 	}
 
 	public boolean hasActiveReservation() {
-		Order userOrder = client.getReservationCTRL().getReadyUserReservation();
-		if (userOrder != null) {
-			return userOrder.getStatus() == OrderStatus.PENDING || userOrder.getStatus() == OrderStatus.NOTIFIED||
-					userOrder.getStatus() == OrderStatus.SEATED;
+		if (orderDTO == null) {
+			return false;
 		}
-		return false;
+		return true;
 	}
 }

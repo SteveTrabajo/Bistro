@@ -17,9 +17,23 @@ public class OrderSubject {
 		// Handler for new reservation creation messages
 		router.on("orders", "createReservation.ok", msg -> {
             BistroClient.awaitResponse = false;
-			String confirmationCode = (String) msg.getData();
-			Platform.runLater(() -> BistroClientGUI.client.getReservationCTRL().setConfirmationCode(confirmationCode));
+			Order createdOrder = (Order) msg.getData();
+			if (createdOrder == null) {
+				Platform.runLater(() -> {
+					Alert alert = new Alert(Alert.AlertType.ERROR);
+					alert.setTitle("Reservation Failed");
+					alert.setHeaderText("Invalid confirmation code received");
+					alert.setContentText("An error occurred while creating your reservation. Please try again later.");
+					alert.showAndWait();
+				});
+				return;
+			}
+			Platform.runLater(() ->{ 
+			BistroClientGUI.client.getReservationCTRL().setOrderDTO(createdOrder);
+			BistroClientGUI.switchScreen("clientNewReservationCreatedScreen", "Failed to load Reservation Success Screen after creating reservation.");
+			});
 		});
+		
 		router.on("orders","createReservation.fail", msg -> {
 			BistroClient.awaitResponse = false;
 			Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -27,6 +41,7 @@ public class OrderSubject {
 			alert.setHeaderText("Could not create reservation");
 			alert.setContentText("An error occurred while creating your reservation. Please try again later.");
 		});
+		
 		// This tells the router: "When the server sends 'getAvailableHours.ok', update the controller."
 		router.on("orders", "getAvailableHours.ok", (msg) -> {
             BistroClient.awaitResponse = false;
@@ -45,12 +60,14 @@ public class OrderSubject {
 				alert.showAndWait();
 			});
 		});
+		
 		router.on("orders", "order.exists", msg -> {
             BistroClient.awaitResponse = false;
 			Order order = (Order) msg.getData();
+			BistroClientGUI.client.getReservationCTRL().setOrderDTO(null); // Clear any existing order data
 			BistroClientGUI.client.getTableCTRL().setUserAllocatedOrderForTable(order);
-			BistroClientGUI.client.getReservationCTRL().setReadyUserReservation(null);
 		});
+		
 		router.on("orders", "order.notExists", msg -> {
 			BistroClient.awaitResponse = false;
 		});	

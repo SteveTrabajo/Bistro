@@ -21,7 +21,7 @@ public class WaitingListController {
 	
 	// ****************************** Instance variables ******************************
 	private final BistroClient client;
-	
+	private Order orderWaitListDTO;
 	// State variables
 	private boolean canSeatImmediately = false;
 	private boolean userOnWaitingList = false;
@@ -40,6 +40,15 @@ public class WaitingListController {
 	}
 
 	// ******************************** Getters And Setters ***********************************
+	public Order getOrderWaitListDTO() {
+		return orderWaitListDTO;
+	}
+	
+	public void setOrderWaitListDTO(Order orderWaitListDTO) {
+		this.orderWaitListDTO = orderWaitListDTO;
+	}
+	
+	
 	public ArrayList<Order> getWaitingList() {
 		return waitingList;
 	}

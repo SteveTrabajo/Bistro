@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import entities.Order;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -37,42 +38,39 @@ public class ClientNewReservationCreatedScreen {
     @FXML
     public void initialize() {
         try {
-            List<Object> reservationDetails = BistroClientGUI.client.getReservationCTRL().getTempReservationData();
-            String confirmCode = BistroClientGUI.client.getReservationCTRL().getConfirmationCode();
-
-            if (reservationDetails != null && reservationDetails.size() >= 3) {
-                String date = reservationDetails.get(0).toString();
-                LocalTime time = (LocalTime) reservationDetails.get(1);
-                int dinersAmount = (Integer) reservationDetails.get(2);
-
-                lblDate.setText(date);
-                // Formatting time to HH:mm for better UX
-                lblHour.setText(time.format(DateTimeFormatter.ofPattern("HH:mm")));
-                lblDinersAmount.setText(dinersAmount + " People");
-                lblConfirmCode.setText(confirmCode);
+            Order reservation = BistroClientGUI.client.getReservationCTRL().getOrderDTO();
+            if (reservation != null) {
+                if (reservation.getOrderDate() != null) {
+                    lblDate.setText(reservation.getOrderDate().toString());
+                }
+                if (reservation.getOrderHour() != null) {
+                    lblHour.setText(reservation.getOrderHour().format(DateTimeFormatter.ofPattern("HH:mm")));
+                }
+                lblDinersAmount.setText(reservation.getDinersAmount() + " People");
+                String code = reservation.getConfirmationCode();
+                lblConfirmCode.setText(code != null ? code : "N/A");
             }
         } catch (Exception e) {
             System.err.println("Error loading reservation details: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     @FXML
     public void btnBack(Event event) {
-        cleanupAndSwitch(event, "clientDashboardScreen");
+    	cleanAndSwitch(event, "clientDashboardScreen");
     }
 
     @FXML
     public void btnNewReserve(Event event) {
-        cleanupAndSwitch(event, "clientNewReservationScreen");
+    	cleanAndSwitch(event, "clientNewReservationScreen");
     }
 
     /**
      * Helper method to reduce code duplication
      */
-    private void cleanupAndSwitch(Event event, String screenName) {
-        List<Object> data = BistroClientGUI.client.getReservationCTRL().getTempReservationData();
-        BistroClientGUI.client.getReservationCTRL().deleteTempReservationData(data);
-        
+    private void cleanAndSwitch(Event event, String screenName) {
+        BistroClientGUI.client.getReservationCTRL().setOrderDTO(null);
         String errorMsg = "Error navigating to " + screenName;
         BistroClientGUI.switchScreen(event, screenName, errorMsg);
     }

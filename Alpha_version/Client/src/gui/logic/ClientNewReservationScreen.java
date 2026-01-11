@@ -191,16 +191,6 @@ public class ClientNewReservationScreen {
 	        return;
 	    }
 	    BistroClientGUI.client.getReservationCTRL().createNewReservation(date, selectedTimeSlot, diners);
-	    String reservationCode = BistroClientGUI.client.getReservationCTRL().getConfirmationCode();
-	    
-	    if(reservationCode != null && !reservationCode.isEmpty()) { 
-	    	BistroClientGUI.switchScreen(event, "clientNewReservationCreatedScreen", "Reservation Confirmed");
-	    } else {
-	    	Alert alert = new Alert(Alert.AlertType.ERROR);
-	    	alert.setContentText("Reservation failed or is still being processed. Please try again later.");
-	        alert.showAndWait();
-	    	System.out.println("Reservation failed or waiting for server...");
-	    }
 	}
 	
 	/*

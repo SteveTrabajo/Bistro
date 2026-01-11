@@ -48,9 +48,9 @@ public final class OrdersSubject {
 			if (orderData.size() > 0) {
 				orderData.add(0, sessionUser.getUserId());
 			}
-			boolean orderCreated= ordersService.createNewOrder(orderData, OrderType.RESERVATION);
-			if (orderCreated) {
-				client.sendToClient(new Message(Api.REPLY_CREATE_RESERVATION_OK, null));
+			String confirmationCode= ordersService.createNewOrder(orderData, OrderType.RESERVATION);
+			if (confirmationCode != null) {
+				client.sendToClient(new Message(Api.REPLY_CREATE_RESERVATION_OK,confirmationCode));
 				logger.log("[INFO] Client: "+ client + " created a new reservation order successfully.");
 			} else {
 				client.sendToClient(new Message(Api.REPLY_CREATE_RESERVATION_FAIL, null));

@@ -63,10 +63,10 @@ public class OrdersService {
 	 * Creates a new Reservation in a thread-safe manner.
 	 * For reservations, it checks slot availability before insertion to avoid conflicts while handling concurrent requests.
 	 * @param data A list containing order details: [0]userId, [1]date, [2]dinersAmount, [3]time, [4]Code
-	 * @param orderType The type of order (RESERVATION or TAKEOUT).
+	 * @param orderType The type of order (RESERVATION or WAITLIST).
 	 * @return true if the order was created successfully, false otherwise.
 	 */
-	public synchronized boolean createNewOrder(List<Object> data, OrderType orderType) {
+	public synchronized String createNewOrder(List<Object> data, OrderType orderType) {
 		// data: [0]userId, [1]date, [2]dinersAmount, [3]time, [4]Code
 		System.out.println("Creating new order with data: " + data.toString() + " of type: " + orderType);
 		int userId = (int) data.get(0);
@@ -78,12 +78,21 @@ public class OrdersService {
 			boolean isSlotStillFree = checkSpecificSlotAvailability(date, time, diners);
 			if (!isSlotStillFree) {
 				System.out.println("Race Condition Avoided: Slot " + time + " was taken just before insertion.");
-				return false; 
+				return null; 
 			}
 		}
 		String confirmationCode = generateConfirmationCode("R");
 		data.add(confirmationCode); 
-		return dbController.setNewOrder(data, orderType, OrderStatus.PENDING);
+		boolean orderCreated = dbController.setNewOrder(data, orderType, OrderStatus.PENDING);
+		if (orderCreated) {
+			System.out.println("Order created successfully with confirmation code: " + confirmationCode);
+			logger.log("[INFO] New order created: " + confirmationCode + " for userId: " + userId);
+			return confirmationCode;
+		} else {
+			System.out.println("Failed to create order in DB.");
+			logger.log("[ERROR] Failed to create new order for userId: " + userId);
+			return null;
+		}
 	}
 	
 	/**
