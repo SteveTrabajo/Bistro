@@ -1358,6 +1358,113 @@ public class BistroDataBase_Controller {
 			// TODO Auto-generated method stub
 			return null;
 		}
+		
+	//*************************************** Reports ********************************
+		
+	//Method that give the number of the reservation this month
+	public int getTotalReservation(LocalDate date) {
+		
+	    final String qry =	"SELECT COUNT(*) AS total " +
+	    					"FROM orders o " +
+	    					"WHERE MONTH(o.order_date) = ? " +
+	    					"AND YEAR(o.order_date) = ?";
+	    					
+
+	    Connection conn = null;
+
+	    try {
+	        conn = borrow();
+
+	        try (PreparedStatement ps = conn.prepareStatement(qry)) {
+	            ps.setInt(1, date.getMonthValue());
+	            ps.setInt(2, date.getYear());
+
+	            try (ResultSet rs = ps.executeQuery()) {
+	                if (rs.next()) {
+	                    return rs.getInt("total");
+	                }
+	            }
+	        }
+	    } catch (SQLException ex) {
+	        logger.log("[ERROR] SQLException in getTotalMemberOrdersForMonth: " + ex.getMessage());
+	        ex.printStackTrace();
+	    } finally {
+	        release(conn);
+	    }
+
+	    return 0;
+	}
+	
+	
+	//Method that give the number of the costumers this month
+	public int getTotalCostumersInMonth(LocalDate date) {
+	    final String qry =	"SELECT COUNT(DISTINCT o.user_id) AS total " +
+	    					"FROM orders o " +
+	    					"WHERE MONTH(o.order_date) = ? " +
+	    					"AND YEAR(o.order_date) = ?";
+	    					
+
+	    Connection conn = null;
+
+	    try {
+	        conn = borrow();
+
+	        try (PreparedStatement ps = conn.prepareStatement(qry)) {
+	            ps.setInt(1, date.getMonthValue());
+	            ps.setInt(2, date.getYear());
+
+	            try (ResultSet rs = ps.executeQuery()) {
+	                if (rs.next()) {
+	                    return rs.getInt("total");
+	                }
+	            }
+	        }
+	    } catch (SQLException ex) {
+	        logger.log("[ERROR] SQLException in getTotalCostumersInMonth: " + ex.getMessage());
+	        ex.printStackTrace();
+	    } finally {
+	        release(conn);
+	    }
+
+	    return 0;
+	}
+	
+	//Method that give the number of the late costumers this month
+	public int getTotalLateCostumersInMonth(LocalDate date) {
+		
+		   final String qry =	"SELECT COUNT(*) AS total_late " +
+		            			"FROM orders o " +
+		            			"JOIN table_sessions ts ON o.order_number = ts.order_number " +
+		            			"WHERE o.order_type = 'RESERVATION' " +
+		            			"AND MONTH(o.order_date) = ? " +
+		            			"AND YEAR(o.order_date) = ? " +
+		            			"AND ts.seated_at IS NOT NULL " +
+		            			"AND ts.seated_at > TIMESTAMP(o.order_date, o.order_time)";
+		    					
+		   Connection conn = null;
+
+		   try {
+		       conn = borrow();
+
+		       try (PreparedStatement ps = conn.prepareStatement(qry)) {
+		            ps.setInt(1, date.getMonthValue());
+		            ps.setInt(2, date.getYear());
+
+		           try (ResultSet rs = ps.executeQuery()) {
+		               if (rs.next()) {
+		                   return rs.getInt("total_late");
+		                }
+		            }
+		        }
+		    } catch (SQLException ex) {
+		        logger.log("[ERROR] SQLException in getTotalLateCostumersInMonth: " + ex.getMessage());
+		        ex.printStackTrace();
+		    } finally {
+		        release(conn);
+		    }
+
+		    return 0;
+		}	
 
 
 }
