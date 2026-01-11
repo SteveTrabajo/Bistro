@@ -66,7 +66,7 @@ public class OrdersService {
 	 * @param orderType The type of order (RESERVATION or WAITLIST).
 	 * @return true if the order was created successfully, false otherwise.
 	 */
-	public synchronized String createNewOrder(List<Object> data, OrderType orderType) {
+	public synchronized Order createNewOrder(List<Object> data, OrderType orderType) {
 		// data: [0]userId, [1]date, [2]dinersAmount, [3]time, [4]Code
 		System.out.println("Creating new order with data: " + data.toString() + " of type: " + orderType);
 		int userId = (int) data.get(0);
@@ -87,12 +87,16 @@ public class OrdersService {
 		if (orderCreated) {
 			System.out.println("Order created successfully with confirmation code: " + confirmationCode);
 			logger.log("[INFO] New order created: " + confirmationCode + " for userId: " + userId);
-			return confirmationCode;
+			return createOrderDto(userId, date, diners, time, confirmationCode, orderType, OrderStatus.PENDING);
 		} else {
 			System.out.println("Failed to create order in DB.");
 			logger.log("[ERROR] Failed to create new order for userId: " + userId);
 			return null;
 		}
+	}
+	
+	public Order createOrderDto(int userId, LocalDate date, int dinersAmount, LocalTime time, String confirmationCode, OrderType orderType, OrderStatus status) {
+		return new Order(userId, date, dinersAmount, time, confirmationCode, orderType, status);
 	}
 	
 	/**
@@ -199,7 +203,7 @@ public class OrdersService {
 	    LocalTime effectiveOpeningTime = openingTime;
 	    // If the requested date is today, adjust the effective opening time:
 	    if (date.equals(LocalDate.now())) {
-	        LocalTime now = LocalTime.now();
+	        LocalTime now = LocalTime.now().plusHours(1); // Add 1 hour buffer
 	        // If current time is after opening time, adjust effective opening time
 	        if (now.isAfter(openingTime)) {
 	            int minutes = now.getMinute();
@@ -298,7 +302,6 @@ public class OrdersService {
 	        //TODO: Remove debug prints later
 	        System.out.println("Checking " + slot + " with groups: " + overlappingDinersAmounts);
 	        // ----------------------------------------------
-	        
 	        
 	        if (canAssignAllDinersToTables(overlappingDinersAmounts, tableSizes)) {
 	            available.add(timeToString(slot));

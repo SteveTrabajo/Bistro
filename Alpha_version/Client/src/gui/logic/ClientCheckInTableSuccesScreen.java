@@ -28,12 +28,13 @@ public class ClientCheckInTableSuccesScreen {
 	public void initialize() {
 		BistroClientGUI.client.getTableCTRL().fetchUserAllocatedTable();
 		int currentTable = BistroClientGUI.client.getTableCTRL().getUserAllocatedTable();
-		String confirmationCode = BistroClientGUI.client.getReservationCTRL().getConfirmationCode();
+		String confirmationCode = BistroClientGUI.client.getTableCTRL().getUserAllocatedOrderForTable()
+				.getConfirmationCode();
 		lblTableNum.setText(String.valueOf(currentTable));
 		lblTableNumber.setText(String.valueOf(currentTable));
 		lblConfirmCode.setText(confirmationCode);
 	}
-	
+
 	/**
 	 * Handles the Back button click event.
 	 *

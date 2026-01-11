@@ -563,12 +563,16 @@ public class BistroDataBase_Controller {
 			try (PreparedStatement ps = conn.prepareStatement(sql)) {
 				// [0] User ID
 				ps.setInt(1, (int) orderData.get(0));
-				// [1] Date
-				ps.setDate(2, Date.valueOf((LocalDate) orderData.get(1)));
+				if (type == OrderType.WAITLIST) {
+	                ps.setNull(2, Types.DATE);
+	                ps.setNull(4, Types.TIME);
+	            } else {
+	                ps.setDate(2, Date.valueOf((LocalDate) orderData.get(1)));
+	                ps.setTime(4, Time.valueOf((LocalTime) orderData.get(3)));
+	            }
 				// [2] Diners Amount
 				ps.setInt(3, (int) orderData.get(2));
-				// [3] Time
-				ps.setTime(4, Time.valueOf((LocalTime) orderData.get(3)));
+				
 				// [4] Confirmation Code
 				ps.setString(5, (String) orderData.get(4));
 				ps.setString(6, type.name());
@@ -1464,7 +1468,12 @@ public class BistroDataBase_Controller {
 		    }
 
 		    return 0;
-		}	
+		}
+
+	public void updateOrderTimeAndDateToNow(String confirmationCode) {
+		String sql = "UPDATE orders SET order_date = ?, order_time = ?, order_type = 'RESERVATION' WHERE confirmation_code = ?";
+		
+	}	
 
 
 }

@@ -11,6 +11,7 @@ import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import logic.BistroClient;
 import logic.BistroClientGUI;
+import logic.TableController;
 import logic.WaitingListController;
 import logic.api.ClientRouter;
 
@@ -19,7 +20,7 @@ public class WaitListSubject {
 	private WaitListSubject() {
 	}
 
-	public static void register(ClientRouter router,WaitingListController waitingListCTRL) {
+	public static void register(ClientRouter router,WaitingListController waitingListCTRL,TableController tableCTRL) {
 				//Staff: Get All Data
 				router.on("waitinglist", "getAll.ok", msg -> {
 		            BistroClient.awaitResponse = false;
@@ -46,12 +47,19 @@ public class WaitListSubject {
 
 				router.on("waitinglist", "join.skipped", msg -> {
 		            BistroClient.awaitResponse = false;
-		            HashMap<String, Object> data = (HashMap<String, Object>) msg.getData();
+		            @SuppressWarnings("unchecked")
+					HashMap<String, Object> data = (HashMap<String, Object>) msg.getData();
 		            Order order = (Order) data.get("order");
 		            int table = (int) data.get("table");
-		            waitingListCTRL.setOrderWaitListDTO(order);
-					BistroClientGUI.client.getTableCTRL().setUserAllocatedTable(table);
-					waitingListCTRL.setCanSeatImmediately(true);
+		            //reset waiting list state
+		            waitingListCTRL.setUserOnWaitingList(false);
+		            waitingListCTRL.setOrderWaitListDTO(null);
+		            waitingListCTRL.setLeaveWaitingListSuccess(false);
+		            waitingListCTRL.setEstimatedWaitTimeMinutes(0);
+		            waitingListCTRL.setCanSeatImmediately(false);
+		            //set table state for seating
+		            tableCTRL.setUserAllocatedOrderForTable(order);
+		            tableCTRL.setUserAllocatedTable(table);
 				});
 
 				//Client/Staff: Leave Status
@@ -76,7 +84,7 @@ public class WaitListSubject {
 				router.on("waitinglist", "isInWaitingList.no", msg -> {
 		            BistroClient.awaitResponse = false;
 					waitingListCTRL.setUserOnWaitingList(false);
-					BistroClientGUI.client.getReservationCTRL().setReadyUserReservation(null);
+					waitingListCTRL.setOrderWaitListDTO(null);
 				});
 				router.on("waitinglist", "isInWaitingList.fail", msg -> {
 		            BistroClient.awaitResponse = false;
@@ -91,8 +99,8 @@ public class WaitListSubject {
 				router.on("waitinglist", "notified.ok", msg -> {
 		            BistroClient.awaitResponse = false;
 					Platform.runLater(() -> {
-						if(BistroClientGUI.client.getReservationCTRL().getReadyUserReservation() != null) {
-							BistroClientGUI.client.getReservationCTRL().getReadyUserReservation().setStatus(OrderStatus.NOTIFIED);
+						if(waitingListCTRL.getOrderWaitListDTO() != null) {
+							waitingListCTRL.getOrderWaitListDTO().setStatus(OrderStatus.NOTIFIED);
 						}
 						Alert alert = new Alert(Alert.AlertType.INFORMATION);
 						alert.setTitle("Notification Received");

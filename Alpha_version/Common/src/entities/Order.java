@@ -45,6 +45,20 @@ public class Order implements Serializable {
 		this.dateOfPlacingOrder = dateOfPlacingOrder;
 	}
 	
+	
+	public Order(int userId, LocalDate date, int dinersAmount, LocalTime time, String confirmationCode,
+			OrderType orderType, OrderStatus status) {
+		this.userId = userId;
+		this.orderDate = date;
+		this.dinersAmount = dinersAmount;
+		this.orderHour = time;
+		this.confirmationCode = confirmationCode;
+		this.orderType = orderType;
+		this.status = status;
+	}
+	
+	
+	
 	//constructor for display order
 	public Order(LocalTime orderHour, int dinersAmount)
 	{
@@ -53,6 +67,8 @@ public class Order implements Serializable {
 	}
 	
 
+
+	
 
 	// Convenience flags
 	public boolean isWaitList() {

@@ -63,6 +63,7 @@ public class WaitingListService {
 		}
 		return null; // Failed to create
     }
+    
 
     /**
      * Checks availability and Attempts to Seat Immediately.

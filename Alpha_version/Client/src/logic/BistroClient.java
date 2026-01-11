@@ -147,7 +147,7 @@ public class BistroClient extends AbstractClient {
 		UserSubject.register(router, this.userCTRL);
 		OrderSubject.register(router);
 		MonthlyReportsSubject.register(router);
-		WaitListSubject.register(router,this.waitingListCTRL);
+		WaitListSubject.register(router,this.waitingListCTRL, this.tableCTRL);
 		TablesSubject.register(router);
 		ConnectionSubject.register(router);
 		PaymentSubject.register(router);

@@ -16,7 +16,7 @@ public class TableController {
 	//****************************** Instance variables ******************************
 	private final BistroClient client;
 	private HashMap<Table,String> tableStatuses;
-	private Order userAllocatedOrderForTable;
+	private Order seatdOrderDTO;
 	private int userAllocatedTable;
 	private BiConsumer<Boolean, String> checkInListener;
 	
@@ -24,7 +24,7 @@ public class TableController {
 	public TableController(BistroClient client) {
 		this.client = client;
 		this.tableStatuses = new HashMap<>();
-		this.userAllocatedOrderForTable = null;
+		this.seatdOrderDTO = null;
 		this.userAllocatedTable = 0;
 	}
 	
@@ -38,11 +38,11 @@ public class TableController {
 		this.tableStatuses = tableStatuses;
 	}
 	public Order getUserAllocatedOrderForTable() {
-		return userAllocatedOrderForTable;
+		return seatdOrderDTO;
 	}
 	
 	public void setUserAllocatedOrderForTable(Order userAllocatedOrderForTable) {
-		this.userAllocatedOrderForTable = userAllocatedOrderForTable;
+		this.seatdOrderDTO = userAllocatedOrderForTable;
 	}
 
 	public int getUserAllocatedTable() {
@@ -59,11 +59,11 @@ public class TableController {
 	
 	//******************************** Instance Methods ***********************************//
 	public boolean isCheckInTableSuccess() {
-		return userAllocatedOrderForTable.getStatus() == OrderStatus.SEATED;
+		return seatdOrderDTO.getStatus() == OrderStatus.SEATED;
 	}
 
 	public void clearCurrentTable() {
-		this.userAllocatedOrderForTable = null;
+		this.seatdOrderDTO = null;
 		this.userAllocatedTable = 0;
 		
 	}
