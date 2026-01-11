@@ -878,9 +878,7 @@ public class BistroDataBase_Controller {
 	 * @return true if the order was successfully cancelled, false otherwise
 	 */
 	public boolean removeFromWaitingList(String confirmationCode) {
-		// Update the order status to 'CANCELLED' and set the timestamp.
-		// Note: The database schema uses double 'L' (CANCELLED, cancelled_at).
-		final String qry = "UPDATE orders " + "SET status = 'CANCELLED', cancelled_at = ? "
+		final String qry = "UPDATE orders " + "SET status = 'CANCELED', canceled_at = ? "
 				+ "WHERE confirmation_code = ? " + "AND order_type = 'WAITLIST' " + "AND status = 'PENDING'";
 		Connection conn = null;
 		try {
@@ -894,7 +892,7 @@ public class BistroDataBase_Controller {
 				if (rowsAffected > 0) {
 					// The DB Trigger (trg_cleanup_waiting_list) will automatically
 					// remove the entry from the 'waiting_list' table now.
-					logger.log("[SUCCESS] Order " + confirmationCode + " cancelled successfully.");
+					logger.log("[SUCCESS] Order " + confirmationCode + " canceled successfully.");
 					return true;
 				} else {
 					logger.log("[WARN] No pending WAITLIST order found for code: " + confirmationCode);
