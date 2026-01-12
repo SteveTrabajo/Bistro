@@ -1605,6 +1605,10 @@ public class BistroDataBase_Controller {
 	//Method that give the number of the reservation this month
 	public int getTotalReservation(LocalDate date) {
 		
+		if(date == null) {
+				return 0;
+		}
+		
 	    final String qry =	"SELECT COUNT(*) AS total " +
 	    					"FROM orders o " +
 	    					"WHERE MONTH(o.order_date) = ? " +
@@ -1639,6 +1643,11 @@ public class BistroDataBase_Controller {
 	
 	//Method that give the number of the costumers this month
 	public int getTotalCostumersInMonth(LocalDate date) {
+		
+		if(date == null) {
+			return 0;
+		}
+	
 	    final String qry =	"SELECT COUNT(DISTINCT o.user_id) AS total " +
 	    					"FROM orders o " +
 	    					"WHERE MONTH(o.order_date) = ? " +
@@ -1673,6 +1682,11 @@ public class BistroDataBase_Controller {
 	//Method that give the number of the late costumers this month
 	public int getTotalLateCostumersInMonth(LocalDate date) {
 		
+			if(date == null) {
+				return 0;
+			}
+			
+	
 		   final String qry =	"SELECT COUNT(*) AS total_late " +
 		            			"FROM orders o " +
 		            			"JOIN table_sessions ts ON o.order_number = ts.order_number " +
@@ -1708,8 +1722,13 @@ public class BistroDataBase_Controller {
 		}
 	
 	
-	//Method that give the number of the late costumers this month
+	//Method that give the number of the costumers that arrive on time this month
 	public int getTotalOntTimeCostumersInMonth(LocalDate date) {
+		
+			if(date == null) {
+				return 0;
+			}
+	
 			
 			final String qry =	"SELECT COUNT(*) AS total_on_time " +
 			            			"FROM orders o " +
@@ -1743,7 +1762,50 @@ public class BistroDataBase_Controller {
 			 }
 
 			 return 0;
-		 }
+	 }
+	
+	
+	//Method that give the number of the total Member Reservation this month
+	public int getTotalMembersReservationInMonth(LocalDate date) {
+			
+		if(date == null) {
+				return 0;
+		}
+		
+				
+		final String qry =	  "SELECT COUNT(*) AS total " +
+							  "FROM orders o " +
+							  "JOIN users u ON o.user_id = u.user_id " +
+							  "WHERE u.type = 'MEMBER' " +
+							  "AND MONTH(o.order_date) = ? " +
+							  "AND YEAR(o.order_date) = ?";
+				    					
+		 Connection conn = null;
+
+		 try {
+				  conn = borrow();
+
+				  try (PreparedStatement ps = conn.prepareStatement(qry)) {
+				          ps.setInt(1, date.getMonthValue());
+				          ps.setInt(2, date.getYear());
+
+				          try (ResultSet rs = ps.executeQuery()) {
+				              if (rs.next()) {
+				                  return rs.getInt("total");
+				               }
+				            }
+				        }
+		} catch (SQLException ex) {
+				logger.log("[ERROR] SQLException in getTotalMembersReservationInMonth: " + ex.getMessage());
+				ex.printStackTrace();
+		} finally{
+			 release(conn);
+		}
+
+		return 0;
+	}
+	
+	
 
 	public void updateOrderTimeAndDateToNow(String confirmationCode) {
 		String sql = "UPDATE orders SET order_date = ?, order_time = ?, order_type = 'RESERVATION' WHERE confirmation_code = ?";
