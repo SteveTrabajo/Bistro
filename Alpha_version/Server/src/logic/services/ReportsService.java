@@ -20,6 +20,7 @@ public class ReportsService {
 		monthlyReport.setTotalReservations(this.dbController.getTotalReservation(date));
 		monthlyReport.setTotalCostumer(this.dbController.getTotalCostumersInMonth(date));
 		monthlyReport.setTotalLateCostumer(this.dbController.getTotalLateCostumersInMonth(date));
+		monthlyReport.setTotalOnTimeCostumer(this.dbController.getTotalOntTimeCostumersInMonth(date));
 		
 		
 		return monthlyReport;
