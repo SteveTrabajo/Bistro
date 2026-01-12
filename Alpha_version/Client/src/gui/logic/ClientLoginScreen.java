@@ -128,56 +128,47 @@ public class ClientLoginScreen {
 
 	
 	/**
-	 * Handles the member sign-in button click event with a loading indicator.
-	 * * @param event The event triggered by clicking the member sign-in button.
-	 */
-	@FXML
-	public void btnSignIn(Event event) {
-		String memberCodeText = txtMemberID.getText();
-		UserType userType = UserType.MEMBER;
-		String err = InputCheck.validateMemberCode6DigitsNoLeadingZero(memberCodeText);
-		
-		if (!err.isEmpty()) {
-			lblError.setText(err);
-			return;
-		}
+     * Handles the "Sign In" button click event.
+     * Validates input, shows a loading screen, and attempts to log the user in via a background thread.
+     *
+     * @param event The event triggered by clicking the button (used for screen switching and locating the root pane).
+     */
+    @FXML
+    public void btnSignIn(Event event) {
+        String memberCodeText = txtMemberID.getText();
+        UserType userType = UserType.MEMBER;
+        
+        // 1. Input Validation (UI Thread)
+        String err = InputCheck.validateMemberCode6DigitsNoLeadingZero(memberCodeText);
+        if (!err.isEmpty()) {
+            lblError.setText(err);
+            return;
+        }
 
-		// 1. Prepare UI for loading state
-		lblError.setText("");
-		btnSignIn.setDisable(true); // Disable button to prevent double clicks
-		
-		// Create a simple loading indicator
-		ProgressIndicator loadingIndicator = new ProgressIndicator();
-		loadingIndicator.setMaxSize(50, 50);
-		
-		// Add the indicator to your main StackPane to show it over the content
-		mainPane.getChildren().add(loadingIndicator);
-		contentPane.setDisable(true); // Soft-disable the background content
+        lblError.setText("");
+        
+        // Prepare login data
+        userLoginData = new HashMap<>();
+        userLoginData.put("userType", userType);
+        userLoginData.put("memberCode", Integer.parseInt(memberCodeText));
 
-		userLoginData = new HashMap<>();
-		userLoginData.put("userType", userType);
-		userLoginData.put("memberCode", Integer.parseInt(memberCodeText));
-
-		// 2. Run the blocking call in a background thread
-		new Thread(() -> {
-			// This is where the code "waits" for the server
-			BistroClientGUI.client.getUserCTRL().signInUser(userLoginData);
-
-			// 3. Update UI after response arrives
-			Platform.runLater(() -> {
-				// Remove loading indicator and re-enable UI
-				mainPane.getChildren().remove(loadingIndicator);
-				contentPane.setDisable(false);
-				btnSignIn.setDisable(false);
-
-				if (BistroClientGUI.client.getUserCTRL().isUserLoggedInAs(userType)) {
-					BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
-				} else {
-					lblError.setText("Member code does not exist.");
-				}
-			});
-		}).start();
-	}
+        // 2. Run Async Task with Loading Screen
+        // Using 'event' allows TaskRunner to find the root pane automatically
+        TaskRunner.run(event, 
+            () -> {
+                // @param backgroundTask: Code that runs in the background
+                BistroClientGUI.client.getUserCTRL().signInUser(userLoginData);
+            }, 
+            () -> {
+                // @param onSuccess: Code that runs on UI thread after background task finishes
+                if (BistroClientGUI.client.getUserCTRL().isUserLoggedInAs(userType)) {
+                    BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error");
+                } else {
+                    lblError.setText("Member code does not exist.");
+                }
+            }
+        );
+    }
 	/**
 	 * Handles the QR code scanning button click event. (Functionality to be
 	 * implemented)

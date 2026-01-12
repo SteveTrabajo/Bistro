@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane fx:id="rootPane"
+	style="-fx-background-color: rgba(0, 0, 0, 0.7);"
+	xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+
+	<VBox alignment="CENTER" spacing="20.0">
+		<ImageView fitHeight="100.0" fitWidth="100.0"
+			pickOnBounds="true" preserveRatio="true">
+			<image>
+				<Image url="@/resources/bistro_logo.png" />
+			</image>
+		</ImageView>
+
+		<ProgressIndicator maxWidth="50.0" />
+
+		<Label text="Please wait..." textFill="WHITE"
+			style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+	</VBox>
+</StackPane>
