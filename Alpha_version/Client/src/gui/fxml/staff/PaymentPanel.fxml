@@ -73,7 +73,7 @@
     <HBox spacing="16" VBox.vgrow="ALWAYS">
 
         <!-- Left: Table -->
-        <VBox prefHeight="465.0" prefWidth="652.0" spacing="10" styleClass="pay-card" VBox.vgrow="ALWAYS">
+        <VBox prefHeight="465.0" prefWidth="652.0" spacing="10" styleClass="pay-card" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS">
             <Label fx:id="pendingTitleLabel" styleClass="pay-card-title" text="Pending Reservation Bills (0)" />
 
             <TableView fx:id="billsTable" styleClass="pay-table" VBox.vgrow="ALWAYS">
@@ -85,6 +85,9 @@
                     <TableColumn fx:id="colCreated" prefWidth="115.0" text="Date" />
                     <TableColumn fx:id="colTotal" prefWidth="89.0" text="Total" />
                 </columns>
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                </columnResizePolicy>
             </TableView>
         </VBox>
     </HBox>
