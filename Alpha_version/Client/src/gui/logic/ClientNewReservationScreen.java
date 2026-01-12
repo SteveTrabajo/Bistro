@@ -243,9 +243,9 @@ public class ClientNewReservationScreen {
 	@FXML
 	void btnBack(Event event) {
 	    if (staffProxyData != null) {
-	    	BistroClientGUI.switchScreen(event, "ReservationsPanel", "Error returning to Staff Reservations Panel");
+	    	BistroClientGUI.switchScreen(event, "clientStaffDashboardScreen", "Error returning to Staff Reservations Panel");
 	    } else {
-	    	BistroClientGUI.switchScreen(event, "ClientDashboardScreen", "Error returning to Client Dashboard");
+	    	BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Error returning to Client Dashboard");
 	    }
 	}
 	

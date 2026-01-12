@@ -42,6 +42,32 @@ public class OrderSubject {
 			alert.setContentText("An error occurred while creating your reservation. Please try again later.");
 		});
 		
+		router.on("orders", "createReservationAsStaff.ok", msg -> {
+            BistroClient.awaitResponse = false;
+            String confirmationCode = (String) msg.getData();
+            Platform.runLater(() -> {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Reservation Successful");
+                alert.setHeaderText("Booking Confirmed!");
+                alert.setContentText("Please provide the customer with their confirmation code: " + confirmationCode); 
+                alert.showAndWait();
+                
+                BistroClientGUI.switchScreen("clientStaffDashboardScreen", "Error returning to Staff Dashboard.");
+            });
+        });
+
+        router.on("orders", "createReservationAsStaff.fail", msg -> {
+            BistroClient.awaitResponse = false;
+            String errorMessage = (String) msg.getData(); 
+            Platform.runLater(() -> {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Booking Failed");
+                alert.setHeaderText("Could not create reservation");
+                alert.setContentText(errorMessage != null ? errorMessage : "Unknown error occurred.");
+                alert.showAndWait();
+            });
+        });
+		
 		// This tells the router: "When the server sends 'getAvailableHours.ok', update the controller."
 		router.on("orders", "getAvailableHours.ok", (msg) -> {
             BistroClient.awaitResponse = false;
