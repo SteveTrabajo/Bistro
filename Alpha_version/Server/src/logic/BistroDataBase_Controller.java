@@ -1706,6 +1706,44 @@ public class BistroDataBase_Controller {
 
 		    return 0;
 		}
+	
+	
+	//Method that give the number of the late costumers this month
+	public int getTotalOntTimeCostumersInMonth(LocalDate date) {
+			
+			final String qry =	"SELECT COUNT(*) AS total_on_time " +
+			            			"FROM orders o " +
+			            			"JOIN table_sessions ts ON o.order_number = ts.order_number " +
+			            			"WHERE o.order_type = 'RESERVATION' " +
+			            			"AND MONTH(o.order_date) = ? " +
+			            			"AND YEAR(o.order_date) = ? " +
+			            			"AND ts.seated_at IS NOT NULL " +
+			            			"AND ts.seated_at = TIMESTAMP(o.order_date, o.order_time)";
+			    					
+			 Connection conn = null;
+
+			 try {
+			      conn = borrow();
+
+			      try (PreparedStatement ps = conn.prepareStatement(qry)) {
+			           	ps.setInt(1, date.getMonthValue());
+			            ps.setInt(2, date.getYear());
+
+			            try (ResultSet rs = ps.executeQuery()) {
+			               if (rs.next()) {
+			                   return rs.getInt("total_on_time");
+			                }
+			            }
+			        }
+			 } catch (SQLException ex) {
+			        logger.log("[ERROR] SQLException in getTotalOntTimeCostumersInMonth: " + ex.getMessage());
+			        ex.printStackTrace();
+			 } finally {
+			        release(conn);
+			 }
+
+			 return 0;
+		 }
 
 	public void updateOrderTimeAndDateToNow(String confirmationCode) {
 		String sql = "UPDATE orders SET order_date = ?, order_time = ?, order_type = 'RESERVATION' WHERE confirmation_code = ?";
