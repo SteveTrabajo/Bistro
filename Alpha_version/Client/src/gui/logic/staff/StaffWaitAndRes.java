@@ -52,7 +52,7 @@ public class StaffWaitAndRes extends Dialog<Map<String, Object>> {
         TextField txtEmail = new TextField();
         txtEmail.setPromptText("Email (Optional)");
         TextField txtName  = new TextField();
-        txtName.setPromptText("Full Name");
+        txtName.setPromptText("Full Name (Optional)");
 
         TextField txtMemberId = new TextField();
         txtMemberId.setPromptText("Member ID");
@@ -74,13 +74,13 @@ public class StaffWaitAndRes extends Dialog<Map<String, Object>> {
         Label lbl1 = new Label("Phone:");
         Label lbl2 = new Label("Name:"); 
         Label lbl3 = new Label("Email:");
+        
+        grid.add(lbl2, 0, row);
+        grid.add(txtName, 1, row, 2, 1); // Name or Empty
+        row++;
 
         grid.add(lbl1, 0, row);
         grid.add(txtPhone, 1, row, 2, 1); // Phone or MemberID
-        row++;
-
-        grid.add(lbl2, 0, row);
-        grid.add(txtName, 1, row, 2, 1); // Name or Empty
         row++;
         
         grid.add(lbl3, 0, row);
@@ -110,8 +110,8 @@ public class StaffWaitAndRes extends Dialog<Map<String, Object>> {
                 lbl1.setText("Phone:");
                 lbl2.setText("Name:");
                 lbl3.setText("Email:");
-                grid.add(txtPhone, 1, 1, 2, 1);
-                grid.add(txtName, 1, 2, 2, 1);
+                grid.add(txtPhone, 1, 2, 2, 1);
+                grid.add(txtName, 1, 1, 2, 1);
                 grid.add(txtEmail, 1, 3, 2, 1);
                 txtName.setVisible(true);
                 txtEmail.setVisible(true);

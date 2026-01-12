@@ -47,17 +47,17 @@ public class WaitingListPanel {
 	@FXML
 	private TableView<Order> waitingTable;
 	@FXML
-	private TableColumn<Order, String> colQueue; // Confirmation Code
+	private TableColumn<Order, String> colQueue;
 	@FXML
-	private TableColumn<Order, String> colName; // We might need to fetch User name separately or stick to ID
+	private TableColumn<Order, String> colName;
 	@FXML
-	private TableColumn<Order, String> colMember; // Type
+	private TableColumn<Order, String> colMember;
 	@FXML
-	private TableColumn<Order, Integer> colParty; // Diners
+	private TableColumn<Order, Integer> colParty;
 	@FXML
-	private TableColumn<Order, LocalTime> colJoined; // Time
+	private TableColumn<Order, LocalTime> colJoined;
 	@FXML
-	private TableColumn<Order, OrderStatus> colStatus; // Status
+	private TableColumn<Order, OrderStatus> colStatus;
 
 	private ObservableList<Order> waitingList = FXCollections.observableArrayList();
 
@@ -100,11 +100,10 @@ public class WaitingListPanel {
 				} else {
 					setText(item.toString());
 
-					// Apply CSS based on status
 					if (item == OrderStatus.NOTIFIED) {
-						getStyleClass().add("wl-chip-called"); // Orange/Red style
+						getStyleClass().add("wl-chip-called"); // Orange~red
 					} else {
-						getStyleClass().add("wl-chip-waiting"); // Yellow/Amber style
+						getStyleClass().add("wl-chip-waiting"); // Yellow~Amber
 					}
 				}
 			}
@@ -112,8 +111,7 @@ public class WaitingListPanel {
 
 		// Custom Factory for Member Type (Simulated based on ID for now)
 		colMember.setCellValueFactory(cellData -> {
-			// In a real app, you'd check cellData.getValue().getUserId() against cached
-			// users
+			// In a real app, you'd check cellData.getValue().getUserId() against cached users
 			return new SimpleStringProperty("Guest");
 		});
 
@@ -132,12 +130,9 @@ public class WaitingListPanel {
 
 	private void loadData() {
 		waitingList.clear();
-		// TODO Request update from server (comment out dummy data when real data is
-		// used)
-		// if (BistroClientGUI.client != null) {
-		// BistroClientGUI.client.getWaitingListCTRL().askWaitingList();
-		// }
-		// In reality: get from WaitingListController
+		if (BistroClientGUI.client != null) {
+			BistroClientGUI.client.getWaitingListCTRL().askWaitingList();
+		}
 		updateQueueTitle();
 		updateStats();
 	}
@@ -163,8 +158,7 @@ public class WaitingListPanel {
 	private void btnRemoveFromWaitlist(ActionEvent event) {
 		Order selectedOrder = waitingTable.getSelectionModel().getSelectedItem();
 		if (selectedOrder != null) {
-			// TODO uncomment next line when backend is ready
-			// BistroClientGUI.client.getWaitingListCTRL().removeFromWaitingList(selectedOrder.getConfirmationCode());
+			BistroClientGUI.client.getWaitingListCTRL().removeFromWaitingList(selectedOrder.getConfirmationCode());
 			showAlert("Remove from Waitlist", "Requested removal of order: " + selectedOrder.getConfirmationCode());
 		} else {
 			showAlert("No Selection", "Please select an order to remove from the waitlist.");

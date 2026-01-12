@@ -95,6 +95,7 @@ public class ReservationsPanel {
         loadData();
     }
 
+    //TODO change into our actual logic: remove mock items and implement real logic
     private void setupColumns() {
         colDate.setCellValueFactory(new PropertyValueFactory<>("orderDate"));
         
@@ -178,12 +179,9 @@ public class ReservationsPanel {
                 );
                 Parent root = loader.load();
                 
-                // 3. Get Controller and inject data
                 ClientNewReservationScreen controller = loader.getController();
                 controller.setBookingForCustomer(customerData);
                 
-                // 4. Switch Screen manually
-                //BistroClientGUI.switchScreen(loader, root, event, "New Reservation (Staff Mode)");
                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                 Scene scene = new Scene(root);
                 stage.setScene(scene);
