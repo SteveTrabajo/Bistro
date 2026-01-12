@@ -34,19 +34,14 @@ public class PaymentPanel {
 
     @FXML
     private Label lblPendingBills, lblTodayRevenue, lblAvgBill, pendingTitleLabel;
-    
     @FXML
     private TextField searchField;
-    
     @FXML
     private Button btnRefreshList, btnPaymentReservation;
-
     @FXML
     private TableView<Bill> billsTable;
-    
     @FXML
     private TableColumn<Bill, String> colTable, colCustomer, colMember, colCreated, colTotal;
-    
     @FXML
     private TableColumn<Bill, Integer> colBillId;
 

@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefHeight="749.0" prefWidth="581.0" spacing="14" styleClass="cm-root" stylesheets="@../../css/staff/CustomersPanelStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.staff.customers.CustomersPanel">
+<VBox prefHeight="749.0" prefWidth="581.0" spacing="14" styleClass="cm-root" stylesheets="@../../css/staff/CustomersPanelStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.staff.CustomersPanel">
 
     <padding><Insets bottom="18" left="18" right="18" top="18" /></padding>
 
@@ -68,11 +68,11 @@
 
         <TableView fx:id="customersTable" styleClass="cm-table" VBox.vgrow="ALWAYS">
             <columns>
-                <TableColumn fx:id="colName" prefWidth="117.0" text="Name" />
+                <TableColumn fx:id="colFullName" prefWidth="117.0" text="Name" />
                 <TableColumn fx:id="colEmail" prefWidth="82.0" text="Email" />
                 <TableColumn fx:id="colPhone" prefWidth="87.0" text="Phone" />
                 <TableColumn fx:id="colMemberCode" prefWidth="117.0" text="Member Code" />
-                <TableColumn fx:id="colType" prefWidth="107.0" text="Type" />
+                <TableColumn fx:id="colUserType" prefWidth="107.0" text="Type" />
             </columns>
         </TableView>
       <Label styleClass="cm-subtitle" text="Double-click in the table to edit customer" />

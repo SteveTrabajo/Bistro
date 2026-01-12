@@ -38,37 +38,27 @@ public class CustomersPanel {
 
 	@FXML
 	public Label totalCustomersLabel;
-
 	@FXML
 	public Label membersLabel;
-
 	@FXML
 	public Label walkinsLabel;
-
 	@FXML
 	public TextField searchField;
-
 	@FXML
 	public Button btnRefresh;
-
 	@FXML
 	public Label directoryTitleLabel;
 
 	@FXML
 	public TableView<UserData> customersTable;
-
 	@FXML
 	public TableColumn<UserData, String> colFullName;
-
 	@FXML
 	public TableColumn<UserData, String> colEmail;
-
 	@FXML
 	public TableColumn<UserData, String> colPhone;
-
 	@FXML
 	public TableColumn<UserData, String> colMemberCode;
-
 	@FXML
 	public TableColumn<UserData, UserType> colUserType;
 
