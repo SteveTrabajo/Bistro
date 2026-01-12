@@ -36,6 +36,7 @@ public class ReservationController {
 	private Consumer<Boolean> cancelResultCallback;
 	private Consumer<List<Order>> allReservationsCallback;
     private Consumer<String> onCodeRetrieveResult;
+    private Consumer<List<LocalDate>> datesUpdateCallback;
 	
 	//******************************** Constructors ***********************************//
 	
@@ -208,5 +209,31 @@ public class ReservationController {
 			return false;
 		}
 		return true;
+	}
+	/**
+	 * Registers the listener for when the server returns valid dates.
+	 */
+	public void setDatesUpdateListener(Consumer<List<LocalDate>> callback) {
+	    this.datesUpdateCallback = callback;
+	}
+
+	/**
+	 * Called by BistroClient when the server sends back the list of dates.
+	 * Triggers the UI update.
+	 */
+	public void setAvailableDates(List<LocalDate> dates) {
+	    if (datesUpdateCallback != null) {
+	        Platform.runLater(() -> {
+	            datesUpdateCallback.accept(dates);
+	        });
+	    }
+	}
+
+	/**
+	 * Sends a request to the server to get available dates for a specific number of diners.
+	 * Note: You must add Api.ASK_AVAILABLE_DATES to your Api class.
+	 */
+	public void askAvailableDates(int diners) {
+	    client.handleMessageFromClientUI(new Message(Api.ASK_AVAILABLE_DATES, diners));
 	}
 }

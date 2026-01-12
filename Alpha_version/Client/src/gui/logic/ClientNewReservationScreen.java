@@ -2,6 +2,7 @@ package gui.logic;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -22,39 +23,41 @@ import logic.BistroClientGUI;
 
 /**
  * Controller class for the Client New Reservation Screen.
- * Handles user interactions for creating a new reservation.
+ * Handles the logic for checking availability and creating bookings.
  */
 public class ClientNewReservationScreen {
-	
-	//***********************FXML Variables************************//
-	
-	@FXML
-	private DatePicker datePicker;
-	@FXML
-	private ComboBox<String> dinersAmountComboBox;
-	@FXML
-	private GridPane timeSlotsGridPane;
-	@FXML
-	private Button btnConfirmReservation;
-	@FXML
-	private Button btnBack;
-	@FXML
-	private Label lblUser;
-	
-	private String selectedTimeSlot = null;
-	
-	private Map<String, Object> staffProxyData = null;
-	
-	//***********************FXML Methods************************//
-	
-	/*
-	 * Initializes the New Reservation Screen by setting up the diners amount combo box and date picker.
-	 */
-	@FXML
+    
+    //*********************** FXML Variables ************************//
+    
+    @FXML
+    private DatePicker datePicker;
+    @FXML
+    private ComboBox<String> dinersAmountComboBox;
+    @FXML
+    private GridPane timeSlotsGridPane;
+    @FXML
+    private Button btnConfirmReservation;
+    @FXML
+    private Button btnBack;
+    @FXML
+    private Label lblUser;
+    
+    private String selectedTimeSlot = null;
+    private Map<String, Object> staffProxyData = null;
+    private List<LocalDate> serverAllowedDates = new ArrayList<>();
+    
+    //*********************** Initialization ************************//
+    
+    @FXML
     public void initialize() {
         setupDinersAmountComboBox();
         setupDatePicker();
-        // Default Label Logic (Normal Client Mode)
+        
+        // Initial state: Date selection is disabled until diners are chosen
+        datePicker.setDisable(true); 
+        btnConfirmReservation.setDisable(true);
+
+        // Set user label based on login status
         if (BistroClientGUI.client != null && BistroClientGUI.client.getUserCTRL().getLoggedInUser() != null) {
             User currentUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
             if (lblUser != null) {
@@ -62,22 +65,57 @@ public class ClientNewReservationScreen {
             }
         }
         
-        dinersAmountComboBox.valueProperty().addListener((obs, oldV, newV) -> refreshTimeSlots());
-        datePicker.valueProperty().addListener((obs, oldDate, newDate) -> refreshTimeSlots());
-        datePicker.setValue(LocalDate.now());
-        btnConfirmReservation.setDisable(true);
+        // Listener: When diner count changes, fetch available dates
+        dinersAmountComboBox.valueProperty().addListener((obs, oldV, newV) -> {
+            if (newV != null) {
+                fetchAvailableDatesFromServer();
+            }
+        });
+
+        // Listener: When date changes, fetch available time slots
+        datePicker.valueProperty().addListener((obs, oldDate, newDate) -> {
+            if (newDate != null) {
+                refreshTimeSlots();
+            }
+        });
     }
-	
-	/*
-     * @param customerData Map containing "name", "identifier" (Phone/ID), and "customerType".
+    
+    //*********************** Logic Methods ************************//
+
+    /**
+     * Requests available dates from the server based on the selected number of diners.
      */
+    private void fetchAvailableDatesFromServer() {
+        int diners = parseDiners(dinersAmountComboBox.getValue());
+
+        // Reset UI state before request
+        datePicker.setValue(null);
+        datePicker.setDisable(true);
+        timeSlotsGridPane.getChildren().clear();
+        selectedTimeSlot = null;
+        btnConfirmReservation.setDisable(true);
+
+        // Register callback for server response
+        BistroClientGUI.client.getReservationCTRL().setDatesUpdateListener((dates) -> {
+            Platform.runLater(() -> {
+                this.serverAllowedDates = dates; 
+                // Refresh date picker cells to apply new restrictions
+                setupDatePicker(); 
+                datePicker.setDisable(false); 
+                datePicker.show(); 
+            });
+        });
+
+        // Send request
+        BistroClientGUI.client.getReservationCTRL().askAvailableDates(diners);
+    }
+    
     public void setBookingForCustomer(Map<String, Object> customerData) {
         this.staffProxyData = customerData;
         
         String name = (String) customerData.get("name");
         String id = (String) customerData.get("identifier");
         
-        // UI update to show who the booking is for
         if (lblUser != null) {
             if (name != null && !name.isEmpty()) {
                 lblUser.setText("Booking for: " + name);
@@ -86,167 +124,142 @@ public class ClientNewReservationScreen {
             }
         }
     }
-	
-	
-	/** 
-	 * Refreshes the available time slots based on the selected date and number of diners.
-	 * Sends a request to the server to fetch available hours.
-	 */
-	private void refreshTimeSlots() {
-		// Safety Check
-		if (timeSlotsGridPane == null) return;
-	    LocalDate date = datePicker.getValue();
-	    if (date == null) {
-	    	timeSlotsGridPane.getChildren().clear();
-	    	return;
-	    }
+    
+    private void refreshTimeSlots() {
+        if (timeSlotsGridPane == null) return;
+        
+        LocalDate date = datePicker.getValue();
+        if (date == null) {
+            timeSlotsGridPane.getChildren().clear();
+            return;
+        }
 
-	    int diners = parseDiners(dinersAmountComboBox.getValue());
+        int diners = parseDiners(dinersAmountComboBox.getValue());
 
-	    //Clear grid immediately so user knows it's refreshing
-	    timeSlotsGridPane.getChildren().clear(); 
-	    selectedTimeSlot = null;
-	    btnConfirmReservation.setDisable(true);
+        timeSlotsGridPane.getChildren().clear(); 
+        selectedTimeSlot = null;
+        btnConfirmReservation.setDisable(true);
 
-	    BistroClientGUI.client.getReservationCTRL().setUIUpdateListener((availableSlots) -> {
-			Platform.runLater(() -> generateTimeSlots(availableSlots));
-		});
-	    BistroClientGUI.client.getReservationCTRL().askAvailableHours(date, diners);
-	}
+        BistroClientGUI.client.getReservationCTRL().setUIUpdateListener((availableSlots) -> {
+            Platform.runLater(() -> generateTimeSlots(availableSlots));
+        });
+        
+        BistroClientGUI.client.getReservationCTRL().askAvailableHours(date, diners);
+    }
 
-	/**
-	 * Parses the number of diners from the combo box value.
-	 * 
-	 * @param value The combo box value (e.g., "2 People").
-	 * @return The number of diners as an integer.
-	 */
-	private int parseDiners(String value) {
-		if (value != null && value.contains(" ")) {
-			String numberPart = value.split(" ")[0];
-			try {
-				return Integer.parseInt(numberPart);
-			} catch (NumberFormatException e) {
-				e.printStackTrace();
-			}
-		}
-		return 2; // Default to 2
-	}
-	
-	/**
-	 * Sets up the date picker to disable past dates.
-	 */
-	private void setupDatePicker() {
-		datePicker.setDayCellFactory(picker -> new DateCell() {
-	        @Override
-	        public void updateItem(LocalDate date, boolean empty) {
-	            super.updateItem(date, empty);
-	            setDisable(empty || date.isBefore(LocalDate.now()) || date.isAfter(LocalDate.now().plusMonths(1)));
-	        }
-	    });
-	}
-	
-	/**
-	 * Method to setup diners amount combo box with values from 1 to 12.
-	 */
-	private void setupDinersAmountComboBox() {
-		for (int i = 1; i <= 12; i++) {
-			dinersAmountComboBox.getItems().add(i + " People");
-		}
-		dinersAmountComboBox.getSelectionModel().select(1); // Default "2 People"
-	}
-	
-	/**
-	 * Generates and displays available time slots in the grid pane.
-	 * 
-	 * @param availableTimeSlots A list of available time slots as strings.
-	 */
-	private void generateTimeSlots(List<String> availableTimeSlots) {
-		if (timeSlotsGridPane == null) return;
-		
-	    timeSlotsGridPane.getChildren().clear(); // Clear existing buttons
-	    
-	    if (availableTimeSlots == null || availableTimeSlots.isEmpty()) {
-			Label lblNoSlots = new Label("No time slots available for this date.");
-			lblNoSlots.setStyle("-fx-text-fill: red; -fx-font-size: 14px;");
-			timeSlotsGridPane.add(lblNoSlots, 0, 0);
-			GridPane.setColumnSpan(lblNoSlots, 4);
-			return;
-		}
-	    //initialize ToggleGroup and row/col counters
-	    ToggleGroup timeSlotToggleGroup = new ToggleGroup();
-	    int col = 0;
-	    int row = 0;
-	    //loop through available time slots and create buttons
-	    for (String timeSlot : availableTimeSlots) {
-	        ToggleButton timeSlotButton = new ToggleButton(timeSlot);
-	        timeSlotButton.setToggleGroup(timeSlotToggleGroup);
-	        timeSlotButton.setPrefWidth(104);
-	        timeSlotButton.setPrefHeight(37);
-	        timeSlotButton.getStyleClass().add("time-slot");
-	        //event handler for button selection
-	        timeSlotButton.setOnAction(event -> {
-	            if (timeSlotButton.isSelected()) {
-	                selectedTimeSlot = timeSlot;
-	                btnConfirmReservation.setDisable(false);
-	            } else {
-	                selectedTimeSlot = null;
-	                btnConfirmReservation.setDisable(true);
-	            }
-	        });
-	        //add button to grid pane
-	        timeSlotsGridPane.add(timeSlotButton, col, row);
-	        col++;
-	        if (col >= 4) { 
-	            col = 0;
-	            row++;
-	        }
-	    }
-	}
-	
-	/**
-	 * Handles the confirm reservation button click event.
-	 * @param event
-	 */
-	@FXML
-	void btnConfirmReservation(Event event) {
-	    LocalDate date = datePicker.getValue();
-	    String dinersStr = dinersAmountComboBox.getValue();
-	    int diners = parseDiners(dinersStr);
-	    if (selectedTimeSlot == null) {
-	        Alert alert = new Alert(Alert.AlertType.WARNING);
-	        alert.setContentText("Please select a time slot.");
-	        alert.showAndWait();
-	        return;
-	    }
-	    // logic to differentiate between Staff Mode and Normal Client Mode
+    private int parseDiners(String value) {
+        if (value != null && value.contains(" ")) {
+            String numberPart = value.split(" ")[0];
+            try {
+                return Integer.parseInt(numberPart);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+        }
+        return 2; 
+    }
+    
+    /**
+     * Configures the DatePicker to disable past dates and dates not returned by the server.
+     */
+    private void setupDatePicker() {
+        datePicker.setDayCellFactory(picker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                
+                boolean isPast = date.isBefore(LocalDate.now());
+                boolean isNotAllowed = (serverAllowedDates != null && !serverAllowedDates.contains(date));
+                
+                if (empty || isPast || isNotAllowed) {
+                    setDisable(true);
+                    setStyle("-fx-background-color: #ffc0cb;"); 
+                }
+            }
+        });
+    }
+    
+    private void setupDinersAmountComboBox() {
+        for (int i = 1; i <= 12; i++) {
+            dinersAmountComboBox.getItems().add(i + " People");
+        }
+    }
+    
+    private void generateTimeSlots(List<String> availableTimeSlots) {
+        if (timeSlotsGridPane == null) return;
+        
+        timeSlotsGridPane.getChildren().clear(); 
+        
+        if (availableTimeSlots == null || availableTimeSlots.isEmpty()) {
+            Label lblNoSlots = new Label("No time slots available.");
+            lblNoSlots.setStyle("-fx-text-fill: red; -fx-font-size: 14px;");
+            timeSlotsGridPane.add(lblNoSlots, 0, 0);
+            GridPane.setColumnSpan(lblNoSlots, 4);
+            return;
+        }
+        
+        ToggleGroup timeSlotToggleGroup = new ToggleGroup();
+        int col = 0;
+        int row = 0;
+        
+        for (String timeSlot : availableTimeSlots) {
+            ToggleButton timeSlotButton = new ToggleButton(timeSlot);
+            timeSlotButton.setToggleGroup(timeSlotToggleGroup);
+            timeSlotButton.setPrefWidth(104);
+            timeSlotButton.setPrefHeight(37);
+            timeSlotButton.getStyleClass().add("time-slot");
+            
+            timeSlotButton.setOnAction(event -> {
+                if (timeSlotButton.isSelected()) {
+                    selectedTimeSlot = timeSlot;
+                    btnConfirmReservation.setDisable(false);
+                } else {
+                    selectedTimeSlot = null;
+                    btnConfirmReservation.setDisable(true);
+                }
+            });
+            
+            timeSlotsGridPane.add(timeSlotButton, col, row);
+            col++;
+            if (col >= 4) { 
+                col = 0;
+                row++;
+            }
+        }
+    }
+    
+    //*********************** Event Handlers ************************//
+    
+    @FXML
+    void btnConfirmReservation(Event event) {
+        LocalDate date = datePicker.getValue();
+        String dinersStr = dinersAmountComboBox.getValue();
+        int diners = parseDiners(dinersStr);
+        
+        if (selectedTimeSlot == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setContentText("Please select a time slot.");
+            alert.showAndWait();
+            return;
+        }
+
         if (staffProxyData != null) {
-            // staff mode
             String type = (String) staffProxyData.get("customerType");
             String id = (String) staffProxyData.get("identifier");
             String name = (String) staffProxyData.get("name");
             
-            // Calls the specialized method in ReservationController
             BistroClientGUI.client.getReservationCTRL().createReservationAsStaff(date, LocalTime.parse(selectedTimeSlot), diners, type, id, name);
         } else {
-            // normal client mode
-            BistroClientGUI.client.getReservationCTRL().createNewReservation(
-                date, selectedTimeSlot, diners
-            );
+            BistroClientGUI.client.getReservationCTRL().createNewReservation(date, selectedTimeSlot, diners);
         }
-	}
-	
-	/*
-	 * Handles the back button click event to return to the Client Dashboard Screen.
-	 * 
-	 * @param event The event triggered by clicking the back button.
-	 */
-	@FXML
-	void btnBack(Event event) {
-	    if (staffProxyData != null) {
-	    	BistroClientGUI.switchScreen(event, "staff/clientStaffDashboardScreen", "Error returning to Staff Reservations Panel");
-	    } else {
-	    	BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Error returning to Client Dashboard");
-	    }
-	}
-	
+    }
+    
+    @FXML
+    void btnBack(Event event) {
+        if (staffProxyData != null) {
+            BistroClientGUI.switchScreen(event, "staff/clientStaffDashboardScreen", "Error returning to Staff Reservations Panel");
+        } else {
+            BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Error returning to Client Dashboard");
+        }
+    }
 }

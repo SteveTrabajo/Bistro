@@ -1557,54 +1557,61 @@ public class BistroDataBase_Controller {
 
 	// ******************** Restaurant Management Operations ******************
 	
-	/**
-	 * Retrieves today's opening hours from the database, considering special
-	 * dates.
-	 * 
-	 * @return List of LocalTime objects representing opening and closing times.
-	 *         Empty list if closed today.
-	 */
-	public List<LocalTime> getOpeningHoursFromDB() {
-		List<LocalTime> hours = new ArrayList<>();
-		LocalDate today = LocalDate.now();
-		int currentDayOfWeek = (today.getDayOfWeek().getValue() % 7) + 1;
-		String qry = "SELECT " + "  COALESCE(s.is_closed, 0) as is_closed_final, "
-				+ "  COALESCE(s.open_time, w.open_time) as open_final, "
-				+ "  COALESCE(s.close_time, w.close_time) as close_final " + "FROM opening_hours_weekly w "
-				+ "LEFT JOIN opening_hours_special s ON s.special_date = ? " + "WHERE w.day_of_week = ?";
-		Connection conn = null;
-		try {
-			conn = borrow();
-			try (PreparedStatement ps = conn.prepareStatement(qry)) {
-				ps.setDate(1, Date.valueOf(today));
-				ps.setInt(2, currentDayOfWeek);
-				try (ResultSet rs = ps.executeQuery()) {
-					if (rs.next()) {
-						boolean isClosed = rs.getInt("is_closed_final") == 1;
+		/**
+		 * Retrieves today's opening hours from the database.
+		 * Acts as a wrapper/convenience method for getOpeningHoursFromDB(LocalDate).
+		 * * @return List containing [OpenTime, CloseTime] or empty list if closed.
+		 */
+		public List<LocalTime> getOpeningHoursFromDB() {
+			return getOpeningHoursFromDB(LocalDate.now());
+		}
 
-						
-						if (!isClosed) {
-							Time openSql = rs.getTime("open_final");
-							Time closeSql = rs.getTime("close_final");
+		/**
+		 * Retrieves opening hours for a SPECIFIC DATE from the database, 
+		 * accounting for weekly schedules and special overrides (holidays/events).
+		 * * @param date The date to check availability for.
+		 * @return A list of LocalTime objects: [0] = Open Time, [1] = Close Time.
+		 * Returns an empty list if the restaurant is closed or an error occurs.
+		 */
+		public List<LocalTime> getOpeningHoursFromDB(LocalDate date) {
+			List<LocalTime> hours = new ArrayList<>();
+			int currentDayOfWeek = (date.getDayOfWeek().getValue() % 7) + 1; // 1=Sunday, 7=Saturday
+			
+			String qry = "SELECT " + "  COALESCE(s.is_closed, 0) as is_closed_final, "
+					+ "  COALESCE(s.open_time, w.open_time) as open_final, "
+					+ "  COALESCE(s.close_time, w.close_time) as close_final " + "FROM opening_hours_weekly w "
+					+ "LEFT JOIN opening_hours_special s ON s.special_date = ? " + "WHERE w.day_of_week = ?";
+			
+			Connection conn = null;
+			try {
+				conn = borrow();
+				try (PreparedStatement ps = conn.prepareStatement(qry)) {
+					ps.setDate(1, Date.valueOf(date));
+					ps.setInt(2, currentDayOfWeek);
+					try (ResultSet rs = ps.executeQuery()) {
+						if (rs.next()) {
+							boolean isClosed = rs.getInt("is_closed_final") == 1;
 
-							if (openSql != null && closeSql != null) {
-								hours.add(openSql.toLocalTime());
-								hours.add(closeSql.toLocalTime());
+							if (!isClosed) {
+								Time openSql = rs.getTime("open_final");
+								Time closeSql = rs.getTime("close_final");
+
+								if (openSql != null && closeSql != null) {
+									hours.add(openSql.toLocalTime());
+									hours.add(closeSql.toLocalTime());
+								}
 							}
 						}
 					}
 				}
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+			} finally {
+				release(conn);
 			}
-		} catch (SQLException ex) {
-			ex.printStackTrace();
-		} finally {
-			release(conn);
-		}
 
-		return hours;
-	}
-	
-	
+			return hours;
+		}
 	//******************************* Payment Operations ******************************
 	/**
 	 * Updates a bill to mark it as PAID and records the external transaction ID.

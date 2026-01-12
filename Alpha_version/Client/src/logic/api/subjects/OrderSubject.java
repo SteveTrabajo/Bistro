@@ -5,6 +5,9 @@ import javafx.scene.control.Alert;
 import logic.BistroClient;
 import logic.BistroClientGUI;
 import logic.api.ClientRouter;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import entities.Order;
@@ -107,6 +110,19 @@ public class OrderSubject {
 		    Platform.runLater(() -> {
 		        BistroClientGUI.client.getReservationCTRL().receiveStaffReservations(orders);
 		    });
+		});
+
+		router.on("orders", "getAvailableDates.ok", msg -> {
+			BistroClient.awaitResponse = false;
+			// Retrieve the list of dates from the server message
+			List<LocalDate> dates = (List<LocalDate>) msg.getData();
+			// Send it to the controller to update the GUI
+			BistroClientGUI.client.getReservationCTRL().setAvailableDates(dates);
+		});
+		router.on("orders", "getAvailableDates.fail", msg -> {
+			BistroClient.awaitResponse = false;
+			// Send an empty list or null to indicate failure/no dates
+			BistroClientGUI.client.getReservationCTRL().setAvailableDates(new ArrayList<>());
 		});
 	}
 	

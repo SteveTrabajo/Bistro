@@ -135,5 +135,23 @@ public final class OrdersSubject {
             List<Order> orders = ordersService.getStaffReservations(date);
             client.sendToClient(new Message(Api.ASK_GET_RESERVATIONS_BY_DATE + ".ok", orders));
         });
+     // --------------------------------------------------------------------------
+     		// NEW HANDLER: Send available dates based on diner count
+     		// --------------------------------------------------------------------------
+     		router.on("orders", "getAvailableDates", (msg, client) -> {
+     		    int diners = (int) msg.getData();
+     		    
+     		    
+     		    List<LocalDate> availableDates = ordersService.getAvailableDates(diners);
+     		    
+     		    if(availableDates != null) {
+     		        client.sendToClient(new Message(Api.REPLY_AVAILABLE_DATES_OK, availableDates));
+     		        logger.log("[INFO] Client: " + client + " retrieved available dates successfully.");
+     		    } else {
+     		        client.sendToClient(new Message(Api.REPLY_AVAILABLE_DATES_FAIL, null));
+     		        logger.log("[ERROR] Client: " + client + " failed to get available dates.");
+     		    }
+     		});
+     		
     }
 }
