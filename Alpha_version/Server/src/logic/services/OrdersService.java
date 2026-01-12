@@ -223,7 +223,7 @@ public class OrdersService {
 	 * Fetches all table sizes from the database and stores them in the tableSizes list.
 	 */
 	public void getTablesCapacity() {
-		List<Table> tables = tableService.getTableSessionInfo();
+		List<Table> tables = tableService.getAllTables();
 		tableSizes.clear();
 		for (Table table : tables) {
 			tableSizes.add(table.getCapacity());
