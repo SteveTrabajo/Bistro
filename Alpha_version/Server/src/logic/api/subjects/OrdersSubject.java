@@ -1,5 +1,6 @@
 package logic.api.subjects;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -127,6 +128,12 @@ public final class OrdersSubject {
 				client.sendToClient(new Message(Api.REPLY_PAYMENT_UPDATE_FAIL, null));
 				logger.log("[ERROR] Client: "+ client + " failed to update payment status for order with confirmation code: " + confirmationCode + ".");
 			}
+        });
+        
+        router.on("orders", "getOrdersByDate", (msg, client) -> {
+            LocalDate date = (LocalDate) msg.getData();
+            List<Order> orders = ordersService.getStaffReservations(date);
+            client.sendToClient(new Message(Api.ASK_GET_RESERVATIONS_BY_DATE + ".ok", orders));
         });
     }
 }

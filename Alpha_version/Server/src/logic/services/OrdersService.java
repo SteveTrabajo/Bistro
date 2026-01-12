@@ -405,9 +405,13 @@ public class OrdersService {
         return String.format("%02d:%02d", time.getHour(), time.getMinute());
     }
 
-
-
-
+	public List<Order> getClientReservations(LocalDate date) {
+        return dbController.getOrderbyDate(date);
+    }
+	
+	public List<Order> getStaffReservations(LocalDate date) {
+        return dbController.getFullOrdersByDate(date);
+    }
 
 
 }

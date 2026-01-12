@@ -807,6 +807,53 @@ public class BistroDataBase_Controller {
 		}
 		return orders;
 	}
+	
+	
+	//TODO double check this method
+	public List<Order> getFullOrdersByDate(LocalDate date) {
+        List<Order> orders = new ArrayList<>();
+        if (date == null) return orders;
+
+        // Select ALL fields needed for the staff table
+        String qry = "SELECT * FROM orders WHERE order_date = ? AND order_type = 'RESERVATION'";
+
+        Connection conn = null;
+        try {
+            conn = borrow();
+            try (PreparedStatement ps = conn.prepareStatement(qry)) {
+                ps.setDate(1, Date.valueOf(date));
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        // 1. Extract Basic Info
+                        int id = rs.getInt("order_number");
+                        LocalTime time = rs.getTime("order_time").toLocalTime();
+                        int diners = rs.getInt("number_of_guests");
+                        String statusStr = rs.getString("status");
+                        String confirmCode = rs.getString("confirmation_code");
+                        int userId = rs.getInt("user_id");
+                        int tableId = rs.getInt("table_id"); 
+                        
+                        // 2. Create Order Object (Full Constructor)
+                        Order order = new Order(id, date, time, diners, confirmCode, tableId, null, OrderStatus.valueOf(statusStr), null);
+                        order.setUserId(userId); 
+                        
+                        // 3. Optional: If you need the User's Name (e.g., "John Doe"), 
+                        // you might need a JOIN query here or a separate lookup.
+                        // For now, we stick to the Order table data.
+                        
+                        orders.add(order);
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            logger.log("[ERROR] getFullOrdersByDate: " + ex.getMessage());
+            ex.printStackTrace();
+        } finally {
+            release(conn);
+        }
+        return orders;
+    }
 
 	/**
 	 * Checks if an order exists in the database by its confirmation code.

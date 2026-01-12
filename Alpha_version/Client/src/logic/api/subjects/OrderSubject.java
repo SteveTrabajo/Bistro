@@ -97,6 +97,17 @@ public class OrderSubject {
 		router.on("orders", "order.notExists", msg -> {
 			BistroClient.awaitResponse = false;
 		});	
+		
+		router.on("orders", "getOrdersByDate.ok", msg -> {
+		    BistroClient.awaitResponse = false;
+		    @SuppressWarnings
+		    ("unchecked")
+		    List<Order> orders = (List<Order>) msg.getData();
+		    
+		    Platform.runLater(() -> {
+		        BistroClientGUI.client.getReservationCTRL().receiveStaffReservations(orders);
+		    });
+		});
 	}
 	
 }

@@ -98,10 +98,9 @@ public class ReservationController {
 	public void setCancelListener(Consumer<Boolean> callback) {
 		this.cancelResultCallback = callback;
 	}
-	
-	// Set by the Client when Server replies with REPLY_GET_ORDER_OK
-	
+		
 	//******************************** Instance Methods ***********************************//
+	
 	/**
 	 * Asks the server for available hours based on date and party size.
 	 * Matches Api.ASK_ORDER_AVAILABLE_HOURS
@@ -139,6 +138,12 @@ public class ReservationController {
 		bookingData.put("customerName", customerName);
 		
 		client.handleMessageFromClientUI(new Message(Api.ASK_CREATE_RESERVATION_AS_STAFF, bookingData));
+	}
+	
+	public void receiveStaffReservations(List<Order> orders) {
+	    if (this.allReservationsCallback != null) {
+	        this.allReservationsCallback.accept(orders);
+	    }
 	}
 	
 	public void updateReservation(Order order) {
