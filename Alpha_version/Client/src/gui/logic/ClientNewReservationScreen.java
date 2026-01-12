@@ -1,7 +1,9 @@
 package gui.logic;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 
 import entities.User;
 import javafx.application.Platform;
@@ -41,26 +43,50 @@ public class ClientNewReservationScreen {
 	
 	private String selectedTimeSlot = null;
 	
+	private Map<String, Object> staffProxyData = null;
+	
 	//***********************FXML Methods************************//
 	
-	/**
+	/*
 	 * Initializes the New Reservation Screen by setting up the diners amount combo box and date picker.
 	 */
 	@FXML
-	public void initialize() {
-		setupDinersAmountComboBox(); //
-		setupDatePicker();
-		if (BistroClientGUI.client != null && BistroClientGUI.client.getUserCTRL().getLoggedInUser() != null) {
-			User currentUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
-			if (lblUser != null) {
-				lblUser.setText(currentUser.getUserType().name());
-			}
-		}
-		// Start with default time slots for local date and 1 diner:
-		dinersAmountComboBox.valueProperty().addListener((obs, oldV, newV) -> refreshTimeSlots());
-		datePicker.valueProperty().addListener((obs, oldDate, newDate) -> refreshTimeSlots());
-		datePicker.setValue(LocalDate.now());// Set default date to today
-	}
+    public void initialize() {
+        setupDinersAmountComboBox();
+        setupDatePicker();
+        // Default Label Logic (Normal Client Mode)
+        if (BistroClientGUI.client != null && BistroClientGUI.client.getUserCTRL().getLoggedInUser() != null) {
+            User currentUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
+            if (lblUser != null) {
+                lblUser.setText("Welcome, " + currentUser.getUserType().name());
+            }
+        }
+        
+        dinersAmountComboBox.valueProperty().addListener((obs, oldV, newV) -> refreshTimeSlots());
+        datePicker.valueProperty().addListener((obs, oldDate, newDate) -> refreshTimeSlots());
+        datePicker.setValue(LocalDate.now());
+        btnConfirmReservation.setDisable(true);
+    }
+	
+	/*
+     * @param customerData Map containing "name", "identifier" (Phone/ID), and "customerType".
+     */
+    public void setBookingForCustomer(Map<String, Object> customerData) {
+        this.staffProxyData = customerData;
+        
+        String name = (String) customerData.get("name");
+        String id = (String) customerData.get("identifier");
+        
+        // UI update to show who the booking is for
+        if (lblUser != null) {
+            if (name != null && !name.isEmpty()) {
+                lblUser.setText("Booking for: " + name);
+            } else {
+                lblUser.setText("Booking for Member: " + id);
+            }
+        }
+    }
+	
 	
 	/** 
 	 * Refreshes the available time slots based on the selected date and number of diners.
@@ -79,11 +105,12 @@ public class ClientNewReservationScreen {
 
 	    //Clear grid immediately so user knows it's refreshing
 	    timeSlotsGridPane.getChildren().clear(); 
+	    selectedTimeSlot = null;
+	    btnConfirmReservation.setDisable(true);
 
 	    BistroClientGUI.client.getReservationCTRL().setUIUpdateListener((availableSlots) -> {
 			Platform.runLater(() -> generateTimeSlots(availableSlots));
 		});
-	    //Send Request
 	    BistroClientGUI.client.getReservationCTRL().askAvailableHours(date, diners);
 	}
 
@@ -137,6 +164,7 @@ public class ClientNewReservationScreen {
 		if (timeSlotsGridPane == null) return;
 		
 	    timeSlotsGridPane.getChildren().clear(); // Clear existing buttons
+	    
 	    if (availableTimeSlots == null || availableTimeSlots.isEmpty()) {
 			Label lblNoSlots = new Label("No time slots available for this date.");
 			lblNoSlots.setStyle("-fx-text-fill: red; -fx-font-size: 14px;");
@@ -190,7 +218,21 @@ public class ClientNewReservationScreen {
 	        alert.showAndWait();
 	        return;
 	    }
-	    BistroClientGUI.client.getReservationCTRL().createNewReservation(date, selectedTimeSlot, diners);
+	    // logic to differentiate between Staff Mode and Normal Client Mode
+        if (staffProxyData != null) {
+            // staff mode
+            String type = (String) staffProxyData.get("customerType");
+            String id = (String) staffProxyData.get("identifier");
+            String name = (String) staffProxyData.get("name");
+            
+            // Calls the specialized method in ReservationController
+            BistroClientGUI.client.getReservationCTRL().createReservationAsStaff(date, LocalTime.parse(selectedTimeSlot), diners, type, id, name);
+        } else {
+            // normal client mode
+            BistroClientGUI.client.getReservationCTRL().createNewReservation(
+                date, selectedTimeSlot, diners
+            );
+        }
 	}
 	
 	/*
@@ -200,8 +242,11 @@ public class ClientNewReservationScreen {
 	 */
 	@FXML
 	void btnBack(Event event) {
-	    System.out.println("Back button clicked.");
-	    BistroClientGUI.switchScreen(event, "ClientDashboardScreen", "Error returning to Client Dashboard Screen.");
+	    if (staffProxyData != null) {
+	    	BistroClientGUI.switchScreen(event, "ReservationsPanel", "Error returning to Staff Reservations Panel");
+	    } else {
+	    	BistroClientGUI.switchScreen(event, "ClientDashboardScreen", "Error returning to Client Dashboard");
+	    }
 	}
 	
 }

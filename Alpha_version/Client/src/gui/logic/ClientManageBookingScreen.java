@@ -1,254 +1,183 @@
 package gui.logic;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import entities.Order;
-import javafx.application.Platform;
+import enums.OrderStatus;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Control;
-import javafx.scene.control.DateCell;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.DatePicker;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.Pane;
-import java.io.IOException;
-import javafx.scene.Parent;
-import javafx.scene.effect.GaussianBlur;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import logic.BistroClientGUI;
 
 public class ClientManageBookingScreen {
-	// ****************************** FXML Variables ******************************
-	@FXML
-	private Button btnCheck;
-	@FXML
-	private Button btnBack;
-	@FXML
-	private Button btnCancel;
-	@FXML
-	private DatePicker datePicker;
-	@FXML
-	private ComboBox<String> dinersAmountComboBox;
-	@FXML
-	private GridPane timeSlotsGridPane;
-	@FXML
-	private TextField txtConfirmationCode;
-	@FXML
-	private Hyperlink lnkForgot;
-	@FXML
-	private StackPane modalOverlay;
-	@FXML
-	private Pane mainPane;
 
-	private String selectedTimeSlot = null;
-	private Order currentOrder = null;
-	private Parent forgotCodeRoot = null;
+    // ****************************** FXML Variables ******************************
+    @FXML private Button btnBack;
+    @FXML private Button btnNewReservation;
+    @FXML private Button btnCancelRes;
+    @FXML private Button btnRefresh;
+    
+    @FXML private DatePicker dateFilter;
+    
+    @FXML private TableView<Order> reservationsTable;
+    @FXML private TableColumn<Order, LocalDate> colDate;
+    @FXML private TableColumn<Order, LocalTime> colTime;
+    @FXML private TableColumn<Order, String> colConfirm;
+    @FXML private TableColumn<Order, Integer> colDiners;
+    @FXML private TableColumn<Order, String> colStatus;
+    @FXML private TableColumn<Order, Integer> colTable;
 
-	// *************************** FXML Methods ****************************
+    private ObservableList<Order> masterData = FXCollections.observableArrayList();
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-	/**
-	 * Initializes the Client Manage Booking screen.
-	 */
-	@FXML
-	public void initialize() {
-		setupDinersAmountComboBox();
-		setupDatePicker();
+    // ****************************** Initialization ******************************
+    @FXML
+    public void initialize() {
+        setupTableColumns();
+        
+        // Default filter: Today
+        dateFilter.setValue(LocalDate.now());
+        
+        // Listener for date picker to filter the table
+        dateFilter.valueProperty().addListener((obs, oldVal, newVal) -> filterTable(newVal));
 
-		setEditingEnabled(false);
-	}
+        loadData();
+    }
 
-	@FXML
-	void btnCheck(Event event) {
-		String code = txtConfirmationCode.getText();
-		if (code == null || code.trim().isEmpty()) {
-			showAlert(Alert.AlertType.WARNING, "Input Error", "Please enter a confirmation code.");
-			return;
-		}
+    private void setupTableColumns() {
+        colDate.setCellValueFactory(new PropertyValueFactory<>("orderDate"));
+        colTime.setCellValueFactory(new PropertyValueFactory<>("orderHour"));
+        colConfirm.setCellValueFactory(new PropertyValueFactory<>("confirmationCode"));
+        colDiners.setCellValueFactory(new PropertyValueFactory<>("dinersAmount"));
+        colTable.setCellValueFactory(new PropertyValueFactory<>("tableId"));
 
-		BistroClientGUI.client.getReservationCTRL().setOrderLoadedListener(this::handleOrderFound);
-		BistroClientGUI.client.getReservationCTRL().askOrderDetails(code.trim());
-	}
+        // Date Formatter: dd/MM/yyyy
+        colDate.setCellFactory(column -> new TableCell<Order, LocalDate>() {
+            @Override
+            protected void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                if (empty || date == null) {
+                    setText(null);
+                } else {
+                    setText(dateFormatter.format(date));
+                }
+            }
+        });
 
-	private void handleOrderFound(Order order) {
-		Platform.runLater(() -> {
-			if (order == null) {
-				showAlert(Alert.AlertType.ERROR, "Not Found", "No order found with that confirmation code.");
-				setEditingEnabled(false);
-			} else {
-				currentOrder = order;
-				loadOrderIntoUI(order);
-			}
-		});
-	}
+        colStatus.setCellValueFactory(cellData -> {
+            if (cellData.getValue().getStatus() != null) {
+                return new SimpleStringProperty(cellData.getValue().getStatus().toString());
+            }
+            return new SimpleStringProperty("");
+        });
+    }
 
-	private void loadOrderIntoUI(Order order) {
-		datePicker.setValue(order.getOrderDate());
-		dinersAmountComboBox.setValue(order.getDinersAmount() + " People");
-		refreshTimeSlots();
-		setEditingEnabled(true);
-	}
+    /**
+     * Helper to force the table to sort by Date then Time.
+     */
+    private void applyDefaultSort() {
+        reservationsTable.getSortOrder().clear();
+        reservationsTable.getSortOrder().add(colDate);
+        reservationsTable.getSortOrder().add(colTime);
+        colDate.setSortType(TableColumn.SortType.ASCENDING);
+        colTime.setSortType(TableColumn.SortType.ASCENDING);
+        reservationsTable.sort();
+    }
 
-	// --- 2. CANCEL LOGIC ---
+    private void loadData() {
+        // TODO: Request actual user history from server
+        // BistroClientGUI.client.getReservationCTRL().askUserReservations(...);
+        
+        masterData.clear();
+        
+        // Mock Data
+        masterData.add(new Order(101, LocalDate.now().plusDays(1), LocalTime.of(19, 0), 4, "RES-1234", 1, null, OrderStatus.PENDING, LocalDateTime.now()));
+        masterData.add(new Order(101, LocalDate.now().plusDays(1), LocalTime.of(18, 30), 5, "RES-1264", 1, null, OrderStatus.PENDING, LocalDateTime.now()));
+        masterData.add(new Order(101, LocalDate.now().plusDays(1), LocalTime.of(19, 30), 4, "RES-1235", 1, null, OrderStatus.PENDING, LocalDateTime.now()));
+        masterData.add(new Order(102, LocalDate.now().plusDays(3), LocalTime.of(20, 30), 2, "RES-5678", 1, null, OrderStatus.PENDING, LocalDateTime.now()));
+        masterData.add(new Order(103, LocalDate.now().minusDays(5), LocalTime.of(18, 0), 6, "RES-OLD1", 1, null, OrderStatus.COMPLETED, LocalDateTime.now()));
+        
+        filterTable(dateFilter.getValue());
+    }
 
-	@FXML
-	void btnCancel(Event event) { 
-		if (currentOrder == null)
-			return;
+    private void filterTable(LocalDate fromDate) {
+        if (fromDate == null) {
+            reservationsTable.setItems(masterData);
+        } else {
+            List<Order> filtered = masterData.stream()
+                    .filter(o -> o.getOrderDate() != null && !o.getOrderDate().isBefore(fromDate))
+                    .collect(Collectors.toList());
+            reservationsTable.setItems(FXCollections.observableArrayList(filtered));
+        }
+        
+        applyDefaultSort();
+    }
 
-		BistroClientGUI.client.getReservationCTRL().setCancelListener(success -> {
-			Platform.runLater(() -> {
-				if (success) {
-					showAlert(Alert.AlertType.INFORMATION, "Cancelled", "Reservation has been cancelled.");
-					setEditingEnabled(false);
-					txtConfirmationCode.clear();
-					currentOrder = null;
-					timeSlotsGridPane.getChildren().clear();
-				} else {
-					showAlert(Alert.AlertType.ERROR, "Error", "Could not cancel the reservation. Please try again.");
-				}
-			});
-		});
-		BistroClientGUI.client.getReservationCTRL().cancelReservation(currentOrder.getConfirmationCode());
-	}
+    // ****************************** Actions ******************************
 
-	@FXML
-	void btnBack(Event event) {
-		BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Error returning to dashboard");
-	}
+    @FXML
+    void btnNewReservation(ActionEvent event) {
+        BistroClientGUI.switchScreen(event, "clientNewReservationScreen", "New Reservation");
+    }
 
-	// --- 3. HELPER METHODS ---
+    @FXML
+    void btnCancelRes(ActionEvent event) {
+        Order selected = reservationsTable.getSelectionModel().getSelectedItem();
+        
+        if (selected == null) {
+            showAlert("No Selection", "Please select a reservation to cancel.");
+            return;
+        }
+        
+        if (selected.getStatus() == OrderStatus.COMPLETED || selected.getStatus() == OrderStatus.CANCELLED) {
+            showAlert("Invalid Action", "You cannot cancel a past or already cancelled reservation.");
+            return;
+        }
 
-	private void setEditingEnabled(boolean enable) {
-		datePicker.setDisable(!enable);
-		dinersAmountComboBox.setDisable(!enable);
-		timeSlotsGridPane.setDisable(!enable);
-		btnCancel.setDisable(!enable);
-	}
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to cancel reservation " + selected.getConfirmationCode() + "?", ButtonType.YES, ButtonType.NO);
+        confirm.showAndWait();
 
-	private void refreshTimeSlots() {
-		LocalDate date = datePicker.getValue();
-		if (date == null)
-			return;
-		int diners = parseDiners(dinersAmountComboBox.getValue());
+        if (confirm.getResult() == ButtonType.YES) {
+            if (BistroClientGUI.client != null) {
+                BistroClientGUI.client.getReservationCTRL().cancelReservation(selected.getConfirmationCode());
+                selected.setStatus(OrderStatus.CANCELLED);
+                reservationsTable.refresh();
+                showAlert("Success", "Cancellation request sent.");
+            }
+        }
+    }
 
-		timeSlotsGridPane.getChildren().clear();
-		selectedTimeSlot = null;
-		
-		BistroClientGUI.client.getReservationCTRL().setAvailableTimeSlotsListener(this::generateTimeSlots);
-		BistroClientGUI.client.getReservationCTRL().askAvailableHours(date, diners);
-	}
+    @FXML
+    void btnRefresh(ActionEvent event) {
+        loadData();
+    }
 
-	private void generateTimeSlots(List<String> availableTimeSlots) {
-		Platform.runLater(() -> {
-			timeSlotsGridPane.getChildren().clear();
-			if (availableTimeSlots == null || availableTimeSlots.isEmpty()) {
-				// Optional: Show a "No slots available" label
-				Label noSlotsLabel = new Label("No available time slots.");
-				noSlotsLabel.setStyle("-fx-text-fill: #ef4444; -fx-font-size: 14px; -fx-font-weight: bold;");
-				timeSlotsGridPane.add(noSlotsLabel, 0, 0);
-				GridPane.setColumnSpan(noSlotsLabel, 4);
-				return;
-			}
-			
-			ToggleGroup timeSlotToggleGroup = new ToggleGroup();
-			int col = 0;
-			int row = 0;
+    @FXML
+    public void btnBack(Event event) {
+        BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Dashboard");
+    }
 
-			for (String timeSlot : availableTimeSlots) {
-				ToggleButton timeSlotButton = new ToggleButton(timeSlot);
-				timeSlotButton.setToggleGroup(timeSlotToggleGroup);
-				timeSlotButton.setPrefWidth(104);
-				timeSlotButton.setPrefHeight(37);
-				timeSlotButton.getStyleClass().add("time-slot");
-				timeSlotButton.setOnAction(event -> {
-					if (timeSlotButton.isSelected()) {
-						selectedTimeSlot = timeSlot;
-					} else {
-						selectedTimeSlot = null;
-					}
-				});
-				timeSlotsGridPane.add(timeSlotButton, col, row);
-				col++;
-				if (col >= 4) {
-					col = 0;
-					row++;
-				}
-			}
-		});
-	}
-
-	private void showAlert(Alert.AlertType type, String title, String content) {
-		Alert alert = new Alert(type);
-		alert.setTitle(title);
-		alert.setHeaderText(null);
-		alert.setContentText(content);
-		alert.showAndWait();
-	}
-
-	// --- SETUP & PARSING ---
-
-	private void setupDatePicker() {
-		datePicker.setDayCellFactory(picker -> new DateCell() {
-			@Override
-			public void updateItem(LocalDate date, boolean empty) {
-				super.updateItem(date, empty);
-				LocalDate today = LocalDate.now();
-				LocalDate maxDate = today.plusMonths(1);
-				setDisable(empty || date.isBefore(today) || date.isAfter(maxDate));
-			}
-		});
-		datePicker.valueProperty().addListener((obs, old, newVal) -> refreshTimeSlots());
-	}
-
-	private void setupDinersAmountComboBox() {
-		for (int i = 1; i <= 12; i++) {
-			dinersAmountComboBox.getItems().add(i + " People");
-		}
-		dinersAmountComboBox.getSelectionModel().selectFirst();
-		dinersAmountComboBox.valueProperty().addListener((obs, old, newVal) -> refreshTimeSlots());
-	}
-
-	private int parseDiners(String value) {
-		if (value != null && value.contains(" ")) {
-			try {
-				return Integer.parseInt(value.split(" ")[0]);
-			} catch (Exception e) {
-				return 2;
-			}
-		}
-		return 2;
-	}
-
-	@FXML
-	private void lnkForgot(Event event) {
-		if (forgotCodeRoot==null) {
-			try {
-				FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/fxml/ClientForgotConfirmationCode.fxml"));
-				forgotCodeRoot = loader.load();
-				modalOverlay.getChildren().add(forgotCodeRoot);
-			} catch (IOException e) {
-				e.printStackTrace();
-				showAlert(Alert.AlertType.ERROR, "Error", "Unable to open Forgot Booking Code screen.");
-				return;
-			}
-		}
-		
-		modalOverlay.setVisible(true);
-		modalOverlay.setManaged(true);
-		
-		mainPane.setEffect(new GaussianBlur(15));
-	}
+    private void showAlert(String title, String msg) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(msg);
+        alert.showAndWait();
+    }
 }
-

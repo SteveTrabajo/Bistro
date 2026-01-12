@@ -52,6 +52,7 @@ public final class Api {
     public static final String REPLY_SIGNOUT_MEMBER_OK = "signout.member.ok";
     public static final String REPLY_SIGNOUT_EMPLOYEE_OK = "signout.employee.ok";
     public static final String REPLY_SIGNOUT_MANAGER_OK = "signout.manager.ok";
+    
 // == User subject == //
     
     // Requests
@@ -83,6 +84,7 @@ public final class Api {
     
     // Requests
     public static final String ASK_CREATE_RESERVATION 	= "orders.createReservation";
+    public static final String ASK_CREATE_RESERVATION_AS_STAFF = "orders.createReservation.asStaff";
     public static final String ASK_ORDER_AVAILABLE_HOURS = "orders.getAvailableHours";
     public static final String ASK_GET_ORDER = "orders.getOrder";
     public static final String ASK_CHECK_ORDER_EXISTS = "orders.checkOrderExists";

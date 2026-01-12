@@ -2,6 +2,7 @@ package gui.logic.staff;
 
 import entities.Order;
 import enums.OrderStatus;
+import gui.logic.ClientNewReservationScreen;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -9,10 +10,16 @@ import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Stage;
 import logic.BistroClientGUI;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -164,7 +171,29 @@ public class ReservationsPanel {
 
     @FXML
     void btnNewReservation(ActionEvent event) {
-        BistroClientGUI.switchScreen(event, "clientNewReservationScreen", "Error opening New Reservation");
+    	StaffWaitAndRes dialog = new StaffWaitAndRes(false);
+        dialog.showAndWait().ifPresent(customerData -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/fxml/ClientNewReservationScreen.fxml")
+                );
+                Parent root = loader.load();
+                
+                // 3. Get Controller and inject data
+                ClientNewReservationScreen controller = loader.getController();
+                controller.setBookingForCustomer(customerData);
+                
+                // 4. Switch Screen manually
+                //BistroClientGUI.switchScreen(loader, root, event, "New Reservation (Staff Mode)");
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                Scene scene = new Scene(root);
+                stage.setScene(scene);
+                stage.show();
+                
+            } catch (IOException e) {
+                e.printStackTrace();
+                showAlert("Error", "Could not load reservation screen.");
+            }
+        });
     }
 
     @FXML
