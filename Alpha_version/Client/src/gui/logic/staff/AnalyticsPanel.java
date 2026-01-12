@@ -100,7 +100,7 @@ public class AnalyticsPanel {
         updateTrendChart(data);
 
         // 4. Update Summaries
-        totalOnTimeLabel.setText("0");
+        totalOnTimeLabel.setText(String.valueOf(data.getTotalOnTimeCostumer()));
         totalLateLabel.setText(String.valueOf(data.getTotalLateCostumer()));
         
 //        data.getPeakMonth()); 
