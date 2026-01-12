@@ -204,19 +204,24 @@ public class InputCheck {
 	 * string.
 	 */
 	public static String isValidGuestInfo(String phoneNumber, String emailAddress) {
-		String errorMessage = "";
-		if ((phoneNumber.trim().isEmpty()) && (emailAddress.trim().isEmpty())) {
-			errorMessage += "You must enter a phone number, an email address or both\n";
-		} else {
-			if (!phoneNumber.trim().isEmpty() && !PHONE_PATTERN.matcher(phoneNumber).matches()) {
-				errorMessage += "Invalid Israeli phone format (05XXXXXXXX or +9725XXXXXXXX)\n";
-			}
-			if (!emailAddress.trim().isEmpty() && !EMAIL_PATTERN.matcher(emailAddress).matches()) {
-				errorMessage += "Invalid email address format\n";
-			}
-		}
-		return errorMessage;
+	    String errorMessage = "";
+
+	    phoneNumber = (phoneNumber == null) ? "" : phoneNumber.trim();
+	    emailAddress = (emailAddress == null) ? "" : emailAddress.trim();
+
+	    if (phoneNumber.isEmpty() && emailAddress.isEmpty()) {
+	        errorMessage += "You must enter a phone number, an email address or both\n";
+	    } else {
+	        if (!phoneNumber.isEmpty() && !PHONE_PATTERN.matcher(phoneNumber).matches()) {
+	            errorMessage += "Invalid Israeli phone format (05XXXXXXXX or +9725XXXXXXXX)\n";
+	        }
+	        if (!emailAddress.isEmpty() && !EMAIL_PATTERN.matcher(emailAddress).matches()) {
+	            errorMessage += "Invalid email address format\n";
+	        }
+	    }
+	    return errorMessage;
 	}
+
 	
 	
 	// Regex pattern for validating usernames

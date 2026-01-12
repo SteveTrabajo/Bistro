@@ -105,8 +105,10 @@ public class ClientLoginScreen {
 	 */
 	@FXML
 	public void btnGuest(Event event) {
-		String phoneNumber = txtPhoneNumber.getText();
-		String emailAddress = txtEmailAddress.getText();
+		String phoneNumber = txtPhoneNumber.getText().trim();
+		String emailAddress = txtEmailAddress.getText().trim();
+		if (phoneNumber.isEmpty()) phoneNumber = null;
+		if (emailAddress.isEmpty()) emailAddress = null;
 		String errorMessage = InputCheck.isValidGuestInfo(phoneNumber, emailAddress);
 		UserType userType = UserType.GUEST;
 		if (!errorMessage.equals("")) {
@@ -115,12 +117,12 @@ public class ClientLoginScreen {
 			userLoginData = new HashMap<>();
 			userLoginData.put("userType", userType);
 			userLoginData.put("phoneNumber", phoneNumber);
-			userLoginData.put("emailAddress", emailAddress);
+			userLoginData.put("email", emailAddress);
 			BistroClientGUI.client.getUserCTRL().signInUser(userLoginData);
 			if (BistroClientGUI.client.getUserCTRL().isUserLoggedInAs(userType)) {
 				BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
 			} else {
-				BistroClientGUI.display(lblError, "Error has been accoured!", Color.RED);
+				BistroClientGUI.display(lblError, "Error has occured!", Color.RED);
 				return;
 			}
 		}

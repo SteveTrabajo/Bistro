@@ -98,10 +98,21 @@ public class UserService {
 		logger.log("[LOGIN] Received login data=" + loginData);
 		User userfound = null;
 		switch (String.valueOf(loginData.get("userType"))) {
-		case "GUEST":
-			userfound = dbController.findOrCreateGuestUser((String) loginData.get("phoneNumber"),
-					(String) loginData.get("email"));
-			break;
+		case "GUEST": {
+		    String phone = (String) loginData.get("phoneNumber");
+		    String email = (String) loginData.get("email");
+
+		    phone = (phone == null) ? null : phone.trim();
+		    email = (email == null) ? null : email.trim();
+		    if (phone != null && phone.isEmpty()) phone = null;
+		    if (email != null && email.isEmpty()) email = null;
+
+		    logger.log("[LOGIN][GUEST] keys=" + loginData.keySet());
+		    logger.log("[LOGIN][GUEST] phone=" + phone + " | email=" + email);
+
+		    userfound = dbController.findOrCreateGuestUser(phone, email);
+		    break;
+		}
 		case "MEMBER": {
 			Object raw = loginData.get("memberCode");
 			if (raw == null) {

@@ -15,7 +15,6 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -182,86 +181,256 @@ public class BistroDataBase_Controller {
 	// ****************************** User Operations ******************************
 
 	public User findOrCreateGuestUser(String phoneNumber, String email) {
-		// check validation of input if both are null or empty throw exception
-		if ((phoneNumber == null || phoneNumber.isBlank()) && (email == null || email.isBlank())) {
-			throw new IllegalArgumentException("Guest must have phoneNumber or email");
-		}
-		//query to find existing guest user by phone or email
-		String findByPhone = "SELECT user_id, phoneNumber, email FROM users WHERE type = 'GUEST' AND phoneNumber = ?";
-		String findByEmail = "SELECT user_id, phoneNumber, email FROM users WHERE type = 'GUEST' AND email = ?";
-		String insertQry = "INSERT INTO users (user_id, phoneNumber, email, type) VALUES (?, ?, ?, 'GUEST')";
-		Connection conn = null;
-		try {
-			conn = borrow();
-			String findQry = (phoneNumber != null && !phoneNumber.isBlank()) ? findByPhone : findByEmail;
-			try (PreparedStatement ps = conn.prepareStatement(findQry)) {
-				ps.setString(1, (phoneNumber != null && !phoneNumber.isBlank()) ? phoneNumber : email);
-				try (ResultSet rs = ps.executeQuery()) {
-					if (rs.next()) {
-						return new User(rs.getInt("user_id"), rs.getString("phoneNumber"), rs.getString("email"),
-								UserType.GUEST);
-					}
-				}
-			}
-			// No existing guest found, create new one
-			int newUserId = generateRandomUserId(conn);
-			try (PreparedStatement psInsert = conn.prepareStatement(insertQry)) {
-				psInsert.setInt(1, newUserId);
-				if (phoneNumber == null || phoneNumber.isBlank()) {
-					psInsert.setNull(2, java.sql.Types.VARCHAR);
-				}
-				else {
-					psInsert.setString(2, phoneNumber);
-				}
-				if (email == null || email.isBlank()) {
-					psInsert.setNull(3, java.sql.Types.VARCHAR);
-				}
-				else {
-					psInsert.setString(3, email);
-				}
+	    boolean hasPhone = phoneNumber != null && !phoneNumber.isBlank();
+	    boolean hasEmail = email != null && !email.isBlank();
 
-				psInsert.executeUpdate();
-			}
-			return new User(newUserId, phoneNumber, email, UserType.GUEST);
-		} catch (SQLException ex) {
-			logger.log("[ERROR] SQLException in findOrCreateGuestUser: " + ex.getMessage());
-			ex.printStackTrace();
-			return null;
-		} finally {
-			if (conn != null) {
-				try {
-					release(conn);
-				} catch (Exception ignore) {
-				}
-			}
-		}
+	    if (!hasPhone && !hasEmail) {
+	        throw new IllegalArgumentException("Guest must have phoneNumber or email");
+	    }
+
+	    final String FIND_BY_PHONE =
+	            "SELECT user_id, phoneNumber, email FROM users WHERE type='GUEST' AND phoneNumber = ?";
+	    final String FIND_BY_EMAIL =
+	            "SELECT user_id, phoneNumber, email FROM users WHERE type='GUEST' AND email = ?";
+
+	    final String INSERT_GUEST =
+	            "INSERT INTO users (phoneNumber, email, type) VALUES (?, ?, 'GUEST')";
+
+	    final String UPDATE_PHONE =
+	            "UPDATE users SET phoneNumber = ? WHERE user_id = ? AND type='GUEST'";
+	    final String UPDATE_EMAIL =
+	            "UPDATE users SET email = ? WHERE user_id = ? AND type='GUEST'";
+
+	    final String SELECT_BY_ID =
+	            "SELECT user_id, phoneNumber, email FROM users WHERE user_id = ? AND type='GUEST'";
+
+	    Connection conn = null;
+
+	    try {
+	        conn = borrow();
+
+	        
+	        //   CASE 1: ONLY ONE IDENTIFIER - OLD BEHAVIOR
+	           
+	        if (!(hasPhone && hasEmail)) {
+	            String sql = hasPhone ? FIND_BY_PHONE : FIND_BY_EMAIL;
+	            String key = hasPhone ? phoneNumber : email;
+
+	            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	                ps.setString(1, key);
+	                try (ResultSet rs = ps.executeQuery()) {
+	                    if (rs.next()) {
+	                        return new User(
+	                                rs.getInt("user_id"),
+	                                rs.getString("phoneNumber"),
+	                                rs.getString("email"),
+	                                UserType.GUEST
+	                        );
+	                    }
+	                }
+	            }
+
+	            // create new guest (AUTO_INCREMENT)
+	            int newId;
+	            try (PreparedStatement ps = conn.prepareStatement(
+	                    INSERT_GUEST, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+
+	                if (hasPhone) ps.setString(1, phoneNumber);
+	                else ps.setNull(1, java.sql.Types.VARCHAR);
+
+	                if (hasEmail) ps.setString(2, email);
+	                else ps.setNull(2, java.sql.Types.VARCHAR);
+
+	                int affected = ps.executeUpdate();
+	                if (affected != 1) throw new SQLException("Insert guest failed: affected rows=" + affected);
+
+	                try (ResultSet keys = ps.getGeneratedKeys()) {
+	                    if (!keys.next()) throw new SQLException("Insert guest: no generated key returned");
+	                    newId = keys.getInt(1);
+	                }
+	            }
+
+	            return new User(newId,
+	                    hasPhone ? phoneNumber : null,
+	                    hasEmail ? email : null,
+	                    UserType.GUEST);
+	        }
+
+	        
+	        //   CASE 2: BOTH IDENTIFIERS - FILL / MERGE LOGIC
+	           
+	        conn.setAutoCommit(false);
+
+	        User phoneUser = null;
+	        User emailUser = null;
+
+	        // find by phone
+	        try (PreparedStatement ps = conn.prepareStatement(FIND_BY_PHONE)) {
+	            ps.setString(1, phoneNumber);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                if (rs.next()) {
+	                    phoneUser = new User(
+	                            rs.getInt("user_id"),
+	                            rs.getString("phoneNumber"),
+	                            rs.getString("email"),
+	                            UserType.GUEST
+	                    );
+	                }
+	            }
+	        }
+
+	        // find by email
+	        try (PreparedStatement ps = conn.prepareStatement(FIND_BY_EMAIL)) {
+	            ps.setString(1, email);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                if (rs.next()) {
+	                    emailUser = new User(
+	                            rs.getInt("user_id"),
+	                            rs.getString("phoneNumber"),
+	                            rs.getString("email"),
+	                            UserType.GUEST
+	                    );
+	                }
+	            }
+	        }
+
+	        // none found - create new with BOTH
+	        if (phoneUser == null && emailUser == null) {
+	            int newId;
+	            try (PreparedStatement ps = conn.prepareStatement(
+	                    INSERT_GUEST, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+	                ps.setString(1, phoneNumber);
+	                ps.setString(2, email);
+
+	                int affected = ps.executeUpdate();
+	                if (affected != 1) throw new SQLException("Insert guest failed: affected rows=" + affected);
+
+	                try (ResultSet keys = ps.getGeneratedKeys()) {
+	                    if (!keys.next()) throw new SQLException("Insert guest: no generated key returned");
+	                    newId = keys.getInt(1);
+	                }
+	            }
+
+	            User result = fetchGuestById(conn, SELECT_BY_ID, newId);
+	            conn.commit();
+	            return result;
+	        }
+
+	        // phone exists, email doesn't - fill email if missing
+	        if (phoneUser != null && emailUser == null) {
+	            if (phoneUser.getEmail() == null || phoneUser.getEmail().isBlank()) {
+	                try (PreparedStatement ps = conn.prepareStatement(UPDATE_EMAIL)) {
+	                    ps.setString(1, email);
+	                    ps.setInt(2, phoneUser.getUserId());
+	                    ps.executeUpdate();
+	                }
+	            }
+	            User result = fetchGuestById(conn, SELECT_BY_ID, phoneUser.getUserId());
+	            conn.commit();
+	            return result;
+	        }
+
+	        // email exists, phone doesn't - fill phone if missing
+	        if (phoneUser == null) { // emailUser != null
+	            if (emailUser.getPhoneNumber() == null || emailUser.getPhoneNumber().isBlank()) {
+	                try (PreparedStatement ps = conn.prepareStatement(UPDATE_PHONE)) {
+	                    ps.setString(1, phoneNumber);
+	                    ps.setInt(2, emailUser.getUserId());
+	                    ps.executeUpdate();
+	                }
+	            }
+	            User result = fetchGuestById(conn, SELECT_BY_ID, emailUser.getUserId());
+	            conn.commit();
+	            return result;
+	        }
+
+	        // both found
+	        if (phoneUser.getUserId() == emailUser.getUserId()) {
+	            User result = fetchGuestById(conn, SELECT_BY_ID, phoneUser.getUserId());
+	            conn.commit();
+	            return result;
+	        }
+
+	     // TRUE MERGE (two different rows) without violating chk_user_contact
+	        int primaryId = phoneUser.getUserId();      // keep the phone row
+	        int secondaryId = emailUser.getUserId();    // delete the email row (after moving FKs)
+
+	        // 1) move foreign keys first (orders/members/staff_accounts etc.)
+	        moveForeignKeys(conn, primaryId, secondaryId);
+
+	        // 2) delete secondary row (no FK references it now)
+	        try (PreparedStatement ps = conn.prepareStatement(
+	                "DELETE FROM users WHERE user_id = ? AND type='GUEST'")) {
+	            ps.setInt(1, secondaryId);
+	            ps.executeUpdate();
+	        }
+
+	        // 3) fill missing fields on primary
+	        try (PreparedStatement ps = conn.prepareStatement(
+	                "UPDATE users SET email = COALESCE(email, ?) WHERE user_id = ? AND type='GUEST'")) {
+	            ps.setString(1, email);
+	            ps.setInt(2, primaryId);
+	            ps.executeUpdate();
+	        }
+
+	        conn.commit();
+	        return fetchGuestById(conn, SELECT_BY_ID, primaryId);
+
+	    } catch (SQLException ex) {
+	        try { if (conn != null) conn.rollback(); } catch (SQLException ignore) {}
+	        logger.log("[ERROR] findOrCreateGuestUser: " + ex.getMessage());
+	        ex.printStackTrace();
+	        return null;
+	    } finally {
+	        try {
+	            if (conn != null) {
+	                conn.setAutoCommit(true);
+	                release(conn);
+	            }
+	        } catch (Exception ignore) {}
+	    }
 	}
+
+	private User fetchGuestById(Connection conn, String sql, int userId) throws SQLException {
+	    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	        ps.setInt(1, userId);
+	        try (ResultSet rs = ps.executeQuery()) {
+	            if (!rs.next()) throw new SQLException("Guest not found by id=" + userId);
+	            return new User(
+	                    rs.getInt("user_id"),
+	                    rs.getString("phoneNumber"),
+	                    rs.getString("email"),
+	                    UserType.GUEST
+	            );
+	        }
+	    }
+	}
+
+	private void moveForeignKeys(Connection conn, int primaryId, int secondaryId) throws SQLException {
+	    try (PreparedStatement ps = conn.prepareStatement(
+	            "UPDATE orders SET user_id = ? WHERE user_id = ?")) {
+	        ps.setInt(1, primaryId);
+	        ps.setInt(2, secondaryId);
+	        ps.executeUpdate();
+	    }
+
+	    try (PreparedStatement ps = conn.prepareStatement(
+	            "UPDATE members SET user_id = ? WHERE user_id = ?")) {
+	        ps.setInt(1, primaryId);
+	        ps.setInt(2, secondaryId);
+	        ps.executeUpdate();
+	    }
+
+	    try (PreparedStatement ps = conn.prepareStatement(
+	            "UPDATE staff_accounts SET user_id = ? WHERE user_id = ?")) {
+	        ps.setInt(1, primaryId);
+	        ps.setInt(2, secondaryId);
+	        ps.executeUpdate();
+	    }
+	}
+
+
 	
-	/**
-	 * Generates a unique 6-digit user_id not already present in the users table.
-	 * 
-	 * @param conn Active database connection
-	 * @return Unique 6-digit user_id
-	 * @throws SQLException if unable to generate a unique ID after multiple
-	 *                      attempts
-	 */
-	private int generateRandomUserId(Connection conn) throws SQLException {
-		Random random = new Random();
-		String checkSql = "SELECT 1 FROM users WHERE user_id = ?";
-		try (PreparedStatement ps = conn.prepareStatement(checkSql)) {
-			for (int i = 0; i < 50; i++) {
-				int candidate = 100000 + random.nextInt(900000);
-				ps.setInt(1, candidate);
-				try (ResultSet rs = ps.executeQuery()) {
-					if (!rs.next()) {
-						return candidate;
-					}
-				}
-			}
-		}
-		throw new SQLException("Failed to generate unique 6-digit user_id after 50 attempts.");
-	}
-
 	/**
 	 * Finds a member user by their member code.
 	 * 
@@ -539,7 +708,7 @@ public class BistroDataBase_Controller {
 	
 	/**
 	 * Generates a unique 6-digit member_code not already present in the members table.
-	 * * @param conn Active database connection
+	 * @param conn Active database connection
 	 * @return Unique 6-digit member_code
 	 * @throws SQLException if unable to generate a unique ID after multiple attempts
 	 */
@@ -567,129 +736,119 @@ public class BistroDataBase_Controller {
 	 * @return The newly generated member code if registration is successful, -1 otherwise
 	 */
 	public int registerNewMember(List<String> newMemberData) {
-		String fName = newMemberData.get(0);
-		String lName = newMemberData.get(1);
-		String email = newMemberData.get(2);
-		String phoneNumber = newMemberData.get(3);
-		String address = newMemberData.get(4);
+	    String fName = newMemberData.get(0);
+	    String lName = newMemberData.get(1);
+	    String email = newMemberData.get(2);
+	    String phoneNumber = newMemberData.get(3);
+	    String address = newMemberData.get(4);
 
-		if (email != null && email.trim().isEmpty())
-			email = null;
-		if (phoneNumber != null && phoneNumber.trim().isEmpty())
-			phoneNumber = null;
+	    if (email != null && email.trim().isEmpty()) email = null;
+	    if (phoneNumber != null && phoneNumber.trim().isEmpty()) phoneNumber = null;
 
-		Connection conn = null;
-		PreparedStatement psCheck = null;
-		PreparedStatement psUpdateUser = null;
-		PreparedStatement psInsertUser = null;
-		PreparedStatement psInsertMember = null;
-		ResultSet rs = null;
+	    Connection conn = null;
 
-		try {
-			conn = borrow();
-			conn.setAutoCommit(false);
-			int userId = -1;
+	    try {
+	        conn = borrow();
+	        conn.setAutoCommit(false);
 
-			// first step: check if user exists in users table by phone or email
-			String checkSql = "SELECT user_id, type FROM users WHERE (phoneNumber = ? AND phoneNumber IS NOT NULL) OR (email = ? AND email IS NOT NULL)";
-			psCheck = conn.prepareStatement(checkSql);
-			psCheck.setString(1, phoneNumber);
-			psCheck.setString(2, email);
-			rs = psCheck.executeQuery();
+	        Integer userId = null;
 
-			if (rs.next()) {
-				// case 1: user exists
-				String existingType = rs.getString("type");
-				userId = rs.getInt("user_id");
+	        // 1) check if user exists by phone or email
+	        final String checkSql =
+	                "SELECT user_id, type FROM users " +
+	                "WHERE (phoneNumber = ? AND phoneNumber IS NOT NULL) " +
+	                "   OR (email = ? AND email IS NOT NULL) " +
+	                "LIMIT 1";
 
-				if ("GUEST".equals(existingType)) {
-					// case 1a: existing user is a GUEST - update to MEMBER
-					String updateSql = "UPDATE users SET type = 'MEMBER', email = COALESCE(?, email), phoneNumber = COALESCE(?, phoneNumber) WHERE user_id = ?";
-					psUpdateUser = conn.prepareStatement(updateSql);
-					psUpdateUser.setString(1, email);
-					psUpdateUser.setString(2, phoneNumber);
-					psUpdateUser.setInt(3, userId);
-					psUpdateUser.executeUpdate();
-				} else {
-					// case 1b: existing user is MEMBER or STAFF - cannot register
-					System.out.println("Registration failed: User already exists with type " + existingType);
-					conn.rollback();// cancel changes
-					return -1;
-				}
+	        try (PreparedStatement psCheck = conn.prepareStatement(checkSql)) {
+	            psCheck.setString(1, phoneNumber);
+	            psCheck.setString(2, email);
 
-			} else {
-				// case 2: user does not exist - create new user
-				userId = generateRandomUserId(conn);
-				// insert new user as MEMBER
-				String insertUserSql = "INSERT INTO users (user_id, phoneNumber, email, type) VALUES (?, ?, ?, 'MEMBER')";
-				psInsertUser = conn.prepareStatement(insertUserSql);
-				psInsertUser.setInt(1, userId);
-				psInsertUser.setString(2, phoneNumber);
-				psInsertUser.setString(3, email);
-				psInsertUser.executeUpdate();
-			}
+	            try (ResultSet rs = psCheck.executeQuery()) {
+	                if (rs.next()) {
+	                    userId = rs.getInt("user_id");
+	                    String existingType = rs.getString("type");
 
-			// case 3: insert new member record
-			int memberCode = generateUniqueMemberCode(conn);
-			// insert into members table
-			String insertMemberSql = "INSERT INTO members (user_id, member_code, f_name, l_name, address) VALUES (?, ?, ?, ?, ?)";
-			psInsertMember = conn.prepareStatement(insertMemberSql);
-			psInsertMember.setInt(1, userId);
-			psInsertMember.setInt(2, memberCode);
-			psInsertMember.setString(3, fName);
-			psInsertMember.setString(4, lName);
-			psInsertMember.setString(5, address);
-			psInsertMember.executeUpdate();
-			conn.commit(); // save changes
-			return memberCode;
-		} catch (SQLException ex) {
-			logger.log("[ERROR] SQLException in registerNewMember: " + ex.getMessage());
-			ex.printStackTrace();
-			if (conn != null) {
-				try {
-					conn.rollback();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			return -1;
-		} finally {
-			// close all resources
-			try {
-				if (rs != null)
-					rs.close();
-			} catch (SQLException e) {
-			}
-			try {
-				if (psCheck != null)
-					psCheck.close();
-			} catch (SQLException e) {
-			}
-			try {
-				if (psUpdateUser != null)
-					psUpdateUser.close();
-			} catch (SQLException e) {
-			}
-			try {
-				if (psInsertUser != null)
-					psInsertUser.close();
-			} catch (SQLException e) {
-			}
-			try {
-				if (psInsertMember != null)
-					psInsertMember.close();
-			} catch (SQLException e) {
-			}
-			// finally block
-			if (conn != null) {
-				try {
-					conn.setAutoCommit(true); // החזרה למצב ברירת מחדל לפני החזרה ל-Pool
-				} catch (SQLException e) {
-				}
-				release(conn); // שחרור החיבור
-			}
-		}
+	                    if ("GUEST".equals(existingType)) {
+	                        // upgrade guest - member; fill missing fields only
+	                        final String upgradeSql =
+	                                "UPDATE users " +
+	                                "SET type = 'MEMBER', " +
+	                                "    email = COALESCE(?, email), " +
+	                                "    phoneNumber = COALESCE(?, phoneNumber) " +
+	                                "WHERE user_id = ?";
+
+	                        try (PreparedStatement psUpgrade = conn.prepareStatement(upgradeSql)) {
+	                            psUpgrade.setString(1, email);
+	                            psUpgrade.setString(2, phoneNumber);
+	                            psUpgrade.setInt(3, userId);
+	                            psUpgrade.executeUpdate();
+	                        }
+	                    } else {
+	                        // already member or staff -> cannot register
+	                        conn.rollback();
+	                        return -1;
+	                    }
+	                }
+	            }
+	        }
+
+	        // 2) if not found - insert new MEMBER user (AUTO_INCREMENT id)
+	        if (userId == null) {
+	            final String insertUserSql =
+	                    "INSERT INTO users (phoneNumber, email, type) VALUES (?, ?, 'MEMBER')";
+
+	            try (PreparedStatement psInsertUser =
+	                         conn.prepareStatement(insertUserSql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+
+	                if (phoneNumber == null) psInsertUser.setNull(1, Types.VARCHAR);
+	                else psInsertUser.setString(1, phoneNumber);
+
+	                if (email == null) psInsertUser.setNull(2, Types.VARCHAR);
+	                else psInsertUser.setString(2, email);
+
+	                int affected = psInsertUser.executeUpdate();
+	                if (affected != 1) throw new SQLException("Insert MEMBER user failed: affected rows=" + affected);
+
+	                try (ResultSet keys = psInsertUser.getGeneratedKeys()) {
+	                    if (!keys.next()) throw new SQLException("Failed to read generated user_id");
+	                    userId = keys.getInt(1);
+	                }
+	            }
+	        }
+
+	        // 3) insert members row
+	        int memberCode = generateUniqueMemberCode(conn);
+
+	        final String insertMemberSql =
+	                "INSERT INTO members (user_id, member_code, f_name, l_name, address) VALUES (?, ?, ?, ?, ?)";
+
+	        try (PreparedStatement psInsertMember = conn.prepareStatement(insertMemberSql)) {
+	            psInsertMember.setInt(1, userId);
+	            psInsertMember.setInt(2, memberCode);
+	            psInsertMember.setString(3, fName);
+	            psInsertMember.setString(4, lName);
+	            psInsertMember.setString(5, address);
+	            psInsertMember.executeUpdate();
+	        }
+
+	        conn.commit();
+	        return memberCode;
+
+	    } catch (SQLException ex) {
+	        logger.log("[ERROR] SQLException in registerNewMember: " + ex.getMessage());
+	        ex.printStackTrace();
+	        try { if (conn != null) conn.rollback(); } catch (SQLException ignore) {}
+	        return -1;
+
+	    } finally {
+	        if (conn != null) {
+	            try { conn.setAutoCommit(true); } catch (SQLException ignore) {}
+	            release(conn);
+	        }
+	    }
 	}
+
 
 	// ****************************** Order Operations ******************************
 
@@ -1423,7 +1582,7 @@ public class BistroDataBase_Controller {
 					if (rs.next()) {
 						boolean isClosed = rs.getInt("is_closed_final") == 1;
 
-						// אם המקום פתוח, נשלוף את השעות
+						
 						if (!isClosed) {
 							Time openSql = rs.getTime("open_final");
 							Time closeSql = rs.getTime("close_final");
