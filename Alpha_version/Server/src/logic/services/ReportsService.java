@@ -21,6 +21,17 @@ public class ReportsService {
 		monthlyReport.setTotalCostumer(this.dbController.getTotalCostumersInMonth(date));
 		monthlyReport.setTotalLateCostumer(this.dbController.getTotalLateCostumersInMonth(date));
 		monthlyReport.setTotalOnTimeCostumer(this.dbController.getTotalOntTimeCostumersInMonth(date));
+		monthlyReport.setTotalMemberReservations(this.dbController.getTotalMembersReservationInMonth(date));
+		
+		int totalReservation = monthlyReport.getTotalReservations();
+		int totalMemberReservation = monthlyReport.getTotalMemberReservations();
+		if(totalReservation == 0) {
+			monthlyReport.setMemberReservationPrecetage(0);
+		}
+		else {
+			double mebmerRateInReservations = (int)Math.round((totalMemberReservation * 100.0) / totalReservation);
+			monthlyReport.setMemberReservationPrecetage(mebmerRateInReservations);
+		}
 		
 		
 		return monthlyReport;

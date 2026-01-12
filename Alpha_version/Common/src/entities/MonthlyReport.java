@@ -13,10 +13,12 @@ public class MonthlyReport implements Serializable {
     //************************ Instance Variables ************************//
     private String reportYear;
     private String reportMonth;
-	private int totalReservations; 			//total Reservation in this month
-	private int totalCostumer; 				//total Costumer in this month
-	private int totalLateCostumer; 			//total late Costumer in this month
-	private int totalOnTimeCostumer; 		//total late Costumer in this month
+	private int totalReservations; 				//total Reservation in this month
+	private int totalCostumer; 					//total Costumer in this month
+	private int totalLateCostumer; 				//total late Costumer in this month
+	private int totalOnTimeCostumer; 			//total on time Costumer in this month
+	private int totalMemberReservations; 		//total Member Reservation in this month
+	private double memberReservationRate; 			//Member Reservation Rate in this month
 
 
 	//************************ Constructors ************************//
@@ -59,7 +61,24 @@ public class MonthlyReport implements Serializable {
 	public void setTotalOnTimeCostumer(int totalOnTimeCostumer) {
 		this.totalOnTimeCostumer = totalOnTimeCostumer;
 	}
+	
+	public int getTotalMemberReservations() {
+		return totalMemberReservations;
+	}
 
+	public void setTotalMemberReservations(int totalMemberReservations) {
+		this.totalMemberReservations = totalMemberReservations;
+	}
+	
+	public double getMemberReservationPrecetage() {
+		return memberReservationRate;
+	}
+
+	public void setMemberReservationPrecetage(double memberReservationRate) {
+		this.memberReservationRate = memberReservationRate;
+	}
+		
+	
 	public String getYear() {
 		return this.reportYear;
 	}

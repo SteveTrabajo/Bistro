@@ -48,12 +48,12 @@
 
                 <HBox HBox.hgrow="ALWAYS">
                     <VBox spacing="6" HBox.hgrow="ALWAYS">
-                        <Label styleClass="ad-kpi-label" text="Avg Monthly Reservations" />
-                        <Label fx:id="avgMonthlyLabel" styleClass="ad-kpi-value" text="0" />
+                        <Label styleClass="ad-kpi-label" text="Mebmer Percentage in Reservation" />
+                        <Label fx:id="rateOfMemberInReservationLabel" styleClass="ad-kpi-value" text="0" />
                     </VBox>
                     <VBox alignment="TOP_RIGHT" spacing="6">
                         <Label styleClass="ad-kpi-icon" text="👤" />
-                        <Label fx:id="avgMonthlyDelta" styleClass="ad-kpi-delta" text="+0.0%" />
+                        <Label fx:id="rateOfMemberInReservationLabel" styleClass="ad-kpi-delta" text="+0.0%" />
                     </VBox>
                <styleClass>
                   <String fx:value="ad-kpi" />

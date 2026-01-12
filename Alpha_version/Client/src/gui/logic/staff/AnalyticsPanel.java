@@ -26,11 +26,8 @@ public class AnalyticsPanel {
     private Label totalReservationsDelta;
     
     @FXML 
-    private Label avgMonthlyLabel;
-    
-    @FXML 
-    private Label avgMonthlyDelta;
-    
+    private Label rateOfMemberInReservationLabel;
+            
     @FXML 
     private Label onTimeRateLabel;
     
@@ -84,11 +81,11 @@ public class AnalyticsPanel {
         // Assuming getter for delta exists in DTO
         //setDeltaLabel(totalReservationsDelta, 5.2); // Example value, replace with data.get...
 
-        avgMonthlyLabel.setText("0");
-        setDeltaLabel(avgMonthlyDelta, 2.1);
+        rateOfMemberInReservationLabel.setText(String.valueOf(data.getMemberReservationPrecetage()) + "%");
+        //setDeltaLabel(avgMonthlyDelta, 2.1);
 
         onTimeRateLabel.setText(String.format("%.1f%%", 0.52 * 100));
-        setDeltaLabel(onTimeDelta, -0.5);
+        //setDeltaLabel(onTimeDelta, -0.5);
 
         customersThisMonthLabel.setText(String.valueOf(data.getTotalCostumer()));      
         currentMonthLabel.setText(data.getMonth()); 
