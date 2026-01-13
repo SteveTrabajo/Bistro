@@ -26,6 +26,7 @@ import entities.Order;
 import entities.Table;
 import entities.User;
 import enums.UserType;
+import enums.EndTableSessionType;
 import enums.OrderStatus;
 import enums.OrderType;
 
@@ -1172,35 +1173,36 @@ public class BistroDataBase_Controller {
 	 * @return true if the update was successful, false otherwise
 	 */
 	public boolean updateOrderStatusInDB(String confirmationCode, OrderStatus status) {
-	    if (confirmationCode == null || confirmationCode.trim().isEmpty()) {
+	    if (confirmationCode == null || confirmationCode.trim().isEmpty() || status == null) {
 	        return false;
 	    }
 
 	    String sql;
-
 	    switch (status) {
-
 	        case NOTIFIED:
-	            sql = "UPDATE orders " +
-	                  "SET status = 'NOTIFIED', notified_at = NOW() " +
-	                  "WHERE confirmation_code = ? " +
-	                  "AND status = 'PENDING'";
+	            sql = "UPDATE orders SET status='NOTIFIED', notified_at=NOW() " +
+	                  "WHERE confirmation_code=? AND status='PENDING'";
 	            break;
 
 	        case NO_SHOW:
-	            sql = "UPDATE orders " +
-	                  "SET status = 'NO_SHOW', cancelled_at = NOW() " +
-	                  "WHERE confirmation_code = ? " +
-	                  "AND status = 'NOTIFIED'";
+	            sql = "UPDATE orders SET status='NO_SHOW', cancelled_at=NOW() " +
+	                  "WHERE confirmation_code=? AND status='NOTIFIED'";
 	            break;
 
 	        case SEATED:
+	            sql = "UPDATE orders SET status='SEATED' WHERE confirmation_code=?";
+	            break;
+
 	        case COMPLETED:
+	            sql = "UPDATE orders SET status='COMPLETED' WHERE confirmation_code=?";
+	            break;
+
 	        case CANCELLED:
+	            sql = "UPDATE orders SET status='CANCELLED', cancelled_at=NOW() WHERE confirmation_code=?";
+	            break;
+
 	        case PENDING:
-	            sql = "UPDATE orders " +
-	                  "SET status = ? " +
-	                  "WHERE confirmation_code = ?";
+	            sql = "UPDATE orders SET status=? WHERE confirmation_code=?";
 	            break;
 
 	        default:
@@ -1213,14 +1215,26 @@ public class BistroDataBase_Controller {
 	        conn = borrow();
 	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
-	            if (status == OrderStatus.NOTIFIED || status == OrderStatus.NO_SHOW) {
-	                ps.setString(1, confirmationCode);
-	            } else {
+	            if (status == OrderStatus.PENDING) {
 	                ps.setString(1, status.name());
 	                ps.setString(2, confirmationCode);
+	            } else {
+	                ps.setString(1, confirmationCode);
 	            }
 
-	            return ps.executeUpdate() > 0;
+	            boolean ok = ps.executeUpdate() > 0;
+
+	            if (ok) {
+	                switch (status) {
+	                    case NOTIFIED:   updateWaitingListStatus(confirmationCode, "NOTIFIED"); break;
+	                    case NO_SHOW:    updateWaitingListStatus(confirmationCode, "EXPIRED");  break;
+	                    case SEATED:     updateWaitingListStatus(confirmationCode, "SEATED");   break;
+	                    case CANCELLED:  updateWaitingListStatus(confirmationCode, "CANCELLED");break;
+	                    default: break;
+	                }
+	            }
+
+	            return ok;
 	        }
 	    } catch (SQLException ex) {
 	        logger.log("[ERROR] SQLException in updateOrderStatusInDB: " + ex.getMessage());
@@ -1232,7 +1246,28 @@ public class BistroDataBase_Controller {
 	}
 
 
-
+	public OrderStatus getOrderStatusInDB(String confirmationCode) {
+		String qry = "SELECT status FROM orders WHERE confirmation_code = ?";
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(qry)) {
+	            ps.setString(1, confirmationCode);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                if (rs.next()) {
+	                    return OrderStatus.valueOf(rs.getString("status"));
+	                } else {
+	                    return null; // Order not found
+	                }
+	            }
+	        }
+	    } catch (SQLException e) {
+	        logger.log("[ERROR] getOrderStatusInDB: " + e.getMessage());
+	        return null;
+	    } finally {
+	        release(conn);
+	    }
+	}
 
 	//  ****************************** Waiting List Operations ******************************
 	
@@ -1274,105 +1309,135 @@ public class BistroDataBase_Controller {
 	 * @return true if the order was successfully cancelled, false otherwise
 	 */
 	public boolean removeFromWaitingList(String confirmationCode) {
-		final String qry = "UPDATE orders " + "SET status = 'CANCELLED', cancelled_at = ? "
-				+ "WHERE confirmation_code = ? " + "AND order_type = 'WAITLIST' " + "AND status IN ('PENDING','NOTIFIED')";
+	    final String qry = "UPDATE orders " +
+	            "SET status = 'CANCELLED', cancelled_at = ? " +
+	            "WHERE confirmation_code = ? " +
+	            "AND order_type = 'WAITLIST' " +
+	            "AND status IN ('PENDING','NOTIFIED')";
+
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(qry)) {
+	            ps.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
+	            ps.setString(2, confirmationCode);
+
+	            int rowsAffected = ps.executeUpdate();
+	            if (rowsAffected > 0) {
+	                // If you're keeping waiting_list rows (no trigger delete), update status there too
+	                updateWaitingListStatus(confirmationCode, "CANCELLED");
+
+	                logger.log("[SUCCESS] Order " + confirmationCode + " cancelled successfully.");
+	                return true;
+	            } else {
+	                logger.log("[WARN] No pending WAITLIST order found for code: " + confirmationCode);
+	                return false;
+	            }
+	        }
+	    } catch (SQLException ex) {
+	        logger.log("[ERROR] SQLException in removeFromWaitingList: " + ex.getMessage());
+	        ex.printStackTrace();
+	        return false;
+	    } finally {
+	        release(conn);
+	    }
+	}
+
+	
+	/**
+	 * Enqueues a WAITLIST order into the waiting_list table with the calculated wait time.
+	 * If the order already exists in the waiting_list, it updates the wait time and priority.
+	 * 
+	 * @param confirmationCode The confirmation code of the order
+	 * @param calculatedWaitTime The calculated wait time in minutes
+	 */
+	public void enqueueWaitingList(String confirmationCode, int calculatedWaitTime) {
+		final String qry =
+		        "INSERT INTO waiting_list (confirmation_code, quoted_wait_time, priority, requested_time, wl_status) " +
+		        "SELECT o.confirmation_code, ?, 2, o.date_of_placing_order, 'WAITING' " +
+		        "FROM orders o " +
+		        "WHERE o.confirmation_code = ? " +
+		        "ON DUPLICATE KEY UPDATE " +
+		        "  quoted_wait_time = VALUES(quoted_wait_time), " +
+		        "  priority = VALUES(priority), " +
+		        "  requested_time = VALUES(requested_time), " +
+		        "  wl_status = 'WAITING'";
+
+		    Connection conn = null;
+		    try {
+		        conn = borrow();
+		        try (PreparedStatement ps = conn.prepareStatement(qry)) {
+		            ps.setInt(1, calculatedWaitTime);
+		            ps.setString(2, confirmationCode);
+		            int rowsAffected = ps.executeUpdate();
+		            if (rowsAffected > 0) {
+		                logger.log("[SUCCESS] Enqueued WAITLIST order: " + confirmationCode);
+		            }
+		        }
+		    } catch (SQLException ex) {
+		        logger.log("[ERROR] SQLException in addWaitTimeToWaitListOrder/enqueue: " + ex.getMessage());
+		        ex.printStackTrace();
+		    } finally {
+		        release(conn);
+		    }
+		}
+	
+	public Order getNextFromWaitingQueueThatFits(int tableCapacity) {
+		final String sql = "SELECT o.order_number, o.confirmation_code, o.user_id, o.number_of_guests, o.order_type, o.status, o.date_of_placing_order "
+				+ "FROM waiting_list w " + "JOIN orders o ON o.confirmation_code = w.confirmation_code "
+				+ "WHERE w.wl_status = 'WAITING' " + "  AND o.number_of_guests <= ? "
+				+ "ORDER BY w.priority ASC, w.requested_time ASC, w.joined_at ASC " + "LIMIT 1";
+
 		Connection conn = null;
 		try {
 			conn = borrow();
-			try (PreparedStatement ps = conn.prepareStatement(qry)) {
-				// Set the current timestamp for cancelled_at
-				ps.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
-				// Set the confirmation code for the WHERE clause
-				ps.setString(2, confirmationCode);
-				int rowsAffected = ps.executeUpdate();
-				if (rowsAffected > 0) {
-					// The DB Trigger (trg_cleanup_waiting_list) will automatically
-					// remove the entry from the 'waiting_list' table now.
-					logger.log("[SUCCESS] Order " + confirmationCode + " cancelled successfully.");
-					return true;
-				} else {
-					logger.log("[WARN] No pending WAITLIST order found for code: " + confirmationCode);
-					return false;
+			try (PreparedStatement ps = conn.prepareStatement(sql)) {
+				ps.setInt(1, tableCapacity);
+				try (ResultSet rs = ps.executeQuery()) {
+					if (!rs.next())
+						return null;
+
+					Order o = new Order();
+					o.setOrderNumber(rs.getInt("order_number"));
+					o.setConfirmationCode(rs.getString("confirmation_code"));
+					o.setUserId(rs.getInt("user_id"));
+					o.setDinersAmount(rs.getInt("number_of_guests"));
+					o.setOrderType(OrderType.valueOf(rs.getString("order_type")));
+					o.setStatus(OrderStatus.valueOf(rs.getString("status")));
+
+					Timestamp placedAt = rs.getTimestamp("date_of_placing_order");
+					if (placedAt != null)
+						o.setDateOfPlacingOrder(placedAt.toLocalDateTime());
+
+					return o;
 				}
 			}
-		} catch (SQLException ex) {
-			logger.log("[ERROR] SQLException in removeFromWaitingList: " + ex.getMessage());
-			ex.printStackTrace();
-			return false;
+		} catch (SQLException e) {
+			logger.log("[ERROR] getNextFromWaitingQueueThatFits: " + e.getMessage());
+			return null;
 		} finally {
 			release(conn);
 		}
 	}
 	
-	/**
-	 * Adds or updates the quoted wait time for a waiting list order.
-	 * 
-	 * @param confirmationCode   The confirmation code of the order
-	 * @param calculatedWaitTime The calculated wait time in minutes
-	 */
-	public void addWaitTimeToWaitListOrder(String confirmationCode, int calculatedWaitTime) {
-	    // This query inserts the wait time into the waiting_list table.
-	    // If the confirmation_code already exists in this table, it updates the time instead.
-	    final String qry = "INSERT INTO waiting_list (confirmation_code, quoted_wait_time) " 
-	                     + "VALUES (?, ?) " 
-	                     + "ON DUPLICATE KEY UPDATE quoted_wait_time = ?";
-	    Connection conn = null;
-	    try {
-	        conn = borrow();
-	        try (PreparedStatement ps = conn.prepareStatement(qry)) {
-	            ps.setString(1, confirmationCode);
-	            ps.setInt(2, calculatedWaitTime);
-	            ps.setInt(3, calculatedWaitTime);
-	            int rowsAffected = ps.executeUpdate();
-	            if (rowsAffected > 0) {
-	                logger.log("[SUCCESS] Wait time updated for order: " + confirmationCode);
-	            }
-	        }
-	    } catch (SQLException ex) {
-	        logger.log("[ERROR] SQLException in addWaitTimeToWaitListOrder: " + ex.getMessage());
-	        ex.printStackTrace();
-	    } finally {
-	        release(conn);
-	    }
-	}
-	
-	
-	public Order getNextWaitlistThatFitsCapacity(int tableCapacity) {
-	    String sql =
-	        "SELECT o.order_number, o.confirmation_code, o.user_id, o.number_of_guests " +
-	        "FROM orders o " +
-	        "JOIN waiting_list w ON w.confirmation_code = o.confirmation_code " +
-	        "WHERE o.order_type = 'WAITLIST' " +
-	        "AND o.status = 'PENDING' " +
-	        "AND o.number_of_guests <= ? " +
-	        "ORDER BY o.date_of_placing_order ASC " +
-	        "LIMIT 1";
-
+	public boolean updateWaitingListStatus(String confirmationCode, String wlStatus) {
+	    final String sql = "UPDATE waiting_list SET wl_status = ? WHERE confirmation_code = ?";
 	    Connection conn = null;
 	    try {
 	        conn = borrow();
 	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-	            ps.setInt(1, tableCapacity);
-	            try (ResultSet rs = ps.executeQuery()) {
-	                if (!rs.next()) return null;
-
-	                Order o = new Order();
-	                o.setOrderNumber(rs.getInt("order_number"));
-	                o.setConfirmationCode(rs.getString("confirmation_code"));
-	                o.setUserId(rs.getInt("user_id"));
-	                o.setDinersAmount(rs.getInt("number_of_guests"));
-	                o.setOrderType(OrderType.WAITLIST);
-	                o.setStatus(OrderStatus.PENDING);
-	                return o;
-	            }
+	            ps.setString(1, wlStatus);
+	            ps.setString(2, confirmationCode);
+	            return ps.executeUpdate() > 0;
 	        }
 	    } catch (SQLException e) {
-	        logger.log("[ERROR] getNextWaitlistThatFitsCapacity: " + e.getMessage());
-	        return null;
+	        logger.log("[ERROR] updateWaitingListStatus: " + e.getMessage());
+	        return false;
 	    } finally {
 	        release(conn);
 	    }
 	}
+
 
 
 	
@@ -1388,10 +1453,13 @@ public class BistroDataBase_Controller {
 		// We filter by 'PENDING' to show only active waiters.
 		// We order by date_of_placing_order ASC so the first person who arrived is
 		// first in the list.
-		String query = "SELECT o.order_number, o.confirmation_code, o.number_of_guests, "
-				+ "       o.date_of_placing_order, o.status, o.order_type, " + "w.quoted_wait_time "
-				+ "FROM orders o " + "JOIN waiting_list w ON o.confirmation_code = w.confirmation_code "
-				+ "WHERE o.status = 'PENDING' " + "ORDER BY o.date_of_placing_order ASC";
+		String query = "SELECT o.order_number, o.confirmation_code, o.number_of_guests,"
+				+ "o.date_of_placing_order, o.status, o.order_type,"
+				+ "w.quoted_wait_time, w.priority, w.requested_time, w.wl_status"
+				+ "FROM orders o"
+				+ "JOIN waiting_list w ON o.confirmation_code = w.confirmation_code"
+				+ "WHERE w.wl_status = 'WAITING'"
+				+ "ORDER BY w.priority, w.requested_time, w.joined_at; ";
 		Connection conn = null;
 		try {
 			conn = borrow();
@@ -1681,13 +1749,18 @@ public class BistroDataBase_Controller {
 		 * 
 		 * @param orderNumber The order number associated with the table session
 		 */
-		public void closeTableSessionForOrder(int orderNumber) {
-			String query = "UPDATE table_sessions " + "SET left_at = NOW(), end_reason = 'PAID' "
-					+ "WHERE order_number = ? AND left_at IS NULL";
+		public void closeTableSessionForOrder(int orderNumber,EndTableSessionType endType) {
+			String query = "UPDATE table_sessions " + "SET left_at = NOW(), end_reason = ? "
+					+ "WHERE order_number = ? AND left_at = ? ";
 
 			try (Connection conn = borrow(); PreparedStatement ps = conn.prepareStatement(query)) {
-
-				ps.setInt(1, orderNumber);
+				ps.setString(1, endType.name());
+				ps.setInt(2, orderNumber);
+				if (endType == EndTableSessionType.PAID) {
+					ps.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+				} else {
+					ps.setTimestamp(3, null);
+				}
 				ps.executeUpdate();
 
 			} catch (SQLException e) {
@@ -2129,9 +2202,14 @@ public class BistroDataBase_Controller {
 			return orders;
 		}
 
+<<<<<<< Updated upstream
 		String qry = "SELECT order_number, user_id, order_date, order_time, number_of_guests, " +
 					 "confirmation_code, order_type, status, date_of_placing_order " +
 					 "FROM orders WHERE order_date = ? AND status = ? AND order_type = ?";
+=======
+	
+
+>>>>>>> Stashed changes
 
 		Connection conn = null;
 		try {

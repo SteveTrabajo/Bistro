@@ -58,7 +58,7 @@ public class WaitingListService {
 		if (success) {
 			if (addToWaitlist) {
 				// The trigger inserted NULL for time, so we must update it manually
-				dbController.addWaitTimeToWaitListOrder(confirmationCode, calculatedWaitTime);
+				dbController.enqueueWaitingList(confirmationCode, calculatedWaitTime);
 			}
 			return confirmationCode; // Successfully created
 		}

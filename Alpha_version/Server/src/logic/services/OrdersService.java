@@ -160,6 +160,8 @@ public class OrdersService {
 	    return code;
 	}
 	
+	
+	//TODO : move to TableService?
 	/**
 	 * 
 	 * Retrieves the allocated table number for a reservation based on its confirmation code.
@@ -182,6 +184,25 @@ public class OrdersService {
 	public boolean updateOrderStatus(String confirmationCode, OrderStatus completed) {
 		return dbController.updateOrderStatusInDB(confirmationCode, completed);
 	}
+	
+	/**
+	 * Scheduler method for 15 min no-show check for reservations.
+	 * @param confirmationCode The confirmation code of the reservation to check.
+	 * @return true if marked as NO_SHOW, false otherwise.
+	 */
+	public boolean checkReservationNoShow(String confirmationCode) {
+		if (dbController.getOrderStatusInDB(confirmationCode) == OrderStatus.PENDING) {
+			boolean noShow = dbController.updateOrderStatusInDB(confirmationCode,OrderStatus.NO_SHOW);
+			if (noShow) {
+				logger.log("[WARN] RESERVATION NO_SHOW: " + confirmationCode);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
+	
 	
 	// ******************************** Reservation Available Time Slots Calculation Methods ***********************************
 	
@@ -412,6 +433,7 @@ public class OrdersService {
 	public List<Order> getStaffReservations(LocalDate date) {
         return dbController.getFullOrdersByDate(date);
     }
+	
 	// ******************************** New Method for Date Availability ***********************************
 	
 		/**
