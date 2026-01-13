@@ -19,18 +19,16 @@ import logic.BistroServer;
 import logic.ServerLogger;
 
 public class WaitingListService {
-	private final BistroServer server;
 	private final BistroDataBase_Controller dbController;
 	private final ServerLogger logger;
 	private final OrdersService ordersService;
 	private final TableService tableService;
 	private final UserService userService;
 	
-	public WaitingListService(BistroServer server,BistroDataBase_Controller dbController,ServerLogger logger,
+	public WaitingListService(BistroDataBase_Controller dbController,ServerLogger logger,
 			OrdersService ordersService,TableService tableService, UserService userService) {
 		this.dbController = dbController;
 		this.logger = logger;
-		this.server = server;
 		this.ordersService = ordersService;
 		this.tableService = tableService;
 		this.userService = userService;
