@@ -170,7 +170,7 @@ public class ClientNewReservationScreen {
     //*********************** UI Setup Methods ************************//
     // Enhanced DatePicker setup with advanced styling and logic
     private void setupDatePicker() {
-        // 1. High-Contrast Base Style: Larger font (16px) and bold text
+        // 1. Custom Cell Factory for DatePicker
         final String BASE_STYLE = "-fx-focus-color: transparent; -fx-faint-focus-color: transparent; " +
                                   "-fx-background-insets: 0; -fx-border-width: 0; " +
                                   "-fx-font-weight: bold; -fx-font-size: 16px; " + 
@@ -181,7 +181,7 @@ public class ClientNewReservationScreen {
             public void updateItem(LocalDate date, boolean empty) {
                 super.updateItem(date, empty);
 
-                // Structural cleanup (hiding extra lines)
+                // 2. Collapse Unavailable Cells
                 boolean isOtherMonth = getStyleClass().contains("next-month") || getStyleClass().contains("previous-month");
                 if (empty || date == null || isOtherMonth) {
                     collapseCell();
@@ -193,7 +193,7 @@ public class ClientNewReservationScreen {
                 setVisible(true);
                 setText(String.valueOf(date.getDayOfMonth()));
                 
-                // Set fixed size for cells to ensure they are big enough to read
+                // set fixed size for uniformity
                 setPrefWidth(45);
                 setPrefHeight(45);
 
@@ -207,7 +207,7 @@ public class ClientNewReservationScreen {
                 } else {
                     updateCellStyle(date, isToday, BASE_STYLE);
 
-                    // HOVER: Clear change to light blue
+                    // Hover Effects
                     setOnMouseEntered(e -> {
                         if (!date.equals(datePicker.getValue())) {
                             setStyle(BASE_STYLE + "-fx-background-color: #bbdefb; -fx-text-fill: #0d47a1; -fx-cursor: hand;");
@@ -228,13 +228,13 @@ public class ClientNewReservationScreen {
 
             private void updateCellStyle(LocalDate date, boolean isToday, String base) {
                 if (date.equals(datePicker.getValue())) {
-                    // SELECTED: Vibrant Blue, White text, very easy to see
+                    // Blue background with White text for selected date
                     setStyle(base + "-fx-background-color: #007bff; -fx-text-fill: white; -fx-background-radius: 5;");
                 } else if (isToday) {
-                    // TODAY: Yellow/Gold background or border so you know where you are
+                    // Yellow background with Dark Yellow text for today
                     setStyle(base + "-fx-background-color: #fff9c4; -fx-text-fill: #f57f17; -fx-border-color: #f57f17; -fx-border-width: 2; -fx-background-radius: 5;");
                 } else {
-                    // NORMAL: Clean White with Dark Black text
+                    // Default style for normal selectable dates
                     setStyle(base + "-fx-background-color: white; -fx-text-fill: #212121; -fx-border-color: #e0e0e0; -fx-border-width: 0.5;");
                 }
             }
