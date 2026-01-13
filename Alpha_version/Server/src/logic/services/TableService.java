@@ -11,6 +11,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import dto.Holiday;
+import dto.WeeklyHour;
 import entities.Order;
 import entities.Table;
 import entities.User;
@@ -168,34 +170,64 @@ public class TableService {
 	    }
 
     
-	/**
-	 * Retrieves the table number associated with a given reservation confirmation code.
-	 * @param confirmationCode The reservation confirmation code.
-	 * @return The table number, or -1 if not found.
-	 */    
-	public int getTableNumberByReservationConfirmationCode(String confirmationCode) {
-		return dbController.getTableNumberByConfirmationCode(confirmationCode);
-	}
-	
-	/**
-	 * Retrieves all tables from the database.
-	 * @return A list of all Table entities.
-	 */
-	public List<Table> getAllTables() {
-		return dbController.getAllTablesFromDB();
-	}
-
-	public HashMap<Table, String> getAllTablesMap() {
-		List<Table> tables = getAllTables();
-		HashMap<Table, String> tableStatusMap = new HashMap<>();
-		for (Table table : tables) {
-			String confirmationCode = dbController.getActiveOrderConfirmationCodeByTableNum(table.getTableID());
-			tableStatusMap.put(table, confirmationCode);
+		/**
+		 * Retrieves the table number associated with a given reservation confirmation code.
+		 * @param confirmationCode The reservation confirmation code.
+		 * @return The table number, or -1 if not found.
+		 */    
+		public int getTableNumberByReservationConfirmationCode(String confirmationCode) {
+			return dbController.getTableNumberByConfirmationCode(confirmationCode);
 		}
-		return tableStatusMap;
-	}
+		
+		/**
+		 * Retrieves all tables from the database.
+		 * @return A list of all Table entities.
+		 */
+		public List<Table> getAllTables() {
+			return dbController.getAllTablesFromDB();
+		}
 	
+		public HashMap<Table, String> getAllTablesMap() {
+			List<Table> tables = getAllTables();
+			HashMap<Table, String> tableStatusMap = new HashMap<>();
+			for (Table table : tables) {
+				String confirmationCode = dbController.getActiveOrderConfirmationCodeByTableNum(table.getTableID());
+				tableStatusMap.put(table, confirmationCode);
+			}
+			return tableStatusMap;
+		}
+		
+		/** Saves the provided weekly hours to the database.
+	     * @param hours A list of WeeklyHour objects representing the weekly hours to save.
+	     * @return true if the operation was successful, false otherwise.
+	     */
+		public boolean saveWeeklyHours(List<WeeklyHour> hours) {
+	        return dbController.updateWeeklyHours(hours);
+	    }
+
+		/** Adds a holiday to the database.
+	     * @param holiday The Holiday object to add.
+	     * @return true if the operation was successful, false otherwise.
+	     */
+	    public boolean addHoliday(Holiday holiday) {
+	        return dbController.addHoliday(holiday);
+	    }
+	    
+	    /** Removes a holiday from the database.
+	     * @param holiday The Holiday object to remove.
+	     * @return true if the operation was successful, false otherwise.
+	     */
+	    public boolean removeHoliday(Holiday holiday) {
+	        return dbController.removeHoliday(holiday);
+	    }
 	
+	    public boolean addNewTable(Table table) {
+	        return dbController.addTable(table);
+	    }
+
+	    public boolean deleteTable(int tableId) {
+	        return dbController.removeTable(tableId);
+	    }
 
 }
 //End of TableService.java

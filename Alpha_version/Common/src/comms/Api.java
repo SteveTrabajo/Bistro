@@ -126,6 +126,11 @@ public final class Api {
 	public static final String ASK_LOAD_CUSTOMERS_DATA = "customers.getalldata";
 	public static final String ASK_MONTHLY_REPORT_DATA = "monthlyReports.getData";
 	public static final String ASK_USER_ALLOCATED_TABLE = "tables.getUserAllocatedTable";
+	
+	public static final String ASK_SAVE_WEEKLY_HOURS = "hours.saveWeeklyHours";
+	public static final String ASK_ADD_HOLIDAY = "hours.addHoliday";
+	public static final String ASK_GET_HOLIDAYS = "hours.getHolidays";
+	public static final String ASK_REMOVE_HOLIDAY = "hours.removeHoliday";
 
 	// Responses
 	public static final String REPLY_TABLE_STATUS_OK = "tables.getStatus.ok";
@@ -142,6 +147,15 @@ public final class Api {
 	public static final String REPLY_USER_ALLOCATED_TABLE_FAIL = "tables.getUserAllocatedTable.fail";
 	public static final String REPLY_MONTHLY_REPORT_DATA_OK = "monthlyReports.getData.ok";
 	public static final String REPLY_MONTHLY_REPORT_DATA_FAIL = "monthlyReports.getData.fail";
+	
+	public static final String REPLY_SAVE_WEEKLY_HOURS_OK = "hours.saveWeeklyHours.ok";
+	public static final String REPLY_SAVE_WEEKLY_HOURS_FAIL = "hours.saveWeeklyHours.fail";
+	public static final String REPLY_ADD_HOLIDAY_OK = "hours.addHoliday.ok";
+	public static final String REPLY_ADD_HOLIDAY_FAIL = "hours.addHoliday.fail";
+	public static final String REPLY_GET_HOLIDAYS_OK = "hours.getHolidays.ok";
+	public static final String REPLY_GET_HOLIDAYS_FAIL = "hours.getHolidays.fail";
+	public static final String REPLY_REMOVE_HOLIDAY_OK = "hours.removeHoliday.ok";
+	public static final String REPLY_REMOVE_HOLIDAY_FAIL = "hours.removeHoliday.fail";
 
 // == WaitList subject == //
 

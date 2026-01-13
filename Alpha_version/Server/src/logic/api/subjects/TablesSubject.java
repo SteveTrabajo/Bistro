@@ -2,10 +2,11 @@ package logic.api.subjects;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import comms.Api;
 import comms.Message;
+import dto.Holiday;
+import dto.WeeklyHour;
 import entities.Table;
 import logic.ServerLogger;
 import logic.api.Router;
@@ -31,5 +32,48 @@ public class TablesSubject {
             }
         });
         
+        router.on("tables", "getAll", (msg, client) -> {
+            List<Table> tables = tableService.getAllTables();
+            client.sendToClient(new Message(Api.REPLY_ALL_TABLES_OK, tables)); 
+        });
+
+        router.on("tables", "add", (msg, client) -> {
+            Table newTable = (Table) msg.getData();
+            boolean success = tableService.addNewTable(newTable);
+            if (success) {
+                List<Table> updatedList = tableService.getAllTables();
+                client.sendToClient(new Message(Api.REPLY_ALL_TABLES_OK, updatedList));
+            }
+        });
+
+        router.on("tables", "remove", (msg, client) -> {
+            int tableId = (int) msg.getData();
+            boolean success = tableService.deleteTable(tableId);
+            if (success) {
+                List<Table> updatedList = tableService.getAllTables();
+                client.sendToClient(new Message(Api.REPLY_ALL_TABLES_OK, updatedList));
+            }
+        });
+        
+        router.on("hours", "saveWeekly", (msg, client) -> {
+        	@SuppressWarnings("unchecked")
+        	List<WeeklyHour> hours = (List<WeeklyHour>) msg.getData();
+        	tableService.saveWeeklyHours(hours);
+        	client.sendToClient(new Message(Api.REPLY_SAVE_WEEKLY_HOURS_OK, null));
+        });
+        
+        router.on("hours", "addHoliday", (msg, client) -> {
+			Holiday holiday = (dto.Holiday) msg.getData();
+			tableService.addHoliday(holiday);
+			client.sendToClient(new Message(Api.REPLY_ADD_HOLIDAY_OK, null));
+		});
+        
+        router.on("hours", "removeHoliday", (msg, client) -> {
+        	Holiday holiday = (dto.Holiday) msg.getData();
+        	tableService.removeHoliday(holiday);
+        	client.sendToClient(new Message(Api.REPLY_REMOVE_HOLIDAY_OK, null));
+		});
+        
     }
+        
 }

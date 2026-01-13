@@ -20,7 +20,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import dto.Holiday;
 import dto.UserData;
+import dto.WeeklyHour;
 import entities.Bill;
 import entities.Order;
 import entities.Table;
@@ -2507,4 +2509,127 @@ public class BistroDataBase_Controller {
 	}
 
 	
+	//TODO double check these 3 methods and place them in the correct area
+	/**
+     * Updates the weekly opening hours. 
+     * Strategy: Delete existing and re-insert, or Update on Duplicate Key.
+     */
+    public boolean updateWeeklyHours(List<WeeklyHour> hours) {
+        // Simple strategy: Update specific days
+        String query = "INSERT INTO opening_hours_weekly (day_of_week, open_time, close_time) " +
+                       "VALUES (?, ?, ?) " +
+                       "ON DUPLICATE KEY UPDATE open_time = VALUES(open_time), close_time = VALUES(close_time)";
+        
+        Connection conn = null;
+        try {
+            conn = borrow();
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                for (WeeklyHour wh : hours) {
+                	// Skip days that are closed (null times)
+                	if (wh.getOpenTime() == null || wh.getCloseTime() == null) continue;
+                	
+                    ps.setInt(1, wh.getDayOfWeek());
+                    ps.setTime(2, Time.valueOf(wh.getOpenTime()));
+                    ps.setTime(3, Time.valueOf(wh.getCloseTime()));
+                    ps.addBatch();
+                }
+                ps.executeBatch();
+                conn.commit();
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            release(conn);
+        }
+    }
+
+    public boolean addHoliday(Holiday holiday) {
+        // Ensure you ran the ALTER TABLE command first!
+        String query = "INSERT INTO opening_hours_special (special_date, name, is_closed, open_time, close_time) VALUES (?, ?, ?, NULL, NULL)";
+        
+        Connection conn = null;
+        try {
+            conn = borrow();
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                ps.setDate(1, Date.valueOf(holiday.getDate()));
+                ps.setString(2, holiday.getName());
+                ps.setInt(3, holiday.isClosed() ? 1 : 0);
+                // For simplicity, this code assumes holidays are full-day closed. 
+                // If you want partial hours, you need to add logic for open/close times here.
+                ps.executeUpdate();
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            release(conn);
+        }
+    }
+
+	public boolean removeHoliday(Holiday holiday) {
+		String query = "DELETE FROM opening_hours_special WHERE special_date = ?";
+		
+		Connection conn = null;
+		try {
+			conn = borrow();
+			try (PreparedStatement ps = conn.prepareStatement(query)) {
+				ps.setDate(1, Date.valueOf(holiday.getDate()));
+				ps.executeUpdate();
+				return true;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			release(conn);
+		}
+	}
+	
+	//TODO check these 2 methods and place them in the correct area
+	/**
+     * Adds a new table to the database.
+     */
+    public boolean addTable(Table table) {
+        String query = "INSERT INTO tables (tableNum, capacity) VALUES (?, ?)";
+        Connection conn = null;
+        try {
+            conn = borrow();
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                ps.setInt(1, table.getTableID());
+                ps.setInt(2, table.getCapacity());
+                ps.executeUpdate();
+                return true;
+            }
+        } catch (SQLException e) {
+            logger.log("[ERROR] Error adding table: " + e.getMessage());
+            return false;
+        } finally {
+            release(conn);
+        }
+    }
+
+    /**
+     * Removes a table from the database.
+     */
+    public boolean removeTable(int tableId) {
+        String query = "DELETE FROM tables WHERE tableNum = ?";
+        Connection conn = null;
+        try {
+            conn = borrow();
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                ps.setInt(1, tableId);
+                int rows = ps.executeUpdate();
+                return rows > 0;
+            }
+        } catch (SQLException e) {
+            logger.log("[ERROR] Error removing table: " + e.getMessage());
+            return false;
+        } finally {
+            release(conn);
+        }
+    }
 }

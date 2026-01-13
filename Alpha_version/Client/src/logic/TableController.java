@@ -9,6 +9,8 @@ import comms.Api;
 import comms.Message;
 import entities.Order;
 import entities.Table;
+import dto.Holiday;
+import dto.WeeklyHour;
 import enums.OrderStatus;
 import javafx.application.Platform;
 
@@ -123,4 +125,15 @@ public class TableController {
 		}
 	}
 	
+	public void askSaveWeeklyHours(List<WeeklyHour> hours) {
+        client.handleMessageFromClientUI(new Message(Api.ASK_SAVE_WEEKLY_HOURS, hours));
+    }
+
+    public void askAddHoliday(Holiday holiday) {
+        client.handleMessageFromClientUI(new Message(Api.ASK_ADD_HOLIDAY, holiday));
+    }
+    
+    public void askGetHolidays() {
+        client.handleMessageFromClientUI(new Message(Api.ASK_GET_HOLIDAYS, null));
+    }
 }

@@ -16,6 +16,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import dto.Holiday;
+import dto.WeeklyHour;
+
 public class RestaurantManagementPanel {
 
     // --- Opening Hours Section ---
@@ -198,40 +201,41 @@ public class RestaurantManagementPanel {
 
     @FXML
     void btnSaveHours(ActionEvent event) {
-        System.out.println("Saving Opening Hours...");
+        List<WeeklyHour> weeklyHours = new ArrayList<>();
         boolean hasErrors = false;
 
         for (int i = 0; i < 7; i++) {
-            if (activeChecks.get(i).isSelected()) {
-                String openStr = openBoxes.get(i).getValue();
-                String closeStr = closeBoxes.get(i).getValue();
+        	int dayId = i+1; // 1=Sun,2=Mon,...,7=Sat
+			if (activeChecks.get(i).isSelected()) {
+				String openStr = openBoxes.get(i).getValue();
+				String closeStr = closeBoxes.get(i).getValue();
 
-                if (openStr != null && closeStr != null) {
-                    LocalTime openTime = LocalTime.parse(openStr);
-                    LocalTime closeTime = LocalTime.parse(closeStr);
+				if (openStr != null && closeStr != null) {
+					LocalTime openTime = LocalTime.parse(openStr);
+					LocalTime closeTime = LocalTime.parse(closeStr);
 
-                    // VALIDATION 1: Closing time must be after opening time
-                    if (!closeTime.isAfter(openTime)) {
-                        showAlert("Invalid Hours", "Day " + (i + 1) + ": Closing time must be after opening time.");
-                        hasErrors = true;
-                    } 
-                    // VALIDATION 2: Shift must be at least 2 hours
-                    else if (closeTime.isBefore(openTime.plusHours(2))) {
-                        showAlert("Invalid Hours", "Day " + (i + 1) + ": The restaurant must be open for at least 2 hours.");
-                        hasErrors = true;
-                    }
-                    else {
-                        System.out.println("Day " + (i + 1) + ": " + openStr + " - " + closeStr);
-                    }
-                }
-            } else {
-                System.out.println("Day " + (i + 1) + ": Closed");
-            }
+					// VALIDATION 1: Closing time must be after opening time
+					if (!closeTime.isAfter(openTime)) {
+						showAlert("Invalid Hours", "Day " + dayId + ": Closing time must be after opening time.");
+						hasErrors = true;
+					} 
+					// VALIDATION 2: Shift must be at least 2 hours
+					else if (closeTime.isBefore(openTime.plusHours(2))) {
+						showAlert("Invalid Hours", "Day " + dayId + ": The restaurant must be open for at least 2 hours.");
+						hasErrors = true;
+					} else {
+						weeklyHours.add(new WeeklyHour(dayId, openTime, closeTime));
+					}
+				}
+			} else {
+				// Inactive day
+				weeklyHours.add(new WeeklyHour(dayId, null, null));
+			}
         }
 
-        if (!hasErrors) {
+        if (!hasErrors && BistroClientGUI.client != null) {
+        	BistroClientGUI.client.getTableCTRL().askSaveWeeklyHours(weeklyHours);
             showAlert("Success", "Opening hours updated successfully.");
-            // TODO: Send data to server here
         }
     }
 
@@ -241,21 +245,21 @@ public class RestaurantManagementPanel {
             showAlert("Error", "Please select a date and enter a holiday name.");
             return;
         }
-
-        String dateStr = dpHoliday.getValue().toString();
-        String name = txtHolidayName.getText();
-        boolean isClosed = holyShitCheck.isSelected();
-
-        // Create a visual entry for the list
-        Label holidayLabel = new Label("• " + dateStr + ": " + name + (isClosed ? " (Closed)" : ""));
-        holidayLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #334155;");
         
-        holidaysListBox.getChildren().add(holidayLabel);
+        Holiday holiday = new Holiday (dpHoliday.getValue(), txtHolidayName.getText(), holyShitCheck.isSelected());
+        if (BistroClientGUI.client != null) {
+			BistroClientGUI.client.getTableCTRL().askAddHoliday(holiday);
+			
+			Label holidayLabel = new Label("• " +holiday.toString());
+			holidayLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #334155;");
+			holidaysListBox.getChildren().add(holidayLabel);
+			
+			// Clear inputs
+			dpHoliday.setValue(null);
+			txtHolidayName.clear();
+			holyShitCheck.setSelected(false);
+		}
 
-        // Clear inputs
-        dpHoliday.setValue(null);
-        txtHolidayName.clear();
-        holyShitCheck.setSelected(false);
     }
 
     
