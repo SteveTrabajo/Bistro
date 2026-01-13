@@ -43,23 +43,20 @@ public class BistroDataBase_Controller {
 	private static BistroDataBase_Controller dataBaseControllerInstance;
 	private static ServerLogger logger;
 
-	// **************************** Database Configurations
-	// ****************************
+	// **************************** Database Configuration ****************************
 
 	private static final String JDBC_URL = "jdbc:mysql://localhost:3306/bistro?allowLoadLocalInfile=true&serverTimezone=Asia/Jerusalem&useSSL=false&allowPublicKeyRetrieval=true";
 	private static final String JDBC_USER = "root";
 	private static final String JDBC_PASS = "Aa123456";
 
-	// ******************************* Connection Pool Configurations
-	// *****************
+	// ******************************* Connection Pool Configurations *****************
 
 	private static final int POOL_SIZE = 10; // Number of connections in the pool
 	private static final long BORROW_TIMEOUT_MS = 10_000; // Timeout for borrowing a connection
 	private static BlockingQueue<Connection> pool = null; // Connection pool
 	private static volatile boolean initialized = false; // Pool initialization flag
 
-	// ********************************
-	// Constructors***********************************
+	// ******************************** Constructors***********************************
 
 	private BistroDataBase_Controller() {
 	}
@@ -71,13 +68,11 @@ public class BistroDataBase_Controller {
 		return dataBaseControllerInstance;
 	}
 
-	// ******************************Getters and
-	// Setters******************************
+	// ******************************Getters and Setters******************************
 	public void setLogger(ServerLogger log) {
 		logger = log;
 	}
-	// ****************************** Database Connection Pool Management
-	// ******************************
+	// ****************************** Database Connection Pool Management ******************************
 
 	/**
 	 * Initializes the database connection pool.
