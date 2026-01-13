@@ -63,7 +63,7 @@ public class PaymentSubject {
                     userFailureMap.remove(requester.getUserId());
                     
                     // Notify Table Service
-                    TableService.notifyPaymentCompletion(requester, tableService, logger);
+                    //TableService.notifyPaymentCompletion(requester, tableService, logger);
                 } else {
                     // Handle Failures
                     int failures = userFailureMap.getOrDefault(requester.getUserId(), 0) + 1;

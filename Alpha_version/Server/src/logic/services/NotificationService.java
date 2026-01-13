@@ -26,6 +26,7 @@ public class NotificationService {
     private final ServerLogger logger;
     private final ScheduledExecutorService scheduler;
     private final INotificationService notificationSimulator;
+    private volatile boolean started = false;
 
     public NotificationService(BistroDataBase_Controller dbController, ServerLogger logger) {
         this.dbController = dbController;
@@ -34,7 +35,11 @@ public class NotificationService {
         this.notificationSimulator = new MockNotificationService();
     }
 
-    public void startBackgroundTasks() {
+
+    public synchronized void startBackgroundTasks() {
+        if (started) return;
+        started = true;
+
         logger.log("[NOTIFICATIONS] Background service started. Polling every 15 minutes.");
         scheduler.scheduleAtFixedRate(() -> {
             try {
@@ -47,11 +52,15 @@ public class NotificationService {
         }, 0, 15, TimeUnit.MINUTES);
     }
 
-    public void stop() {
+    public synchronized void stop() {
+        if (!started) return;
+        started = false;
+
         if (scheduler != null && !scheduler.isShutdown()) {
             scheduler.shutdown();
         }
     }
+
 
     /**
      * Checks for RESERVATION orders starting in approximately 2 hours and sends reminders.
@@ -63,7 +72,7 @@ public class NotificationService {
         LocalDateTime startWindow = now.plusMinutes(110);
         LocalDateTime endWindow   = now.plusMinutes(130);
 
-        // ✅ returns only RESERVATION + PENDING + notified_at IS NULL within window
+        // returns only RESERVATION + PENDING + notified_at IS NULL within window
         List<Order> upcomingOrders = dbController.getReservationsBetweenTimes(startWindow, endWindow, OrderStatus.PENDING);
 
         if (upcomingOrders == null || upcomingOrders.isEmpty()) return;
@@ -75,7 +84,7 @@ public class NotificationService {
             String msg = "Reminder: Your reservation at Bistro is in 2 hours (" + order.getOrderHour() + ").";
             dispatchToSimulator(user, msg, NotificationType.RESERVATION_REMINDER);
 
-            // ✅ lock it so we won't re-send
+            //lock it so we won't re-send
             boolean marked = dbController.markReservationReminderSent(order.getOrderNumber(), now);
             if (!marked) {
                 logger.log("[WARN] Could not mark reservation reminder as sent for order #" + order.getOrderNumber());

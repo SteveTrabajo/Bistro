@@ -1566,27 +1566,38 @@ public class BistroDataBase_Controller {
 	 * @return List of Table objects representing all tables in the database
 	 */
 	public List<Table> getAllTablesFromDB() {
-		List<Table> tablesList = new ArrayList<>();
-		String qry = "SELECT tableNum, capacity FROM tables";
+	    List<Table> tablesList = new ArrayList<>();
 
-		Connection conn = null;
-		try {
-			conn = borrow();
-			try (PreparedStatement ps = conn.prepareStatement(qry); ResultSet rs = ps.executeQuery()) {
-				while (rs.next()) {
+	    String qry =
+	        "SELECT t.tableNum, t.capacity, " +
+	        "CASE WHEN ts.table_id IS NULL THEN false ELSE true END AS occupiedNow " +
+	        "FROM tables t " +
+	        "LEFT JOIN table_sessions ts " +
+	        "ON t.tableNum = ts.table_id AND ts.left_at IS NULL";
 
-					tablesList.add(new Table(rs.getInt("tableNum"), rs.getInt("capacity")));
-				}
-			}
-		} catch (SQLException ex) {
-			ex.printStackTrace();
-		} finally {
-			release(conn);
-		}
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(qry);
+	             ResultSet rs = ps.executeQuery()) {
 
-		System.out.println("Controller: Fetched " + tablesList.size() + " tables from DB.");
-		return tablesList;
+	            while (rs.next()) {
+	                tablesList.add(new Table(
+	                        rs.getInt("tableNum"),
+	                        rs.getInt("capacity"),
+	                        rs.getBoolean("occupiedNow")
+	                ));
+	            }
+	        }
+	    } catch (SQLException ex) {
+	        ex.printStackTrace();
+	    } finally {
+	        release(conn);
+	    }
+	    System.out.println("Controller: Fetched " + tablesList.size() + " tables from DB.");
+	    return tablesList;
 	}
+
 		
 	/**
 	 * Retrieves the table number associated with a given confirmation code.
@@ -1652,6 +1663,31 @@ public class BistroDataBase_Controller {
 	    }
 	}
 
+	public String getActiveOrderConfirmationCodeByTableNum(int tableID) {
+		String sql = "SELECT o.confirmation_code " + "FROM orders o "
+				+ "JOIN table_sessions ts ON o.order_number = ts.order_number "
+				+ "WHERE ts.tableNum = ? AND ts.left_at IS NULL";
+
+		Connection conn = null;
+		try {
+			conn = borrow();
+			try (PreparedStatement ps = conn.prepareStatement(sql)) {
+				ps.setInt(1, tableID);
+				try (ResultSet rs = ps.executeQuery()) {
+					if (rs.next()) {
+						return rs.getString("confirmation_code");
+					} else {
+						return null; // No active order found for the table
+					}
+				}
+			}
+		} catch (SQLException e) {
+			logger.log("[ERROR] getActiveOrderConfirmationCodeByTableNum: " + e.getMessage());
+			return null;
+		} finally {
+			release(conn);
+		}
+	}
 
 	/**
 	 * Retrieves the earliest expected end time among active table sessions that can
@@ -1971,6 +2007,8 @@ public class BistroDataBase_Controller {
 	}
 	
 	//*************************************** Notification Operations ********************************
+	
+	
 	public List<Order> getReservationsBetweenTimes(LocalDateTime startWindow, LocalDateTime endWindow, OrderStatus status) {
 	    final String sql =
 	        "SELECT order_number, user_id, order_date, order_time, number_of_guests, confirmation_code, status, order_type " +
@@ -2467,4 +2505,6 @@ public class BistroDataBase_Controller {
 		}
 		return null;
 	}
+
+	
 }

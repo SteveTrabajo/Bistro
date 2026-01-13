@@ -20,7 +20,7 @@ public class TablesSubject {
         // Handle request for table map status
         router.on("tables", "getStatus", (msg, client) -> {
             // Get data from Service
-        	HashMap<Table,String> tables = tableService.getTableMap();
+        	HashMap<Table,String> tables = tableService.getAllTablesMap();
             
             if (tables != null) {
                 client.sendToClient(new Message(Api.REPLY_TABLE_STATUS_OK, tables));

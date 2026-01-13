@@ -184,13 +184,17 @@ public class TableService {
 	public List<Table> getAllTables() {
 		return dbController.getAllTablesFromDB();
 	}
+
+	public HashMap<Table, String> getAllTablesMap() {
+		List<Table> tables = getAllTables();
+		HashMap<Table, String> tableStatusMap = new HashMap<>();
+		for (Table table : tables) {
+			String confirmationCode = dbController.getActiveOrderConfirmationCodeByTableNum(table.getTableID());
+			tableStatusMap.put(table, confirmationCode);
+		}
+		return tableStatusMap;
+	}
 	
-	//TODO : change logic to return map of Table objects and their status
-//	public HashMap<Table,String> getTableMap() {
-//		HashMap<Table,String> data =dbController.getTableMap();
-//		printDATA(data);
-//		return data;
-//	}
 	
 
 }
