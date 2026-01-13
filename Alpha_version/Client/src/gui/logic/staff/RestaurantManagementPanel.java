@@ -1,6 +1,7 @@
 package gui.logic.staff;
 
 import entities.Table;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -8,6 +9,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
+import logic.BistroClientGUI;
+
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -66,10 +69,98 @@ public class RestaurantManagementPanel {
         setupTableManagement();
     }
 
-    // ==========================================
-    // 1. Opening Hours Logic
-    // ==========================================
+    private void setupTableManagement() {
+        // Setup Spinner
+        spinDinersAmount.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(2, 20, 4));
 
+        // Setup Columns
+        colTableId.setCellValueFactory(new PropertyValueFactory<>("tableID"));
+        colTableId.setCellFactory(column -> new TableCell<Table, Integer>() {
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText("T" + item); 
+                }
+            }
+        });
+        
+        colSeats.setCellValueFactory(new PropertyValueFactory<>("capacity"));
+        tablesTable.setItems(tableList);
+        
+        if (BistroClientGUI.client != null) {
+            BistroClientGUI.client.getTableCTRL().setTablesListener(this::updateTableList);
+            BistroClientGUI.client.getTableCTRL().askAllTables();
+        }
+    }
+    
+    private void updateTableList(List<Table> tables) {
+        Platform.runLater(() -> {
+            tableList.clear();
+            if (tables != null) {
+                tableList.addAll(tables);
+            }
+        });
+    }
+    
+    @FXML
+    void btnAddTable(ActionEvent event) {
+        String idStr = txtTableID.getText();
+        if (idStr == null || idStr.trim().isEmpty()) {
+            showAlert("Input Error", "Please enter a Table ID.");
+            return;
+        }
+        
+        try {
+            String cleanInput = idStr.trim().toUpperCase();
+            int id;
+            if (cleanInput.startsWith("T")) {
+            	String numericPart = cleanInput.substring(1);
+            	id = Integer.parseInt(numericPart);
+            } else {
+				id = Integer.parseInt(cleanInput);
+			}
+            
+            int seats = spinDinersAmount.getValue();
+
+            // Check if exists
+            for(Table t : tableList) {
+                if(t.getTableID() == id) {
+                    showAlert("Duplicate", "Table ID " + id + " already exists.");
+                    return;
+                }
+            }
+
+            Table newTable = new Table(id, seats, false);
+            if (BistroClientGUI.client != null) {
+                BistroClientGUI.client.getTableCTRL().askAddTable(newTable);
+                txtTableID.clear();
+            }
+
+        } catch (NumberFormatException e) {
+            showAlert("Input Error", "Invalid Table ID. Format must be 'T' followed by numbers (e.g., T12).");
+        }
+    }
+
+    @FXML
+    void btnRemoveTable(ActionEvent event) {
+        Table selected = tablesTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert("Selection Error", "Please select a table to remove.");
+            return;
+        }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Delete Table T" + selected.getTableID() + "?", ButtonType.YES, ButtonType.NO);
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.YES && BistroClientGUI.client != null) {
+                BistroClientGUI.client.getTableCTRL().askRemoveTable(selected.getTableID());
+            }
+        });
+    }
+    
+    
     private void initHoursArrays() {
         // Group fields into lists for easier handling
         openBoxes.add(cmboxOpen1); openBoxes.add(cmboxOpen2); openBoxes.add(cmboxOpen3);
@@ -167,84 +258,7 @@ public class RestaurantManagementPanel {
         holyShitCheck.setSelected(false);
     }
 
-    private void setupTableManagement() {
-        // Setup Spinner
-        spinDinersAmount.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(2, 20, 4));
-
-        // Setup Columns
-        colTableId.setCellValueFactory(new PropertyValueFactory<>("tableID"));
-        colTableId.setCellFactory(column -> new TableCell<Table, Integer>() {
-            @Override
-            protected void updateItem(Integer item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText("T" + item); 
-                }
-            }
-        });
-        
-        colSeats.setCellValueFactory(new PropertyValueFactory<>("capacity"));
-
-        tablesTable.setItems(tableList);
-        
-        // TODO Add Dummy Data (Remove later)
-        tableList.add(new Table(101, 4, false));
-        tableList.add(new Table(102, 2, false));
-    }
-
-    @FXML
-    void btnAddTable(ActionEvent event) {
-        String idStr = txtTableID.getText();
-        if (idStr == null || idStr.trim().isEmpty()) {
-            showAlert("Input Error", "Please enter a Table ID.");
-            return;
-        }
-
-        String cleanInput = idStr.trim().toUpperCase();
-        
-        try {
-            int id;
-            if (cleanInput.startsWith("T")) {
-            	String numericPart = cleanInput.substring(1);
-            	id = Integer.parseInt(numericPart);
-            } else {
-				id = Integer.parseInt(cleanInput);
-			}
-            
-            int seats = spinDinersAmount.getValue();
-
-            // Check if exists
-            for(Table t : tableList) {
-                if(t.getTableID() == id) {
-                    showAlert("Duplicate", "Table ID " + id + " already exists.");
-                    return;
-                }
-            }
-
-            Table newTable = new Table(id, seats, false);
-            tableList.add(newTable);
-            txtTableID.clear();
-
-            // TODO: Send to Server (BistroClientGUI.client.getTableCTRL().addTable(newTable))
-
-        } catch (NumberFormatException e) {
-            showAlert("Input Error", "Invalid Table ID. Format must be 'T' followed by numbers (e.g., T12).");
-        }
-    }
-
-    @FXML
-    void btnRemoveTable(ActionEvent event) {
-        Table selected = tablesTable.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            showAlert("Selection Error", "Please select a table to remove.");
-            return;
-        }
-
-        tableList.remove(selected);
-        // TODO: Send to Server (BistroClientGUI.client.getTableCTRL().removeTable(selected.getTableID()))
-    }
+    
 
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

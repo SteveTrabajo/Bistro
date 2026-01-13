@@ -55,7 +55,7 @@ public final class Api {
 // == User subject == //
 
 	// Requests
-	public static final String ASK_MEMBER_UPDATE_INFO = "member.updateInfo";// TODO: MAYBE ADD member.updateDetails
+	public static final String ASK_MEMBER_UPDATE_INFO = "member.updateInfo";
 	public static final String ASK_FORGOT_MEMBER_ID = "user.forgotMemberID";
 	public static final String ASK_FORGOT_CONFIRMATION_CODE = "reservation.forgotConfirmationCode";
 	public static final String ASK_REGISTER_NEW_MEMBER = "user.registerNewMember";
@@ -120,7 +120,9 @@ public final class Api {
 
 	// Requests
 	public static final String ASK_TABLE_STATUS = "tables.getStatus";
-	public static final String ASK_TABLES_AMOUNT = "tables.getAmount";
+	public static final String ASK_ALL_TABLES = "tables.getAll";
+	public static final String ASK_ADD_TABLE = "tables.add";
+	public static final String ASK_REMOVE_TABLE = "tables.remove";
 	public static final String ASK_LOAD_CUSTOMERS_DATA = "customers.getalldata";
 	public static final String ASK_MONTHLY_REPORT_DATA = "monthlyReports.getData";
 	public static final String ASK_USER_ALLOCATED_TABLE = "tables.getUserAllocatedTable";
@@ -128,6 +130,12 @@ public final class Api {
 	// Responses
 	public static final String REPLY_TABLE_STATUS_OK = "tables.getStatus.ok";
 	public static final String REPLY_TABLE_STATUS_FAIL = "tables.getStatus.fail";
+	public static final String REPLY_ALL_TABLES_OK = "tables.getAll.ok";
+	public static final String REPLY_ALL_TABLES_FAIL = "tables.getAll.fail";
+	public static final String REPLY_ADD_TABLE_OK = "tables.add.ok";
+	public static final String REPLY_ADD_TABLE_FAIL = "tables.add.fail";
+	public static final String REPLY_REMOVE_TABLE_OK = "tables.remove.ok";
+	public static final String REPLY_REMOVE_TABLE_FAIL = "tables.remove.fail";
 	public static final String REPLY_LOAD_CUSTOMERS_DATA_OK = "customers.getalldata.ok";
 	public static final String REPLY_LOAD_CUSTOMERS_DATA_FAIL = "customers.getalldata.fail";
 	public static final String REPLY_USER_ALLOCATED_TABLE_OK = "tables.getUserAllocatedTable.ok";

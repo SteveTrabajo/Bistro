@@ -1,16 +1,16 @@
 package logic;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import comms.Api;
 import comms.Message;
 import entities.Order;
 import entities.Table;
 import enums.OrderStatus;
+import javafx.application.Platform;
 
 public class TableController {
 	//****************************** Instance variables ******************************
@@ -20,6 +20,7 @@ public class TableController {
 	private BiConsumer<Boolean, String> checkInListener;
 	private int userAllocatedTable;
 	private int tablesAmount;
+	private Consumer<List<Table>> allTablesCallback;
 	
 	//******************************** Constructors ***********************************//
 	public TableController(BistroClient client) {
@@ -66,8 +67,14 @@ public class TableController {
 		this.tablesAmount = tablesAmount;
 	}
 	
+	public void setTablesListener(Consumer<List<Table>> callback) {
+		this.allTablesCallback = callback;
+	}
+	
 	//******************************** Instance Methods ***********************************//
+	
 	public boolean isCheckInTableSuccess() {
+		//TODO maybe change to return seatdOrderDTO != null && seatdOrderDTO.getStatus() == OrderStatus.SEATED;
 		return seatdOrderDTO.getStatus() == OrderStatus.SEATED;
 	}
 
@@ -97,4 +104,23 @@ public class TableController {
 		client.handleMessageFromClientUI(new Message(Api.ASK_USER_ALLOCATED_TABLE, null));
 		
 	}
+	
+	public void askAllTables() {
+		client.handleMessageFromClientUI(new Message(Api.ASK_ALL_TABLES, null));
+	}
+	
+	public void askAddTable(Table table) {
+		client.handleMessageFromClientUI(new Message(Api.ASK_ADD_TABLE, table));
+	}
+	
+	public void askRemoveTable(int tableNumber) {
+		client.handleMessageFromClientUI(new Message(Api.ASK_REMOVE_TABLE, tableNumber));
+	}
+	
+	public void setAllTables(List<Table> tables) {
+		if (allTablesCallback != null) {
+			Platform.runLater(() -> allTablesCallback.accept(tables));
+		}
+	}
+	
 }
