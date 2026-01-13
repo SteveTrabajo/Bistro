@@ -2201,16 +2201,9 @@ public class BistroDataBase_Controller {
 		if (date == null) {
 			return orders;
 		}
-
-<<<<<<< Updated upstream
 		String qry = "SELECT order_number, user_id, order_date, order_time, number_of_guests, " +
 					 "confirmation_code, order_type, status, date_of_placing_order " +
 					 "FROM orders WHERE order_date = ? AND status = ? AND order_type = ?";
-=======
-	
-
->>>>>>> Stashed changes
-
 		Connection conn = null;
 		try {
 			conn = borrow();
