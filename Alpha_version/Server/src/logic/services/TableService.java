@@ -26,9 +26,6 @@ public class TableService {
 	    private final OrdersService orderService;
 	    private final NotificationService notificationService;
 
-	    // scheduler for 15-minute no-show checks
-	    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-
 	    //******************************** Constructor ********************************//	
 	    public TableService(BistroDataBase_Controller dbController, ServerLogger logger,OrdersService orderService, NotificationService notificationService) {
 	        this.dbController = dbController;
@@ -90,51 +87,82 @@ public class TableService {
 	            logger.log("[WARN] Payment completed but no active table session found for order " + orderNumber);
 	            return false;
 	        }	       
-	        return FreeTable(tableNum); //when table is freed, try to seat WAITLIST/RESERVATION order if possible
+	        return afterTableFreed(tableNum); //when table is freed, try to seat WAITLIST/RESERVATION order if possible
 	    }
 
 	    /**
 	     * Handles logic when a table is freed.
 	     * @param tableNum The table number that was freed.
 	     */
-	    public boolean FreeTable(int tableNum) {
-	    	//get table capacity and try to find next waitlist/reservation that fits capacity
-	        int capacity = dbController.getTableCapacity(tableNum);
-	        if (capacity <= 0) {
-	        	return false;
+	    public boolean afterTableFreed(int tableNum) {
+	    	 int capacity = dbController.getTableCapacity(tableNum);
+	    	    if (capacity <= 0) {
+	    	        logger.log("[ERROR] Invalid capacity for table " + tableNum);
+	    	        return false;
+	    	    }
+
+	    	    // הבא בתור שמתאים לקיבולת (PENDING waitlist)
+	    	    Order next = dbController.getNextFromWaitingQueueThatFits(capacity);
+
+	    	    if (next == null) {
+	    	        logger.log("[INFO] Table " + tableNum + " freed. No waitlist fits capacity=" + capacity);
+	    	        return true; // שולחן התפנה בהצלחה, פשוט אין מי להודיע
+	    	    }
+
+	    	    // עדיפות להזמנות עתידיות (Reservation Guard)
+	    	    if (!canNotifyWaitlistNow(next.getDinersAmount())) {
+	    	        logger.log("[INFO] Cannot notify waitlist " + next.getConfirmationCode()
+	    	                + " now due to reservation constraints.");
+	    	        return true; // השולחן פנוי, פשוט לא מודיעים כרגע
+	    	    }
+
+	    	    // ✅ קריטי: מעדכנים גם NOTIFIED וגם notified_at (כדי ש-NoShowManager יעבוד)
+	    	    boolean marked = dbController.markWaitlistAsNotified(next.getOrderNumber(), LocalDateTime.now());
+	    	    if (!marked) {
+	    	        logger.log("[ERROR] Failed to mark waitlist as NOTIFIED for " + next.getConfirmationCode());
+	    	        return false;
+	    	    }
+
+	    	    // למשוך הזמנה מחדש אחרי העדכון
+	    	    Order refreshed = dbController.getOrderByConfirmationCodeInDB(next.getConfirmationCode());
+
+	    	    // שליחה (Email+SMS) דרך NotificationService של החבר
+	    	    notificationService.notifyWaitlistUser(refreshed);
+
+	    	    logger.log("[INFO] NOTIFIED waitlist " + refreshed.getConfirmationCode()
+	    	            + " for table " + tableNum + ", capacity=" + capacity);
+
+	    	    // ❌ לא עושים schedule פה — NoShowManager של החבר יטפל ב-15 דקות
+	    	    return true;
+	    	}
+	    
+	    private boolean canNotifyWaitlistNow(int dinersAmount) {
+	        LocalTime now = LocalTime.now();
+	        int duration = orderService.getReservationDurationMinutes();
+	        LocalTime end = now.plusMinutes(duration);
+
+	        // מביא הזמנות פעילות + הזמנות עתידיות שעלולות להתנגש
+	        List<Order> conflicts = dbController.getActiveAndUpcomingOrders(LocalDate.now(), now, end);
+
+	        List<Integer> load = new ArrayList<>();
+
+	        for (Order o : conflicts) {
+	            if (o.getStatus() == OrderStatus.SEATED) {
+	                load.add(o.getDinersAmount());
+	            } else if (o.getOrderType() == OrderType.RESERVATION && o.getStatus() == OrderStatus.PENDING) {
+	                LocalTime s = o.getOrderHour();
+	                LocalTime e = s.plusMinutes(duration);
+	                if (orderService.overlaps(now, end, s, e)) {
+	                    load.add(o.getDinersAmount());
+	                }
+	            }
 	        }
-	        //TODO: change getNextNotifiedOrderThatFits quary to fit priority by date of placing order 
-	        Order next = dbController.getNextFromWaitingQueueThatFits(capacity);
-	        if (next == null) {
-	            logger.log("[INFO] Table " + tableNum + " freed. No waitlist fits capacity=" + capacity);
-	            return null;
-	        }
-	        
-	        //check if can notify waitlist now (reservation priority)
-	        if (canNotifyWaitlistNow(next.getDinersAmount())) {
-	            logger.log("[INFO] Notifying waitlist " + next.getConfirmationCode() + " for table " + tableNum);
-	            //change status to NOTIFIED and start the process 
-		        boolean marked = dbController.updateOrderStatusInDB(next.getConfirmationCode(), OrderStatus.NOTIFIED);
-		        if (!marked) return false;
-	            
-	        } else {
-	            logger.log("[INFO] Cannot notify waitlist " + next.getConfirmationCode() + " now due to capacity constraints.");
-	            return false;
-	        }
-	        //send notification to the user
-	        notificationService.notifyWaitlistUser(next);
-	        
-	        //schedule a task to check for no-show after 15 minutes
-			scheduler.schedule(() -> {
-				if (dbController.getOrderStatusInDB(next.getConfirmationCode()) == OrderStatus.NOTIFIED) {
-					boolean noShow = dbController.updateOrderStatusInDB(next.getConfirmationCode(),OrderStatus.NO_SHOW);
-					if (noShow) {
-						logger.log("[WARN] WAITLIST NO_SHOW: " + next.getConfirmationCode());
-						FreeTable(tableNum);// try to seat next waitlist
-					}
-				}
-			}, 15, TimeUnit.MINUTES);
+
+	        load.add(dinersAmount);
+
+	        return orderService.canAssignAllDinersToTables(load, orderService.getTableSizes());
 	    }
+
     
 	/**
 	 * Retrieves the table number associated with a given reservation confirmation code.

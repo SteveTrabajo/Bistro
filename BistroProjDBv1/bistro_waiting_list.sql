@@ -25,7 +25,12 @@ DROP TABLE IF EXISTS `waiting_list`;
 CREATE TABLE `waiting_list` (
   `confirmation_code` varchar(50) NOT NULL,
   `quoted_wait_time` int DEFAULT NULL,
+  `priority` int NOT NULL DEFAULT '2',
+  `requested_time` datetime DEFAULT NULL,
+  `joined_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `wl_status` enum('WAITING','NOTIFIED','SEATED','CANCELLED','EXPIRED') NOT NULL DEFAULT 'WAITING',
   PRIMARY KEY (`confirmation_code`),
+  KEY `idx_waiting_queue` (`wl_status`,`priority`,`requested_time`,`joined_at`),
   CONSTRAINT `fk_waitlist_orders_code` FOREIGN KEY (`confirmation_code`) REFERENCES `orders` (`confirmation_code`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -36,6 +41,7 @@ CREATE TABLE `waiting_list` (
 
 LOCK TABLES `waiting_list` WRITE;
 /*!40000 ALTER TABLE `waiting_list` DISABLE KEYS */;
+INSERT INTO `waiting_list` VALUES ('WL-0001',40,2,NULL,'2026-01-13 15:13:20','WAITING');
 /*!40000 ALTER TABLE `waiting_list` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -48,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-01-10 13:07:50
+-- Dump completed on 2026-01-13 17:52:39
