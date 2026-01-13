@@ -1,6 +1,9 @@
 package logic.services;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import entities.Order;
 import entities.Table;
 import entities.User;
+import enums.EndTableSessionType;
 import enums.OrderStatus;
 import enums.OrderType;
 import logic.BistroDataBase_Controller;
@@ -25,51 +29,49 @@ public class TableService {
 	    // scheduler for 15-minute no-show checks
 	    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-
+	    //******************************** Constructor ********************************//	
 	    public TableService(BistroDataBase_Controller dbController, ServerLogger logger,OrdersService orderService, NotificationService notificationService) {
 	        this.dbController = dbController;
 	        this.logger = logger;
 			this.orderService = orderService;
 	        this.notificationService = notificationService;
 	    }
-
+	    
+	    //********************************Instance  Methods ********************************//
+	   /**
+	    * Allocates a table for the given confirmation code if possible.
+	    * @param confirmationCode
+	    * @param now
+	    * @return
+	    */
 	    public int allocateTable(String confirmationCode, LocalDateTime now) {
 	        Order order = dbController.getOrderByConfirmationCodeInDB(confirmationCode);
+	        //case order not found
 	        if (order == null) {
 	            logger.log("[ERROR] Allocation failed: Order not found for " + confirmationCode);
 	            return -1;
 	        }
-
 	        //case order type WAITLIST not notified yet block allocation
 	        if (order.getOrderType() == OrderType.WAITLIST && order.getStatus() != OrderStatus.NOTIFIED) {
 	            logger.log("[WARN] Allocation blocked: WAITLIST not notified for " + confirmationCode);
 	            return -1;
 	        }
-	        
-	        //case order type RESERVATION check for no-show after 15 minutes from reservation time 
-	        if (order.getOrderType() == OrderType.RESERVATION
-	                && order.getStatus() != OrderStatus.SEATED
-	                && order.getStatus() != OrderStatus.COMPLETED) {
-	            LocalDateTime start = LocalDateTime.of(order.getOrderDate(), order.getOrderHour());
-	            if (now.isAfter(start.plusMinutes(15))) { //if more than 15 minutes past reservation time
-	                dbController.updateOrderStatusInDB(confirmationCode, OrderStatus.NO_SHOW);
-	                logger.log("[WARN] Reservation NO_SHOW: " + confirmationCode);
-	                return -1;
-	            }
-	        }
-	        
+	        	        
+	        //find free table for the group size dinersAmount to allocate table to seat them:
 	        int tableNum = dbController.findFreeTableForGroup(order.getDinersAmount());
 	        if (tableNum == -1) {
 	            logger.log("[WARN] No tables available for group size " + order.getDinersAmount());
+	            //TODO : add to waitlist if not already in it
 	            return -1;
 	        }
+	        //create table session for the order 
 	        int diningMinutes = orderService.getReservationDurationMinutes(); 
 	        boolean sessionCreated = dbController.createTableSession(order.getOrderNumber(), tableNum, diningMinutes);
 	        if (!sessionCreated) {
 	            logger.log("[ERROR] Failed to create session for order " + confirmationCode);
 	            return -1;
 	        }
-
+	        //update order status to SEATED
 	        dbController.updateOrderStatusInDB(confirmationCode, OrderStatus.SEATED);
 	        logger.log("[INFO] Allocated Table " + tableNum + " to Order " + confirmationCode);
 	        return tableNum;
@@ -79,47 +81,59 @@ public class TableService {
 	    * method to be called when payment is completed for an order
 	    * @param orderNumber
 	    */
-	    public void onPaymentCompleted(int orderNumber) {
+	    public boolean onPaymentCompleted(int orderNumber) {
 	    	//close table session when payment is completed
 	        Integer tableNum = dbController.getActiveTableNumByOrderNumber(orderNumber);
-	        dbController.closeTableSessionForOrder(orderNumber);
+	        dbController.closeTableSessionForOrder(orderNumber, EndTableSessionType.PAID);
 	        //case no active table session found
 	        if (tableNum == null) {
 	            logger.log("[WARN] Payment completed but no active table session found for order " + orderNumber);
-	            return;
+	            return false;
 	        }	       
-	        onTableFreed(tableNum); // when table is freed, try to seat waitlist
+	        return FreeTable(tableNum); //when table is freed, try to seat WAITLIST/RESERVATION order if possible
 	    }
 
 	    /**
 	     * Handles logic when a table is freed.
 	     * @param tableNum The table number that was freed.
 	     */
-	    public void onTableFreed(int tableNum) {
+	    public boolean FreeTable(int tableNum) {
+	    	//get table capacity and try to find next waitlist/reservation that fits capacity
 	        int capacity = dbController.getTableCapacity(tableNum);
-	        if (capacity <= 0) return;
-
-	        Order next = dbController.getNextWaitlistThatFitsCapacity(capacity);
+	        if (capacity <= 0) {
+	        	return false;
+	        }
+	        //TODO: change getNextNotifiedOrderThatFits quary to fit priority by date of placing order 
+	        Order next = dbController.getNextFromWaitingQueueThatFits(capacity);
 	        if (next == null) {
 	            logger.log("[INFO] Table " + tableNum + " freed. No waitlist fits capacity=" + capacity);
-	            return;
+	            return null;
 	        }
-
-	        //change status to NOTIFIED and start the process 
-	        boolean marked = dbController.updateOrderStatusInDB(next.getConfirmationCode(), OrderStatus.NOTIFIED);
-	        if (!marked) return;
-
+	        
+	        //check if can notify waitlist now (reservation priority)
+	        if (canNotifyWaitlistNow(next.getDinersAmount())) {
+	            logger.log("[INFO] Notifying waitlist " + next.getConfirmationCode() + " for table " + tableNum);
+	            //change status to NOTIFIED and start the process 
+		        boolean marked = dbController.updateOrderStatusInDB(next.getConfirmationCode(), OrderStatus.NOTIFIED);
+		        if (!marked) return false;
+	            
+	        } else {
+	            logger.log("[INFO] Cannot notify waitlist " + next.getConfirmationCode() + " now due to capacity constraints.");
+	            return false;
+	        }
 	        //send notification to the user
 	        notificationService.notifyWaitlistUser(next);
 	        
 	        //schedule a task to check for no-show after 15 minutes
-	        scheduler.schedule(() -> {
-	            boolean noShow = dbController.updateOrderStatusInDB(next.getConfirmationCode(), OrderStatus.NO_SHOW);
-	            if (noShow) {
-	                logger.log("[WARN] WAITLIST NO_SHOW: " + next.getConfirmationCode());
-	                onTableFreed(tableNum);//try to seat next waitlist
-	            }
-	        }, 15, TimeUnit.MINUTES);
+			scheduler.schedule(() -> {
+				if (dbController.getOrderStatusInDB(next.getConfirmationCode()) == OrderStatus.NOTIFIED) {
+					boolean noShow = dbController.updateOrderStatusInDB(next.getConfirmationCode(),OrderStatus.NO_SHOW);
+					if (noShow) {
+						logger.log("[WARN] WAITLIST NO_SHOW: " + next.getConfirmationCode());
+						FreeTable(tableNum);// try to seat next waitlist
+					}
+				}
+			}, 15, TimeUnit.MINUTES);
 	    }
     
 	/**
