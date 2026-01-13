@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import entities.User;
@@ -50,6 +51,7 @@ public class ClientNewReservationScreen {
     
     @FXML
     public void initialize() {
+    	Locale.setDefault(Locale.ENGLISH);
         setupDinersAmountComboBox();
         setupDatePicker();
         
@@ -61,7 +63,7 @@ public class ClientNewReservationScreen {
         if (BistroClientGUI.client != null && BistroClientGUI.client.getUserCTRL().getLoggedInUser() != null) {
             User currentUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
             if (lblUser != null) {
-                lblUser.setText("Welcome, " + currentUser.getUserType().name());
+                lblUser.setText( currentUser.getUserType().name());
             }
         }
         
@@ -83,8 +85,10 @@ public class ClientNewReservationScreen {
     //*********************** Logic Methods ************************//
 
     /**
-     * Requests available dates from the server based on the selected number of diners.
-     */
+	 * Fetches available reservation dates from the server based on selected number of diners.
+	 * Updates the DatePicker to enable only those dates.
+	 */
+    
     private void fetchAvailableDatesFromServer() {
         int diners = parseDiners(dinersAmountComboBox.getValue());
 
@@ -109,7 +113,12 @@ public class ClientNewReservationScreen {
         // Send request
         BistroClientGUI.client.getReservationCTRL().askAvailableDates(diners);
     }
-    
+    /**
+	 * Sets the booking context for a customer when accessed by staff.
+	 * Updates the user label accordingly.
+	 * 
+	 * @param customerData Map containing customer details like name and identifier.
+	 */
     public void setBookingForCustomer(Map<String, Object> customerData) {
         this.staffProxyData = customerData;
         
@@ -158,27 +167,79 @@ public class ClientNewReservationScreen {
         }
         return 2; 
     }
-    
-    /**
-     * Configures the DatePicker to disable past dates and dates not returned by the server.
-     */
+    //*********************** UI Setup Methods ************************//
+    // Enhanced DatePicker setup with advanced styling and logic
     private void setupDatePicker() {
+        // 1. High-Contrast Base Style: Larger font (16px) and bold text
+        final String BASE_STYLE = "-fx-focus-color: transparent; -fx-faint-focus-color: transparent; " +
+                                  "-fx-background-insets: 0; -fx-border-width: 0; " +
+                                  "-fx-font-weight: bold; -fx-font-size: 16px; " + 
+                                  "-fx-alignment: CENTER;";
+
         datePicker.setDayCellFactory(picker -> new DateCell() {
             @Override
             public void updateItem(LocalDate date, boolean empty) {
                 super.updateItem(date, empty);
+
+                // Structural cleanup (hiding extra lines)
+                boolean isOtherMonth = getStyleClass().contains("next-month") || getStyleClass().contains("previous-month");
+                if (empty || date == null || isOtherMonth) {
+                    collapseCell();
+                    return;
+                }
+
+                setOpacity(1.0);
+                setManaged(true);
+                setVisible(true);
+                setText(String.valueOf(date.getDayOfMonth()));
                 
+                // Set fixed size for cells to ensure they are big enough to read
+                setPrefWidth(45);
+                setPrefHeight(45);
+
                 boolean isPast = date.isBefore(LocalDate.now());
                 boolean isNotAllowed = (serverAllowedDates != null && !serverAllowedDates.contains(date));
-                
-                if (empty || isPast || isNotAllowed) {
+                boolean isToday = date.equals(LocalDate.now());
+
+                if (isPast || isNotAllowed) {
                     setDisable(true);
-                    setStyle("-fx-background-color: #ffc0cb;"); 
+                    setStyle(BASE_STYLE + "-fx-background-color: #f0f0f0; -fx-text-fill: #bebebe;");
+                } else {
+                    updateCellStyle(date, isToday, BASE_STYLE);
+
+                    // HOVER: Clear change to light blue
+                    setOnMouseEntered(e -> {
+                        if (!date.equals(datePicker.getValue())) {
+                            setStyle(BASE_STYLE + "-fx-background-color: #bbdefb; -fx-text-fill: #0d47a1; -fx-cursor: hand;");
+                        }
+                    });
+
+                    setOnMouseExited(e -> updateCellStyle(date, isToday, BASE_STYLE));
+                }
+            }
+
+            private void collapseCell() {
+                setText(null);
+                setGraphic(null);
+                setManaged(false);
+                setVisible(false);
+                setStyle("-fx-background-color: transparent;");
+            }
+
+            private void updateCellStyle(LocalDate date, boolean isToday, String base) {
+                if (date.equals(datePicker.getValue())) {
+                    // SELECTED: Vibrant Blue, White text, very easy to see
+                    setStyle(base + "-fx-background-color: #007bff; -fx-text-fill: white; -fx-background-radius: 5;");
+                } else if (isToday) {
+                    // TODAY: Yellow/Gold background or border so you know where you are
+                    setStyle(base + "-fx-background-color: #fff9c4; -fx-text-fill: #f57f17; -fx-border-color: #f57f17; -fx-border-width: 2; -fx-background-radius: 5;");
+                } else {
+                    // NORMAL: Clean White with Dark Black text
+                    setStyle(base + "-fx-background-color: white; -fx-text-fill: #212121; -fx-border-color: #e0e0e0; -fx-border-width: 0.5;");
                 }
             }
         });
     }
-    
     private void setupDinersAmountComboBox() {
         for (int i = 1; i <= 12; i++) {
             dinersAmountComboBox.getItems().add(i + " People");
@@ -192,7 +253,7 @@ public class ClientNewReservationScreen {
         
         if (availableTimeSlots == null || availableTimeSlots.isEmpty()) {
             Label lblNoSlots = new Label("No time slots available.");
-            lblNoSlots.setStyle("-fx-text-fill: red; -fx-font-size: 14px;");
+            lblNoSlots.setStyle("-fx-text-fill: blue; -fx-font-size: 14px;");
             timeSlotsGridPane.add(lblNoSlots, 0, 0);
             GridPane.setColumnSpan(lblNoSlots, 4);
             return;
