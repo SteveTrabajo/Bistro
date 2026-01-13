@@ -18,7 +18,7 @@ public class MonthlyReport implements Serializable {
 	private int totalLateCostumer; 				//total late Costumer in this month
 	private int totalOnTimeCostumer; 			//total on time Costumer in this month
 	private int totalMemberReservations; 		//total Member Reservation in this month
-	private double memberReservationRate; 			//Member Reservation Rate in this month
+	private int memberReservationRate; 			//Member Reservation Rate in this month
 
 
 	//************************ Constructors ************************//
@@ -70,12 +70,19 @@ public class MonthlyReport implements Serializable {
 		this.totalMemberReservations = totalMemberReservations;
 	}
 	
-	public double getMemberReservationPrecetage() {
+	public int getMemberReservationPrecetage() {
 		return memberReservationRate;
 	}
 
-	public void setMemberReservationPrecetage(double memberReservationRate) {
+	public void setMemberReservationPrecetage(int memberReservationRate) {
 		this.memberReservationRate = memberReservationRate;
+	}
+	
+	public int getOnTimeRate() {
+		if (totalCostumer == 0) {
+			return 0;
+		}
+		return	(int) Math.round(((double)totalOnTimeCostumer / totalCostumer) * 100);
 	}
 		
 	

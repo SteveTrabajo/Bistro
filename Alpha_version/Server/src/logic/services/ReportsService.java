@@ -29,7 +29,7 @@ public class ReportsService {
 			monthlyReport.setMemberReservationPrecetage(0);
 		}
 		else {
-			double mebmerRateInReservations = (int)Math.round((totalMemberReservation * 100.0) / totalReservation);
+			int mebmerRateInReservations = (int)Math.round((totalMemberReservation * 100.0) / totalReservation);
 			monthlyReport.setMemberReservationPrecetage(mebmerRateInReservations);
 		}
 		

@@ -30,7 +30,7 @@
             <HBox spacing="14">
                 <HBox HBox.hgrow="ALWAYS">
                     <VBox spacing="6" HBox.hgrow="ALWAYS">
-                        <Label styleClass="ad-kpi-label" text="Total Reservations (2025)" />
+                        <Label styleClass="ad-kpi-label" text="Total Reservations This Month" />
                         <Label fx:id="totalReservationsLabel" styleClass="ad-kpi-value" text="0" />
                     </VBox>
                     <VBox alignment="TOP_RIGHT" spacing="6">
@@ -53,7 +53,7 @@
                     </VBox>
                     <VBox alignment="TOP_RIGHT" spacing="6">
                         <Label styleClass="ad-kpi-icon" text="👤" />
-                        <Label fx:id="rateOfMemberInReservationLabel" styleClass="ad-kpi-delta" text="+0.0%" />
+                        <Label fx:id="rateOfMemberInReservationDelta" styleClass="ad-kpi-delta" text="+0.0%" />
                     </VBox>
                <styleClass>
                   <String fx:value="ad-kpi" />
@@ -132,8 +132,8 @@
             <!-- Card 2: Monthly Trend -->
             <VBox spacing="12" styleClass="ad-card">
                 <VBox spacing="2">
-                    <Label styleClass="ad-card-title" text="Monthly Reservations Trend" />
-                    <Label styleClass="ad-card-subtitle" text="Reservation volume throughout the year" />
+                    <Label styleClass="ad-card-title" text="Monthly Members Reservations" />
+                    <Label styleClass="ad-card-subtitle" text="Reservation volume throughout the Month" />
                 </VBox>
 
                 <LineChart fx:id="reservationsLineChart" createSymbols="true" styleClass="ad-chart">

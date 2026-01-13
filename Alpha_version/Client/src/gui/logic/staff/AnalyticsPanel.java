@@ -27,6 +27,9 @@ public class AnalyticsPanel {
     
     @FXML 
     private Label rateOfMemberInReservationLabel;
+    
+    @FXML
+    private Label rateOfMemberInReservationDelta;
             
     @FXML 
     private Label onTimeRateLabel;
@@ -76,16 +79,12 @@ public class AnalyticsPanel {
     public void updateDashboard(MonthlyReport data) {
         if (data == null) return;
 
-        // 1. Update KPIs 
         totalReservationsLabel.setText(String.valueOf(data.getTotalReservations()));
-        // Assuming getter for delta exists in DTO
-        //setDeltaLabel(totalReservationsDelta, 5.2); // Example value, replace with data.get...
 
         rateOfMemberInReservationLabel.setText(String.valueOf(data.getMemberReservationPrecetage()) + "%");
-        //setDeltaLabel(avgMonthlyDelta, 2.1);
-
-        onTimeRateLabel.setText(String.format("%.1f%%", 0.52 * 100));
-        //setDeltaLabel(onTimeDelta, -0.5);
+               
+        onTimeRateLabel.setText(String.valueOf(data.getOnTimeRate()) + "%");
+     
 
         customersThisMonthLabel.setText(String.valueOf(data.getTotalCostumer()));      
         currentMonthLabel.setText(data.getMonth()); 
@@ -154,7 +153,7 @@ public class AnalyticsPanel {
     private void updateTrendChart(MonthlyReport data) {
         reservationsLineChart.getData().clear();
         XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName(data.getYear());
+        series.setName(data.getMonth());
 
 //        Map<String, Integer> trends = data.getMonthlyReservationsMap();
 //        // Ensure month order is correct (Logic depends on Map implementation, LinkedHashMap is best)
