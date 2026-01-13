@@ -4,7 +4,6 @@ import java.util.List;
 import entities.Bill;
 import entities.Item;
 import entities.User;
-import enums.EndTableSessionType;
 import enums.UserType;
 import logic.BistroDataBase_Controller;
 import logic.ServerLogger;
@@ -15,16 +14,14 @@ public class PaymentService {
 
     private final BistroDataBase_Controller dbController;
     private final ServerLogger logger;
-    private final TableService tableService;
     private final PaymentGateway paymentGateway;
 
-    public PaymentService(BistroDataBase_Controller dbController, ServerLogger logger,TableService tableService) {
+    public PaymentService(BistroDataBase_Controller dbController, ServerLogger logger) {
         this.dbController = dbController;
         this.logger = logger;
         // Initialize with the Mock gateway for now. 
         // In the future, this can be swapped for a RealPaymentGateway.
         this.paymentGateway = new MockPaymentGateway();
-        this.tableService = tableService;
     }
 
     /**
@@ -118,20 +115,4 @@ public class PaymentService {
         return dbController.getPendingBillsByUserId(userId);
     }
 
-    
-    /**
-	    * method to be called when payment is completed for an order
-	    * @param orderNumber
-	    */
-	    public boolean onPaymentCompleted(int orderNumber) {
-	    	//close table session when payment is completed
-	        Integer tableNum = dbController.getActiveTableNumByOrderNumber(orderNumber);
-	        dbController.closeTableSessionForOrder(orderNumber, EndTableSessionType.PAID);
-	        //case no active table session found
-	        if (tableNum == null) {
-	            logger.log("[WARN] Payment completed but no active table session found for order " + orderNumber);
-	            return false;
-	        }	       
-	        return tableService.FreeTable(tableNum); //when table is freed, try to seat WAITLIST/RESERVATION order if possible
-	    }
 }
