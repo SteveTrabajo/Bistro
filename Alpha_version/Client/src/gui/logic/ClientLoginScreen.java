@@ -118,13 +118,19 @@ public class ClientLoginScreen {
 			userLoginData.put("userType", userType);
 			userLoginData.put("phoneNumber", phoneNumber);
 			userLoginData.put("email", emailAddress);
+			TaskRunner.run(event, 
+		            () -> {
 			BistroClientGUI.client.getUserCTRL().signInUser(userLoginData);
+		            }, 
+		            () -> {
 			if (BistroClientGUI.client.getUserCTRL().isUserLoggedInAs(userType)) {
 				BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
 			} else {
 				BistroClientGUI.display(lblError, "Error has occured!", Color.RED);
 				return;
 			}
+		            }
+		        );
 		}
 	}
 
