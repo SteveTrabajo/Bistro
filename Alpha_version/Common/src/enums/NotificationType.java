@@ -5,5 +5,6 @@ public enum NotificationType {
 	    TABLE_READY,          
 	    CONFIRMATION_CODE,    
 	    BILL_DETAILS,         
-	    CANCELLATION_NOTICE  
+	    CANCELLATION_NOTICE,
+	    NO_SHOW_ALERT
 }

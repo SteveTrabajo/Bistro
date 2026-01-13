@@ -1895,16 +1895,10 @@ public class BistroDataBase_Controller {
 	
 	//*************************************** Notification Operations ********************************
 	// TODO complete the function
-		public User getUserById(int userId) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		// TODO complete the function
-		public List<Order> getOrdersBetweenTimes(LocalDateTime startWindow, LocalDateTime endWindow, OrderStatus seated) {
-			// TODO Auto-generated method stub
-			return null;
-		}
+	public List<Order> getOrdersBetweenTimes(LocalDateTime startWindow, LocalDateTime endWindow, OrderStatus seated) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 		
 	//*************************************** Reports ********************************
 		
@@ -2117,7 +2111,175 @@ public class BistroDataBase_Controller {
 		String sql = "UPDATE orders SET order_date = ?, order_time = ?, order_type = 'RESERVATION' WHERE confirmation_code = ?";
 		
 	}
+	
+	// ======================== NO-SHOW MANAGEMENT METHODS ========================
+	
+	/**
+	 * Retrieves all orders for a specific date with a given status and type.
+	 * Used by NoShowManager to find orders that need no-show checking.
+	 * 
+	 * @param date The order date to check
+	 * @param status The order status (PENDING, NOTIFIED, etc.)
+	 * @param type The order type (RESERVATION, WAITLIST)
+	 * @return List of matching Order objects
+	 */
+	public List<Order> getOrdersByDateAndStatus(LocalDate date, OrderStatus status, OrderType orderType) {
+		List<Order> orders = new ArrayList<>();
+		if (date == null) {
+			return orders;
+		}
 
+		String qry = "SELECT order_number, user_id, order_date, order_time, number_of_guests, " +
+					 "confirmation_code, order_type, status, date_of_placing_order " +
+					 "FROM orders WHERE order_date = ? AND status = ? AND order_type = ?";
 
+		Connection conn = null;
+		try {
+			conn = borrow();
+			try (PreparedStatement ps = conn.prepareStatement(qry)) {
+				ps.setDate(1, Date.valueOf(date));
+				ps.setString(2, status.name());
+				ps.setString(3, orderType.name());
 
+				try (ResultSet rs = ps.executeQuery()) {
+					while (rs.next()) {
+						int orderNumber = rs.getInt("order_number");
+						int userId = rs.getInt("user_id");
+						LocalDate orderDate = rs.getDate("order_date").toLocalDate();
+						LocalTime orderTime = rs.getTime("order_time").toLocalTime();
+						int dinersAmount = rs.getInt("number_of_guests");
+						String confirmCode = rs.getString("confirmation_code");
+						OrderType type = OrderType.valueOf(rs.getString("order_type"));
+						OrderStatus orderStatus = OrderStatus.valueOf(rs.getString("status"));
+						Timestamp placingTs = rs.getTimestamp("date_of_placing_order");
+						LocalDateTime dateOfPlacing = placingTs != null ? placingTs.toLocalDateTime() : null;
+
+						Order order = new Order(orderNumber, orderDate, orderTime, dinersAmount, 
+												confirmCode, userId, type, orderStatus, dateOfPlacing);
+						orders.add(order);
+					}
+				}
+			}
+		} catch (SQLException ex) {
+			logger.log("[ERROR] SQLException in getOrdersByDateAndStatus: " + ex.getMessage());
+			ex.printStackTrace();
+		} finally {
+			release(conn);
+		}
+		return orders;
+	}
+	
+	/**
+	 * Gets the notification time (when status was changed to NOTIFIED) for a waitlist order.
+	 * 
+	 * @param orderNumber The order number to check
+	 * @return LocalDateTime when the order was notified, or null if not found
+	 */
+	public LocalDateTime getOrderNotificationTime(int orderNumber) {
+		String qry = "SELECT notified_at FROM orders WHERE order_number = ?";
+		Connection conn = null;
+
+		try {
+			conn = borrow();
+			try (PreparedStatement ps = conn.prepareStatement(qry)) {
+				ps.setInt(1, orderNumber);
+				try (ResultSet rs = ps.executeQuery()) {
+					if (rs.next()) {
+						Timestamp ts = rs.getTimestamp("notified_at");
+						return ts != null ? ts.toLocalDateTime() : null;
+					}
+				}
+			}
+		} catch (SQLException ex) {
+			logger.log("[ERROR] SQLException in getOrderNotificationTime: " + ex.getMessage());
+			ex.printStackTrace();
+		} finally {
+			release(conn);
+		}
+		return null;
+	}
+
+	/**
+	 * Updates the status of an order.
+	 */
+	public boolean updateOrderStatus(int orderNumber, OrderStatus newStatus) {
+		String qry = "UPDATE orders SET status = ? WHERE order_number = ?";
+		Connection conn = null;
+
+		try {
+			conn = borrow();
+			try (PreparedStatement ps = conn.prepareStatement(qry)) {
+				ps.setString(1, newStatus.name());
+				ps.setInt(2, orderNumber);
+				int rowsAffected = ps.executeUpdate();
+				return rowsAffected > 0;
+			}
+		} catch (SQLException ex) {
+			logger.log("[ERROR] SQLException in updateOrderStatus: " + ex.getMessage());
+			ex.printStackTrace();
+			return false;
+		} finally {
+			release(conn);
+		}
+	}
+
+	/**
+	 * Frees up a table reservation when an order is marked as NO_SHOW.
+	 * Sets the table status back to available.
+	 * 
+	 * @param orderNumber The order number for the no-show reservation
+	 * @return true if table was freed, false otherwise
+	 */
+	public boolean freeReservationTable(int orderNumber) {
+		String qry = "UPDATE orders SET table_id = NULL WHERE order_number = ?";
+		Connection conn = null;
+
+		try {
+			conn = borrow();
+			try (PreparedStatement ps = conn.prepareStatement(qry)) {
+				ps.setInt(1, orderNumber);
+				int rowsAffected = ps.executeUpdate();
+				return rowsAffected > 0;
+			}
+		} catch (SQLException ex) {
+			logger.log("[ERROR] SQLException in freeReservationTable: " + ex.getMessage());
+			ex.printStackTrace();
+			return false;
+		} finally {
+			release(conn);
+		}
+	}
+
+	/**
+	 * Retrieves a user by their user ID.
+	 * Used by NoShowManager to get customer info for notifications.
+	 * 
+	 * @param userId The user ID to look up
+	 * @return User object if found, null otherwise
+	 */
+	public User getUserById(int userId) {
+		String qry = "SELECT user_id, phoneNumber, email, type FROM users WHERE user_id = ?";
+		Connection conn = null;
+
+		try {
+			conn = borrow();
+			try (PreparedStatement ps = conn.prepareStatement(qry)) {
+				ps.setInt(1, userId);
+				try (ResultSet rs = ps.executeQuery()) {
+					if (rs.next()) {
+						String phoneNumber = rs.getString("phoneNumber");
+						String email = rs.getString("email");
+						String userType = rs.getString("type");
+						return new User(userId, phoneNumber, email, null, UserType.valueOf(userType));
+					}
+				}
+			}
+		} catch (SQLException ex) {
+			logger.log("[ERROR] SQLException in getUserById: " + ex.getMessage());
+			ex.printStackTrace();
+		} finally {
+			release(conn);
+		}
+		return null;
+	}
 }

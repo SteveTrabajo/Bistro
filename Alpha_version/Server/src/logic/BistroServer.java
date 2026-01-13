@@ -39,6 +39,7 @@ public class BistroServer extends AbstractServer {
 	private final UserService userService;
 	private final ReportsService reportService;
 	private final PaymentService paymentService;
+	private final NoShowManager noShowManager;
 	// Scheduler for background tasks:
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
@@ -58,12 +59,13 @@ public class BistroServer extends AbstractServer {
 		this.dbController.setLogger(this.logger);
 		// Initialize services:
 		this.userService = new UserService(this.dbController, this.logger);
-		this.tableService = new TableService(this.dbController, this.logger);
+		this.ordersService = new OrdersService(this, this.dbController, null, this.logger);
 		this.reportService = new ReportsService(this.dbController, this.logger);
 		this.paymentService = new PaymentService(this.dbController, this.logger);
-		this.ordersService = new OrdersService(this, this.dbController, this.tableService, this.logger);
-		this.waitingListService = new WaitingListService(this,this.dbController,this.ordersService,this.tableService, this.logger, this.userService);
 		this.notificationService = new NotificationService(this.dbController, this.logger);
+		this.tableService = new TableService(this.dbController, this.logger, this.ordersService, this.notificationService);
+		this.waitingListService = new WaitingListService(this,this.dbController,this.ordersService,this.tableService, this.logger, this.userService);
+		this.noShowManager = new NoShowManager(this.dbController, this.logger);
 		// Register API subjects
 		registerHandlers(this.router, this.dbController, this.logger);
 	}
@@ -141,6 +143,7 @@ public class BistroServer extends AbstractServer {
 		if (isConnectToDB) {
 			logger.log("Connected to database successfully");
 			notificationService.startBackgroundTasks(); // Start notification background tasks
+			noShowManager.startBackgroundTasks(); // Start no-show detection background tasks
 		} else {
 			logger.log("Failed to connect to database");
 		}
@@ -152,6 +155,7 @@ public class BistroServer extends AbstractServer {
 	protected void serverStopped() {
 		logger.log("Server stopped");
 		notificationService.stop(); // Stop notification background tasks
+		noShowManager.stop(); // Stop no-show detection background tasks
 		dbController.closeConnection();
 	}
 
