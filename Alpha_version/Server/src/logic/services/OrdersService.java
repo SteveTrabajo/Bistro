@@ -107,7 +107,7 @@ public class OrdersService {
 	 * @return true if the slot is available, false otherwise.
 	 */
 	private boolean checkSpecificSlotAvailability(LocalDate date, LocalTime targetTime, int diners) {
-		List<Order> existingReservations = dbController.getOrderbyDate(date);
+		List<Order> existingReservations = dbController.getOrdersByDate(date);
 		List<LocalTime> openingHours = dbController.getOpeningHoursFromDB();
 		if (openingHours == null || openingHours.size() < 2) return false;
 		LocalTime open = openingHours.get(0);
@@ -217,7 +217,6 @@ public class OrdersService {
 		getTablesCapacity(); // Fetch table sizes from DB
 		//Get opening hours and existing reservations from DB:
 		List<LocalTime> openingHours = dbController.getOpeningHoursFromDB();
-		printOpeningHours(openingHours); //TODO: Remove debug prints later
 		LocalDate date = (LocalDate) requestData.get("date");
 		LocalTime openingTime = openingHours.get(0);
 		LocalTime closingTime = openingHours.get(1);
@@ -234,8 +233,7 @@ public class OrdersService {
 	        }
 	    }
 		int dinersAmount = (int) requestData.get("dinersAmount");
-		List<Order> reservationsByDate = dbController.getOrderbyDate(date);
-		printReservationsByDate(reservationsByDate); //TODO: Remove debug prints later
+		List<Order> reservationsByDate = dbController.getOrdersByDate(date);
 		//Compute available slots:
 		return computeAvailableSlots(effectiveOpeningTime, closingTime, dinersAmount, reservationsByDate);
 	}
@@ -253,23 +251,6 @@ public class OrdersService {
 	}
 	
 	
-	//TODO: Remove debug prints later ---------------------------------------------
-	private void printReservationsByDate(List<Order> reservationsByDate) {
-		System.out.println("Reservations fetched from DB for the given date: ");
-		for (Order o : reservationsByDate) {
-			System.out.println( "Time: " + o.getOrderHour().toString() + ", Diners: " + o.getDinersAmount());
-		}
-		
-	}
-
-	private void printOpeningHours(List<LocalTime> openingHours) {
-		System.out.println("Opening Hours fetched from DB: ");
-		System.out.println("Opening Time: " + openingHours.get(0).toString());
-		System.out.println("Closing Time: " + openingHours.get(1).toString());
-		
-	}
-	
-	
 	//TODO: add more comments to the methods below ---------------------------------------------
 	/**
 	 * 
@@ -284,14 +265,6 @@ public class OrdersService {
 	 */
 	public List<String> computeAvailableSlots(LocalTime openingTime, LocalTime closingTime, int newDinersAmount,
 	        List<Order> reservationsByDate) {
-	    
-	    //TODO: Remove debug prints later
-	    System.out.println("--- DEBUG: Starting computeAvailableSlots ---");
-	    System.out.println("Table Sizes Loaded: " + this.tableSizes); 
-	    System.out.println("New Diners Amount: " + newDinersAmount);
-	    System.out.println("Opening: " + openingTime + ", Closing: " + closingTime);
-	    // ----------------------------------------------
-	    //
 	    if (this.tableSizes == null || this.tableSizes.isEmpty()) {
 	        System.err.println("ERROR: tableSizes is EMPTY! No tables to seat diners.");
 	        return new ArrayList<>();
@@ -319,28 +292,16 @@ public class OrdersService {
 	    for (LocalTime slot : possibleTimeSlots) {
 	        List<Integer> overlappingDinersAmounts = new ArrayList<>(tablesPerTime.get(slot));
 	        overlappingDinersAmounts.add(newDinersAmount);
-	        
-	        //TODO: Remove debug prints later
-	        System.out.println("Checking " + slot + " with groups: " + overlappingDinersAmounts);
-	        // ----------------------------------------------
-	        
 	        if (canAssignAllDinersToTables(overlappingDinersAmounts, tableSizes)) {
 	            available.add(timeToString(slot));
 	        } else {
 	             System.out.println("Slot " + slot + " REJECTED (Not enough tables)");
 	        }
 	    }
-	    
-	    printListbeforeReturn(available);
 	    return available;
 	}
 	
-	public void printListbeforeReturn(List<String> available) {
-		System.out.println("Available slots computed: ");
-		for (String s : available) {
-			System.out.println(s);
-		}
-	}
+	
 
 	/**
 	 * 
@@ -427,7 +388,7 @@ public class OrdersService {
     }
 
 	public List<Order> getClientReservations(LocalDate date) {
-        return dbController.getOrderbyDate(date);
+        return dbController.getOrdersByDate(date);
     }
 	
 	public List<Order> getStaffReservations(LocalDate date) {
@@ -458,7 +419,7 @@ public class OrdersService {
 			// Iterate through each day
 			for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
 				// Get existing reservations for this specific date
-				List<Order> reservationsOnDate = dbController.getOrderbyDate(date);
+				List<Order> reservationsOnDate = dbController.getOrdersByDate(date);
 				
 				// Calculate available slots for this date
 				List<String> slots = computeAvailableSlots(open, close, diners, reservationsOnDate);

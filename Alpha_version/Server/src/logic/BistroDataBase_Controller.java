@@ -917,7 +917,7 @@ public class BistroDataBase_Controller {
 	 * @param date The date to retrieve orders for
 	 * @return List of Order objects for the specified date
 	 */
-	public List<Order> getOrderbyDate(LocalDate date) {
+	public List<Order> getOrdersByDate(LocalDate date) {
 		List<Order> orders = new ArrayList<>();
 		if (date == null) {
 			return orders;
