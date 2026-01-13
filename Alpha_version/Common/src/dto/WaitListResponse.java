@@ -1,25 +1,34 @@
 package dto;
 
-public class WaitListResponse {
-	private boolean canSeatImmediately;
-	private long estimatedWaitTimeMinutes;
-	private String message;
+import java.io.Serializable;
 
-	public WaitListResponse(boolean canSeatImmediately, long waitTime, String message) {
-		this.canSeatImmediately = canSeatImmediately;
-		this.estimatedWaitTimeMinutes = waitTime;
-		this.message = message;
-	}
+/**
+ * WaitListResponse must implement Serializable to be transmitted 
+ * between the Server and the Client.
+ */
+public class WaitListResponse implements Serializable {
+    // serialVersionUID ensures that both sides agree on the class version
+    private static final long serialVersionUID = 1L;
 
-	public boolean isCanSeatImmediately() {
-		return canSeatImmediately;
-	}
+    private boolean canSeatImmediately;
+    private long estimatedWaitTimeMinutes;
+    private String message;
 
-	public long getEstimatedWaitTimeMinutes() {
-		return estimatedWaitTimeMinutes;
-	}
+    public WaitListResponse(boolean canSeatImmediately, long waitTime, String message) {
+        this.canSeatImmediately = canSeatImmediately;
+        this.estimatedWaitTimeMinutes = waitTime;
+        this.message = message;
+    }
 
-	public String getMessage() {
-		return message;
-	}
+    public boolean isCanSeatImmediately() {
+        return canSeatImmediately;
+    }
+
+    public long getEstimatedWaitTimeMinutes() {
+        return estimatedWaitTimeMinutes;
+    }
+
+    public String getMessage() {
+        return message;
+    }
 }

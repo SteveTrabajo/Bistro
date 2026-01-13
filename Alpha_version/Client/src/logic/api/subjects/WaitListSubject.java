@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import dto.WaitListResponse;
 import entities.Order;
 import entities.Table;
 import enums.OrderStatus;
@@ -20,171 +21,184 @@ public class WaitListSubject {
 	private WaitListSubject() {
 	}
 
-	public static void register(ClientRouter router,WaitingListController waitingListCTRL,TableController tableCTRL) {
-				//Staff: Get All Data
-				router.on("waitinglist", "getAll.ok", msg -> {
-		            BistroClient.awaitResponse = false;
-					@SuppressWarnings
-					("unchecked")
-					ArrayList<Order> list = (ArrayList<Order>) msg.getData();
-					waitingListCTRL.setWaitingList(list);
-				});
-				router.on("waitinglist", "getAll.fail", msg -> {
-		            BistroClient.awaitResponse = false;
-				});
+	public static void register(ClientRouter router, WaitingListController waitingListCTRL, TableController tableCTRL) {
+		// Staff: Get All Data
+		router.on("waitinglist", "getAll.ok", msg -> {
+			BistroClient.awaitResponse = false;
+			@SuppressWarnings("unchecked")
+			ArrayList<Order> list = (ArrayList<Order>) msg.getData();
+			waitingListCTRL.setWaitingList(list);
+		});
+		router.on("waitinglist", "getAll.fail", msg -> {
+			BistroClient.awaitResponse = false;
+		});
 
-				//Client: Join Status
-				router.on("waitinglist", "join.ok", msg -> {
-		            BistroClient.awaitResponse = false;
-					Order order = (Order) msg.getData();
-					waitingListCTRL.setOrderWaitListDTO(order);
-					waitingListCTRL.setUserOnWaitingList(true);
-				});
+		// Client: Join Status
+		router.on("waitinglist", "join.ok", msg -> {
+			BistroClient.awaitResponse = false;
+			Order order = (Order) msg.getData();
+			waitingListCTRL.setOrderWaitListDTO(order);
+			waitingListCTRL.setUserOnWaitingList(true);
+		});
 
-				router.on("waitinglist", "join.fail", msg -> {
-		            BistroClient.awaitResponse = false;
-				});
-				//Client/Staff: Leave Status
-				router.on("waitinglist", "leave.ok", msg -> {
-					BistroClient.awaitResponse = false;
-					waitingListCTRL.setOrderWaitListDTO(null);
-					waitingListCTRL.setLeaveWaitingListSuccess(true);
-					waitingListCTRL.setUserOnWaitingList(false);
-				});
+		router.on("waitinglist", "join.fail", msg -> {
+			BistroClient.awaitResponse = false;
+		});
+		// Client/Staff: Leave Status
+		router.on("waitinglist", "leave.ok", msg -> {
+			BistroClient.awaitResponse = false;
+			waitingListCTRL.setOrderWaitListDTO(null);
+			waitingListCTRL.setLeaveWaitingListSuccess(true);
+			waitingListCTRL.setUserOnWaitingList(false);
+		});
 
-				router.on("waitinglist", "leave.fail", msg -> {
-		            BistroClient.awaitResponse = false;
-					waitingListCTRL.setLeaveWaitingListSuccess(false);
-				});
+		router.on("waitinglist", "leave.fail", msg -> {
+			BistroClient.awaitResponse = false;
+			waitingListCTRL.setLeaveWaitingListSuccess(false);
+		});
 
-				//Check if user is in waiting list
-				router.on("waitinglist", "isInWaitingList.yes", msg -> {
-		            BistroClient.awaitResponse = false;
-					waitingListCTRL.setUserOnWaitingList(true);
-				});
+		// Check if user is in waiting list
+		router.on("waitinglist", "isInWaitingList.yes", msg -> {
+			BistroClient.awaitResponse = false;
+			waitingListCTRL.setUserOnWaitingList(true);
+		});
 
-				router.on("waitinglist", "isInWaitingList.no", msg -> {
-		            BistroClient.awaitResponse = false;
-					waitingListCTRL.setUserOnWaitingList(false);
-					waitingListCTRL.setOrderWaitListDTO(null);
-				});
-				router.on("waitinglist", "isInWaitingList.fail", msg -> {
-		            BistroClient.awaitResponse = false;
-		            Alert alert = new Alert(Alert.AlertType.ERROR);
-		            alert.setTitle("Error");
-		            alert.setHeaderText("Could not verify waiting list status");
-		            alert.setContentText("An error occurred while verifying your waiting list status. Please try again later.");
-		            alert.showAndWait();
-				});
+		router.on("waitinglist", "isInWaitingList.no", msg -> {
+			BistroClient.awaitResponse = false;
+			waitingListCTRL.setUserOnWaitingList(false);
+			waitingListCTRL.setOrderWaitListDTO(null);
+		});
+		router.on("waitinglist", "isInWaitingList.fail", msg -> {
+			BistroClient.awaitResponse = false;
+			Alert alert = new Alert(Alert.AlertType.ERROR);
+			alert.setTitle("Error");
+			alert.setHeaderText("Could not verify waiting list status");
+			alert.setContentText("An error occurred while verifying your waiting list status. Please try again later.");
+			alert.showAndWait();
+		});
 
-				//Notifications
-				router.on("waitinglist", "notified.ok", msg -> {
-		            BistroClient.awaitResponse = false;
-					Platform.runLater(() -> {
-						if(waitingListCTRL.getOrderWaitListDTO() != null) {
-							waitingListCTRL.getOrderWaitListDTO().setStatus(OrderStatus.NOTIFIED);
-						}
-						Alert alert = new Alert(Alert.AlertType.INFORMATION);
-						alert.setTitle("Notification Received");
-						alert.setHeaderText("You have been notified!");
-						alert.setContentText("Please proceed to the restaurant to be seated in table numer: "
-								+ msg.getData() + ". If you do not arrive within 15 minutes, you may lose your spot.");
-						alert.showAndWait();
-						BistroClientGUI.switchScreen("clientDashboardScreen", "Client Dashboard error message");
-					});
-				});
+		// Notifications
+		router.on("waitinglist", "notified.ok", msg -> {
+			BistroClient.awaitResponse = false;
+			Platform.runLater(() -> {
+				if (waitingListCTRL.getOrderWaitListDTO() != null) {
+					waitingListCTRL.getOrderWaitListDTO().setStatus(OrderStatus.NOTIFIED);
+				}
+				Alert alert = new Alert(Alert.AlertType.INFORMATION);
+				alert.setTitle("Notification Received");
+				alert.setHeaderText("You have been notified!");
+				alert.setContentText("Please proceed to the restaurant to be seated in table numer: " + msg.getData()
+						+ ". If you do not arrive within 15 minutes, you may lose your spot.");
+				alert.showAndWait();
+				BistroClientGUI.switchScreen("clientDashboardScreen", "Client Dashboard error message");
+			});
+		});
 
-				router.on("waitinglist", "notified.failed", msg -> {
-		            BistroClient.awaitResponse = false;
-					Platform.runLater(() -> {
-						Alert alert = new Alert(Alert.AlertType.ERROR);
-						alert.setTitle("Error");
-						alert.setHeaderText("Notification Error");
-						alert.setContentText("Failed to notify the system that you have arrived. Please contact the staff for assistance.");
-						alert.showAndWait();
-					});
-				});
-				
-				router.on("waitinglist", "addWalkIn.ok", msg -> {
-				    BistroClient.awaitResponse = false;
-				    
-				    // Extract the data map sent from the server
-				    @SuppressWarnings("unchecked")
-				    Map<String, Object> responseData = (Map<String, Object>) msg.getData();
-				    
-				    String status = (String) responseData.get("status");
-				    String code = (String) responseData.get("confirmationCode");
+		router.on("waitinglist", "notified.failed", msg -> {
+			BistroClient.awaitResponse = false;
+			Platform.runLater(() -> {
+				Alert alert = new Alert(Alert.AlertType.ERROR);
+				alert.setTitle("Error");
+				alert.setHeaderText("Notification Error");
+				alert.setContentText(
+						"Failed to notify the system that you have arrived. Please contact the staff for assistance.");
+				alert.showAndWait();
+			});
+		});
 
-				    Platform.runLater(() -> {
-				        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-				        alert.setTitle("Walk-In Success");
-				        
-				        StringBuilder content = new StringBuilder();
-				        content.append("Successfully registered!\n");
-				        content.append("Confirmation Code: ").append(code).append("\n");
+		router.on("waitinglist", "addWalkIn.ok", msg -> {
+			BistroClient.awaitResponse = false;
 
-				        if ("SEATED".equals(status)) {
-				            int tableNum = (int) responseData.get("tableNumber");
-				            alert.setHeaderText("Table Assigned Immediately!");
-				            content.append("Please proceed to Table Number: ").append(tableNum);
-				        } else {
-				            long waitTime = ((Number) responseData.get("waitTime")).longValue();
-				            alert.setHeaderText("Added to Waiting List");
-				            content.append("Estimated Wait Time: ").append(waitTime).append(" minutes.");
-				        }
+			// Extract the data map sent from the server
+			@SuppressWarnings("unchecked")
+			Map<String, Object> responseData = (Map<String, Object>) msg.getData();
 
-				        alert.setContentText(content.toString());
-				        alert.show();
-				        
-				        // Refresh the local waiting list view
-				        waitingListCTRL.askWaitingList();
-				    });
-				});
+			String status = (String) responseData.get("status");
+			String code = (String) responseData.get("confirmationCode");
 
-				router.on("waitinglist", "addWalkIn.fail", msg -> {
-				    BistroClient.awaitResponse = false;
-				    // Extract error message if the server sent one
-				    String errorMsg = (msg.getData() instanceof String) ? (String) msg.getData() : "Unknown error occurred.";
-				    
-				    Platform.runLater(() -> {
-				        Alert alert = new Alert(Alert.AlertType.ERROR);
-				        alert.setTitle("Error");
-				        alert.setHeaderText("Failed to add walk-in");
-				        alert.setContentText(errorMsg);
-				        alert.show();
-				    });
-				});
-		        router.on("waitinglist", "checkAvailability.ok", msg -> {
-		            BistroClient.awaitResponse = false;
-		            long estimatedWaitTime = (long) msg.getData();
-		            waitingListCTRL.setEstimatedWaitTimeMinutes(estimatedWaitTime);
-		            });
-		        router.on("waitinglist", "checkAvailability.fail", msg -> {
-		        			            BistroClient.awaitResponse = false;
-		            Platform.runLater(() -> {
-		                Alert alert = new Alert(Alert.AlertType.ERROR);
-		                alert.setTitle("Error");
-		                alert.setContentText("Failed to check availability.");
-		                alert.show();
-		            });
-		            
-		        });
-				router.on("waitinglist", "checkAvailability.skipped", msg -> {
-		            BistroClient.awaitResponse = false;
-		            @SuppressWarnings("unchecked")
-					HashMap<String, Object> data = (HashMap<String, Object>) msg.getData();
-		            Order order = (Order) data.get("order");
-		            int table = (int) data.get("table");
-		            //reset waiting list state
-		            waitingListCTRL.setUserOnWaitingList(false);
-		            waitingListCTRL.setOrderWaitListDTO(null);
-		            waitingListCTRL.setLeaveWaitingListSuccess(false);
-		            waitingListCTRL.setEstimatedWaitTimeMinutes(0);
-		            waitingListCTRL.setCanSeatImmediately(false);
-		            //set table state for seating
-		            tableCTRL.setUserAllocatedOrderForTable(order);
-		            tableCTRL.setUserAllocatedTable(table);
-				});
+			Platform.runLater(() -> {
+				Alert alert = new Alert(Alert.AlertType.INFORMATION);
+				alert.setTitle("Walk-In Success");
+
+				StringBuilder content = new StringBuilder();
+				content.append("Successfully registered!\n");
+				content.append("Confirmation Code: ").append(code).append("\n");
+
+				if ("SEATED".equals(status)) {
+					int tableNum = (int) responseData.get("tableNumber");
+					alert.setHeaderText("Table Assigned Immediately!");
+					content.append("Please proceed to Table Number: ").append(tableNum);
+				} else {
+					long waitTime = ((Number) responseData.get("waitTime")).longValue();
+					alert.setHeaderText("Added to Waiting List");
+					content.append("Estimated Wait Time: ").append(waitTime).append(" minutes.");
+				}
+
+				alert.setContentText(content.toString());
+				alert.show();
+
+				// Refresh the local waiting list view
+				waitingListCTRL.askWaitingList();
+			});
+		});
+
+		router.on("waitinglist", "addWalkIn.fail", msg -> {
+			BistroClient.awaitResponse = false;
+			// Extract error message if the server sent one
+			String errorMsg = (msg.getData() instanceof String) ? (String) msg.getData() : "Unknown error occurred.";
+
+			Platform.runLater(() -> {
+				Alert alert = new Alert(Alert.AlertType.ERROR);
+				alert.setTitle("Error");
+				alert.setHeaderText("Failed to add walk-in");
+				alert.setContentText(errorMsg);
+				alert.show();
+			});
+		});
+			router.on("waitinglist", "checkAvailability.ok", msg -> {
+				BistroClient.awaitResponse = false;
+
+				// Check if the server sent the DTO object or just a number
+				if (msg.getData() instanceof WaitListResponse) {
+					dto.WaitListResponse res = (WaitListResponse) msg.getData();
+
+					// Update the controller using the object's data
+					waitingListCTRL.setEstimatedWaitTimeMinutes(res.getEstimatedWaitTimeMinutes());
+					waitingListCTRL.setCanSeatImmediately(res.isCanSeatImmediately());
+				} else if (msg.getData() instanceof Long) {
+					// Fallback for old simple long messages
+					waitingListCTRL.setEstimatedWaitTimeMinutes((long) msg.getData());
+				}
+			});
+			
+		
+
+		router.on("waitinglist", "checkAvailability.fail", msg -> {
+			BistroClient.awaitResponse = false;
+			Platform.runLater(() -> {
+				Alert alert = new Alert(Alert.AlertType.ERROR);
+				alert.setTitle("Error");
+				alert.setContentText("Failed to check availability.");
+				alert.show();
+			});
+
+		});
+		router.on("waitinglist", "checkAvailability.skipped", msg -> {
+			BistroClient.awaitResponse = false;
+			@SuppressWarnings("unchecked")
+			HashMap<String, Object> data = (HashMap<String, Object>) msg.getData();
+			Order order = (Order) data.get("order");
+			int table = (int) data.get("table");
+			// reset waiting list state
+			waitingListCTRL.setUserOnWaitingList(false);
+			waitingListCTRL.setOrderWaitListDTO(null);
+			waitingListCTRL.setLeaveWaitingListSuccess(false);
+			waitingListCTRL.setEstimatedWaitTimeMinutes(0);
+			waitingListCTRL.setCanSeatImmediately(false);
+			// set table state for seating
+			tableCTRL.setUserAllocatedOrderForTable(order);
+			tableCTRL.setUserAllocatedTable(table);
+		});
 
 	}
 }

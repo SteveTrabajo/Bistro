@@ -33,8 +33,8 @@ public class WaitingListSubject {
 	 */
 	public static void register(Router router, WaitingListService waitingListService, ServerLogger logger) {
 		// 1. Check if user is in waiting list
-		router.on("WaitingList", "isInWaitingList", (msg, client) -> {
-			String confirmationCode = (String) msg.getData();
+		router.on("waitinglist", "isInWaitingList", (msg, client) -> {
+			int confirmationCode = (int) msg.getData();
 			boolean isInWaitingList = waitingListService.isUserInWaitingList(confirmationCode);
 
 			if (isInWaitingList) {
@@ -50,6 +50,7 @@ public class WaitingListSubject {
 		// Client sends: int (dinersAmount)
 		// Server uses: client.getInfo("user") to get contact info
 		router.on("waitingList", "checkAvailability", (msg, client) -> {
+			System.out.println("Received checkAvailability request from client: " + client);
 			// TODO : add option to staff to add users to waitlist
 			// A. Get Data from Message
 			int dinersAmount = (int) msg.getData();
