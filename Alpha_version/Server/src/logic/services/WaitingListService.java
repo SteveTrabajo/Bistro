@@ -2,6 +2,7 @@ package logic.services;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -99,7 +100,7 @@ public class WaitingListService {
         //In case seating is possible, create order and allocate table
         if (canSeat) {
         	String code = createWaitListOrder(dinersAmount, userID, false, 0);
-            int tableNum = tableService.allocateTable(code);
+            int tableNum = tableService.allocateTable(code, LocalDateTime.now());
             Order newOrder = ordersService.getOrderByConfirmationCode(code);
             Map<String,Object> data = new HashMap();
             data.put("order", newOrder);

@@ -1067,8 +1067,10 @@ public class BistroDataBase_Controller {
 						return null; // not exists such order
 					}
 					int orderNumber = rs.getInt("order_number");
-					LocalDate orderDate = rs.getDate("order_date").toLocalDate();
-					LocalTime orderTime = rs.getTime("order_time").toLocalTime();
+					Date d = rs.getDate("order_date");
+					Time t = rs.getTime("order_time");
+					LocalDate orderDate = (d != null) ? d.toLocalDate() : null;
+					LocalTime orderTime = (t != null) ? t.toLocalTime() : null;
 					int dinersAmount = rs.getInt("number_of_guests");
 					int userId = rs.getInt("user_id");
 					OrderType orderType = OrderType.valueOf(rs.getString("order_type"));
@@ -1163,44 +1165,73 @@ public class BistroDataBase_Controller {
 	}
 	
 	/**
-	 * Updates the status of an order in the database based on its confirmation code.
+	 * Updates the status of an order in the database based on the confirmation code.
 	 * 
 	 * @param confirmationCode The confirmation code of the order
 	 * @param status           The new OrderStatus to set
 	 * @return true if the update was successful, false otherwise
 	 */
 	public boolean updateOrderStatusInDB(String confirmationCode, OrderStatus status) {
-		if (confirmationCode == null || confirmationCode.trim().isEmpty()) {
-			return false;
-		}
-		// We use 'user_id' because you stated that for waitlist entries,
-		// the code is stored in the 'user_id' column.
-		final String qry = "UPDATE orders SET status = ? WHERE user_id = ?";
+	    if (confirmationCode == null || confirmationCode.trim().isEmpty()) {
+	        return false;
+	    }
 
-		Connection conn = null;
-		try {
-			conn = borrow();
+	    String sql;
 
-			try (PreparedStatement ps = conn.prepareStatement(qry)) {
-				// Set the new status (e.g., 'COMPLETED', 'CANCELED')
-				ps.setString(1, status.name());
+	    switch (status) {
 
-				// Map the confirmationCode string to the 'user_id' column
-				ps.setString(2, confirmationCode);
+	        case NOTIFIED:
+	            sql = "UPDATE orders " +
+	                  "SET status = 'NOTIFIED', notified_at = NOW() " +
+	                  "WHERE confirmation_code = ? " +
+	                  "AND status = 'PENDING'";
+	            break;
 
-				int rowsAffected = ps.executeUpdate();
+	        case NO_SHOW:
+	            sql = "UPDATE orders " +
+	                  "SET status = 'NO_SHOW', cancelled_at = NOW() " +
+	                  "WHERE confirmation_code = ? " +
+	                  "AND status = 'NOTIFIED'";
+	            break;
 
-				// Returns true if exactly one row was updated
-				return rowsAffected > 0;
-			}
-		} catch (SQLException ex) {
-			logger.log("[ERROR] SQLException in updateOrderStatusInDB: " + ex.getMessage());
-			ex.printStackTrace();
-			return false;
-		} finally {
-			release(conn);
-		}
+	        case SEATED:
+	        case COMPLETED:
+	        case CANCELLED:
+	        case PENDING:
+	            sql = "UPDATE orders " +
+	                  "SET status = ? " +
+	                  "WHERE confirmation_code = ?";
+	            break;
+
+	        default:
+	            logger.log("[WARN] Unsupported OrderStatus: " + status);
+	            return false;
+	    }
+
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	            if (status == OrderStatus.NOTIFIED || status == OrderStatus.NO_SHOW) {
+	                ps.setString(1, confirmationCode);
+	            } else {
+	                ps.setString(1, status.name());
+	                ps.setString(2, confirmationCode);
+	            }
+
+	            return ps.executeUpdate() > 0;
+	        }
+	    } catch (SQLException ex) {
+	        logger.log("[ERROR] SQLException in updateOrderStatusInDB: " + ex.getMessage());
+	        ex.printStackTrace();
+	        return false;
+	    } finally {
+	        release(conn);
+	    }
 	}
+
+
 
 
 	//  ****************************** Waiting List Operations ******************************
@@ -1214,7 +1245,7 @@ public class BistroDataBase_Controller {
 	public boolean isUserInWaitingList(String confirmationCode) {
 		// Check if a WAITLIST order exists with PENDING status for the given confirmation code
 		final String qry = "SELECT 1 " + "FROM orders " + "WHERE confirmation_code = ? "
-				+ "AND order_type = 'WAITLIST' " + "AND status = 'PENDING'";
+				+ "AND order_type = 'WAITLIST' " + "AND status IN ('PENDING','NOTIFIED')";
 		Connection conn = null;
 		try {
 			conn = borrow();
@@ -1243,8 +1274,8 @@ public class BistroDataBase_Controller {
 	 * @return true if the order was successfully cancelled, false otherwise
 	 */
 	public boolean removeFromWaitingList(String confirmationCode) {
-		final String qry = "UPDATE orders " + "SET status = 'CANCELED', canceled_at = ? "
-				+ "WHERE confirmation_code = ? " + "AND order_type = 'WAITLIST' " + "AND status = 'PENDING'";
+		final String qry = "UPDATE orders " + "SET status = 'CANCELLED', cancelled_at = ? "
+				+ "WHERE confirmation_code = ? " + "AND order_type = 'WAITLIST' " + "AND status IN ('PENDING','NOTIFIED')";
 		Connection conn = null;
 		try {
 			conn = borrow();
@@ -1257,7 +1288,7 @@ public class BistroDataBase_Controller {
 				if (rowsAffected > 0) {
 					// The DB Trigger (trg_cleanup_waiting_list) will automatically
 					// remove the entry from the 'waiting_list' table now.
-					logger.log("[SUCCESS] Order " + confirmationCode + " canceled successfully.");
+					logger.log("[SUCCESS] Order " + confirmationCode + " cancelled successfully.");
 					return true;
 				} else {
 					logger.log("[WARN] No pending WAITLIST order found for code: " + confirmationCode);
@@ -1305,22 +1336,62 @@ public class BistroDataBase_Controller {
 	    }
 	}
 	
+	
+	public Order getNextWaitlistThatFitsCapacity(int tableCapacity) {
+	    String sql =
+	        "SELECT o.order_number, o.confirmation_code, o.user_id, o.number_of_guests " +
+	        "FROM orders o " +
+	        "JOIN waiting_list w ON w.confirmation_code = o.confirmation_code " +
+	        "WHERE o.order_type = 'WAITLIST' " +
+	        "AND o.status = 'PENDING' " +
+	        "AND o.number_of_guests <= ? " +
+	        "ORDER BY o.date_of_placing_order ASC " +
+	        "LIMIT 1";
+
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	            ps.setInt(1, tableCapacity);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                if (!rs.next()) return null;
+
+	                Order o = new Order();
+	                o.setOrderNumber(rs.getInt("order_number"));
+	                o.setConfirmationCode(rs.getString("confirmation_code"));
+	                o.setUserId(rs.getInt("user_id"));
+	                o.setDinersAmount(rs.getInt("number_of_guests"));
+	                o.setOrderType(OrderType.WAITLIST);
+	                o.setStatus(OrderStatus.PENDING);
+	                return o;
+	            }
+	        }
+	    } catch (SQLException e) {
+	        logger.log("[ERROR] getNextWaitlistThatFitsCapacity: " + e.getMessage());
+	        return null;
+	    } finally {
+	        release(conn);
+	    }
+	}
+
+
+	
 	/**
 	 * Retrieves the current waiting queue from the database view.
 	 * 
 	 * @return List of Order objects representing the waiting queue
 	 */
 	public List<Order> getWaitingQueueFromView() {
+		
 		List<Order> queue = new ArrayList<>();
 		// Query to fetch orders joined with waiting_list details.
 		// We filter by 'PENDING' to show only active waiters.
 		// We order by date_of_placing_order ASC so the first person who arrived is
 		// first in the list.
 		String query = "SELECT o.order_number, o.confirmation_code, o.number_of_guests, "
-				+ "       o.date_of_placing_order, o.status, o.order_type, " + "       w.quoted_wait_time "
+				+ "       o.date_of_placing_order, o.status, o.order_type, " + "w.quoted_wait_time "
 				+ "FROM orders o " + "JOIN waiting_list w ON o.confirmation_code = w.confirmation_code "
 				+ "WHERE o.status = 'PENDING' " + "ORDER BY o.date_of_placing_order ASC";
-
 		Connection conn = null;
 		try {
 			conn = borrow();
@@ -1328,6 +1399,7 @@ public class BistroDataBase_Controller {
 				while (rs.next()) {
 					Order order = new Order();
 					// Map standard Order fields
+					order.setConfirmationCode(rs.getString("confirmation_code"));
 					order.setOrderNumber(rs.getInt("order_number"));
 					order.setDinersAmount(rs.getInt("number_of_guests"));
 					order.setOrderType(OrderType.valueOf(rs.getString("order_type")));
@@ -1352,6 +1424,32 @@ public class BistroDataBase_Controller {
 
 	// ****************************** Table Operations ******************************
 	
+	/**
+	 * Retrieves the capacity of a table by its table number.
+	 * 
+	 * @param tableNum The table number
+	 * @return The capacity of the table, or -1 if not found or on error
+	 */
+	public int getTableCapacity(int tableNum) {
+	    final String sql = "SELECT capacity FROM tables WHERE tableNum = ?";
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	            ps.setInt(1, tableNum);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                if (!rs.next()) return -1;
+	                return rs.getInt("capacity");
+	            }
+	        }
+	    } catch (SQLException e) {
+	        logger.log("[ERROR] getTableCapacity: " + e.getMessage());
+	        return -1;
+	    } finally {
+	        release(conn);
+	    }
+	}
+
 	/**
 	 * Retrieves all tables from the database.
 	 * 
@@ -1380,39 +1478,44 @@ public class BistroDataBase_Controller {
 		return tablesList;
 	}
 	
-	public HashMap<Table, String> getTableMap() {
-	    HashMap<Table, String> tableSessionsMap = new HashMap<>();
-	    
-	    String qry = "SELECT t.tableNum, t.capacity, o.confirmation_code " +
-	                 "FROM tables t " +
-	                 "LEFT JOIN table_sessions ts ON t.tableNum = ts.tableNum AND ts.left_at IS NULL " +
-	                 "LEFT JOIN orders o ON ts.order_number = o.order_number";
-
-	    Connection conn = null;
-	    try {
-	        conn = borrow();
-	        try (PreparedStatement ps = conn.prepareStatement(qry); ResultSet rs = ps.executeQuery()) {
-	            while (rs.next()) {
-	                Table table = new Table(rs.getInt("tableNum"), rs.getInt("capacity"));
-	                
-	                String confirmationCode = rs.getString("confirmation_code");
-	                
-	                if (confirmationCode == null) {
-	                    confirmationCode = "";
-	                }
-	                
-	                tableSessionsMap.put(table, confirmationCode);
-	            }
-	        }
-	    } catch (SQLException ex) {
-	        ex.printStackTrace();
-	    } finally {
-	        release(conn);
-	    }
-
-	    System.out.println("Controller: Fetched " + tableSessionsMap.size() + " tables (total status).");
-	    return tableSessionsMap;
-	}
+//	/**
+//	 * Retrieves a mapping of all tables to their current session status.
+//	 * 
+//	 * @return HashMap where the key is a Table object and the value is the confirmation code of the active session, or an empty string if no active session exists
+//	 */
+//	public HashMap<Table, String> getTableMap() {
+//	    HashMap<Table, String> tableSessionsMap = new HashMap<>();
+//	    
+//	    String qry = "SELECT t.tableNum, t.capacity, o.confirmation_code " +
+//	                 "FROM tables t " +
+//	                 "LEFT JOIN table_sessions ts ON t.tableNum = ts.tableNum AND ts.left_at IS NULL " +
+//	                 "LEFT JOIN orders o ON ts.order_number = o.order_number";
+//
+//	    Connection conn = null;
+//	    try {
+//	        conn = borrow();
+//	        try (PreparedStatement ps = conn.prepareStatement(qry); ResultSet rs = ps.executeQuery()) {
+//	            while (rs.next()) {
+//	                Table table = new Table(rs.getInt("tableNum"), rs.getInt("capacity"));
+//	                
+//	                String confirmationCode = rs.getString("confirmation_code");
+//	                
+//	                if (confirmationCode == null) {
+//	                    confirmationCode = "";
+//	                }
+//	                
+//	                tableSessionsMap.put(table, confirmationCode);
+//	            }
+//	        }
+//	    } catch (SQLException ex) {
+//	        ex.printStackTrace();
+//	    } finally {
+//	        release(conn);
+//	    }
+//
+//	    System.out.println("Controller: Fetched " + tableSessionsMap.size() + " tables (total status).");
+//	    return tableSessionsMap;
+//	}
 	
 	
 	/**
@@ -1451,6 +1554,34 @@ public class BistroDataBase_Controller {
 			release(conn);
 		}
 	}
+	
+	/**
+	 * Retrieves the active table number associated with a given order number.
+	 * 
+	 * @param orderNumber The order number to search for
+	 * @return The active table number if found, null otherwise
+	 */
+	public Integer getActiveTableNumByOrderNumber(int orderNumber) {
+	    final String sql =
+	        "SELECT tableNum FROM table_sessions WHERE order_number = ? AND left_at IS NULL";
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	            ps.setInt(1, orderNumber);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                if (!rs.next()) return null;
+	                return rs.getInt("tableNum");
+	            }
+	        }
+	    } catch (SQLException e) {
+	        logger.log("[ERROR] getActiveTableNumByOrderNumber: " + e.getMessage());
+	        return null;
+	    } finally {
+	        release(conn);
+	    }
+	}
+
 
 	/**
 	 * Retrieves the earliest expected end time among active table sessions that can
@@ -1492,7 +1623,7 @@ public class BistroDataBase_Controller {
 		return earliestTime;
 	}
 	
-	// TODO double check the functions below for table sessions
+	// TODO Maybe delete
 		/**
 		 * Finds the smallest available table that fits the group size. Checks against
 		 * table_sessions to ensure the table isn't currently occupied.
@@ -1520,28 +1651,37 @@ public class BistroDataBase_Controller {
 		}
 
 		/**
-		 * Creates a new session linking the order to the table.
+		 * Creates a new table session for the given order number and table number.
+		 * 
+		 * @param orderNumber   The order number associated with the table session
+		 * @param tableNum      The table number being assigned
+		 * @param diningMinutes The estimated dining duration in minutes
+		 * @return true if the table session was created successfully, false otherwise
 		 */
-		public boolean createTableSession(int orderNumber, int tableNum) {
-			String query = "INSERT INTO table_sessions (order_number, tableNum, seated_at) VALUES (?, ?, NOW())";
+		public boolean createTableSession(int orderNumber, int tableNum, int diningMinutes) {
+		    String sql =
+		        "INSERT INTO table_sessions (order_number, tableNum, seated_at, expected_end_at) " +
+		        "VALUES (?, ?, NOW(), DATE_ADD(NOW(), INTERVAL ? MINUTE))";
 
-			try (Connection conn = borrow(); PreparedStatement ps = conn.prepareStatement(query)) {
-
-				ps.setInt(1, orderNumber);
-				ps.setInt(2, tableNum);
-
-				int rows = ps.executeUpdate();
-				return rows > 0;
-			} catch (SQLException e) {
-				logger.log("[DB ERROR] Failed to create table session: " + e.getMessage());
-				return false;
-			}
+		    try (Connection conn = borrow(); PreparedStatement ps = conn.prepareStatement(sql)) {
+		        ps.setInt(1, orderNumber);
+		        ps.setInt(2, tableNum);
+		        ps.setInt(3, diningMinutes);
+		        return ps.executeUpdate() > 0;
+		    } catch (SQLException e) {
+		        logger.log("[DB ERROR] Failed to create table session: " + e.getMessage());
+		        return false;
+		    }
 		}
 
+
 		/**
-		 * Closes the active session for a specific order.
+		 * Closes the table session for the given order number by setting the left_at
+		 * timestamp and end_reason.
+		 * 
+		 * @param orderNumber The order number associated with the table session
 		 */
-		public void closeSessionForOrder(int orderNumber) {
+		public void closeTableSessionForOrder(int orderNumber) {
 			String query = "UPDATE table_sessions " + "SET left_at = NOW(), end_reason = 'PAID' "
 					+ "WHERE order_number = ? AND left_at IS NULL";
 
