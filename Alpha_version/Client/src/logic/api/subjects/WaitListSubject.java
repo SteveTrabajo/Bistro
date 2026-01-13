@@ -44,28 +44,10 @@ public class WaitListSubject {
 				router.on("waitinglist", "join.fail", msg -> {
 		            BistroClient.awaitResponse = false;
 				});
-
-				router.on("waitinglist", "join.skipped", msg -> {
-		            BistroClient.awaitResponse = false;
-		            @SuppressWarnings("unchecked")
-					HashMap<String, Object> data = (HashMap<String, Object>) msg.getData();
-		            Order order = (Order) data.get("order");
-		            int table = (int) data.get("table");
-		            //reset waiting list state
-		            waitingListCTRL.setUserOnWaitingList(false);
-		            waitingListCTRL.setOrderWaitListDTO(null);
-		            waitingListCTRL.setLeaveWaitingListSuccess(false);
-		            waitingListCTRL.setEstimatedWaitTimeMinutes(0);
-		            waitingListCTRL.setCanSeatImmediately(false);
-		            //set table state for seating
-		            tableCTRL.setUserAllocatedOrderForTable(order);
-		            tableCTRL.setUserAllocatedTable(table);
-				});
-
 				//Client/Staff: Leave Status
 				router.on("waitinglist", "leave.ok", msg -> {
-		            BistroClient.awaitResponse = false;
-		            waitingListCTRL.setOrderWaitListDTO(null);
+					BistroClient.awaitResponse = false;
+					waitingListCTRL.setOrderWaitListDTO(null);
 					waitingListCTRL.setLeaveWaitingListSuccess(true);
 					waitingListCTRL.setUserOnWaitingList(false);
 				});
@@ -187,5 +169,22 @@ public class WaitListSubject {
 		            });
 		            
 		        });
+				router.on("waitinglist", "checkAvailability.skipped", msg -> {
+		            BistroClient.awaitResponse = false;
+		            @SuppressWarnings("unchecked")
+					HashMap<String, Object> data = (HashMap<String, Object>) msg.getData();
+		            Order order = (Order) data.get("order");
+		            int table = (int) data.get("table");
+		            //reset waiting list state
+		            waitingListCTRL.setUserOnWaitingList(false);
+		            waitingListCTRL.setOrderWaitListDTO(null);
+		            waitingListCTRL.setLeaveWaitingListSuccess(false);
+		            waitingListCTRL.setEstimatedWaitTimeMinutes(0);
+		            waitingListCTRL.setCanSeatImmediately(false);
+		            //set table state for seating
+		            tableCTRL.setUserAllocatedOrderForTable(order);
+		            tableCTRL.setUserAllocatedTable(table);
+				});
+
 	}
 }
