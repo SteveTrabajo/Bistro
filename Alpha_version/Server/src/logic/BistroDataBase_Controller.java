@@ -868,46 +868,48 @@ public class BistroDataBase_Controller {
 	 * @return true if order creation is successful, false otherwise
 	 */
 	public boolean setNewOrder(List<Object> orderData, OrderType type, OrderStatus status) {
-		final String sql = "INSERT INTO orders "
-				+ "(user_id, order_date, number_of_guests, order_time, confirmation_code, "
-				+ "order_type, status, date_of_placing_order, notified_at, canceled_at) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-		Connection conn = null;
-		try {
-			conn = borrow();
-			try (PreparedStatement ps = conn.prepareStatement(sql)) {
-				// [0] User ID
-				ps.setInt(1, (int) orderData.get(0));
-				if (type == OrderType.WAITLIST) {
-	                ps.setNull(2, Types.DATE);
-	                ps.setNull(4, Types.TIME);
-	            } else {
-	                ps.setDate(2, Date.valueOf((LocalDate) orderData.get(1)));
-	                ps.setTime(4, Time.valueOf((LocalTime) orderData.get(3)));
-	            }
-				// [2] Diners Amount
-				ps.setInt(3, (int) orderData.get(2));
-				
-				// [4] Confirmation Code
-				ps.setString(5, (String) orderData.get(4));
-				ps.setString(6, type.name());
-				ps.setString(7, status.name());
-				ps.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
-				ps.setNull(9, Types.TIMESTAMP); // notified_at
-				ps.setNull(10, Types.TIMESTAMP); // canceled_at
-				ps.executeUpdate();
-			}
-		} catch (SQLException ex) {
-			logger.log("[ERROR] SQLException in createGenericOrder: " + ex.getMessage());
-			ex.printStackTrace();
-			return false;
-		} finally {
-			if (conn != null) {
-				release(conn);
-			}
-		}
-		return true;
+	    final String sql = "INSERT INTO orders " +
+	            "(user_id, order_date, number_of_guests, order_time, confirmation_code, " +
+	            "order_type, status, date_of_placing_order, notified_at, cancelled_at) " +
+	            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	            int userId = (int) orderData.get(0);
+	            LocalDate date = (LocalDate) orderData.get(1);
+	            int diners = (int) orderData.get(2);
+	            LocalTime time = (LocalTime) orderData.get(3);
+	            String code = (String) orderData.get(4);
+
+	            ps.setInt(1, userId);
+
+	            
+	            ps.setDate(2, Date.valueOf(date != null ? date : LocalDate.now()));
+	            ps.setInt(3, diners);
+	            ps.setTime(4, Time.valueOf(time != null ? time : LocalTime.now()));
+
+	            ps.setString(5, code);
+	            ps.setString(6, type.name());
+	            ps.setString(7, status.name());
+	            ps.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
+	            ps.setNull(9, Types.TIMESTAMP);   // notified_at
+	            ps.setNull(10, Types.TIMESTAMP);  // cancelled_at
+
+	            ps.executeUpdate();
+	            return true;
+	        }
+	    } catch (SQLException ex) {
+	        logger.log("[ERROR] SQLException in setNewOrder: " + ex.getMessage());
+	        ex.printStackTrace();
+	        return false;
+	    } finally {
+	        release(conn);
+	    }
 	}
+
 	
 	/**
 	 * Retrieves a list of orders for a specific date.
@@ -1176,7 +1178,6 @@ public class BistroDataBase_Controller {
 	    if (confirmationCode == null || confirmationCode.trim().isEmpty() || status == null) {
 	        return false;
 	    }
-
 	    String sql;
 	    switch (status) {
 	        case NOTIFIED:
@@ -1186,7 +1187,7 @@ public class BistroDataBase_Controller {
 
 	        case NO_SHOW:
 	            sql = "UPDATE orders SET status='NO_SHOW', cancelled_at=NOW() " +
-	                  "WHERE confirmation_code=? AND status='NOTIFIED'";
+	                  "WHERE confirmation_code=? AND status IN ('PENDING','NOTIFIED')";
 	            break;
 
 	        case SEATED:
@@ -1209,7 +1210,6 @@ public class BistroDataBase_Controller {
 	            logger.log("[WARN] Unsupported OrderStatus: " + status);
 	            return false;
 	    }
-
 	    Connection conn = null;
 	    try {
 	        conn = borrow();
@@ -1226,14 +1226,21 @@ public class BistroDataBase_Controller {
 
 	            if (ok) {
 	                switch (status) {
-	                    case NOTIFIED:   updateWaitingListStatus(confirmationCode, "NOTIFIED"); break;
-	                    case NO_SHOW:    updateWaitingListStatus(confirmationCode, "EXPIRED");  break;
-	                    case SEATED:     updateWaitingListStatus(confirmationCode, "SEATED");   break;
-	                    case CANCELLED:  updateWaitingListStatus(confirmationCode, "CANCELLED");break;
+	                    case NOTIFIED:
+	                    	updateWaitingListStatus(confirmationCode, "NOTIFIED"); 
+	                    	break;
+	                    case NO_SHOW:    
+	                    	updateWaitingListStatus(confirmationCode, "EXPIRED");  
+	                    	break;
+	                    case SEATED:     
+	                    	updateWaitingListStatus(confirmationCode, "SEATED");   
+	                    	break;
+	                    case CANCELLED:  
+	                    	updateWaitingListStatus(confirmationCode, "CANCELLED");
+	                    	break;
 	                    default: break;
 	                }
 	            }
-
 	            return ok;
 	        }
 	    } catch (SQLException ex) {
@@ -1437,6 +1444,41 @@ public class BistroDataBase_Controller {
 	        release(conn);
 	    }
 	}
+	
+	public boolean markWaitlistAsNotified(int orderNumber, LocalDateTime notifiedAt) {
+	    final String sql =
+	        "UPDATE orders " +
+	        "SET status='NOTIFIED', notified_at=? " +
+	        "WHERE order_number=? AND order_type='WAITLIST' AND status='PENDING'";
+
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	            ps.setTimestamp(1, Timestamp.valueOf(notifiedAt));
+	            ps.setInt(2, orderNumber);
+	            int rows = ps.executeUpdate();
+	            if (rows == 1) {
+	                try (PreparedStatement ps2 = conn.prepareStatement(
+	                        "UPDATE waiting_list w " +
+	                        "JOIN orders o ON o.confirmation_code=w.confirmation_code " +
+	                        "SET w.wl_status='NOTIFIED' " +
+	                        "WHERE o.order_number=?")) {
+	                    ps2.setInt(1, orderNumber);
+	                    ps2.executeUpdate();
+	                }
+	                return true;
+	            }
+	            return false;
+	        }
+	    } catch (SQLException e) {
+	        logger.log("[ERROR] markWaitlistAsNotified: " + e.getMessage());
+	        return false;
+	    } finally {
+	        release(conn);
+	    }
+	}
+
 
 
 
@@ -1545,47 +1587,7 @@ public class BistroDataBase_Controller {
 		System.out.println("Controller: Fetched " + tablesList.size() + " tables from DB.");
 		return tablesList;
 	}
-	
-//	/**
-//	 * Retrieves a mapping of all tables to their current session status.
-//	 * 
-//	 * @return HashMap where the key is a Table object and the value is the confirmation code of the active session, or an empty string if no active session exists
-//	 */
-//	public HashMap<Table, String> getTableMap() {
-//	    HashMap<Table, String> tableSessionsMap = new HashMap<>();
-//	    
-//	    String qry = "SELECT t.tableNum, t.capacity, o.confirmation_code " +
-//	                 "FROM tables t " +
-//	                 "LEFT JOIN table_sessions ts ON t.tableNum = ts.tableNum AND ts.left_at IS NULL " +
-//	                 "LEFT JOIN orders o ON ts.order_number = o.order_number";
-//
-//	    Connection conn = null;
-//	    try {
-//	        conn = borrow();
-//	        try (PreparedStatement ps = conn.prepareStatement(qry); ResultSet rs = ps.executeQuery()) {
-//	            while (rs.next()) {
-//	                Table table = new Table(rs.getInt("tableNum"), rs.getInt("capacity"));
-//	                
-//	                String confirmationCode = rs.getString("confirmation_code");
-//	                
-//	                if (confirmationCode == null) {
-//	                    confirmationCode = "";
-//	                }
-//	                
-//	                tableSessionsMap.put(table, confirmationCode);
-//	            }
-//	        }
-//	    } catch (SQLException ex) {
-//	        ex.printStackTrace();
-//	    } finally {
-//	        release(conn);
-//	    }
-//
-//	    System.out.println("Controller: Fetched " + tableSessionsMap.size() + " tables (total status).");
-//	    return tableSessionsMap;
-//	}
-	
-	
+		
 	/**
 	 * Retrieves the table number associated with a given confirmation code.
 	 * 
@@ -1749,24 +1751,26 @@ public class BistroDataBase_Controller {
 		 * 
 		 * @param orderNumber The order number associated with the table session
 		 */
-		public void closeTableSessionForOrder(int orderNumber,EndTableSessionType endType) {
-			String query = "UPDATE table_sessions " + "SET left_at = NOW(), end_reason = ? "
-					+ "WHERE order_number = ? AND left_at = ? ";
+		public void closeTableSessionForOrder(int orderNumber, EndTableSessionType endType) {
+		    String sql = "UPDATE table_sessions " +
+		                 "SET left_at = NOW(), end_reason = ? " +
+		                 "WHERE order_number = ? AND left_at IS NULL";
 
-			try (Connection conn = borrow(); PreparedStatement ps = conn.prepareStatement(query)) {
-				ps.setString(1, endType.name());
-				ps.setInt(2, orderNumber);
-				if (endType == EndTableSessionType.PAID) {
-					ps.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
-				} else {
-					ps.setTimestamp(3, null);
-				}
-				ps.executeUpdate();
-
-			} catch (SQLException e) {
-				logger.log("[DB ERROR] Failed to close session: " + e.getMessage());
-			}
+		    Connection conn = null;
+		    try {
+		        conn = borrow();
+		        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+		            ps.setString(1, endType.name());
+		            ps.setInt(2, orderNumber);
+		            ps.executeUpdate();
+		        }
+		    } catch (SQLException e) {
+		        logger.log("[DB ERROR] Failed to close session: " + e.getMessage());
+		    } finally {
+		        release(conn);
+		    }
 		}
+
 
 	// ******************** Restaurant Management Operations ******************
 	
@@ -1967,11 +1971,121 @@ public class BistroDataBase_Controller {
 	}
 	
 	//*************************************** Notification Operations ********************************
-	// TODO complete the function
-	public List<Order> getOrdersBetweenTimes(LocalDateTime startWindow, LocalDateTime endWindow, OrderStatus seated) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Order> getReservationsBetweenTimes(LocalDateTime startWindow, LocalDateTime endWindow, OrderStatus status) {
+	    final String sql =
+	        "SELECT order_number, user_id, order_date, order_time, number_of_guests, confirmation_code, status, order_type " +
+	        "FROM orders " +
+	        "WHERE order_type = 'RESERVATION' " +
+	        "  AND status = ? " +
+	        "  AND notified_at IS NULL " +
+	        "  AND TIMESTAMP(order_date, order_time) BETWEEN ? AND ?";
+
+	    List<Order> list = new ArrayList<>();
+	    Connection conn = null;
+
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	            ps.setString(1, status.name());
+	            ps.setTimestamp(2, Timestamp.valueOf(startWindow));
+	            ps.setTimestamp(3, Timestamp.valueOf(endWindow));
+
+	            try (ResultSet rs = ps.executeQuery()) {
+	                while (rs.next()) {
+	                    Order o = new Order();
+	                    o.setOrderNumber(rs.getInt("order_number"));
+	                    o.setUserId(rs.getInt("user_id"));
+	                    Date d = rs.getDate("order_date");
+	                    Time t = rs.getTime("order_time");
+	                    if (d != null) o.setOrderDate(d.toLocalDate());
+	                    if (t != null) o.setOrderHour(t.toLocalTime());
+	                    o.setDinersAmount(rs.getInt("number_of_guests"));
+	                    o.setConfirmationCode(rs.getString("confirmation_code"));
+	                    o.setStatus(OrderStatus.valueOf(rs.getString("status")));
+	                    o.setOrderType(OrderType.valueOf(rs.getString("order_type")));
+	                    list.add(o);
+	                }
+	            }
+	        }
+	    } catch (SQLException e) {
+	        logger.log("[ERROR] getReservationsBetweenTimes: " + e.getMessage());
+	        e.printStackTrace();
+	        return null;
+	    } finally {
+	        release(conn);
+	    }
+	    return list;
 	}
+	
+	public boolean markReservationReminderSent(int orderNumber, LocalDateTime sentAt) {
+	    final String sql =
+	        "UPDATE orders " +
+	        "SET notified_at = ? " +
+	        "WHERE order_number = ? " +
+	        "  AND order_type = 'RESERVATION' " +
+	        "  AND notified_at IS NULL";
+
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	            ps.setTimestamp(1, Timestamp.valueOf(sentAt));
+	            ps.setInt(2, orderNumber);
+	            return ps.executeUpdate() == 1;
+	        }
+	    } catch (SQLException e) {
+	        logger.log("[ERROR] markReservationReminderSent: " + e.getMessage());
+	        e.printStackTrace();
+	        return false;
+	    } finally {
+	        release(conn);
+	    }
+	}
+	
+	public List<Order> getSeatedOrdersBetweenTimes(LocalDateTime startWindow, LocalDateTime endWindow) {
+	    final String sql =
+	        "SELECT order_number, user_id, order_date, order_time, number_of_guests, confirmation_code, status, order_type " +
+	        "FROM orders " +
+	        "WHERE status = 'SEATED' " +
+	        "  AND TIMESTAMP(order_date, order_time) BETWEEN ? AND ?";
+
+	    List<Order> list = new ArrayList<>();
+	    Connection conn = null;
+
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	            ps.setTimestamp(1, Timestamp.valueOf(startWindow));
+	            ps.setTimestamp(2, Timestamp.valueOf(endWindow));
+
+	            try (ResultSet rs = ps.executeQuery()) {
+	                while (rs.next()) {
+	                    Order o = new Order();
+	                    o.setOrderNumber(rs.getInt("order_number"));
+	                    o.setUserId(rs.getInt("user_id"));
+	                    Date d = rs.getDate("order_date");
+	                    Time t = rs.getTime("order_time");
+	                    if (d != null) o.setOrderDate(d.toLocalDate());
+	                    if (t != null) o.setOrderHour(t.toLocalTime());
+	                    o.setDinersAmount(rs.getInt("number_of_guests"));
+	                    o.setConfirmationCode(rs.getString("confirmation_code"));
+	                    o.setStatus(OrderStatus.valueOf(rs.getString("status")));
+	                    o.setOrderType(OrderType.valueOf(rs.getString("order_type")));
+	                    list.add(o);
+	                }
+	            }
+	        }
+	    } catch (SQLException e) {
+	        logger.log("[ERROR] getSeatedOrdersBetweenTimes: " + e.getMessage());
+	        e.printStackTrace();
+	        return null;
+	    } finally {
+	        release(conn);
+	    }
+	    return list;
+	}
+
+
 		
 	//*************************************** Reports ********************************
 		

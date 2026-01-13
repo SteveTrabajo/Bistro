@@ -132,6 +132,6 @@ public class PaymentService {
 	            logger.log("[WARN] Payment completed but no active table session found for order " + orderNumber);
 	            return false;
 	        }	       
-	        return tableService.afterTableFreed(tableNum); //when table is freed, try to seat WAITLIST/RESERVATION order if possible
+	        return tableService.tableFreed(tableNum); //when table is freed, try to seat WAITLIST/RESERVATION order if possible
 	    }
 }

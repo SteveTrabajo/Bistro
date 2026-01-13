@@ -87,61 +87,65 @@ public class TableService {
 	            logger.log("[WARN] Payment completed but no active table session found for order " + orderNumber);
 	            return false;
 	        }	       
-	        return afterTableFreed(tableNum); //when table is freed, try to seat WAITLIST/RESERVATION order if possible
+	        return tableFreed(tableNum); //when table is freed, try to seat WAITLIST/RESERVATION order if possible
 	    }
 
 	    /**
 	     * Handles logic when a table is freed.
 	     * @param tableNum The table number that was freed.
 	     */
-	    public boolean afterTableFreed(int tableNum) {
+	    public boolean tableFreed(int tableNum) {
 	    	 int capacity = dbController.getTableCapacity(tableNum);
 	    	    if (capacity <= 0) {
 	    	        logger.log("[ERROR] Invalid capacity for table " + tableNum);
 	    	        return false;
 	    	    }
 
-	    	    // הבא בתור שמתאים לקיבולת (PENDING waitlist)
+	    	    //find next waitlist that fits the table capacity
 	    	    Order next = dbController.getNextFromWaitingQueueThatFits(capacity);
 
 	    	    if (next == null) {
 	    	        logger.log("[INFO] Table " + tableNum + " freed. No waitlist fits capacity=" + capacity);
-	    	        return true; // שולחן התפנה בהצלחה, פשוט אין מי להודיע
+	    	        return true; //no waitlist fits the table capacity
 	    	    }
 
-	    	    // עדיפות להזמנות עתידיות (Reservation Guard)
+	    	    //if cannot notify now due to reservation constraints, skip notifying for now
 	    	    if (!canNotifyWaitlistNow(next.getDinersAmount())) {
 	    	        logger.log("[INFO] Cannot notify waitlist " + next.getConfirmationCode()
 	    	                + " now due to reservation constraints.");
-	    	        return true; // השולחן פנוי, פשוט לא מודיעים כרגע
+	    	        return true; //skip notifying for now 
 	    	    }
 
-	    	    // ✅ קריטי: מעדכנים גם NOTIFIED וגם notified_at (כדי ש-NoShowManager יעבוד)
+	    	    //set waitlist as NOTIFIED in DB with current timestamp
 	    	    boolean marked = dbController.markWaitlistAsNotified(next.getOrderNumber(), LocalDateTime.now());
 	    	    if (!marked) {
 	    	        logger.log("[ERROR] Failed to mark waitlist as NOTIFIED for " + next.getConfirmationCode());
 	    	        return false;
 	    	    }
 
-	    	    // למשוך הזמנה מחדש אחרי העדכון
+	    	    //refresh order data
 	    	    Order refreshed = dbController.getOrderByConfirmationCodeInDB(next.getConfirmationCode());
 
-	    	    // שליחה (Email+SMS) דרך NotificationService של החבר
+	    	    //notify waitlist user via NotificationService
 	    	    notificationService.notifyWaitlistUser(refreshed);
 
-	    	    logger.log("[INFO] NOTIFIED waitlist " + refreshed.getConfirmationCode()
-	    	            + " for table " + tableNum + ", capacity=" + capacity);
+	    	    logger.log("[INFO] NOTIFIED waitlist " + refreshed.getConfirmationCode() + " for table " + tableNum + ", capacity=" + capacity);
 
-	    	    // ❌ לא עושים schedule פה — NoShowManager של החבר יטפל ב-15 דקות
 	    	    return true;
 	    	}
 	    
+	    
+	    /**
+	     * Checks if a waitlist user can be notified now without conflicting with existing reservations.
+	     * @param dinersAmount The number of diners in the waitlist order.
+	     * @return true if the waitlist user can be notified now, false otherwise.
+	     */
 	    private boolean canNotifyWaitlistNow(int dinersAmount) {
 	        LocalTime now = LocalTime.now();
 	        int duration = orderService.getReservationDurationMinutes();
 	        LocalTime end = now.plusMinutes(duration);
 
-	        // מביא הזמנות פעילות + הזמנות עתידיות שעלולות להתנגש
+	        //get active and upcoming reservations that may conflict
 	        List<Order> conflicts = dbController.getActiveAndUpcomingOrders(LocalDate.now(), now, end);
 
 	        List<Integer> load = new ArrayList<>();

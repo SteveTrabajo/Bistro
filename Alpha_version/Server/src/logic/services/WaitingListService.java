@@ -25,17 +25,15 @@ public class WaitingListService {
 	private final OrdersService ordersService;
 	private final TableService tableService;
 	private final UserService userService;
-	private final NotificationService notificationService;
 	
 	public WaitingListService(BistroServer server,BistroDataBase_Controller dbController,ServerLogger logger,
-			OrdersService ordersService,TableService tableService, NotificationService notificationService, UserService userService) {
+			OrdersService ordersService,TableService tableService, UserService userService) {
 		this.dbController = dbController;
 		this.logger = logger;
 		this.server = server;
 		this.ordersService = ordersService;
 		this.tableService = tableService;
 		this.userService = userService;
-		this.notificationService = notificationService;
 	}
 
 	/**
