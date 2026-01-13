@@ -1598,7 +1598,7 @@ public class BistroDataBase_Controller {
 	    }
 	    System.out.println("Controller: Fetched " + tablesList.size() + " tables from DB.");
 	    return tablesList;
-	}
+	} 
 
 		
 	/**
