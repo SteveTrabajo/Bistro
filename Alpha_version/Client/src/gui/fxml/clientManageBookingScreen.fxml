@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.lang.String?>
+<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.DatePicker?>
@@ -11,12 +12,10 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
-<StackPane styleClass="reservation-root" stylesheets="@../../gui/css/clientNewReservationStyles.css, @../../gui/css/staff/ReservationsPanelStyles.css" 
-           xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" 
-           fx:controller="gui.logic.ClientManageBookingScreen">
+<StackPane styleClass="reservation-root" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.ClientManageBookingScreen">
 
     <children>
         <BorderPane prefHeight="720" prefWidth="1280">
@@ -39,8 +38,8 @@
                     </left>
                     <center>
                         <VBox alignment="CENTER" spacing="4">
-                            <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;" text="My Reservations" />
-                            <Label style="-fx-text-fill: rgba(255,255,255,0.8);" text="View and manage your upcoming bookings" />
+                            <Label styleClass="page-hero-title" text="My Reservations" />
+                            <Label styleClass="wl-subtitle" text="View and manage your upcoming bookings" />
                         </VBox>
                     </center>
                     <right>
@@ -50,7 +49,7 @@
             </top>
 
             <center>
-                <VBox spacing="14" style="-fx-background-color: white; -fx-background-radius: 12;" maxWidth="1000">
+                <VBox maxWidth="1000" spacing="14" style="-fx-background-color: white; -fx-background-radius: 12;">
                     <padding>
                         <Insets bottom="18" left="18" right="18" top="18" />
                     </padding>
@@ -59,18 +58,19 @@
                     </BorderPane.margin>
 
                     <HBox alignment="CENTER_LEFT" spacing="12">
-                        <Label text="Show from:" style="-fx-font-weight: bold; -fx-text-fill: #333;" />
+                        <Label style="-fx-font-weight: bold; -fx-text-fill: #333;" text="Show from:" />
                         <DatePicker fx:id="dateFilter" prefWidth="160.0" promptText="Select Date" />
                         <Button fx:id="btnRefresh" onAction="#btnRefresh" text="Refresh List">
                              <styleClass>
-                                <String fx:value="btn-secondary" /> 
+                                <String fx:value="wl-btn" /> 
                              </styleClass>
                         </Button>
                         
                         <HBox HBox.hgrow="ALWAYS" /> <Button fx:id="btnNewReservation" onAction="#btnNewReservation" text="+ New Reservation">
-                            <styleClass>
-                                <String fx:value="btn-primary" />
-                            </styleClass>
+                     <styleClass>
+                        <String fx:value="btn-primary" />
+                        <String fx:value="btn-primary" />
+                     </styleClass>
                         </Button>
                     </HBox>
 
@@ -89,8 +89,8 @@
                     </TableView>
                     
                     <HBox alignment="CENTER_RIGHT" spacing="12">
-                        <Label text="Select a row to perform actions" style="-fx-text-fill: #666; -fx-font-style: italic;" />
-                        <Button fx:id="btnCancelRes" onAction="#btnCancelRes" style="-fx-background-color: #fee2e2; -fx-text-fill: #ef4444;" text="Cancel Selected Reservation" />
+                        <Label style="-fx-text-fill: #666; -fx-font-style: italic;" text="Select a row to perform actions" />
+                        <Button fx:id="btnCancelRes" onAction="#btnCancelRes" styleClass="wl-btn-remove" text="Cancel Selected Reservation" />
                     </HBox>
                 </VBox>
             </center>
@@ -112,4 +112,9 @@
 
         </BorderPane>
     </children>
+   <stylesheets>
+      <URL value="@../css/clientNewReservationStyles.css" />
+      <URL value="@../css/staff/ReservationsPanelStyles.css" />
+      <URL value="@../css/staff/WaitingListPanelStyles.css" />
+   </stylesheets>
 </StackPane>

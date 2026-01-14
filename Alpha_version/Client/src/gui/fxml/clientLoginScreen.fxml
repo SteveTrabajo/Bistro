@@ -18,7 +18,7 @@
    <children>
       <StackPane fx:id="mainPane" styleClass="loginD-root" stylesheets="@../../gui/css/clientLoginStyles.css">
       	<children>
-      		<ImageView fitHeight="827.0" fitWidth="1280.0" opacity="0.08" styleClass="loginD-backgroundImage">
+      		<ImageView  fx:id="bgImage" fitHeight="827.0" fitWidth="1280.0" opacity="0.08" styleClass="loginD-backgroundImage">
       			<image>
       				<Image url="@../../resources/images/image1.jpg" />
       			</image>
