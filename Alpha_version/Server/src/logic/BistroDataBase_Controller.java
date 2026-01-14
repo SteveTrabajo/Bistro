@@ -883,11 +883,21 @@ public class BistroDataBase_Controller {
 
 	            ps.setInt(1, userId);
 
-	            
-	            ps.setDate(2, Date.valueOf(date != null ? date : LocalDate.now()));
-	            ps.setInt(3, diners);
-	            ps.setTime(4, Time.valueOf(time != null ? time : LocalTime.now()));
 
+	            // ✅ MUST match chk_order_slot_rules
+	            if (type == OrderType.WAITLIST) {
+	                ps.setNull(2, Types.DATE);
+	                ps.setNull(4, Types.TIME);
+	            } else { // RESERVATION
+	                if (date == null || time == null) {
+	                    logger.log("[ERROR] RESERVATION requires non-null order_date and order_time");
+	                    return false;
+	                }
+	                ps.setDate(2, Date.valueOf(date));
+	                ps.setTime(4, Time.valueOf(time));
+	            }
+
+	            ps.setInt(3, diners);
 	            ps.setString(5, code);
 	            ps.setString(6, type.name());
 	            ps.setString(7, status.name());
@@ -2424,15 +2434,15 @@ public class BistroDataBase_Controller {
 	/**
 	 * Updates the status of an order.
 	 */
-	public boolean updateOrderStatus(int orderNumber, OrderStatus newStatus) {
-		String qry = "UPDATE orders SET status = ? WHERE order_number = ?";
+	public boolean updateOrderStatus(String confirmationCode, OrderStatus newStatus) {
+		String qry = "UPDATE orders SET status = ? WHERE confirmation_code = ?";
 		Connection conn = null;
 
 		try {
 			conn = borrow();
 			try (PreparedStatement ps = conn.prepareStatement(qry)) {
 				ps.setString(1, newStatus.name());
-				ps.setInt(2, orderNumber);
+				ps.setString(2, confirmationCode);
 				int rowsAffected = ps.executeUpdate();
 				return rowsAffected > 0;
 			}

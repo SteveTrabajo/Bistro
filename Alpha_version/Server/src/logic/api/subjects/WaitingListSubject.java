@@ -119,41 +119,41 @@ public class WaitingListSubject {
 				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_LEAVE_FAIL, null));
 			}
 		});
-		router.on("waitingList", "getAll", (msg, client) -> {
-			client.sendToClient(new Message(Api.REPLY_GET_WAITING_LIST_OK, waitingListService.getCurrentQueue()));
-			if (waitingListService.getCurrentQueue() != null) {
-				logger.log("[INFO] Sent current waiting list to client: " + client);
-			} else {
-				logger.log("[ERROR] Failed to retrieve waiting list for client: " + client);
-				client.sendToClient(new Message(Api.REPLY_GET_WAITING_LIST_FAIL, null));
-			}
-		});
-		router.on("waitingList", "addWalkIn", (msg, client) -> {
-		    try {
-		        @SuppressWarnings("unchecked")
-		        Map<String, Object> data = (Map<String, Object>) msg.getData();
-		        
-		        int dinersAmount = ((Number) data.get("diners")).intValue();
-		        String type = (String) data.get("type");
-		        
-		        Object response = null;
-		        if ("MEMBER".equals(type)) {
-		            response = waitingListService.handleMemberWalkIn(dinersAmount, (String) data.get("memberId"));
-		        } else if ("GUEST".equals(type)) {
-		            response = waitingListService.handleGuestWalkIn(dinersAmount, (String) data.get("phone"), (String) data.get("email"));
-		        }
-
-		        if (response != null) {
-		            // Could be Order or WaitListResponse
-		            client.sendToClient(new Message(Api.REPLY_WAITING_LIST_ADD_WALKIN_OK, response));
-		        } else {
-		            client.sendToClient(new Message(Api.REPLY_WAITING_LIST_ADD_WALKIN_FAIL, "User registration failed"));
-		        }
-		    } catch (Exception e) {
-		        logger.log("[ERROR] addWalkIn critical failure: " + e.getMessage());
-		        client.sendToClient(new Message(Api.REPLY_WAITING_LIST_ADD_WALKIN_FAIL, "Internal Server Error"));
-		    }
-		});
+//		router.on("waitingList", "getAll", (msg, client) -> {
+//			client.sendToClient(new Message(Api.REPLY_GET_WAITING_LIST_OK, waitingListService.getCurrentQueue()));
+//			if (waitingListService.getCurrentQueue() != null) {
+//				logger.log("[INFO] Sent current waiting list to client: " + client);
+//			} else {
+//				logger.log("[ERROR] Failed to retrieve waiting list for client: " + client);
+//				client.sendToClient(new Message(Api.REPLY_GET_WAITING_LIST_FAIL, null));
+//			}
+//		});
+//		router.on("waitingList", "addWalkIn", (msg, client) -> {
+//		    try {
+//		        @SuppressWarnings("unchecked")
+//		        Map<String, Object> data = (Map<String, Object>) msg.getData();
+//		        
+//		        int dinersAmount = ((Number) data.get("diners")).intValue();
+//		        String type = (String) data.get("type");
+//		        
+//		        Object response = null;
+//		        if ("MEMBER".equals(type)) {
+//		            response = waitingListService.handleMemberWalkIn(dinersAmount, (String) data.get("memberId"));
+//		        } else if ("GUEST".equals(type)) {
+//		            response = waitingListService.handleGuestWalkIn(dinersAmount, (String) data.get("phone"), (String) data.get("email"));
+//		        }
+//
+//		        if (response != null) {
+//		            // Could be Order or WaitListResponse
+//		            client.sendToClient(new Message(Api.REPLY_WAITING_LIST_ADD_WALKIN_OK, response));
+//		        } else {
+//		            client.sendToClient(new Message(Api.REPLY_WAITING_LIST_ADD_WALKIN_FAIL, "User registration failed"));
+//		        }
+//		    } catch (Exception e) {
+//		        logger.log("[ERROR] addWalkIn critical failure: " + e.getMessage());
+//		        client.sendToClient(new Message(Api.REPLY_WAITING_LIST_ADD_WALKIN_FAIL, "Internal Server Error"));
+//		    }
+//		});
 	}
 }
 // End of WaitingListSubject class

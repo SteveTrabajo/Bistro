@@ -11,6 +11,7 @@ import java.util.Map;
 
 import dto.WaitListResponse;
 import entities.Order;
+import entities.Table;
 import entities.User;
 import enums.OrderStatus;
 import enums.OrderType;
@@ -46,9 +47,9 @@ public class WaitingListService {
         // Prepare data for new order
     	List<Object> data = new ArrayList<>();
         data.add(userID);
-        data.add(LocalDate.now());
+        data.add(null);
         data.add(dinersAmount);
-        data.add(LocalTime.now());
+        data.add(null);
         String confirmationCode = ordersService.generateConfirmationCode("W");
         data.add(confirmationCode);
         //create the order in the DB
@@ -58,6 +59,8 @@ public class WaitingListService {
 			if (addToWaitlist) {
 				// The trigger inserted NULL for time, so we must update it manually
 				dbController.enqueueWaitingList(confirmationCode, calculatedWaitTime);
+			}else {
+				dbController.updateOrderStatus(confirmationCode, OrderStatus.NOTIFIED);
 			}
 			return confirmationCode; // Successfully created
 		}
@@ -67,51 +70,75 @@ public class WaitingListService {
 
     /**
      * Checks availability and Attempts to Seat Immediately.
+     * @param dinersAmount Number of diners in the group.
+     * @param userID ID of the user making the request.
      * @return Order object (if seated) OR WaitListResponse object (if full).
      */
     public Object checkAvailabilityAndSeat(int dinersAmount, int userID) {
-        //Data Preparation
+
+        LocalDate today = LocalDate.now();
         LocalTime now = LocalTime.now();
         int duration = ordersService.getReservationDurationMinutes();
-        LocalTime walkInEndTime = now.plusMinutes(duration);
-        //Retrieve active and upcoming orders that may conflict
-        List<Order> ordersConflicts = dbController.getActiveAndUpcomingOrders(LocalDate.now(), now, walkInEndTime);
-        List<Integer> currentLoad = new ArrayList<>();
-        
-        //loop through orders to calculate current load that could conflict:
-        for (Order o : ordersConflicts) {
-            if (o.getStatus() == OrderStatus.SEATED) { //in case of seated orders, they always count
-                currentLoad.add(o.getDinersAmount());
-            }
-            // For reservations that pending, check for time overlap
-            else if (o.getOrderType() == OrderType.RESERVATION && o.getStatus() == OrderStatus.PENDING) {
-                LocalTime resStartTime = o.getOrderHour();
-                LocalTime resEndTime = resStartTime.plusMinutes(duration);
-                if (ordersService.overlaps(now, walkInEndTime, resStartTime, resEndTime)) {
-                    currentLoad.add(o.getDinersAmount());
-                }
-            }
+        LocalTime walkInEnd = now.plusMinutes(duration);
+
+        int freeTable = dbController.findFreeTableForGroup(dinersAmount);
+        if (freeTable == -1 ) {
+            long wait = calculateEstimatedWaitTime(dinersAmount);
+            return new WaitListResponse(true, wait,"No table available. Estimated wait: " + wait + " minutes.");
         }
-        currentLoad.add(dinersAmount); // Include the new walk-in group
-        // Check if seating is possible with current load and table sizes
-        boolean canSeat = ordersService.canAssignAllDinersToTables(currentLoad, ordersService.getTableSizes());
         
-        //In case seating is possible, create order and allocate table
-        if (canSeat) {
-        	String code = createWaitListOrder(dinersAmount, userID, false, 0);
-            int tableNum = tableService.allocateTable(code, LocalDateTime.now());
-            Order newOrder = ordersService.getOrderByConfirmationCode(code);
-            Map<String,Object> data = new HashMap();
-            data.put("order", newOrder);
-            data.put("table", tableNum);
-            return data;
+        boolean safe = canSeatWalkInWithoutHurtingReservations(today, now, walkInEnd, dinersAmount);
+
+        if (!safe) {
+            long wait = calculateEstimatedWaitTime(dinersAmount);
+            return new WaitListResponse(true, wait,
+                    "Seating now may affect reservations. Estimated wait: " + wait + " minutes.");
         }
-        //In case seating is NOT possible, calculate estimated wait time and return WaitListResponse to get client approval
-        long waitTime = calculateEstimatedWaitTime(dinersAmount);
-        String msg = "No table available. Estimated wait: " + waitTime + " min.";
-        return new WaitListResponse(false, waitTime, msg);
+
+        String code = createWaitListOrder(dinersAmount, userID, false, 0);
+        int tableNum = tableService.allocateTable(code, LocalDateTime.now());
+
+        Order order = ordersService.getOrderByConfirmationCode(code);
+
+        Map<String, Object> res = new HashMap<>();
+        res.put("order", order);
+        res.put("table", tableNum);
+        return res;
     }
-    
+
+	private boolean canSeatWalkInWithoutHurtingReservations(LocalDate date, LocalTime now, LocalTime walkInEnd,
+			int dinersAmount) {
+
+		List<Order> conflicts = dbController.getActiveAndUpcomingOrders(date, now, walkInEnd);
+
+		List<Integer> load = new ArrayList<>();
+
+		for (Order o : conflicts) {
+			if (o.getStatus() == OrderStatus.SEATED) {
+				load.add(o.getDinersAmount());
+			} else if (o.getOrderType() == OrderType.RESERVATION && o.getStatus() == OrderStatus.PENDING) {
+
+				LocalTime start = o.getOrderHour();
+				LocalTime end = start.plusMinutes(ordersService.getReservationDurationMinutes());
+
+				if (ordersService.overlaps(now, walkInEnd, start, end)) {
+					load.add(o.getDinersAmount());
+				}
+			}
+		}
+
+		load.add(dinersAmount);
+
+		List<Integer> freeTableSizes = new ArrayList<>();
+		for (Table t : tableService.getAllTables()) {
+			if (!t.isOccupiedNow()) {
+				freeTableSizes.add(t.getCapacity());
+			}
+		}
+
+		return ordersService.canAssignAllDinersToTables(load, freeTableSizes);
+	}
+
     /**
      * Calculates the estimated wait time for a walk-in group based on the earliest
      * @param dinersAmount The number of diners in the walk-in group.
@@ -149,86 +176,86 @@ public class WaitingListService {
         return dbController.isUserInWaitingList(confirmationCode);
     }
     
-   /**
-	* Logic for Members using the existing getUserInfo logic in UserService
-	* @param dinersAmount Number of diners in the group.
-	* @param memberIdStr Member ID string.
-	* @return Result object containing seating or waitlist information.
-	*/
-   public Object handleMemberWalkIn(int dinersAmount, String memberIdStr) {
-       Map<String, Object> loginData = new HashMap<>();
-       loginData.put("userType", "MEMBER");
-       loginData.put("memberCode", memberIdStr);
-
-       User user = userService.getUserInfo(loginData);
-       if (user == null) return null;
-
-       return processSeatingOrWaiting(dinersAmount, user.getUserId());
-   }
-
-   /**
-    * Logic for Guests using the existing getUserInfo logic in UserService
-    * @param dinersAmount
-    * @param phone
-    * @param email
-    * @return
-    */
-   public Object handleGuestWalkIn(int dinersAmount, String phone, String email) {
-       Map<String, Object> loginData = new HashMap<>();
-       loginData.put("userType", "GUEST");
-       loginData.put("phoneNumber", phone);
-       loginData.put("email", email);
-
-       User user = userService.getUserInfo(loginData);
-       if (user == null) return null;
-
-       return processSeatingOrWaiting(dinersAmount, user.getUserId());
-   }
-
-   /**
-    * Core algorithm logic
-    */
-   /**
-    * Shared logic for seating or waitlist registration.
-    * Returns a Map with the results.
-    */
-   private Object processSeatingOrWaiting(int dinersAmount, int userID) {
-       Object availability = checkAvailabilityAndSeat(dinersAmount, userID);
-       Map<String, Object> resultMap = new HashMap<>();
-
-       if (availability instanceof Map) {
-           // --- SCENARIO A: IMMEDIATE SEATING ---
-           @SuppressWarnings("unchecked")
-           Map<String, Object> successMap = (Map<String, Object>) availability;
-           Order order = (Order) successMap.get("order");
-           int tableNum = (int) successMap.get("table");
-
-           resultMap.put("status", "SEATED");
-           resultMap.put("userID", userID);
-           resultMap.put("confirmationCode", order.getConfirmationCode());
-           resultMap.put("tableNumber", tableNum);
-           return resultMap;
-       } 
-       else if (availability instanceof WaitListResponse) {
-           // --- SCENARIO B: ADDED TO WAITLIST ---
-           WaitListResponse res = (WaitListResponse) availability;
-           String code = createWaitListOrder(dinersAmount, userID, true, (int) res.getEstimatedWaitTimeMinutes());
-           
-           if (code != null) {
-               resultMap.put("status", "WAITING");
-               resultMap.put("userID", userID);
-               resultMap.put("confirmationCode", code);
-               resultMap.put("waitTime", res.getEstimatedWaitTimeMinutes());
-               resultMap.put("message", res.getMessage());
-               return resultMap;
-           }
-       }
-       return null; // Registration failed
-   }
-   
-    public List<Order> getCurrentQueue() {
-        // We return a list of Order entities that are currently in the waitlist
-        return dbController.getWaitingQueueFromView();
-    }
+//   /**
+//	* Logic for Members using the existing getUserInfo logic in UserService
+//	* @param dinersAmount Number of diners in the group.
+//	* @param memberIdStr Member ID string.
+//	* @return Result object containing seating or waitlist information.
+//	*/
+//   public Object handleMemberWalkIn(int dinersAmount, String memberIdStr) {
+//       Map<String, Object> loginData = new HashMap<>();
+//       loginData.put("userType", "MEMBER");
+//       loginData.put("memberCode", memberIdStr);
+//
+//       User user = userService.getUserInfo(loginData);
+//       if (user == null) return null;
+//
+//       return processSeatingOrWaiting(dinersAmount, user.getUserId());
+//   }
+//
+//   /**
+//    * Logic for Guests using the existing getUserInfo logic in UserService
+//    * @param dinersAmount
+//    * @param phone
+//    * @param email
+//    * @return
+//    */
+//   public Object handleGuestWalkIn(int dinersAmount, String phone, String email) {
+//       Map<String, Object> loginData = new HashMap<>();
+//       loginData.put("userType", "GUEST");
+//       loginData.put("phoneNumber", phone);
+//       loginData.put("email", email);
+//
+//       User user = userService.getUserInfo(loginData);
+//       if (user == null) return null;
+//
+//       return processSeatingOrWaiting(dinersAmount, user.getUserId());
+//   }
+//
+//   /**
+//    * Core algorithm logic
+//    */
+//   /**
+//    * Shared logic for seating or waitlist registration.
+//    * Returns a Map with the results.
+//    */
+//   private Object processSeatingOrWaiting(int dinersAmount, int userID) {
+//       Object availability = checkAvailabilityAndSeat(dinersAmount, userID);
+//       Map<String, Object> resultMap = new HashMap<>();
+//
+//       if (availability instanceof Map) {
+//           // --- SCENARIO A: IMMEDIATE SEATING ---
+//           @SuppressWarnings("unchecked")
+//           Map<String, Object> successMap = (Map<String, Object>) availability;
+//           Order order = (Order) successMap.get("order");
+//           int tableNum = (int) successMap.get("table");
+//
+//           resultMap.put("status", "SEATED");
+//           resultMap.put("userID", userID);
+//           resultMap.put("confirmationCode", order.getConfirmationCode());
+//           resultMap.put("tableNumber", tableNum);
+//           return resultMap;
+//       } 
+//       else if (availability instanceof WaitListResponse) {
+//           // --- SCENARIO B: ADDED TO WAITLIST ---
+//           WaitListResponse res = (WaitListResponse) availability;
+//           String code = createWaitListOrder(dinersAmount, userID, true, (int) res.getEstimatedWaitTimeMinutes());
+//           
+//           if (code != null) {
+//               resultMap.put("status", "WAITING");
+//               resultMap.put("userID", userID);
+//               resultMap.put("confirmationCode", code);
+//               resultMap.put("waitTime", res.getEstimatedWaitTimeMinutes());
+//               resultMap.put("message", res.getMessage());
+//               return resultMap;
+//           }
+//       }
+//       return null; // Registration failed
+//   }
+//   
+//    public List<Order> getCurrentQueue() {
+//        // We return a list of Order entities that are currently in the waitlist
+//        return dbController.getWaitingQueueFromView();
+//    }
 
 }

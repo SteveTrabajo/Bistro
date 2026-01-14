@@ -1,6 +1,7 @@
 package gui.logic;
 
 
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -114,26 +115,24 @@ public class ClientJoinWaitingListScreen {
 	 * @param dinersAmount The number of diners.
 	 */
 	public void showAskJoinWaitlistDialog(long estimatedMinutes, int dinersAmount) {
-		//TODO: add css styling
+
 	    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
 	    alert.setTitle("Waiting List Confirmation");
 	    alert.setHeaderText(null);
-	    alert.setContentText("Estimated wait time is " + estimatedMinutes + " minutes. Do you want to join the waiting list?");
+	    alert.setContentText(
+	        "Estimated wait time is " + estimatedMinutes + " minutes.\n" +
+	        "Do you want to join the waiting list?"
+	    );
 
-	    ButtonType joinButton = new ButtonType("Sure add me! ", ButtonData.OK_DONE);
-	    ButtonType cancelButton = new ButtonType("No never mind :(", ButtonData.CANCEL_CLOSE);
+	    ButtonType joinButton = new ButtonType("Join Waiting List");
+	    ButtonType cancelButton = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
 	    alert.getButtonTypes().setAll(joinButton, cancelButton);
 	    Optional<ButtonType> result = alert.showAndWait();
 	    if (result.isPresent() && result.get() == joinButton) {
-	        System.out.println("User agreed to join the waiting list.");
-	        Map<String, Object> details = new HashMap<>();
-	        details.put("dinersAmount", dinersAmount);
-	        details.put("estimatedWaitTimeMinutes", estimatedMinutes);
-	        BistroClientGUI.client.getWaitingListCTRL().joinWaitingList(details);
-	    } else {
-	        System.out.println("User declined to join the waiting list.");
+	    	BistroClientGUI.client.getWaitingListCTRL().joinWaitingList(dinersAmount, estimatedMinutes);
 	    }
 	}
+
 
 	/**
 	 * Handles the action when the "Back" button is clicked.

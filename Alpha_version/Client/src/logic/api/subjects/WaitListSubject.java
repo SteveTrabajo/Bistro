@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import dto.WaitListResponse;
 import entities.Order;
 import entities.Table;
 import enums.OrderStatus;
@@ -174,8 +175,8 @@ public class WaitListSubject {
 				});
 		        router.on("waitinglist", "checkAvailability.ok", msg -> {
 		            BistroClient.awaitResponse = false;
-		            long estimatedWaitTime = (long) msg.getData();
-		            waitingListCTRL.setEstimatedWaitTimeMinutes(estimatedWaitTime);
+		            WaitListResponse dto = (WaitListResponse) msg.getData();
+		            waitingListCTRL.setEstimatedWaitTimeMinutes(dto.getEstimatedWaitTimeMinutes());
 		            });
 		        router.on("waitinglist", "checkAvailability.fail", msg -> {
 		        			            BistroClient.awaitResponse = false;
