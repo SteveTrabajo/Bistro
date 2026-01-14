@@ -93,18 +93,21 @@ public class ServerWaitingListSubject {
 
 			@SuppressWarnings("unchecked")
 			Map<String, Object> data = (Map<String, Object>) msg.getData();
-			int dinersAmount = (int) data.get("diners");
-			int waitTime = (int) data.get("waitTime");
-
+			int dinersAmount = (int)data.get("diners");
+			Integer waitTime = (Integer)data.get("waitTime");
+			System.out.println("Join waitlist requested: diners=" + dinersAmount + ", waitTime=" + waitTime);
 			User currentUser = (User) client.getInfo("user");
 
 			// Create the waitlist order
 			String code = waitingListService.createWaitListOrder(dinersAmount, currentUser.getUserId(), true, waitTime);
-
 			if (code != null) {
-				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_JOIN_OK, code));
-				logger.log("[INFO] Added to waitlist. Code: " + code);
+				Order waitListOrder= waitingListService.getWaitingListOrderByCode(code);
+				if (waitListOrder != null) {
+					logger.log("[INFO] Added to waitlist. Code: " + code);
+					client.sendToClient(new Message(Api.REPLY_WAITING_LIST_JOIN_OK, waitListOrder));
+				}
 			} else {
+				logger.log("[ERROR] Failed to join waiting list for client: " + client);
 				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_JOIN_FAIL, null));
 			}
 		});

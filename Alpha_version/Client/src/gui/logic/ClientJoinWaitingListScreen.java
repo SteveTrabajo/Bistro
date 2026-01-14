@@ -123,13 +123,16 @@ public class ClientJoinWaitingListScreen {
 	        "Estimated wait time is " + estimatedMinutes + " minutes.\n" +
 	        "Do you want to join the waiting list?"
 	    );
-
+	    //convert long to int via string:
+	    String estimatedMinutesStr = Long.toString(estimatedMinutes);
+	    Integer estimatedMinutesInt = Integer.valueOf(estimatedMinutesStr);
+	    System.out.println("Estimated wait time (int): " + estimatedMinutesInt);
 	    ButtonType joinButton = new ButtonType("Join Waiting List");
 	    ButtonType cancelButton = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
 	    alert.getButtonTypes().setAll(joinButton, cancelButton);
 	    Optional<ButtonType> result = alert.showAndWait();
 	    if (result.isPresent() && result.get() == joinButton) {
-	    	BistroClientGUI.client.getWaitingListCTRL().joinWaitingList(dinersAmount, estimatedMinutes);
+	    	BistroClientGUI.client.getWaitingListCTRL().joinWaitingList(dinersAmount, estimatedMinutesInt);
 	    }
 	}
 
