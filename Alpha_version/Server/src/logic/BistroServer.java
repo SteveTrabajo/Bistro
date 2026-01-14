@@ -8,9 +8,9 @@ import comms.Message;
 import entities.MonthlyReport;
 import entities.Order;
 import gui.controllers.ServerConsoleController;
-import logic.api.Router;
-import logic.api.subjects.ConnectionSubject;
-import logic.api.subjects.OrdersSubject;
+import logic.api.ServerRouter;
+import logic.api.subjects.ServerConnectionSubject;
+import logic.api.subjects.ServerOrdersSubject;
 import ocsf.server.AbstractServer;
 import ocsf.server.ConnectionToClient;
 import logic.api.subjects.*;
@@ -27,8 +27,8 @@ public class BistroServer extends AbstractServer {
 	private static BistroServer serverInstance;
 	// Database controller
 	private final BistroDataBase_Controller dbController;
-	// Router for API message handling
-	private final Router router;
+	// ServerRouter for API message handling
+	private final ServerRouter router;
 	// Server logger for logging events
 	private final ServerLogger logger;
 	//Services to handle the server algorithms:
@@ -54,7 +54,7 @@ public class BistroServer extends AbstractServer {
 	private BistroServer(int port, ServerConsoleController serverConsoleController) {
 		super(port);
 		this.dbController = BistroDataBase_Controller.getInstance();
-		this.router = new Router();
+		this.router = new ServerRouter();
 		this.logger = new ServerLogger(serverConsoleController);
 		this.dbController.setLogger(this.logger);
 		// Initialize services:
@@ -178,20 +178,20 @@ public class BistroServer extends AbstractServer {
 	/**
 	 * Registers API subjects and their handlers with the router.
 	 * 
-	 * @param router       The Router instance to register handlers with.
+	 * @param router       The ServerRouter instance to register handlers with.
 	 * 
 	 * @param dbController The database controller for handling data operations.
 	 * 
 	 * @param logger       The server logger for logging events.
 	 */
-	private void registerHandlers(Router router, BistroDataBase_Controller dbController, ServerLogger logger) {
+	private void registerHandlers(ServerRouter router, BistroDataBase_Controller dbController, ServerLogger logger) {
 		// Register API subjects
-		ConnectionSubject.register(router, logger);
-		UserSubject.register(router,userService, logger);
-		OrdersSubject.register(router, ordersService, tableService, logger);
-		WaitingListSubject.register(router, waitingListService, logger);
-		TablesSubject.register(router, tableService, logger);
-		ReportsSubject.register(router, reportService, logger);
+		ServerConnectionSubject.register(router, logger);
+		ServerUserSubject.register(router,userService, logger);
+		ServerOrdersSubject.register(router, ordersService, tableService, logger);
+		ServerWaitingListSubject.register(router, waitingListService, logger);
+		ServerTablesSubject.register(router, tableService, logger);
+		ServerReportsSubject.register(router, reportService, logger);
 	}
 	
 	// ******************************** Getters for Services ********************************
