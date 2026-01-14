@@ -1,6 +1,9 @@
 package dto;
 
-public class WaitListResponse {
+import java.io.Serializable;
+
+public class WaitListResponse implements Serializable {
+	 private static final long serialVersionUID = 1L;
 	private boolean canSeatImmediately;
 	private long estimatedWaitTimeMinutes;
 	private String message;
