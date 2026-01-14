@@ -1291,29 +1291,26 @@ public class BistroDataBase_Controller {
 	 * @param confirmationCode The confirmation code to check
 	 * @return true if the user is in the waiting list, false otherwise
 	 */
-	public boolean isUserInWaitingList(String confirmationCode) {
-		// Check if a WAITLIST order exists with PENDING status for the given confirmation code
-		final String qry = "SELECT 1 " + "FROM orders " + "WHERE confirmation_code = ? "
-				+ "AND order_type = 'WAITLIST' " + "AND status IN ('PENDING','NOTIFIED')";
-		Connection conn = null;
-		try {
-			conn = borrow();
-
-			try (PreparedStatement ps = conn.prepareStatement(qry)) {
-				ps.setString(1, confirmationCode);
-
-				try (ResultSet rs = ps.executeQuery()) {
-					// If rs.next() is true, the order exists
-					return rs.next();
-				}
-			}
-		} catch (SQLException ex) {
-			logger.log("[ERROR] SQLException in isUserInWaitingList: " + ex.getMessage());
-			ex.printStackTrace();
-			return false;
-		} finally {
-			release(conn);
-		}
+	public boolean isUserInWaitingList(int userID) {
+		String qry = "SELECT 1 FROM orders "
+				+ "WHERE user_id = ? "
+				+ "AND order_type = 'WAITLIST' "
+				+ "AND status IN ('PENDING','NOTIFIED')";
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(qry)) {
+	            ps.setInt(1, userID);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                return rs.next(); // returns true if at least one matching order exists
+	            }
+	        }
+	    } catch (SQLException e) {
+	        logger.log("[ERROR] isUserInWaitingList: " + e.getMessage());
+	        return false;
+	    } finally {
+	        release(conn);
+	    }
 	}
 	
 	/**
@@ -2639,4 +2636,43 @@ public class BistroDataBase_Controller {
             release(conn);
         }
     }
+
+	public Order getSeatedOrderForUser(int userId) {
+		String qry = "SELECT order_number, user_id, order_date, order_time, number_of_guests, " +
+					 "confirmation_code, order_type, status, date_of_placing_order " +
+					 "FROM orders WHERE user_id = ? AND status = 'SEATED'";
+		Connection conn = null;
+		Order order = null;
+		try {
+			conn = borrow();
+			try (PreparedStatement ps = conn.prepareStatement(qry)) {
+				ps.setInt(1, userId);
+
+				try (ResultSet rs = ps.executeQuery()) {
+					if (rs.next()) {
+						int orderNumber = rs.getInt("order_number");
+						Date sqlDate = rs.getDate("order_date");
+						LocalDate orderDate = (sqlDate != null) ? sqlDate.toLocalDate() : null;
+						Time sqlTime = rs.getTime("order_time");
+						LocalTime orderTime = (sqlTime != null) ? sqlTime.toLocalTime() : null;
+						int dinersAmount = rs.getInt("number_of_guests");
+						String confirmCode = rs.getString("confirmation_code");
+						OrderType type = OrderType.valueOf(rs.getString("order_type"));
+						OrderStatus orderStatus = OrderStatus.valueOf(rs.getString("status"));
+						Timestamp placingTs = rs.getTimestamp("date_of_placing_order");
+						LocalDateTime dateOfPlacing = placingTs != null ? placingTs.toLocalDateTime() : null;
+
+						order = new Order(orderNumber, orderDate, orderTime, dinersAmount, 
+												confirmCode, userId, type, orderStatus, dateOfPlacing);
+					}
+				}
+			}
+		} catch (SQLException ex) {
+			logger.log("[ERROR] SQLException in getSeatedOrderForUser: " + ex.getMessage());
+			ex.printStackTrace();
+		} finally {
+			release(conn);
+		}
+		return order;
+	}
 }

@@ -40,6 +40,16 @@ public class WaitingListController {
 	}
 
 	// ******************************** Getters And Setters ***********************************
+	public boolean clearWaitingListController() {
+		this.orderWaitListDTO = null;
+		this.canSeatImmediately = false;
+		this.userOnWaitingList = false;
+		this.leaveWaitingListSuccess = false;
+		this.estimatedWaitTimeMinutes = 0;
+		this.waitingList.clear();
+		return true;
+	}
+	
 	public Order getOrderWaitListDTO() {
 		return orderWaitListDTO;
 	}

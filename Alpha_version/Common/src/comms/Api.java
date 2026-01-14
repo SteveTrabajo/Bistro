@@ -126,9 +126,11 @@ public final class Api {
 	public static final String ASK_ALL_TABLES = "tables.getAll";
 	public static final String ASK_ADD_TABLE = "tables.add";
 	public static final String ASK_REMOVE_TABLE = "tables.remove";
+	public static final String ASK_USER_ALLOCATED_TABLE = "tables.getUserAllocatedTable";
+	public static final String ASK_SEATED_ORDER = "tables.askSeatedOrder";
+	
 	public static final String ASK_LOAD_CUSTOMERS_DATA = "customers.getalldata";
 	public static final String ASK_MONTHLY_REPORT_DATA = "monthlyReports.getData";
-	public static final String ASK_USER_ALLOCATED_TABLE = "tables.getUserAllocatedTable";
 	
 	public static final String ASK_SAVE_WEEKLY_HOURS = "hours.saveWeeklyHours";
 	public static final String ASK_ADD_HOLIDAY = "hours.addHoliday";
@@ -144,10 +146,14 @@ public final class Api {
 	public static final String REPLY_ADD_TABLE_FAIL = "tables.add.fail";
 	public static final String REPLY_REMOVE_TABLE_OK = "tables.remove.ok";
 	public static final String REPLY_REMOVE_TABLE_FAIL = "tables.remove.fail";
-	public static final String REPLY_LOAD_CUSTOMERS_DATA_OK = "customers.getalldata.ok";
-	public static final String REPLY_LOAD_CUSTOMERS_DATA_FAIL = "customers.getalldata.fail";
 	public static final String REPLY_USER_ALLOCATED_TABLE_OK = "tables.getUserAllocatedTable.ok";
 	public static final String REPLY_USER_ALLOCATED_TABLE_FAIL = "tables.getUserAllocatedTable.fail";
+	public static final String REPLY_SEATED_ORDER_OK = "tables.askSeatedOrder.ok";
+	public static final String REPLY_SEATED_ORDER_FAIL = "tables.askSeatedOrder.fail";
+	
+	public static final String REPLY_LOAD_CUSTOMERS_DATA_OK = "customers.getalldata.ok";
+	public static final String REPLY_LOAD_CUSTOMERS_DATA_FAIL = "customers.getalldata.fail";
+	
 	public static final String REPLY_MONTHLY_REPORT_DATA_OK = "monthlyReports.getData.ok";
 	public static final String REPLY_MONTHLY_REPORT_DATA_FAIL = "monthlyReports.getData.fail";
 	
@@ -163,9 +169,9 @@ public final class Api {
 // == WaitList subject == //
 
 	// Requests
-	public static final String ASK_WAITING_LIST_CHECK_AVAILABILITY = "waitingList.checkAvailability";
-	public static final String ASK_WAITING_LIST_JOIN = "waitingList.join";
-	public static final String ASK_WAITING_LIST_LEAVE = "waitingList.leave";
+	public static final String ASK_WAITING_LIST_CHECK_AVAILABILITY = "waitinglist.checkAvailability";
+	public static final String ASK_WAITING_LIST_JOIN = "waitinglist.join";
+	public static final String ASK_WAITING_LIST_LEAVE = "waitinglist.leave";
 	public static final String ASK_IS_IN_WAITLIST = "waitinglist.isInWaitingList";
 	public static final String ASK_GET_WAITING_LIST = "waitinglist.getAll";
 	public static final String ASK_WAITING_LIST_ADD_WALKIN = "waitinglist.addWalkIn";

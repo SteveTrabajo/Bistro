@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane stylesheets="@../../css/staff/TableOverviewPanelStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.staff.TableOverviewPanel">
+<BorderPane fx:id="panelPane" stylesheets="@../../css/staff/TableOverviewPanelStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.staff.TableOverviewPanel">
 
 	<center>
 		<VBox spacing="16" BorderPane.alignment="CENTER">

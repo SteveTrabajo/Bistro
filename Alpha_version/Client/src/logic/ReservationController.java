@@ -26,8 +26,6 @@ public class ReservationController {
 	private Order orderDTO;
 	private List<String> availableTimeSlots;
 	
-	
-	
 	private Consumer<List<String>> uiUpdateCallback;
 	
 	private Consumer<Order> orderLoadedCallback;
@@ -47,6 +45,13 @@ public class ReservationController {
 	}
 	
 	//******************************** Getters, Setters and Listeners ***********************************//
+	
+	public boolean clearReservationController() {
+		this.orderDTO = null;
+		this.availableTimeSlots.clear();
+		return true;
+	}
+	
 	
 	public Order getOrderDTO() {
 		return orderDTO;
@@ -101,6 +106,7 @@ public class ReservationController {
 	}
 		
 	//******************************** Instance Methods ***********************************//
+	
 	
 	/**
 	 * Asks the server for available hours based on date and party size.

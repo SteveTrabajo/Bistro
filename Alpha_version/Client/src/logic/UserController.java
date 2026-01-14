@@ -48,7 +48,18 @@ public class UserController {
 	}
 
 	// ******************************** Getters And Setters ***********************************
-
+	
+	public boolean clearUserController() {
+		this.registrationSuccessFlag = false;
+		this.userUpdateSuccessFlag = false;
+		this.newMemberID = 0;
+		this.customersData.clear();
+		this.memberRegistrationStats = null;
+		this.staffCreationSuccessFlag = false;
+		this.staffCreationErrorMessage = null;
+		return true;
+	}
+	
 	/*
 	 * Getter for the currently logged-in user.
 	 * 

@@ -1,14 +1,19 @@
 package gui.logic;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+
 import entities.User;
 import enums.UserType;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import logic.BistroClientGUI;
@@ -30,6 +35,9 @@ public class ClientDashboardScreen {
 
 	@FXML
 	private VBox becomeMemberVbox;
+	
+	@FXML
+	private GridPane gridPane;
 
 	@FXML
 	private Button btnNewReservation;
@@ -64,6 +72,9 @@ public class ClientDashboardScreen {
 	@FXML
 	private Label LblButtonDescrip;
 	
+	@FXML 
+	private StackPane rootPane;
+	
 	
 	// ******************************** FXML Methods ***********************************
 
@@ -71,36 +82,39 @@ public class ClientDashboardScreen {
 	 * Method to initialize the Client Dashboard screen based on the logged-in user
 	 * type.
 	 */
+
 	@FXML
 	public void initialize() {
 	    User loggedInUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
 	    int userID = loggedInUser.getUserId();
-	    
+	    TaskRunner.run (rootPane,()->{
 	    // Fetch all necessary states at once
-	    BistroClientGUI.client.getWaitingListCTRL().askUserOnWaitingList(userID);
-	    boolean isOnWaitingList = BistroClientGUI.client.getWaitingListCTRL().isUserOnWaitingList();
-	    boolean hasActiveReservation = BistroClientGUI.client.getReservationCTRL().hasActiveReservation();
+	    	BistroClientGUI.client.getWaitingListCTRL().askUserOnWaitingList(userID);
+	    	BistroClientGUI.client.getTableCTRL().askUserAllocatedSeatedOrder(userID);
+	    },()->{
+	    	boolean isOnWaitingList = BistroClientGUI.client.getWaitingListCTRL().isUserOnWaitingList();
+	    	boolean hasActiveSeatedReservation = BistroClientGUI.client.getTableCTRL().getUserAllocatedOrderForTable() != null;
+	    	// Set user-type specific layout
+	    	if (BistroClientGUI.client.getUserCTRL().getLoggedInUserType() == UserType.MEMBER) {
+	    		SetDashboardAsMember(loggedInUser);
+	    	} else {
+	    		SetDashboardAsGuest();
+	    	}
 	    
-	    // Set user-type specific layout
-	    if (BistroClientGUI.client.getUserCTRL().getLoggedInUserType() == UserType.MEMBER) {
-	        SetDashboardAsMember(loggedInUser);
-	    } else {
-	        SetDashboardAsGuest();
-	    }
-	    
-	    //Centralized UI State Management
-	    applyBusinessRules(isOnWaitingList, hasActiveReservation);
+	    	//Centralized UI State Management
+	    	applyBusinessRules(isOnWaitingList, hasActiveSeatedReservation);
+	    	});
 	}
 
 	/**
 	 * Centralizes the logic for button states and labels to avoid code duplication.
 	 */
-	private void applyBusinessRules(boolean isOnWaitingList, boolean hasActiveReservation) {
+	private void applyBusinessRules(boolean isOnWaitingList, boolean hasActiveSeatedReservation) {
 	    // Handle Waiting List button text
 	    LblButtonDescrip.setText(isOnWaitingList ? "Waiting List Status" : "Add to queue");
 
 	    // Disable actions if an active reservation exists
-	    if (hasActiveReservation) {
+	    if (hasActiveSeatedReservation) {
 	        btnJoinWaitingList.setDisable(true);
 	        btnCheckInForTable.setDisable(true);
 	        display(lblError, "Active reservation detected. Some options are disabled.", Color.ORANGE);
@@ -128,24 +142,25 @@ public class ClientDashboardScreen {
 	 */
 	@FXML
 	public void SetDashboardAsGuest() {
-		lblWelcome.setText("Welcome, Guest!");
-		lblClient.setText("How can we serve you today?");
-		//Disable member-only features for guest users
-		//disable personal details editing and hide member info
-		btnEditPersonalDetails.setVisible(false);
-		btnEditPersonalDetails.setManaged(false);
-		loyalpointVbox.setVisible(false);
-		loyalpointVbox.setManaged(false);
-		discountVbox.setVisible(false);
-		discountVbox.setManaged(false);
-		statusVbox.setVisible(false);
-		statusVbox.setManaged(false);
-		becomeMemberVbox.setVisible(true);
-		becomeMemberVbox.setManaged(true);
-		
-		btnManageBooking.setVisible(false);
-		btnManageBooking.setManaged(false);
+	    lblWelcome.setText("Welcome, Guest!");
+	    lblClient.setText("How can we serve you today?");
+
+	    // Disable member-only features
+	    btnEditPersonalDetails.setVisible(false);
+	    btnEditPersonalDetails.setManaged(false);
+	    btnManageBooking.setVisible(false);
+	    btnManageBooking.setManaged(false);
+	    loyalpointVbox.setVisible(false);
+	    loyalpointVbox.setManaged(false);
+	    discountVbox.setVisible(false);
+	    discountVbox.setManaged(false);
+	    statusVbox.setVisible(false);
+	    statusVbox.setManaged(false);
+	    becomeMemberVbox.setVisible(true);
+	    becomeMemberVbox.setManaged(true);
+	    gridPane.setAlignment(Pos.CENTER);
 	}
+
 
 	/**
 	 * Method to set up the dashboard for a member user.
@@ -243,8 +258,21 @@ public class ClientDashboardScreen {
 	 */
 	@FXML
 	public void btnSignOut(Event event) {
+		boolean clearPayment = BistroClientGUI.client.getPaymentCTRL().clearPaymentController();
+		boolean clearReservation = BistroClientGUI.client.getReservationCTRL().clearReservationController();
+		boolean clearTable = BistroClientGUI.client.getTableCTRL().clearTableController();
+		boolean clearWaitingList = BistroClientGUI.client.getWaitingListCTRL().clearWaitingListController();
+		if(!clearPayment || !clearReservation || !clearTable || !clearWaitingList) {
+			display(lblError, "Error clearing user data. Please try again.", Color.RED);
+			return;
+		}
 		BistroClientGUI.client.getUserCTRL().signOutUser();
 		if (BistroClientGUI.client.getUserCTRL().getLoggedInUser()== null) {
+			boolean clearUser = BistroClientGUI.client.getUserCTRL().clearUserController();
+			if(!clearUser) {
+				display(lblError, "Error clearing user data. Please try again.", Color.RED);
+				return;
+			}
 			BistroClientGUI.switchScreen(event, "clientLoginScreen", "Failed to load Login Screen.");
 		} else {
 			display(lblError, "Failed to sign out. Please try again.", Color.RED);

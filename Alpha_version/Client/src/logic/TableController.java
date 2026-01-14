@@ -75,6 +75,15 @@ public class TableController {
 	
 	//******************************** Instance Methods ***********************************//
 	
+	public boolean clearTableController() {
+		this.tableStatuses.clear();
+		this.seatdOrderDTO = null;
+		this.userAllocatedTable = -1;
+		this.tablesAmount = -1;
+		return true;
+	}
+	
+	
 	public boolean isCheckInTableSuccess() {
 		//TODO maybe change to return seatdOrderDTO != null && seatdOrderDTO.getStatus() == OrderStatus.SEATED;
 		return seatdOrderDTO.getStatus() == OrderStatus.SEATED;
@@ -136,4 +145,12 @@ public class TableController {
     public void askGetHolidays() {
         client.handleMessageFromClientUI(new Message(Api.ASK_GET_HOLIDAYS, null));
     }
+
+
+	public void askUserAllocatedSeatedOrder(int userID) {
+		client.handleMessageFromClientUI(new Message(Api.ASK_SEATED_ORDER, userID));
+		
+	}
+
+	
 }

@@ -7,6 +7,7 @@ import comms.Api;
 import comms.Message;
 import dto.Holiday;
 import dto.WeeklyHour;
+import entities.Order;
 import entities.Table;
 import logic.ServerLogger;
 import logic.api.ServerRouter;
@@ -31,6 +32,17 @@ public class ServerTablesSubject {
                 logger.log("[ERROR] Failed to fetch table statuses for " + client);
             }
         });
+        
+        router.on("tables", "askSeatedOrder", (msg, client) -> {
+        	int userId = (int) msg.getData();
+        	Order seatedOrder = tableService.getSeatedOrderForClient(userId);
+        	if (seatedOrder != null) {
+				client.sendToClient(new Message(Api.REPLY_SEATED_ORDER_OK, seatedOrder));
+			} else {
+				client.sendToClient(new Message(Api.REPLY_SEATED_ORDER_FAIL, null));
+			}
+		
+		});
         
         router.on("tables", "getAll", (msg, client) -> {
             List<Table> tables = tableService.getAllTables();

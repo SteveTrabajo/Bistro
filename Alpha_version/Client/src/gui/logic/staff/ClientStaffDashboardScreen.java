@@ -7,6 +7,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import logic.BistroClientGUI;
 
 public class ClientStaffDashboardScreen {
@@ -107,9 +108,24 @@ public class ClientStaffDashboardScreen {
 	
 	@FXML
 	public void btnLogout(Event event) {
+		boolean clearPayment = BistroClientGUI.client.getPaymentCTRL().clearPaymentController();
+		boolean clearReservation = BistroClientGUI.client.getReservationCTRL().clearReservationController();
+		boolean clearTable = BistroClientGUI.client.getTableCTRL().clearTableController();
+		boolean clearWaitingList = BistroClientGUI.client.getWaitingListCTRL().clearWaitingListController();
+		if(!clearPayment || !clearReservation || !clearTable || !clearWaitingList) {
+			System.out.println("Error clearing controllers during logout.");
+			return;
+		}
 		BistroClientGUI.client.getUserCTRL().signOutUser();
-		if (BistroClientGUI.client.getUserCTRL().getLoggedInUser() == null) {
+		if (BistroClientGUI.client.getUserCTRL().getLoggedInUser()== null) {
+			boolean clearUser = BistroClientGUI.client.getUserCTRL().clearUserController();
+			if(!clearUser) {
+				System.out.println("Error clearing user controller during logout.");
+				return;
+			}
 			BistroClientGUI.switchScreen(event, "clientLoginScreen", "Failed to load Login Screen.");
+		} else {
+			System.out.println("Failed to sign out. Please try again.");
 		}
 	}
 	

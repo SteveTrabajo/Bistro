@@ -28,6 +28,15 @@ public class PaymentController {
 		this.amountPaid = 0.0;
 		this.paymentstatus = PaymentStatus.PENDING.name();
 	}
+	
+	public boolean clearPaymentController() {
+		this.amountPaid = 0.0;
+		this.paymentstatus = null;
+		this.orderItemsForBilling = null;
+		this.isPaymentManuallySuccessful = false;
+		this.pendingBills = null;
+		return true;
+	}
 
 	public void setPaymentAmount(double amount) {
 		this.amountPaid = amount;
@@ -103,4 +112,6 @@ public class PaymentController {
 		this.pendingBills = data;
 
 	}
+	
+	
 }

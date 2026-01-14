@@ -229,5 +229,9 @@ public class TableService {
 	        return dbController.removeTable(tableId);
 	    }
 
+		public Order getSeatedOrderForClient(int userId) {
+			return dbController.getSeatedOrderForUser(userId);
+		}
+
 }
 //End of TableService.java

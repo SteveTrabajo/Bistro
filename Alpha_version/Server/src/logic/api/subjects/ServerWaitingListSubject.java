@@ -18,10 +18,11 @@ import logic.services.WaitingListService;
  * operations.
  */
 public class ServerWaitingListSubject {
+	
 	// ******************************** Constructors ***********************************
-	private ServerWaitingListSubject() {
-	}
-
+	
+	private ServerWaitingListSubject() {}
+	
 	// ******************************** Static Methods***********************************
 	/**
 	 * Registers handlers related to waiting list operations.
@@ -33,9 +34,9 @@ public class ServerWaitingListSubject {
 	 */
 	public static void register(ServerRouter router, WaitingListService waitingListService, ServerLogger logger) {
 		// 1. Check if user is in waiting list
-		router.on("WaitingList", "isInWaitingList", (msg, client) -> {
-			String confirmationCode = (String) msg.getData();
-			boolean isInWaitingList = waitingListService.isUserInWaitingList(confirmationCode);
+		router.on("waitinglist", "isInWaitingList", (msg, client) -> {
+			int userID = (int) msg.getData();
+			boolean isInWaitingList = waitingListService.isUserInWaitingList(userID);
 
 			if (isInWaitingList) {
 				logger.log("[INFO] Client: " + client + " is in waiting list.");
@@ -49,7 +50,7 @@ public class ServerWaitingListSubject {
 		// 2. Check Availability AND Seat if possible (Optimistic Scheduling)
 		// Client sends: int (dinersAmount)
 		// Server uses: client.getInfo("user") to get contact info
-		router.on("waitingList", "checkAvailability", (msg, client) -> {
+		router.on("waitinglist", "checkAvailability", (msg, client) -> {
 			// TODO : add option to staff to add users to waitlist
 			// A. Get Data from Message
 			int dinersAmount = (int) msg.getData();
@@ -85,7 +86,7 @@ public class ServerWaitingListSubject {
 
 		// 3. Add to Waitlist (User accepted the wait time)
 		// This handles the explicit request to join the queue
-		router.on("waitingList", "join", (msg, client) -> {
+		router.on("waitinglist", "join", (msg, client) -> {
 			// Expecting a Map or Object, but we can extract User ID from session too!
 			// Assuming for simplicity the client sends specific data,
 			// OR we can use the session user again:
@@ -109,7 +110,7 @@ public class ServerWaitingListSubject {
 		});
 
 		// 4. Leave Waiting List
-		router.on("waitingList", "leave", (msg, client) -> {
+		router.on("waitinglist", "leave", (msg, client) -> {
 			String confirmationCode = (String) msg.getData();
 			boolean success = waitingListService.removeFromWaitingList(confirmationCode);
 
@@ -119,6 +120,8 @@ public class ServerWaitingListSubject {
 				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_LEAVE_FAIL, null));
 			}
 		});
+		
+		
 //		router.on("waitingList", "getAll", (msg, client) -> {
 //			client.sendToClient(new Message(Api.REPLY_GET_WAITING_LIST_OK, waitingListService.getCurrentQueue()));
 //			if (waitingListService.getCurrentQueue() != null) {

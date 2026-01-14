@@ -2,6 +2,7 @@ package logic.api.subjects;
 
 import java.util.HashMap;
 
+import entities.Order;
 import entities.Table;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -21,6 +22,7 @@ public class ClientTablesSubject {
 			BistroClientGUI.client.getTableCTRL().updateTableStatuses(tableStatuses);
             });
 		});
+		
 		router.on("tables", "getStatus.fail", msg -> {
 			BistroClient.awaitResponse = false;
 			Platform.runLater(() -> {
@@ -32,6 +34,7 @@ public class ClientTablesSubject {
 			});
 			
 		});
+		
 		router.on("tables", "getUserAllocatedTable.ok", msg -> {
 			BistroClient.awaitResponse = false;
 			Platform.runLater(() -> {
@@ -48,6 +51,14 @@ public class ClientTablesSubject {
 			alert.setHeaderText("Could not retrieve allocated table");
 			alert.setContentText("An error occurred while fetching your allocated table. Please try again later.");
 			alert.showAndWait();
+			});
+		});
+		
+		router.on("tables", "askSeatedOrder.ok", msg -> {
+			BistroClient.awaitResponse = false;
+			Order dto = (Order) msg.getData();
+			Platform.runLater(() -> {
+			BistroClientGUI.client.getTableCTRL().setUserAllocatedOrderForTable(dto);
 			});
 		});
 		

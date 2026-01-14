@@ -8,11 +8,16 @@ import entities.Table;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import logic.BistroClientGUI;
+import gui.logic.TaskRunner;
 
 public class TableOverviewPanel {
+	
+	@FXML
+	private BorderPane panelPane;
 	
 	@FXML
     private Label lblAvailable;
@@ -27,7 +32,11 @@ public class TableOverviewPanel {
     public void initialize() {
     	BistroClientGUI.client.getTableCTRL().requestTableStatus();
     	System.out.println("Requested table statuses");
-    	updateTableStatus(BistroClientGUI.client.getTableCTRL().getTableStatuses());
+    	TaskRunner.run(panelPane, ()->{
+    		BistroClientGUI.client.getTableCTRL().requestTableStatus();
+    	},()->{
+    		updateTableStatus(BistroClientGUI.client.getTableCTRL().getTableStatuses());
+    	});
 	}
 
   

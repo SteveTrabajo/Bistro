@@ -172,8 +172,8 @@ public class WaitingListService {
         return dbController.removeFromWaitingList(confirmationCode);
     }
 
-    public boolean isUserInWaitingList(String confirmationCode) { 
-        return dbController.isUserInWaitingList(confirmationCode);
+    public boolean isUserInWaitingList(int userID) { 
+        return dbController.isUserInWaitingList(userID);
     }
     
 //   /**

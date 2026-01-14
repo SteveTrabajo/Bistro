@@ -204,7 +204,7 @@ public class BistroClient extends AbstractClient {
 	 */
 	public void notifyServerOnExit() {
 		try {
-			sendToServer(new Message("disconnect", null));
+			sendToServer(new Message(Api.ASK_CONNECTION_DISCONNECT, null));
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("Error: Could not notify server on exit." + e);
