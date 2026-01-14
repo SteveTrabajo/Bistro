@@ -2451,6 +2451,28 @@ public class BistroDataBase_Controller {
 			release(conn);
 		}
 	}
+	
+	
+	public boolean updateOrderStatus(int userid, OrderStatus newStatus) {
+		String qry = "UPDATE orders SET status = ? WHERE confirmation_code = ?";
+		Connection conn = null;
+
+		try {
+			conn = borrow();
+			try (PreparedStatement ps = conn.prepareStatement(qry)) {
+				ps.setString(1, newStatus.name());
+				ps.setInt(2, userid);
+				int rowsAffected = ps.executeUpdate();
+				return rowsAffected > 0;
+			}
+		} catch (SQLException ex) {
+			logger.log("[ERROR] SQLException in updateOrderStatus: " + ex.getMessage());
+			ex.printStackTrace();
+			return false;
+		} finally {
+			release(conn);
+		}
+	}
 
 	/**
 	 * Frees up a table reservation when an order is marked as NO_SHOW.

@@ -39,9 +39,11 @@ public final class ServerUserSubject {
 			Map<String, Object> loginData = (Map<String, Object>) msg.getData();
 			User user = userService.getUserInfo(loginData);
 			if (user != null) {
+				logger.log("[LOGIN] GUEST login successful for username: " + user.getUsername());
 				client.setInfo("user", user); // Store session user for authorization
 				client.sendToClient(new Message(Api.REPLY_LOGIN_GUEST_OK, user));
 			} else {
+				logger.log("[Warn] GUEST login failed for username: " + String.valueOf(loginData.get("username")));
 				client.sendToClient(new Message(Api.REPLY_LOGIN_GUEST_NOT_FOUND, null));
 			}
 		});
@@ -52,9 +54,11 @@ public final class ServerUserSubject {
 			Map<String, Object> loginData = (Map<String, Object>) msg.getData();
 			User user = userService.getUserInfo(loginData);
 			if (user != null) {
+				logger.log("[LOGIN] MEMBER login successful for username: " + user.getUsername());
 				client.setInfo("user", user); // Store session user for authorization
 				client.sendToClient(new Message(Api.REPLY_LOGIN_MEMBER_OK, user));
 			} else {
+				logger.log("[Warn] MEMBER login failed for username: " + String.valueOf(loginData.get("username")));
 				client.sendToClient(new Message(Api.REPLY_LOGIN_MEMBER_NOT_FOUND, null));
 			}
 		});
@@ -76,10 +80,12 @@ public final class ServerUserSubject {
 		    staffLoginData.put("userType", UserType.EMPLOYEE); // userService routes staff lookup for EMPLOYEE/MANAGER
 		    User user = userService.getUserInfo(staffLoginData);
 		    if (user != null && (user.getUserType() == UserType.EMPLOYEE || user.getUserType() == UserType.MANAGER)) {
+		    	logger.log("[LOGIN] STAFF login successful for username: " + user.getUsername() + " as " + user.getUserType());
 		        // Store session user for authorization (e.g., staff.create)
 		        client.setInfo("user", user);
 		        client.sendToClient(new Message(Api.REPLY_LOGIN_STAFF_OK, user));
 		    } else {
+		    	logger.log("[Warn] STAFF login failed for username: " + username);
 		        client.sendToClient(new Message(Api.REPLY_LOGIN_STAFF_INVALID_CREDENTIALS, null));
 		    }
 		});
@@ -149,12 +155,14 @@ public final class ServerUserSubject {
 		    @SuppressWarnings("unchecked")
 		    Map<String, Object> staffData = (Map<String, Object>) msg.getData();
 		    if (staffData == null) {
+		    	logger.log("[MANAGER] Invalid staff creation data received.");
 		        client.sendToClient(new Message(Api.REPLY_STAFF_CREATE_INVALID_DATA, "Missing staff data"));
 		        return;
 		    }
 		    // Authorization: Only a logged-in MANAGER (from the client) may create an EMPLOYEE.
 		    User requester = (User) client.getInfo("user");
 		    if (requester == null || requester.getUserType() != UserType.MANAGER) {
+		    	logger.log("[MANAGER] Unauthorized staff creation attempt.");
 		        client.sendToClient(new Message(Api.REPLY_STAFF_CREATE_UNAUTHORIZED, null));
 		        return;
 		    }
@@ -164,10 +172,12 @@ public final class ServerUserSubject {
 		    String phoneNumber = (String) staffData.get("phoneNumber");
 		    String validationError = InputCheck.validateAllStaffData(username, password, email, phoneNumber);
 		    if (validationError != null) {
+		    	logger.log("[MANAGER] Staff creation failed due to invalid data: " + validationError);
 		        client.sendToClient(new Message(Api.REPLY_STAFF_CREATE_INVALID_DATA, validationError));
 		        return;
 		    }
 		    if (userService.staffUsernameExists(username)) {
+		    	logger.log("[MANAGER] Staff creation failed: username already exists - " + username);
 		        client.sendToClient(new Message(Api.REPLY_STAFF_CREATE_USERNAME_EXISTS, null));
 		        return;
 		    }
