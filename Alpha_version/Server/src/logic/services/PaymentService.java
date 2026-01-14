@@ -134,4 +134,8 @@ public class PaymentService {
 	        }	       
 	        return tableService.tableFreed(tableNum); //when table is freed, try to seat WAITLIST/RESERVATION order if possible
 	    }
+
+	public List<Item> getBillItemsList(int orderNumber, User requester) {
+		return dbController.getBillItemsList(orderNumber, requester);
+	}
 }

@@ -22,11 +22,13 @@ public class PaymentController {
 	private Object orderItemsForBilling;
 	private boolean isPaymentManuallySuccessful = false;
 	private List<Bill> pendingBills;
+	private List<Item> billItemsList;
 
 	public PaymentController(BistroClient client) {
 		this.client = client;
 		this.amountPaid = 0.0;
 		this.paymentstatus = PaymentStatus.PENDING.name();
+		this.orderItemsForBilling = null;
 	}
 	
 	public boolean clearPaymentController() {
@@ -35,6 +37,7 @@ public class PaymentController {
 		this.orderItemsForBilling = null;
 		this.isPaymentManuallySuccessful = false;
 		this.pendingBills = null;
+		this.billItemsList = null;
 		return true;
 	}
 
@@ -68,6 +71,14 @@ public class PaymentController {
 
 	public Object getOrderItems() {
 		return this.orderItemsForBilling;
+	}
+	
+	public void setBillItemsList(List<Item> items) {
+		this.billItemsList = items;
+	}
+	
+	public List<Item> getBillItemsList() {
+		return this.billItemsList;
 	}
 
 	public boolean processPaymentCompleted() {
@@ -111,6 +122,11 @@ public class PaymentController {
 	public void setPendingBills(List<Bill> data) {
 		this.pendingBills = data;
 
+	}
+
+	public void askBillItemsList(int orderId) {
+		client.handleMessageFromClientUI(new Message(Api.ASK_BILL_ITEMS_LIST, orderId));
+		
 	}
 	
 	

@@ -1,45 +1,46 @@
 package gui.logic;
 
+import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.StackPane;
 import javafx.collections.FXCollections;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import entities.Item;
 import logic.BistroClientGUI;
 
 public class ClientCheckoutScreen {
-    @FXML
+
+	@FXML
+	private StackPane mainPane;
+	@FXML 
+	private Button btnPay;
+	@FXML 
+	private Button btnBack;
+	@FXML 
+	private TextField txtAmountToPay;
+    @FXML 
     private Label LabelUserBenefits;
     @FXML 
-    private TextField txtAmountToPay;
-    @FXML
     private Label summarySubtotal;
-    @FXML
+    @FXML 
     private Label summarySubTax;
-    @FXML
+    @FXML 
     private Label summaryDiscount;
-    @FXML
-    private Button btnPay;
-    @FXML
+    @FXML 
     private Label subtotalLabel;
-    @FXML
+    @FXML 
     private Label taxLabel;
-    @FXML
+    @FXML 
     private Label discountLabel;
-    @FXML
+    @FXML 
     private Label totalLabel;
-    @FXML
+    @FXML 
     private TableView<Item> billTable;
     @FXML 
     private TableColumn<Item, String> colItem;
@@ -49,162 +50,171 @@ public class ClientCheckoutScreen {
     private TableColumn<Item, Double> colPrice;
     @FXML 
     private TableColumn<Item, Double> colTotal;
-    @FXML
-    private Button btnBack;
+
+
     private double finalAmount = 0.0;
     private double minValue = 0.0;
-    private static final double PRICE_BURGER = 55.00;
-    private static final double PRICE_PIZZA = 45.00;
-    private static final double PRICE_SALAD = 38.00;
-    private static final double PRICE_COLA = 12.00;
-    private static final double PRICE_FRIES = 18.00;
-    private List<Item> randomItems = new ArrayList<>();
+
+    private List<Item> billItems = new ArrayList<>();
+
     // ======================== Initialization ========================
-	@FXML
-	public void initialize() {
-		colItem.setCellValueFactory(new PropertyValueFactory<>("name"));
-        colQty.setCellValueFactory(new PropertyValueFactory<>("quantity")); 
+    @FXML
+    public void initialize() {
+        colItem.setCellValueFactory(new PropertyValueFactory<>("name"));
+        colQty.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         colPrice.setCellValueFactory(new PropertyValueFactory<>("price"));
         colTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
-		int DinersAmount = BistroClientGUI.client.getTableCTRL().getUserAllocatedOrderForTable().getDinersAmount();
-		Random random = new Random();
-        Item[] menu = {
-                new Item(1, "Classic Burger", PRICE_BURGER, 0),
-                new Item(2, "Margherita Pizza", PRICE_PIZZA, 0),
-                new Item(3, "Caesar Salad", PRICE_SALAD, 0),
-                new Item(4, "Coca Cola", PRICE_COLA, 0),
-                new Item(5, "French Fries", PRICE_FRIES, 0)
-            };
-        	double subtotal = 0;
-     // Each diner is likely to order 1-3 items
-        for (Item menuItem : menu) {
-            // Logic: Each item has a chance to be ordered based on diner count
-            int qty = random.nextInt(DinersAmount + 1); 
-            
-            if (qty > 0) {
-                // Create the final item with the randomized quantity
-                Item orderedItem = new Item(
-                    menuItem.getItemId(), 
-                    menuItem.getName(), 
-                    menuItem.getPrice(), 
-                    qty
-                );
-                randomItems.add(orderedItem);
-                subtotal += orderedItem.getTotal();
-            }
-        }
-		// Fetch data from Controller
-        double discount = 0;
-		double tax = BistroClientGUI.client.getPaymentCTRL().calculateTax(subtotal);
-		// Check if user is a MEMBER for discount benefits
-		if (BistroClientGUI.client.getUserCTRL().getLoggedInUser().getUserType().name().equals("MEMBER")) {
-			LabelUserBenefits.setStyle("-fx-text-fill: green;");
-			LabelUserBenefits.setText("Discount Applied");
-			discount = BistroClientGUI.client.getPaymentCTRL().calculateDiscount(subtotal);
-			summaryDiscount.setText(String.format("-%.2f", discount));
-		} else {
-			LabelUserBenefits.setStyle("-fx-text-fill: red;");
-			LabelUserBenefits.setText("Sorry, no benefits for you :(");
-			summaryDiscount.setText("0.00");
-		}
-		double total = subtotal + tax - discount;
-		
-		// Setup UI Labels with formatted prices
-		summarySubtotal.setText(String.format("%.2f", subtotal));
-		summarySubTax.setText(String.format("%.2f", tax));
-		subtotalLabel.setText(String.format("%.2f", subtotal));
-		taxLabel.setText(String.format("%.2f", tax));
-		discountLabel.setText(String.format("-%.2f", discount));
-		totalLabel.setText(String.format("%.2f", total));
-		
-		// Setup Table with order items
-		billTable.getItems().setAll(randomItems);
-		
-		// Initialize payment values
-		minValue = total;
-		finalAmount = total;
-		txtAmountToPay.setText(String.format("%.2f", total));
-		
-		// Setup Text Field Listeners
-		setupTextFieldListeners();
-		
-	}
-	
-	// ======================== Text Field Listeners ========================
-	/**
-	 * Sets up listeners for the payment amount text field:
-	 * 1. textProperty: Validates format and updates finalAmount in real-time
-	 * 2. focusedProperty: Enforces minimum value when user leaves the field
-	 */
-	private void setupTextFieldListeners() {
-		// 1. Text Property Listener: Updates the variable REAL-TIME while typing
-		txtAmountToPay.textProperty().addListener((obs, oldVal, newVal) -> {
-			// Reject invalid characters (allow only digits and one decimal point with max 2 decimals)
-			if (!newVal.matches("\\d*(\\.\\d{0,2})?")) {
-				txtAmountToPay.setText(oldVal);
-				return;
-			}
-			
-			// Update finalAmount variable immediately
-			if (!newVal.isEmpty()) {
-				try {
-					finalAmount = Double.parseDouble(newVal);
-				} catch (NumberFormatException e) {
-					finalAmount = 0.0;
-				}
-			} else {
-				finalAmount = 0.0;
-			}
-		});
-		
-		// 2. Focus Listener: Corrects the UI and enforces minimum when user leaves the field
-		txtAmountToPay.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
-			if (!isNowFocused) {
-				enforceMinimumValue();
-			}
-		});
-	}
+        billTable.setItems(FXCollections.observableArrayList());
+        billTable.setPlaceholder(new Label("Loading bill items from server..."));
+        btnPay.setDisable(true);
 
-	// ======================== Validation Methods ========================
-	/**
-	 * Ensures the payment amount is not below the minimum (base price).
-	 * If finalAmount is below minValue, it resets to minValue.
-	 */
-	private void enforceMinimumValue() {
-		if (finalAmount < minValue) {
-			finalAmount = minValue;
-		}
-		// Format the text field to show the corrected/final value with 2 decimal places
-		txtAmountToPay.setText(String.format("%.2f", finalAmount));
-	}
-	
-	// ======================== Button Actions ========================
-	/**
-	 * Handles the Pay button click event.
-	 * Validates the amount one last time and processes the payment.
-	 */
-	@FXML
-	public void btnPay(Event event) {
-		// Force validation one last time (in case user clicked Pay without leaving the text field)
-		enforceMinimumValue();
-		// Get confirmation code and set payment amount
-		BistroClientGUI.client.getPaymentCTRL().setPaymentAmount(finalAmount);//TODO
-		BistroClientGUI.client.getPaymentCTRL().checkpaymentSuccess(randomItems);
-		// Process Payment
-		if (BistroClientGUI.client.getPaymentCTRL().processPaymentCompleted()) {
-			BistroClientGUI.switchScreen(event, "clientCheckoutSuccessScreen", "Payment Successful");
-		} else {
-			Alert alert = new Alert(Alert.AlertType.ERROR, "Payment failed! Please try again.", null);
-			alert.setTitle("Payment Error");
-			alert.setHeaderText("Transaction Failed");
-			alert.showAndWait();
-		}
-	}
-	public void btnBack(Event event) {
-		try {
-			BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client back error messege");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+        setupTextFieldListeners();
+        int orderNumber= BistroClientGUI.client.getTableCTRL().getUserAllocatedOrderForTable().getOrderNumber();
+		TaskRunner.run(mainPane, () -> {
+			BistroClientGUI.client.getPaymentCTRL().askBillItemsList(orderNumber);
+		}, () -> {
+			List<Item> itemsFromServer = BistroClientGUI.client.getPaymentCTRL().getBillItemsList();
+			if(itemsFromServer != null) {
+				onBillItemsReceived(itemsFromServer);
+			}
+		});
+    }
+
+    // ======================== Server Request ========================
+
+
+    private void onBillItemsReceived(List<Item> itemsFromServer) {
+        Platform.runLater(() -> {
+            if (itemsFromServer == null || itemsFromServer.isEmpty()) {
+                billTable.setPlaceholder(new Label("No items found for this bill."));
+                btnPay.setDisable(true);
+                resetTotalsToZero();
+                return;
+            }
+
+            this.billItems = new ArrayList<>(itemsFromServer);
+            populateBill(this.billItems);
+            btnPay.setDisable(false);
+        });
+    }
+
+    // ======================== UI Populate & Calculations ========================
+    private void populateBill(List<Item> items) {
+        // Table
+        billTable.setItems(FXCollections.observableArrayList(items));
+
+        // Subtotal
+        double subtotal = 0.0;
+        for (Item it : items) {
+            subtotal += it.getTotal();
+        }
+
+        double tax = BistroClientGUI.client.getPaymentCTRL().calculateTax(subtotal);
+
+        // Discount
+        double discount = 0.0;
+        boolean isMember = BistroClientGUI.client.getUserCTRL()
+                .getLoggedInUser()
+                .getUserType()
+                .name()
+                .equals("MEMBER");
+
+        if (isMember) {
+            LabelUserBenefits.setStyle("-fx-text-fill: green;");
+            LabelUserBenefits.setText("Discount Applied");
+            discount = BistroClientGUI.client.getPaymentCTRL().calculateDiscount(subtotal);
+            summaryDiscount.setText(String.format("-%.2f", discount));
+        } else {
+            LabelUserBenefits.setStyle("-fx-text-fill: red;");
+            LabelUserBenefits.setText("Sorry, no benefits for you :(");
+            summaryDiscount.setText("0.00");
+        }
+
+        double total = subtotal + tax - discount;
+
+        // Labels
+        summarySubtotal.setText(String.format("%.2f", subtotal));
+        summarySubTax.setText(String.format("%.2f", tax));
+
+        subtotalLabel.setText(String.format("%.2f", subtotal));
+        taxLabel.setText(String.format("%.2f", tax));
+        discountLabel.setText(String.format("-%.2f", discount));
+        totalLabel.setText(String.format("%.2f", total));
+
+        // Payment values
+        minValue = total;
+        finalAmount = total;
+        txtAmountToPay.setText(String.format("%.2f", total));
+    }
+
+    private void resetTotalsToZero() {
+        summarySubtotal.setText("0.00");
+        summarySubTax.setText("0.00");
+        summaryDiscount.setText("0.00");
+        subtotalLabel.setText("0.00");
+        taxLabel.setText("0.00");
+        discountLabel.setText("0.00");
+        totalLabel.setText("0.00");
+        minValue = 0.0;
+        finalAmount = 0.0;
+        txtAmountToPay.setText("0.00");
+    }
+
+    // ======================== Text Field Listeners ========================
+    private void setupTextFieldListeners() {
+        txtAmountToPay.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (!newVal.matches("\\d*(\\.\\d{0,2})?")) {
+                txtAmountToPay.setText(oldVal);
+                return;
+            }
+
+            if (!newVal.isEmpty()) {
+                try {
+                    finalAmount = Double.parseDouble(newVal);
+                } catch (NumberFormatException e) {
+                    finalAmount = 0.0;
+                }
+            } else {
+                finalAmount = 0.0;
+            }
+        });
+
+        txtAmountToPay.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            if (!isNowFocused) enforceMinimumValue();
+        });
+    }
+
+    private void enforceMinimumValue() {
+        if (finalAmount < minValue) {
+            finalAmount = minValue;
+        }
+        txtAmountToPay.setText(String.format("%.2f", finalAmount));
+    }
+
+    // ======================== Button Actions ========================
+    @FXML
+    public void btnPay(Event event) {
+        enforceMinimumValue();
+
+        BistroClientGUI.client.getPaymentCTRL().setPaymentAmount(finalAmount);
+
+        BistroClientGUI.client.getPaymentCTRL().checkpaymentSuccess(billItems);
+        
+        if (BistroClientGUI.client.getPaymentCTRL().processPaymentCompleted()) {
+            BistroClientGUI.switchScreen(event, "clientCheckoutSuccessScreen", "Payment Successful");
+        } else {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Payment failed! Please try again.", null);
+            alert.setTitle("Payment Error");
+            alert.setHeaderText("Transaction Failed");
+            alert.showAndWait();
+        }
+    }
+
+    public void btnBack(Event event) {
+        try {
+            BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client back error messege");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

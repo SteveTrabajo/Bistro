@@ -25,6 +25,26 @@ public class ServerPaymentSubject {
 
     public static void register(ServerRouter router, TableService tableService, ServerLogger logger, PaymentService paymentService) {
         
+    	
+    	router.on("payment",  "billItemsList", (msg, client) -> {
+			User requester = (User) client.getInfo("user");
+			// Client sends billId (int)
+			int orderNumber = (int) msg.getData();
+			try {
+				List<Item> items = paymentService.getBillItemsList(orderNumber, requester);
+				if (items != null) {
+					client.sendToClient(new Message(Api.REPLY_BILL_ITEMS_LIST_OK, items));
+				} else {
+					client.sendToClient(new Message(Api.REPLY_BILL_ITEMS_LIST_FAIL, null));
+				}
+			} catch (Exception e) {
+				logger.log("[ERROR] Failed to retrieve bill items list: " + e.getMessage());
+				client.sendToClient(new Message(Api.REPLY_BILL_ITEMS_LIST_FAIL, null));
+			}
+		});
+    	
+    	
+    	
         // --- ROUTE: Credit Card Payment ---
         router.on("payment", "complete", (msg, client) -> {
             User requester = (User) client.getInfo("user");
@@ -59,7 +79,9 @@ public class ServerPaymentSubject {
                 boolean paymentSuccess = paymentService.processCreditCardPayment(billId, totalAmount, mockCardToken);
 
                 if (paymentSuccess) {
-                    client.sendToClient(new Message(Api.REPLY_PAYMENT_COMPLETE_OK, "Success"));
+                	String successMessage = "Payment of $" + String.format("%.2f", totalAmount) + " completed successfully.\n"
+                			+ "Bill ID: " + billId + "\nThank you for dining with us!";
+                    client.sendToClient(new Message(Api.REPLY_PAYMENT_COMPLETE_OK, successMessage));
                     userFailureMap.remove(requester.getUserId());
                     
                     // Notify Table Service
@@ -82,6 +104,7 @@ public class ServerPaymentSubject {
                 client.sendToClient(new Message(Api.REPLY_PAYMENT_COMPLETE_FAIL, "System Error"));
             }
         });
+        
 
         // --- ROUTE: Manual (Cash) Payment ---
         router.on("payment", "processmanually", (msg, client) -> {

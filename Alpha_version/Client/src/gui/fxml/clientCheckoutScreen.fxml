@@ -18,7 +18,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane styleClass="bill-root" stylesheets="@../../gui/css/clientCheckoutStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.BillPaymentScreen">
+<StackPane fx:id = "mainPane" styleClass="bill-root" stylesheets="@../../gui/css/clientCheckoutStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.ClientCheckoutScreen">
 
     <children>
         <BorderPane prefHeight="720" prefWidth="1280">
@@ -180,7 +180,7 @@
                                             <VBox spacing="8">
                                                 <children>
                                                     <Label fx:id="summarySubtotal" styleClass="summary-bullet" text="• Subtotal: ₪125.92" />
-                                                    <Label fx:id="summaryTax" styleClass="summary-bullet" text="• Tax: ₪10.07" />
+                                                    <Label fx:id="summarySubTax" styleClass="summary-bullet" text="• Tax: ₪10.07" />
                                                     <Label fx:id="summaryDiscount" styleClass="summary-bullet" text="• Discount: -₪12.59" />
                                                 </children>
                                             </VBox>

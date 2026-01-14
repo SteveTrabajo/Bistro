@@ -24,6 +24,7 @@ import dto.Holiday;
 import dto.UserData;
 import dto.WeeklyHour;
 import entities.Bill;
+import entities.Item;
 import entities.Order;
 import entities.Table;
 import entities.User;
@@ -2783,4 +2784,72 @@ public class BistroDataBase_Controller {
 		}
 		return order;
 	}
+
+	/**
+	 * Generates a list of bill items for a given billId, simulating realistic ordering behavior.
+	 * The number of items and their quantities are influenced by the number of diners.
+	 *
+	 * @param orderNumber The ID of the bill to generate items for.
+	 * @param requester The user requesting the bill items (not used in this example).
+	 * @return A list of Item objects representing the bill items.
+	 */
+	public List<Item> getBillItemsList(int orderNumber, User requester) {
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        int dinersAmount = fetchDinersAmountByOrder(conn, orderNumber);
+	        if (dinersAmount <= 0) dinersAmount = 1;
+
+	        int itemsCount = Math.min(8, Math.max(2, (int)Math.ceil(dinersAmount * 1.5)));
+	        final String sql =
+	                "SELECT item_name, MAX(unit_price) AS unit_price " +
+	                "FROM bill_items " +
+	                "GROUP BY item_name " +
+	                "ORDER BY RAND() " +
+	                "LIMIT ?";
+
+	        List<Item> result = new ArrayList<>();
+	        Random rnd = new Random();
+	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	            ps.setInt(1, itemsCount);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                int fakeId = 1;
+	                while (rs.next()) {
+	                    String name = rs.getString("item_name");
+	                    double unitPrice = rs.getDouble("unit_price");
+	                    int maxQty = Math.max(1, (dinersAmount / 2) + 1);
+	                    int qty = 1 + rnd.nextInt(maxQty); 
+	                    if (dinersAmount >= 6 && unitPrice <= 20 && rnd.nextDouble() < 0.35) {
+	                        qty += 1;
+	                    }
+	                    result.add(new Item(fakeId++, name, unitPrice, qty));
+	                }
+	            }
+	        }
+	        return result;
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        return List.of();
+	    } finally {
+	        release(conn);
+	    }
+	}
+
+	
+	private int fetchDinersAmountByOrder(Connection conn, int orderId) throws SQLException {
+	    final String sql =
+	            "SELECT number_of_guests " +
+	            "FROM orders " +
+	            "WHERE order_id = ?";
+	    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	        ps.setInt(1, orderId);
+	        try (ResultSet rs = ps.executeQuery()) {
+	            if (rs.next()) {
+	                return rs.getInt("number_of_guests");
+	            }
+	        }
+	    }
+	    return 1; // fallback בטיחותי
+	}
+
 }
