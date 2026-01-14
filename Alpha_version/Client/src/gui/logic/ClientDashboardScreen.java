@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 import entities.User;
+import enums.OrderStatus;
 import enums.UserType;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -82,7 +83,6 @@ public class ClientDashboardScreen {
 	 * Method to initialize the Client Dashboard screen based on the logged-in user
 	 * type.
 	 */
-
 	@FXML
 	public void initialize() {
 	    User loggedInUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
@@ -100,7 +100,6 @@ public class ClientDashboardScreen {
 	    	} else {
 	    		SetDashboardAsGuest();
 	    	}
-	    
 	    	//Centralized UI State Management
 	    	applyBusinessRules(isOnWaitingList, hasActiveSeatedReservation);
 	    	});
@@ -111,8 +110,12 @@ public class ClientDashboardScreen {
 	 */
 	private void applyBusinessRules(boolean isOnWaitingList, boolean hasActiveSeatedReservation) {
 	    // Handle Waiting List button text
+		
+		if (isOnWaitingList && BistroClientGUI.client.getWaitingListCTRL().getOrderStatus()==OrderStatus.NOTIFIED) {
+			 BistroClientGUI.switchScreen("clientCheckInTableScreen", "Failed to load Client Check-In For Table Screen.");
+		}
 	    LblButtonDescrip.setText(isOnWaitingList ? "Waiting List Status" : "Add to queue");
-
+	    btnJoinWaitingList.setText(isOnWaitingList ? "View Status": "Join Waiting List");
 	    // Disable actions if an active reservation exists
 	    if (hasActiveSeatedReservation) {
 	        btnJoinWaitingList.setDisable(true);
@@ -144,7 +147,6 @@ public class ClientDashboardScreen {
 	public void SetDashboardAsGuest() {
 	    lblWelcome.setText("Welcome, Guest!");
 	    lblClient.setText("How can we serve you today?");
-
 	    // Disable member-only features
 	    btnEditPersonalDetails.setVisible(false);
 	    btnEditPersonalDetails.setManaged(false);

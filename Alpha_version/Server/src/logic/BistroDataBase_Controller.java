@@ -2744,4 +2744,43 @@ public class BistroDataBase_Controller {
 		}
 		return order;
 	}
+
+	public Order getWaitingListOrderByUserId(int userID) {
+		String qry = "SELECT order_number, user_id, order_date, order_time, number_of_guests, " +
+					 "confirmation_code, order_type, status, date_of_placing_order " +
+					 "FROM orders WHERE user_id = ? AND order_type = 'WAITLIST' AND status IN ('PENDING', 'NOTIFIED')";
+		Connection conn = null;
+		Order order = null;
+		try {
+			conn = borrow();
+			try (PreparedStatement ps = conn.prepareStatement(qry)) {
+				ps.setInt(1, userID);
+
+				try (ResultSet rs = ps.executeQuery()) {
+					if (rs.next()) {
+						int orderNumber = rs.getInt("order_number");
+						Date sqlDate = rs.getDate("order_date");
+						LocalDate orderDate = (sqlDate != null) ? sqlDate.toLocalDate() : null;
+						Time sqlTime = rs.getTime("order_time");
+						LocalTime orderTime = (sqlTime != null) ? sqlTime.toLocalTime() : null;
+						int dinersAmount = rs.getInt("number_of_guests");
+						String confirmCode = rs.getString("confirmation_code");
+						OrderType type = OrderType.valueOf(rs.getString("order_type"));
+						OrderStatus orderStatus = OrderStatus.valueOf(rs.getString("status"));
+						Timestamp placingTs = rs.getTimestamp("date_of_placing_order");
+						LocalDateTime dateOfPlacing = placingTs != null ? placingTs.toLocalDateTime() : null;
+
+						order = new Order(orderNumber, orderDate, orderTime, dinersAmount, 
+												confirmCode, userID, type, orderStatus, dateOfPlacing);
+					}
+				}
+			}
+		} catch (SQLException ex) {
+			logger.log("[ERROR] SQLException in getWaitingListOrderByUserId: " + ex.getMessage());
+			ex.printStackTrace();
+		} finally {
+			release(conn);
+		}
+		return order;
+	}
 }

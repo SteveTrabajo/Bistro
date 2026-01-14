@@ -124,7 +124,7 @@ public class OrdersService {
 	public Order getOrderByConfirmationCode(String confirmationCode) {
 		return dbController.getOrderByConfirmationCodeInDB(confirmationCode);
 	}
-
+	
 	public boolean checkOrderExists(String confirmationCode) {
 		return dbController.checkOrderExistsInDB(confirmationCode);
 	}

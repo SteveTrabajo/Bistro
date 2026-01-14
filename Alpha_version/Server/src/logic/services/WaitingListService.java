@@ -179,6 +179,10 @@ public class WaitingListService {
 	public Order getWaitingListOrderByCode(String code) {
 		return ordersService.getOrderByConfirmationCode(code);
 	}
+
+	public Order getWaitingListOrderByUserId(int userID) {
+		return dbController.getWaitingListOrderByUserId(userID);
+	}
     
 //   /**
 //	* Logic for Members using the existing getUserInfo logic in UserService

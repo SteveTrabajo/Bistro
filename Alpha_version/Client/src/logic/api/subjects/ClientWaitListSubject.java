@@ -38,12 +38,24 @@ public class ClientWaitListSubject {
 				router.on("waitinglist", "join.ok", msg -> {
 		            BistroClient.awaitResponse = false;
 					Order order = (Order) msg.getData();
+					waitingListCTRL.clearWaitingListController();
 					waitingListCTRL.setOrderWaitListDTO(order);
 					waitingListCTRL.setUserOnWaitingList(true);
+					Platform.runLater(() -> {
+						BistroClientGUI.switchScreen("clientOnListScreen", "Client On List Screen error message");
+					});
 				});
 
 				router.on("waitinglist", "join.fail", msg -> {
 		            BistroClient.awaitResponse = false;
+		            waitingListCTRL.clearWaitingListController();
+		            Platform.runLater(() -> {
+		                Alert alert = new Alert(Alert.AlertType.ERROR);
+		                alert.setTitle("Error");
+		                alert.setHeaderText("Failed to join waiting list");
+		                alert.setContentText("An error occurred while trying to join the waiting list. Please try again later.");
+		                alert.showAndWait();
+		            });
 				});
 
 				router.on("waitinglist", "join.skipped", msg -> {
@@ -53,11 +65,7 @@ public class ClientWaitListSubject {
 		            Order order = (Order) data.get("order");
 		            int table = (int) data.get("table");
 		            //reset waiting list state
-		            waitingListCTRL.setUserOnWaitingList(false);
-		            waitingListCTRL.setOrderWaitListDTO(null);
-		            waitingListCTRL.setLeaveWaitingListSuccess(false);
-		            waitingListCTRL.setEstimatedWaitTimeMinutes(0);
-		            waitingListCTRL.setCanSeatImmediately(false);
+		            waitingListCTRL.clearWaitingListController();
 		            //set table state for seating
 		            tableCTRL.setUserAllocatedOrderForTable(order);
 		            tableCTRL.setUserAllocatedTable(table);
@@ -66,20 +74,36 @@ public class ClientWaitListSubject {
 				//Client/Staff: Leave Status
 				router.on("waitinglist", "leave.ok", msg -> {
 		            BistroClient.awaitResponse = false;
-		            waitingListCTRL.setOrderWaitListDTO(null);
-					waitingListCTRL.setLeaveWaitingListSuccess(true);
-					waitingListCTRL.setUserOnWaitingList(false);
+		            waitingListCTRL.clearWaitingListController();
+		            waitingListCTRL.setLeaveWaitingListSuccess(true);
+		            Platform.runLater(() -> {
+		            	Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		            	alert.setTitle("Left Waiting List");
+		            	alert.setHeaderText(null);
+		            	alert.setContentText("You have successfully left the waiting list.");
+		            	alert.showAndWait();
+		            	BistroClientGUI.switchScreen("clientDashboardScreen", "Client Dashboard error message");		
+		            });
+		            
 				});
 
 				router.on("waitinglist", "leave.fail", msg -> {
 		            BistroClient.awaitResponse = false;
 					waitingListCTRL.setLeaveWaitingListSuccess(false);
+					Platform.runLater(() -> {
+						Alert alert = new Alert(Alert.AlertType.ERROR);
+						alert.setTitle("Error");
+						alert.setHeaderText("Failed to leave waiting list");
+						alert.setContentText("An error occurred while trying to leave the waiting list. Please try again later.");
+						alert.showAndWait();
+					});
 				});
 
 				//Check if user is in waiting list
 				router.on("waitinglist", "isInWaitingList.yes", msg -> {
 		            BistroClient.awaitResponse = false;
 					waitingListCTRL.setUserOnWaitingList(true);
+					waitingListCTRL.setOrderWaitListDTO((Order) msg.getData());
 				});
 
 				router.on("waitinglist", "isInWaitingList.no", msg -> {

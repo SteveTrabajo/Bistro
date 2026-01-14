@@ -37,10 +37,12 @@ public class ServerWaitingListSubject {
 		router.on("waitinglist", "isInWaitingList", (msg, client) -> {
 			int userID = (int) msg.getData();
 			boolean isInWaitingList = waitingListService.isUserInWaitingList(userID);
-
 			if (isInWaitingList) {
-				logger.log("[INFO] Client: " + client + " is in waiting list.");
-				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_IS_IN_LIST, true));
+				Order waitListOrder = waitingListService.getWaitingListOrderByUserId(userID);
+				if (waitListOrder != null && waitListOrder.getOrderType() == OrderType.WAITLIST) {
+					logger.log("[INFO] User ID: " + userID + " has waitlist order: " + waitListOrder.getConfirmationCode());
+					client.sendToClient(new Message(Api.REPLY_WAITING_LIST_IS_IN_LIST, waitListOrder));
+				}
 			} else {
 				logger.log("[INFO] Client: " + client + " is NOT in waiting list.");
 				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_IS_NOT_IN_LIST, false));
@@ -116,7 +118,6 @@ public class ServerWaitingListSubject {
 		router.on("waitinglist", "leave", (msg, client) -> {
 			String confirmationCode = (String) msg.getData();
 			boolean success = waitingListService.removeFromWaitingList(confirmationCode);
-
 			if (success) {
 				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_LEAVE_OK, null));
 			} else {

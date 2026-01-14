@@ -123,6 +123,7 @@ public class NotificationService {
         if (user != null) {
             String msg = "Good news! Table is ready. Please arrive within 15 minutes.";
             dispatchToSimulator(user, msg, NotificationType.TABLE_READY);
+            dbController.updateOrderStatus(order.getUserId(), OrderStatus.NOTIFIED);
             logger.log("[NOTIFY] Waitlist alert sent to user " + user.getUserId());
         }
     }

@@ -43,14 +43,12 @@ public class ClientCheckInTableScreen {
 	 */
 	@FXML
 	public void initialize() {
-		// 1. Safe User Loading (Prevents crash if client not fully ready)
 		if (BistroClientGUI.client != null && BistroClientGUI.client.getUserCTRL().getLoggedInUser() != null) {
 			User currentUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
 			if (lblUser != null) {
 				lblUser.setText(currentUser.getUserType().name());
 			}
 		}
-
 		// 2. Length Limiter (UX)
 		int maxLength = 8;
 		txtConfirmCode.textProperty().addListener((observable, oldValue, newValue) -> {

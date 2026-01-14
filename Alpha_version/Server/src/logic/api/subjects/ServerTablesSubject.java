@@ -75,13 +75,13 @@ public class ServerTablesSubject {
         });
         
         router.on("hours", "addHoliday", (msg, client) -> {
-			Holiday holiday = (dto.Holiday) msg.getData();
+			Holiday holiday = (Holiday) msg.getData();
 			tableService.addHoliday(holiday);
 			client.sendToClient(new Message(Api.REPLY_ADD_HOLIDAY_OK, null));
 		});
         
         router.on("hours", "removeHoliday", (msg, client) -> {
-        	Holiday holiday = (dto.Holiday) msg.getData();
+        	Holiday holiday = (Holiday) msg.getData();
         	tableService.removeHoliday(holiday);
         	client.sendToClient(new Message(Api.REPLY_REMOVE_HOLIDAY_OK, null));
 		});

@@ -50,7 +50,7 @@ public class ClientOnListScreen {
      */
     private String retrieveConfirmationCode() {
         // Check for a ready reservation specific to this session
-        Order activeOrder = BistroClientGUI.client.getReservationCTRL().getOrderDTO();
+        Order activeOrder = BistroClientGUI.client.getWaitingListCTRL().getOrderWaitListDTO();
         
         if (activeOrder != null && activeOrder.getConfirmationCode() != null) {
             return activeOrder.getConfirmationCode();
@@ -85,12 +85,15 @@ public class ClientOnListScreen {
 	 */
 	@FXML
 	public void btnLeave(Event event) {
-		BistroClientGUI.client.getWaitingListCTRL().leaveWaitingList();
+		TaskRunner.run(event,()->{
+			BistroClientGUI.client.getWaitingListCTRL().leaveWaitingList();
+		},()->{
 		if (BistroClientGUI.client.getWaitingListCTRL().isLeaveWaitingListSuccess()) {
-			BistroClientGUI.switchScreen(event, "clientDashboardScreen",
-					"Error returning to dashboard after leaving waiting list.");
+			BistroClientGUI.client.getWaitingListCTRL().clearWaitingListController();
+			BistroClientGUI.switchScreen(event, "clientDashboardScreen","Error returning to dashboard after leaving waiting list.");
 		} else
 			BistroClientGUI.display(lblError, "Error leaving the waiting list. Please try again.", null);
+		});
 	}
 	
 	/**

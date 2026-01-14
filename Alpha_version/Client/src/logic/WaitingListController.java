@@ -58,6 +58,13 @@ public class WaitingListController {
 		this.orderWaitListDTO = orderWaitListDTO;
 	}
 	
+	public OrderStatus getOrderStatus() {
+		if (this.orderWaitListDTO != null) {
+			return this.orderWaitListDTO.getStatus();
+		}
+		return null;
+	}
+	
 	
 	public ArrayList<Order> getWaitingList() {
 		return waitingList;
@@ -133,7 +140,7 @@ public class WaitingListController {
 	}
 
 	public void leaveWaitingList() {
-		client.handleMessageFromClientUI(new Message(Api.ASK_WAITING_LIST_LEAVE, null));
+		client.handleMessageFromClientUI(new Message(Api.ASK_WAITING_LIST_LEAVE, this.orderWaitListDTO.getConfirmationCode()));
 	}
 
     /**

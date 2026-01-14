@@ -48,13 +48,11 @@ public class ClientPayBillScreen {
 	@FXML
 	public void btnVerify(Event event) {
 		String checkConfirmCode = txtConfirmCode.getText();
-		String correctConfirmCode = BistroClientGUI.client.getTableCTRL().getUserAllocatedOrderForTable()
-				.getConfirmationCode();
+		String correctConfirmCode = BistroClientGUI.client.getTableCTRL().getUserAllocatedOrderForTable().getConfirmationCode();
 		if (checkConfirmCode.equals(correctConfirmCode)) {
-			BistroClientGUI.switchScreen(event, "clientCheckoutScreen", "client Payment c Screen error messege");
+			BistroClientGUI.switchScreen(event, "clientCheckoutScreen", "cannot load client checkout screen");
 		} else {
 			BistroClientGUI.display(lblError,"Invalid Confirmation Code", Color.RED);
-			
 		}
 	}
 
