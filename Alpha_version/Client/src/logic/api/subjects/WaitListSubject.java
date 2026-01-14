@@ -173,11 +173,23 @@ public class WaitListSubject {
 				        alert.show();
 				    });
 				});
+				
 		        router.on("waitinglist", "checkAvailability.ok", msg -> {
 		            BistroClient.awaitResponse = false;
 		            WaitListResponse dto = (WaitListResponse) msg.getData();
 		            waitingListCTRL.setEstimatedWaitTimeMinutes(dto.getEstimatedWaitTimeMinutes());
 		            });
+		        
+		        router.on("waitinglist", "checkAvailability.skipped", msg -> {
+		            BistroClient.awaitResponse = false;
+		            Map<String, Object> data = (Map<String, Object>) msg.getData();
+		            waitingListCTRL.setCanSeatImmediately(true);
+		            tableCTRL.setUserAllocatedOrderForTable((Order.class.cast(data.get("order"))));
+		            tableCTRL.setUserAllocatedTable((int) data.get("table"));
+		            BistroClientGUI.switchScreen("clientCheckInTableSuccesScreen", "Client Check-In Table Success error messege");
+		            
+		        });
+		        
 		        router.on("waitinglist", "checkAvailability.fail", msg -> {
 		        			            BistroClient.awaitResponse = false;
 		            Platform.runLater(() -> {

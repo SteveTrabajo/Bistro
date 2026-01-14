@@ -75,19 +75,19 @@ public class ClientDashboardScreen {
 	public void initialize() {
 	    User loggedInUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
 	    int userID = loggedInUser.getUserId();
-
+	    
 	    // Fetch all necessary states at once
 	    BistroClientGUI.client.getWaitingListCTRL().askUserOnWaitingList(userID);
 	    boolean isOnWaitingList = BistroClientGUI.client.getWaitingListCTRL().isUserOnWaitingList();
 	    boolean hasActiveReservation = BistroClientGUI.client.getReservationCTRL().hasActiveReservation();
-
+	    
 	    // Set user-type specific layout
 	    if (BistroClientGUI.client.getUserCTRL().getLoggedInUserType() == UserType.MEMBER) {
 	        SetDashboardAsMember(loggedInUser);
 	    } else {
 	        SetDashboardAsGuest();
 	    }
-
+	    
 	    //Centralized UI State Management
 	    applyBusinessRules(isOnWaitingList, hasActiveReservation);
 	}
@@ -130,6 +130,8 @@ public class ClientDashboardScreen {
 	public void SetDashboardAsGuest() {
 		lblWelcome.setText("Welcome, Guest!");
 		lblClient.setText("How can we serve you today?");
+		//Disable member-only features for guest users
+		//disable personal details editing and hide member info
 		btnEditPersonalDetails.setVisible(false);
 		btnEditPersonalDetails.setManaged(false);
 		loyalpointVbox.setVisible(false);
@@ -140,6 +142,9 @@ public class ClientDashboardScreen {
 		statusVbox.setManaged(false);
 		becomeMemberVbox.setVisible(true);
 		becomeMemberVbox.setManaged(true);
+		
+		btnManageBooking.setVisible(false);
+		btnManageBooking.setManaged(false);
 	}
 
 	/**

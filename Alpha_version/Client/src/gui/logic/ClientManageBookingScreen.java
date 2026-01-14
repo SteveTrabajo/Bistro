@@ -106,13 +106,6 @@ public class ClientManageBookingScreen {
         
         masterData.clear();
         
-        // Mock Data
-        masterData.add(new Order(101, LocalDate.now().plusDays(1), LocalTime.of(19, 0), 4, "RES-1234", 1, null, OrderStatus.PENDING, LocalDateTime.now()));
-        masterData.add(new Order(101, LocalDate.now().plusDays(1), LocalTime.of(18, 30), 5, "RES-1264", 1, null, OrderStatus.PENDING, LocalDateTime.now()));
-        masterData.add(new Order(101, LocalDate.now().plusDays(1), LocalTime.of(19, 30), 4, "RES-1235", 1, null, OrderStatus.PENDING, LocalDateTime.now()));
-        masterData.add(new Order(102, LocalDate.now().plusDays(3), LocalTime.of(20, 30), 2, "RES-5678", 1, null, OrderStatus.PENDING, LocalDateTime.now()));
-        masterData.add(new Order(103, LocalDate.now().minusDays(5), LocalTime.of(18, 0), 6, "RES-OLD1", 1, null, OrderStatus.COMPLETED, LocalDateTime.now()));
-        
         filterTable(dateFilter.getValue());
     }
 
