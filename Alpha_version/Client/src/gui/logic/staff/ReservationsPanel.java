@@ -89,8 +89,11 @@ public class ReservationsPanel {
         SortedList<Order> sortedData = new SortedList<>(filteredData);
         sortedData.comparatorProperty().bind(reservationsTable.comparatorProperty());
         reservationsTable.setItems(sortedData);
-
         dateFilter.setValue(LocalDate.now());
+        
+        if (BistroClientGUI.client != null) {
+            BistroClientGUI.client.getReservationCTRL().setCancelListener(this::onCancellationComplete);
+        }
         
         loadData();
     }
@@ -241,7 +244,7 @@ public class ReservationsPanel {
         if (selected.getStatus() == OrderStatus.SEATED) {
             showAlert("Invalid Action", "This customer is already seated at a table");
             return;
-       }
+        }
         
         if (BistroClientGUI.client != null) {
             //selected.setStatus(OrderStatus.SEATED);
@@ -259,19 +262,33 @@ public class ReservationsPanel {
         	return; 
     	}
         
+        if (selected.getStatus() == OrderStatus.SEATED || selected.getStatus() == OrderStatus.COMPLETED || selected.getStatus() == OrderStatus.CANCELLED) {
+                
+            showAlert("Invalid Action", "Cannot cancel a reservation that is " + selected.getStatus() + ".");
+            return;
+        }
+        
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, 
-                "Are you sure you want to cancel reservation " + selected.getConfirmationCode() + "?", 
+        		"Are you sure you want to cancel reservation " + selected.getConfirmationCode() + "?", 
                 ButtonType.YES, ButtonType.NO);
                 
-            confirm.showAndWait().ifPresent(response -> {
-                if (response == ButtonType.YES && BistroClientGUI.client != null) {
-                    BistroClientGUI.client.getReservationCTRL().cancelReservation(selected.getConfirmationCode());
-                    showAlert("Cancelled", "Cancellation request sent.");
-                }
-            });
-
-        loadData();
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.YES && BistroClientGUI.client != null) {
+                BistroClientGUI.client.getReservationCTRL().cancelReservation(selected.getConfirmationCode());
+            }
+        });
     }
+    
+    /**
+     * Callback for when a Cancellation request finishes successfully.
+     * Refreshes the table if successful.
+     */
+    private void onCancellationComplete(boolean success) {
+        if (success) {
+            loadData();
+        }
+    }
+
 
     private void showAlert(String title, String msg) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

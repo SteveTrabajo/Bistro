@@ -1,6 +1,7 @@
 package logic.services;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -435,5 +436,24 @@ public class OrdersService {
 		return resultDates;
 	}
 
+	/**
+     * Cancels a reservation if it is currently PENDING or NOTIFIED.
+     * Prevents cancelling orders that are already SEATED or COMPLETED.
+     */
+    public boolean cancelReservation(String confirmationCode) {
+        OrderStatus currentStatus = dbController.getOrderStatusInDB(confirmationCode);
+        
+        if (currentStatus == null) {
+            return false; 
+        }
+        
+        if (currentStatus == OrderStatus.SEATED || currentStatus == OrderStatus.COMPLETED) {
+            logger.log("[WARN] Attempted to cancel an active/finished order: " + confirmationCode);
+            return false;
+        }
+
+        return dbController.updateOrderStatusInDB(confirmationCode, OrderStatus.CANCELLED);
+    }
+	
 
 }
