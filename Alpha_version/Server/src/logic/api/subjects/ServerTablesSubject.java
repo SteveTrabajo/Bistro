@@ -9,14 +9,14 @@ import dto.Holiday;
 import dto.WeeklyHour;
 import entities.Table;
 import logic.ServerLogger;
-import logic.api.Router;
+import logic.api.ServerRouter;
 import logic.services.TableService;
 
-public class TablesSubject {
+public class ServerTablesSubject {
 
-    private TablesSubject() {}
+    private ServerTablesSubject() {}
 
-    public static void register(Router router, TableService tableService, ServerLogger logger) {
+    public static void register(ServerRouter router, TableService tableService, ServerLogger logger) {
         
         // Handle request for table map status
         router.on("tables", "getStatus", (msg, client) -> {

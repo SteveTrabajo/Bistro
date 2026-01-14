@@ -2,16 +2,16 @@ package logic.api.subjects;
 
 import comms.Api;
 import comms.Message;
-import logic.api.Router;
+import logic.api.ServerRouter;
 import logic.BistroDataBase_Controller;
 import logic.ServerLogger;
 
 /**
  * API handlers related to client connections.
  */
-public final class ConnectionSubject {
+public final class ServerConnectionSubject {
 	// ******************************** Constructors***********************************
-    private ConnectionSubject() {}
+    private ServerConnectionSubject() {}
 	// ******************************** Static Methods***********************************
     /**
      * Registers connection-related handlers.
@@ -19,7 +19,7 @@ public final class ConnectionSubject {
      * @param logger 
      * @param dbController 
      */
-    public static void register(Router router, ServerLogger logger) {
+    public static void register(ServerRouter router, ServerLogger logger) {
 
         router.on("connection", "connect", (msg, client) -> {
         	logger.log("[INFO] Client connected: " + client);
@@ -34,4 +34,4 @@ public final class ConnectionSubject {
         });
     }
 }
-//End of ConnectionSubject.java
+//End of ServerConnectionSubject.java

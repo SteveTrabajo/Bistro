@@ -9,7 +9,7 @@ import logic.BistroClient;
 import logic.BistroClientGUI;
 import logic.api.ClientRouter;
 
-public class TablesSubject {
+public class ClientTablesSubject {
 
 	public static void register(ClientRouter router) {
 

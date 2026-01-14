@@ -12,9 +12,9 @@ import java.util.List;
 
 import entities.Order;
 
-public class OrderSubject {
+public class ClientOrderSubject {
 	
-	private OrderSubject() {}
+	private ClientOrderSubject() {}
 	
 	public static void register(ClientRouter router) {
 		// Handler for new reservation creation messages
@@ -150,6 +150,32 @@ public class OrderSubject {
 		        alert.show();
 		    });
 		});
+		
+		router.on("orders", "cancelReservation.ok", msg -> {
+			BistroClient.awaitResponse = false;
+			Platform.runLater(() -> {
+				Alert alert = new Alert(Alert.AlertType.INFORMATION);
+				alert.setTitle("Cancellation Successful");
+				alert.setHeaderText("Reservation Cancelled");
+				alert.setContentText("The reservation has been successfully cancelled.");
+				alert.show();
+				
+				// Refresh the list to show status change
+				BistroClientGUI.client.getReservationCTRL().askReservationsByDate(LocalDate.now());
+			});
+		});
+		
+		router.on("orders", "cancelReservation.fail", msg -> {
+			BistroClient.awaitResponse = false;
+			Platform.runLater(() -> {
+				Alert alert = new Alert(Alert.AlertType.ERROR);
+				alert.setTitle("Cancellation Failed");
+				alert.setHeaderText("Could not cancel reservation");
+				alert.setContentText("An error occurred while cancelling the reservation. Please try again later.");
+				alert.show();
+			});
+		});
+		
 	}
 	
 }

@@ -9,9 +9,9 @@ import java.util.List;
 
 import entities.MonthlyReport;
 
-public class MonthlyReportsSubject {
+public class ClientMonthlyReportsSubject {
 	
-	private MonthlyReportsSubject() {}
+	private ClientMonthlyReportsSubject() {}
 	
 	public static void register(ClientRouter router) {
 		// Handler for new reservation creation messages

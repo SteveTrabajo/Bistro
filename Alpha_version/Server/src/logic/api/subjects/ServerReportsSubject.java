@@ -8,16 +8,16 @@ import comms.Api;
 import comms.Message;
 import entities.User;
 import logic.ServerLogger;
-import logic.api.Router;
+import logic.api.ServerRouter;
 import logic.services.ReportsService;
 
 import entities.MonthlyReport;
 
-public class ReportsSubject {
+public class ServerReportsSubject {
 	
-	private ReportsSubject() {}
+	private ServerReportsSubject() {}
 	
-	public static void register(Router router, ReportsService reportsService, ServerLogger logger) {
+	public static void register(ServerRouter router, ReportsService reportsService, ServerLogger logger) {
 		
 		router.on("monthlyReports", "getData", (msg, client) -> {
 			User sessionUser = (User) client.getInfo("user");

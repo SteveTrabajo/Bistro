@@ -14,16 +14,16 @@ import entities.User;
 import enums.OrderStatus;
 import enums.OrderType;
 import logic.ServerLogger;
-import logic.api.Router;
+import logic.api.ServerRouter;
 import logic.services.OrdersService;
 import logic.services.TableService;
 
 /**
  * API handlers related to orders.
  */
-public final class OrdersSubject {
+public final class ServerOrdersSubject {
 	// ******************************** Constructors***********************************
-    private OrdersSubject() {}
+    private ServerOrdersSubject() {}
     
 	// ******************************** Static Methods***********************************
     
@@ -34,7 +34,7 @@ public final class OrdersSubject {
      * @param ordersService
      * @param logger 
      */
-    public static void register(Router router, OrdersService ordersService, TableService tableService, ServerLogger logger) {
+    public static void register(ServerRouter router, OrdersService ordersService, TableService tableService, ServerLogger logger) {
     	
     	
 		// New reservation order

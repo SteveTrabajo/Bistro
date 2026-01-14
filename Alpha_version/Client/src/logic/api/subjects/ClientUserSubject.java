@@ -13,7 +13,7 @@ import enums.UserType;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 
-public class UserSubject {
+public class ClientUserSubject {
 
 	public static void register(ClientRouter router, UserController userController) {
 		

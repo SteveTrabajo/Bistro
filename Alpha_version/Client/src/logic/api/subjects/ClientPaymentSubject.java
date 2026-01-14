@@ -8,7 +8,7 @@ import logic.BistroClientGUI;
 import logic.PaymentController.PaymentStatus;
 import logic.api.ClientRouter;
 
-public class PaymentSubject {
+public class ClientPaymentSubject {
 
 	public static void register(ClientRouter router) {
 		router.on("payment", "complete.ok", msg -> {

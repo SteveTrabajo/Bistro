@@ -3,7 +3,7 @@ package logic.api.subjects;
 import logic.BistroClient;
 import logic.api.ClientRouter;
 
-public class SystemSubject {
+public class ClientSystemSubject {
 
 	public static void register(ClientRouter router) {
 		

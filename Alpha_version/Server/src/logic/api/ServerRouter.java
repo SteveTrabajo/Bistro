@@ -9,7 +9,7 @@ import ocsf.server.ConnectionToClient;
 /**
  * Routes messages based on the format: {@code subject.action}.
  */
-public class Router {
+public class ServerRouter {
 
     /** Maps subjects to their action handlers */
     private final Map<String, Map<String, ServerHandler>> routes = new HashMap<>();

@@ -16,9 +16,9 @@ import logic.TableController;
 import logic.WaitingListController;
 import logic.api.ClientRouter;
 
-public class WaitListSubject {
+public class ClientWaitListSubject {
 
-	private WaitListSubject() {
+	private ClientWaitListSubject() {
 	}
 
 	public static void register(ClientRouter router,WaitingListController waitingListCTRL,TableController tableCTRL) {

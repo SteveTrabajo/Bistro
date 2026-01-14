@@ -10,28 +10,28 @@ import entities.User;
 import enums.OrderType;
 import logic.BistroDataBase_Controller;
 import logic.ServerLogger;
-import logic.api.Router;
+import logic.api.ServerRouter;
 import logic.services.WaitingListService;
 
 /**
- * WaitingListSubject class that registers handlers related to waiting list
+ * ServerWaitingListSubject class that registers handlers related to waiting list
  * operations.
  */
-public class WaitingListSubject {
+public class ServerWaitingListSubject {
 	// ******************************** Constructors ***********************************
-	private WaitingListSubject() {
+	private ServerWaitingListSubject() {
 	}
 
 	// ******************************** Static Methods***********************************
 	/**
 	 * Registers handlers related to waiting list operations.
 	 * 
-	 * @param router             The Router instance to register handlers with.
+	 * @param router             The ServerRouter instance to register handlers with.
 	 * @param waitingListService The BistroDataBase_Controller instance for database
 	 *                           operations.
 	 * @param logger             The ServerLogger instance for logging.
 	 */
-	public static void register(Router router, WaitingListService waitingListService, ServerLogger logger) {
+	public static void register(ServerRouter router, WaitingListService waitingListService, ServerLogger logger) {
 		// 1. Check if user is in waiting list
 		router.on("WaitingList", "isInWaitingList", (msg, client) -> {
 			String confirmationCode = (String) msg.getData();
@@ -156,4 +156,4 @@ public class WaitingListSubject {
 //		});
 	}
 }
-// End of WaitingListSubject class
+// End of ServerWaitingListSubject class

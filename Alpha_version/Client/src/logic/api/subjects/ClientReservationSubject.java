@@ -9,7 +9,7 @@ import logic.BistroClientGUI;
 import logic.UserController;
 import logic.api.ClientRouter;
 
-public class ReservationSubject {
+public class ClientReservationSubject {
 	public static void register(ClientRouter router, UserController userController) {
 
 		router.on("reservation", "forgotConfirmationCode.ok", msg -> {

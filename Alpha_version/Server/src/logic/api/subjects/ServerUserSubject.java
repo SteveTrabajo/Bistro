@@ -12,16 +12,16 @@ import entities.User;
 import enums.UserType;
 import logic.LoginAttemptTracker;
 import logic.ServerLogger;
-import logic.api.Router;
+import logic.api.ServerRouter;
 import logic.services.UserService;
 import dto.UserData;
 /**
- * UserSubject handles user-related requests such as login, signout, member info update, and staff creation.
+ * ServerUserSubject handles user-related requests such as login, signout, member info update, and staff creation.
  */
-public final class UserSubject {
+public final class ServerUserSubject {
 	
 	// Private constructor to prevent instantiation
-	private UserSubject() {
+	private ServerUserSubject() {
 	}
 	
 	/**
@@ -31,7 +31,7 @@ public final class UserSubject {
 	 * @param userService The user service for user operations.
 	 * @param logger      The server logger for logging events.
 	 */
-	public static void register(Router router, UserService userService, ServerLogger logger) {
+	public static void register(ServerRouter router, UserService userService, ServerLogger logger) {
 
 		// Request: "login.guest"
 		router.on("login", "guest", (msg, client) -> {

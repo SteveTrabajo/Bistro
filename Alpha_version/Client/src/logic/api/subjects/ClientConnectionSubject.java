@@ -4,7 +4,7 @@ import javafx.application.Platform;
 import logic.BistroClient;
 import logic.api.ClientRouter;
 
-public class ConnectionSubject {
+public class ClientConnectionSubject {
 
     public static void register(ClientRouter router) {
         router.on("connection", "connect.ok", msg -> {

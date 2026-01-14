@@ -11,19 +11,19 @@ import entities.Item;
 import entities.User;
 import enums.UserType;
 import logic.ServerLogger;
-import logic.api.Router;
+import logic.api.ServerRouter;
 import logic.services.PaymentService;
 import logic.services.TableService;
 
-public class PaymentSubject {
+public class ServerPaymentSubject {
 
-    private PaymentSubject() {
+    private ServerPaymentSubject() {
     }
 
     private static final int MAX_FAILURES = 5;
     private static Map<Integer, Integer> userFailureMap = new ConcurrentHashMap<>();
 
-    public static void register(Router router, TableService tableService, ServerLogger logger, PaymentService paymentService) {
+    public static void register(ServerRouter router, TableService tableService, ServerLogger logger, PaymentService paymentService) {
         
         // --- ROUTE: Credit Card Payment ---
         router.on("payment", "complete", (msg, client) -> {
