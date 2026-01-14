@@ -58,7 +58,14 @@ public class ClientTablesSubject {
 			BistroClient.awaitResponse = false;
 			Order dto = (Order) msg.getData();
 			Platform.runLater(() -> {
-			BistroClientGUI.client.getTableCTRL().setUserAllocatedOrderForTable(dto);
+				BistroClientGUI.client.getTableCTRL().setUserAllocatedOrderForTable(dto);
+			});
+		});
+		
+		router.on("tables", "askSeatedOrder.fail", msg -> {
+			BistroClient.awaitResponse = false;
+			Platform.runLater(() -> {
+				BistroClientGUI.client.getTableCTRL().setUserAllocatedOrderForTable(null);
 			});
 		});
 		
