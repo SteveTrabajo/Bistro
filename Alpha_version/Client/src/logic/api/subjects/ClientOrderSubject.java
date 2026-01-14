@@ -161,7 +161,7 @@ public class ClientOrderSubject {
 				alert.show();
 				
 				// Refresh the list to show status change
-				BistroClientGUI.client.getReservationCTRL().askReservationsByDate(LocalDate.now());
+				BistroClientGUI.client.getReservationCTRL().notifyCancelResult(true);
 			});
 		});
 		
@@ -171,7 +171,7 @@ public class ClientOrderSubject {
 				Alert alert = new Alert(Alert.AlertType.ERROR);
 				alert.setTitle("Cancellation Failed");
 				alert.setHeaderText("Could not cancel reservation");
-				alert.setContentText("An error occurred while cancelling the reservation. Please try again later.");
+				alert.setContentText("Can't cancel an already SEATED or COMPLETED reservation.");
 				alert.show();
 			});
 		});

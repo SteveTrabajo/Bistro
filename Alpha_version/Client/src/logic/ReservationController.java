@@ -3,18 +3,14 @@ package logic;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.function.Consumer;
 
 import comms.Api;
 import comms.Message;
 import entities.Order;
-import enums.DaysOfWeek;
 import enums.OrderStatus;
 import javafx.application.Platform;
 
@@ -167,6 +163,12 @@ public class ReservationController {
 	    client.handleMessageFromClientUI(new Message(Api.ASK_CANCEL_RESERVATION, confirmationCode));
 	}
 	
+	public void notifyCancelResult(boolean success) {
+		if (cancelResultCallback != null) {
+			Platform.runLater(() -> cancelResultCallback.accept(success));
+		}
+	}
+	
 	public void seatCustomer(String confirmationCode) {
 	    client.handleMessageFromClientUI(new Message(Api.ASK_SEAT_CUSTOMER, confirmationCode));
 	}
@@ -201,7 +203,7 @@ public class ReservationController {
     }
 
 	public void retrieveConfirmationCode(String email, String phoneNum) {
-			    Map<String, String> requestData = new HashMap<>();
+	    Map<String, String> requestData = new HashMap<>();
 	    requestData.put("email", email);
 	    requestData.put("phoneNum", phoneNum);
 	    client.handleMessageFromClientUI(new Message(Api.ASK_FORGOT_CONFIRMATION_CODE, requestData));

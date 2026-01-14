@@ -165,5 +165,17 @@ public final class ServerOrdersSubject {
  	        }
  	    });
      		
+ 		router.on("orders", "cancelReservation", (msg, client) -> {
+            String confirmationCode = (String) msg.getData();
+            boolean success = ordersService.cancelReservation(confirmationCode);
+            if (success) {
+                client.sendToClient(new Message(Api.REPLY_CANCEL_RESERVATION_OK, confirmationCode));
+                logger.log("[INFO] Order " + confirmationCode + " was cancelled by " + client);
+            } else {
+                client.sendToClient(new Message(Api.REPLY_CANCEL_RESERVATION_FAIL, "Could not find order or order is already processed."));
+                logger.log("[WARN] Failed to cancel order " + confirmationCode);
+            }
+        });
+ 		
     }
 }
