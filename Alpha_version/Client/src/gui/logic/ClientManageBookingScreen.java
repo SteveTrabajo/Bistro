@@ -1,7 +1,6 @@
 package gui.logic;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -9,6 +8,7 @@ import java.util.stream.Collectors;
 
 import entities.Order;
 import enums.OrderStatus;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -28,20 +28,32 @@ import logic.BistroClientGUI;
 public class ClientManageBookingScreen {
 
     // ****************************** FXML Variables ******************************
-    @FXML private Button btnBack;
-    @FXML private Button btnNewReservation;
-    @FXML private Button btnCancelRes;
-    @FXML private Button btnRefresh;
+    @FXML 
+    private Button btnBack;
+    @FXML 
+    private Button btnNewReservation;
+    @FXML 
+    private Button btnCancelRes;
+    @FXML 
+    private Button btnRefresh;
     
-    @FXML private DatePicker dateFilter;
+    @FXML 
+    private DatePicker dateFilter;
     
-    @FXML private TableView<Order> reservationsTable;
-    @FXML private TableColumn<Order, LocalDate> colDate;
-    @FXML private TableColumn<Order, LocalTime> colTime;
-    @FXML private TableColumn<Order, String> colConfirm;
-    @FXML private TableColumn<Order, Integer> colDiners;
-    @FXML private TableColumn<Order, String> colStatus;
-    @FXML private TableColumn<Order, Integer> colTable;
+    @FXML 
+    private TableView<Order> reservationsTable;
+    @FXML 
+    private TableColumn<Order, LocalDate> colDate;
+    @FXML 
+    private TableColumn<Order, LocalTime> colTime;
+    @FXML 
+    private TableColumn<Order, String> colConfirm;
+    @FXML 
+    private TableColumn<Order, Integer> colDiners;
+    @FXML 
+    private TableColumn<Order, String> colStatus;
+    @FXML 
+    private TableColumn<Order, Integer> colTable;
 
     private ObservableList<Order> masterData = FXCollections.observableArrayList();
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -50,10 +62,8 @@ public class ClientManageBookingScreen {
     @FXML
     public void initialize() {
         setupTableColumns();
-        
         // Default filter: Today
         dateFilter.setValue(LocalDate.now());
-        
         // Listener for date picker to filter the table
         dateFilter.valueProperty().addListener((obs, oldVal, newVal) -> filterTable(newVal));
 
@@ -67,7 +77,7 @@ public class ClientManageBookingScreen {
         colDiners.setCellValueFactory(new PropertyValueFactory<>("dinersAmount"));
         colTable.setCellValueFactory(new PropertyValueFactory<>("tableId"));
 
-        // Date Formatter: dd/MM/yyyy
+        // Date Formatter: dd/mm/yyyy
         colDate.setCellFactory(column -> new TableCell<Order, LocalDate>() {
             @Override
             protected void updateItem(LocalDate date, boolean empty) {
@@ -86,10 +96,23 @@ public class ClientManageBookingScreen {
             }
             return new SimpleStringProperty("");
         });
+        
+        // Hide table value if 0
+        colTable.setCellFactory(column -> new TableCell<Order, Integer>() {
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null || item == 0) {
+                    setText(null);
+                } else {
+                    setText(String.valueOf(item));
+                }
+            }
+        });
     }
 
     /**
-     * Helper to force the table to sort by Date then Time.
+     * Helper to force table sort by Date and then Time.
      */
     private void applyDefaultSort() {
         reservationsTable.getSortOrder().clear();
@@ -101,12 +124,20 @@ public class ClientManageBookingScreen {
     }
 
     private void loadData() {
-        // TODO: Request actual user history from server
-        // BistroClientGUI.client.getReservationCTRL().askUserReservations(...);
-        
-        masterData.clear();
-        
-        filterTable(dateFilter.getValue());
+        if (BistroClientGUI.client != null) {
+            BistroClientGUI.client.getReservationCTRL().setAllReservationsListener(this::updateTable);
+            BistroClientGUI.client.getReservationCTRL().askClientOrderHistory();
+        }
+    }
+
+    private void updateTable(List<Order> orders) {
+        Platform.runLater(() -> {
+            masterData.clear();
+            if (orders != null) {
+                masterData.addAll(orders);
+            }
+            filterTable(dateFilter.getValue());
+        });
     }
 
     private void filterTable(LocalDate fromDate) {

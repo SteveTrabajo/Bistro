@@ -87,6 +87,18 @@ public final class ServerOrdersSubject {
 				}
 		});
 		
+		// Send client order history
+		router.on("orders", "getClientHistory", (msg, client) -> {
+			User sessionUser = (User) client.getInfo("user");
+			if (sessionUser != null) {
+				List<Order> history = ordersService.getClientHistory(sessionUser.getUserId());
+				client.sendToClient(new Message(Api.REPLY_CLIENT_ORDER_HISTORY_OK, history));
+                logger.log("[INFO] Sent order history to client " + client);
+			} else {
+				client.sendToClient(new Message(Api.REPLY_CLIENT_ORDER_HISTORY_OK, new ArrayList<>()));
+			}
+		});
+		
         //Send available time slots for reservation
         router.on("orders", "getAvailableHours", (msg, client) -> {
 			@SuppressWarnings("unchecked")

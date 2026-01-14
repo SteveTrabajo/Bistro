@@ -129,17 +129,14 @@ public class ReservationController {
 	}
 	
 	public void createReservationAsStaff(LocalDate date, LocalTime time, int diners, String customerType, String identifier, String customerName) {
-
 		Map<String, Object> bookingData = new HashMap<>();
 		bookingData.put("date", date);
 		bookingData.put("time", time);
 		bookingData.put("diners", diners);
 		bookingData.put("customerType", customerType);
-		
 		// Identifier is either MemberID or Phone Number depending on type
 		bookingData.put("identifier", identifier);
 		bookingData.put("customerName", customerName);
-		
 		client.handleMessageFromClientUI(new Message(Api.ASK_CREATE_RESERVATION_AS_STAFF, bookingData));
 	}
 	
@@ -160,6 +157,10 @@ public class ReservationController {
 	public void CheckConfirmationCodeCorrect(String confirmationCode) {
         client.handleMessageFromClientUI(new Message(Api.ASK_CHECK_ORDER_EXISTS, confirmationCode));
     }
+	
+	public void askClientOrderHistory() {
+		client.handleMessageFromClientUI(new Message(Api.ASK_CLIENT_ORDER_HISTORY, null));
+	}
 	
 	public void askOrderDetails(String confirmationCode) {
 	    client.handleMessageFromClientUI(new Message(Api.ASK_GET_ORDER, confirmationCode));

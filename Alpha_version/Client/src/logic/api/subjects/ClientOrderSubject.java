@@ -159,7 +159,6 @@ public class ClientOrderSubject {
 				alert.setHeaderText("Reservation Cancelled");
 				alert.setContentText("The reservation has been successfully cancelled.");
 				alert.show();
-				
 				// Refresh the list to show status change
 				BistroClientGUI.client.getReservationCTRL().notifyCancelResult(true);
 			});
@@ -173,6 +172,17 @@ public class ClientOrderSubject {
 				alert.setHeaderText("Could not cancel reservation");
 				alert.setContentText("Can't cancel an already SEATED or COMPLETED reservation.");
 				alert.show();
+			});
+		});
+		
+		router.on("orders", "getClientHistory.ok", msg -> {
+			BistroClient.awaitResponse = false;
+			@SuppressWarnings("unchecked")
+			List<Order> orders = (List<Order>) msg.getData();
+			
+			Platform.runLater(() -> {
+				//TODO maybe rename method to receiveOrderHistory
+				BistroClientGUI.client.getReservationCTRL().receiveStaffReservations(orders);
 			});
 		});
 		

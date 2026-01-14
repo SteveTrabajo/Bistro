@@ -129,6 +129,10 @@ public class OrdersService {
 		return dbController.checkOrderExistsInDB(confirmationCode);
 	}
 	
+	public List<Order> getClientHistory(int userId) {
+		return dbController.getOrdersByUserId(userId);
+	}
+	
 	/**
 	 * Generates a unique 6-digit code with a prefix (e.g., "R-123456").
 	 * Verifies against the DB to ensure no duplicates exist.

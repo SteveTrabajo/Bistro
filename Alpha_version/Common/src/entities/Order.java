@@ -19,10 +19,7 @@ public class Order implements Serializable {
 	private String confirmationCode;
 	private Item[] orderedItems=null;
 	private String idempotencyKey;
-
-	// This field existed in your old schema as member_id.
-	// Now its a user_id for both guests and members.
-
+	private int tableID; // temp var, doesnt get saved into DB
 	private LocalDateTime dateOfPlacingOrder;
 
 	private OrderType orderType; // RESERVATION / WAITLIST
@@ -65,10 +62,6 @@ public class Order implements Serializable {
 		this.orderHour = orderHour;
 		this.dinersAmount = dinersAmount;
 	}
-	
-
-
-	
 
 	// Convenience flags
 	public boolean isWaitList() {
@@ -151,9 +144,11 @@ public class Order implements Serializable {
 	public void setStatus(OrderStatus status) {
 		this.status = status;
 	}
+	
 	public Item[] getOrderedItems() {
 		return orderedItems;
 	}
+	
 	public void setOrderedItems(Item[] orderedItems) {
 		this.orderedItems = orderedItems;
 	}
@@ -161,7 +156,16 @@ public class Order implements Serializable {
 	public String getIdempotencyKey() {// for payment processing
 		return this.idempotencyKey; //
 	}
+	
 	public void setIdempotencyKey(String idempotencyKey) {// for payment processing
 		this.idempotencyKey = idempotencyKey;
+	}
+	
+	public int getTableId() {
+		return tableID;
+	}
+	
+	public void setTableId(int tableID) {
+		this.tableID = tableID;
 	}
 }

@@ -1023,6 +1023,53 @@ public class BistroDataBase_Controller {
         }
         return orders;
     }
+	
+	/*	//TODO double check this method
+	 *  Retrieves all orders associated with a specific user ID. 
+	 */
+	public List<Order> getOrdersByUserId(int userId) {
+		List<Order> orders = new ArrayList<>();
+        // Query joins with table_sessions to get tableNum if currently seated
+		String query = "SELECT o.*, ts.tableNum " +
+                       "FROM orders o " +
+                       "LEFT JOIN table_sessions ts ON o.order_number = ts.order_number AND ts.left_at IS NULL " +
+                       "WHERE o.user_id = ? " +
+                       "ORDER BY o.order_date DESC, o.order_time DESC";
+		
+		Connection conn = null;
+		try {
+			conn = borrow();
+			try (PreparedStatement ps = conn.prepareStatement(query)) {
+				ps.setInt(1, userId);
+				try (ResultSet rs = ps.executeQuery()) {
+					while (rs.next()) {
+                        // Map ResultSet to Order
+						int orderNumber = rs.getInt("order_number");
+						Date sqlDate = rs.getDate("order_date");
+						LocalDate orderDate = (sqlDate != null) ? sqlDate.toLocalDate() : null;
+						Time sqlTime = rs.getTime("order_time");
+						LocalTime orderTime = (sqlTime != null) ? sqlTime.toLocalTime() : null;
+						int diners = rs.getInt("number_of_guests");
+						String code = rs.getString("confirmation_code");
+						OrderStatus status = OrderStatus.valueOf(rs.getString("status"));
+                        String typeStr = rs.getString("order_type");
+                        OrderType type = (typeStr != null) ? OrderType.valueOf(typeStr) : OrderType.RESERVATION;
+                        int tableId = rs.getInt("tableNum");
+                        if (rs.wasNull()) tableId = 0; // no table assigned
+                        Order order = new Order(orderNumber, orderDate, orderTime, diners, code, userId, type, status, null);
+                        order.setTableId(tableId); // set tableId if applicable
+                        orders.add(order);
+					}
+				}
+			}
+		} catch (SQLException ex) {
+			logger.log("[ERROR] getOrdersByUserId: " + ex.getMessage());
+			ex.printStackTrace();
+		} finally {
+			release(conn);
+		}
+		return orders;
+	}
 
 	/**
 	 * Checks if an order exists in the database by its confirmation code.
