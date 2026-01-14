@@ -24,7 +24,7 @@ public class OrdersService {
 	private final BistroServer server;
 	private final BistroDataBase_Controller dbController;
 	private final ServerLogger logger;
-	private final TableService tableService;
+	private TableService tableService;
 	
 	//Variables for reservation slots calculation:
 	private List<Integer> tableSizes; // [2,2,4,4,6,6,8]
@@ -34,16 +34,19 @@ public class OrdersService {
 	
 	// ******************************** Constructors***********************************
 	
-	public OrdersService(BistroServer server,BistroDataBase_Controller dbController,TableService tableService, ServerLogger logger) {
+	public OrdersService(BistroServer server,BistroDataBase_Controller dbController, ServerLogger logger) {
 		this.dbController = dbController;
 		this.logger = logger;
 		this.server = server;
-		this.tableService = tableService;
 		this.tableSizes = new ArrayList<Integer>();
 		this.slotStepMinutes = 30;
 		this.reservationDurationMinutes = 120;
 	}
 	// ******************************* Getters and Setters ***********************************
+	
+	public void setTableService(TableService tableService) {
+		this.tableService = tableService;
+	}
 	
 	public int getSlotStepMinutes() {
 		return slotStepMinutes;

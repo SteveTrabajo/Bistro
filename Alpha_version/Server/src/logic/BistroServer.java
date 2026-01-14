@@ -59,13 +59,14 @@ public class BistroServer extends AbstractServer {
 		this.dbController.setLogger(this.logger);
 		// Initialize services:
 		this.userService = new UserService(this.dbController, this.logger);
-		this.ordersService = new OrdersService(this, this.dbController, null, this.logger);
 		this.reportService = new ReportsService(this.dbController, this.logger);
+		this.noShowManager = new NoShowManager(this.dbController, this.logger);
 		this.notificationService = new NotificationService(this.dbController, this.logger);
+		this.ordersService = new OrdersService(this, this.dbController,this.logger);
 		this.tableService = new TableService(this.dbController, this.logger, this.ordersService, this.notificationService);
 		this.paymentService = new PaymentService(this.dbController, this.logger, this.tableService);
 		this.waitingListService = new WaitingListService(this.dbController,this.logger,this.ordersService,this.tableService, this.userService);
-		this.noShowManager = new NoShowManager(this.dbController, this.logger);
+		this.ordersService.setTableService(this.tableService);
 		// Register API subjects
 		registerHandlers(this.router, this.dbController, this.logger);
 	}

@@ -1566,11 +1566,13 @@ public class BistroDataBase_Controller {
 	    List<Table> tablesList = new ArrayList<>();
 
 	    String qry =
-	        "SELECT t.tableNum, t.capacity, " +
-	        "CASE WHEN ts.table_id IS NULL THEN false ELSE true END AS occupiedNow " +
-	        "FROM tables t " +
-	        "LEFT JOIN table_sessions ts " +
-	        "ON t.tableNum = ts.table_id AND ts.left_at IS NULL";
+	    	    "SELECT t.tableNum, t.capacity, " +
+	    	    "EXISTS ( " +
+	    	    "   SELECT 1 FROM table_sessions ts " +
+	    	    "   WHERE ts.tableNum = t.tableNum AND ts.left_at IS NULL " +
+	    	    ") AS occupiedNow " +
+	    	    "FROM tables t";
+
 
 	    Connection conn = null;
 	    try {
