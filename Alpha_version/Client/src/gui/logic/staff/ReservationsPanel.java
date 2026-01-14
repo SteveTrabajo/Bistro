@@ -195,10 +195,14 @@ public class ReservationsPanel {
     }
 
     @FXML
-    void onDateChanged(ActionEvent event) { loadData(); }
+    void onDateChanged(ActionEvent event) { 
+    	loadData(); 
+	}
 
     @FXML
-    void btnRefresh(ActionEvent event) { loadData(); }
+    void btnRefresh(ActionEvent event) { 
+    	loadData(); 
+	}
 
     private void loadData() {
         LocalDate date = dateFilter.getValue();
@@ -226,22 +230,46 @@ public class ReservationsPanel {
     @FXML
     void btnMarkSeated(ActionEvent event) {
         Order selected = reservationsTable.getSelectionModel().getSelectedItem();
-        if (selected == null) { showAlert("No Selection", "Please select a reservation."); return; }
+        if (selected == null) { 
+        	showAlert("No Selection", "Please select a reservation."); 
+        	return; 
+        } 
+        if (selected.getStatus() == OrderStatus.CANCELLED || selected.getStatus() == OrderStatus.COMPLETED) {
+            showAlert("Invalid Action", "This reservation is already inactive.");
+            return;
+        }
+        if (selected.getStatus() == OrderStatus.SEATED) {
+            showAlert("Invalid Action", "This customer is already seated at a table");
+            return;
+       }
+        
         if (BistroClientGUI.client != null) {
-            selected.setStatus(OrderStatus.SEATED);
-            BistroClientGUI.client.getReservationCTRL().updateReservation(selected);
+            //selected.setStatus(OrderStatus.SEATED);
+            BistroClientGUI.client.getReservationCTRL().seatCustomer(selected.getConfirmationCode());
         }
         reservationsTable.refresh();
     }
 
+    
     @FXML
     void btnCancelRes(ActionEvent event) {
         Order selected = reservationsTable.getSelectionModel().getSelectedItem();
-        if (selected == null) { showAlert("No Selection", "Please select a reservation."); return; }
-        if (BistroClientGUI.client != null) {
-            BistroClientGUI.client.getReservationCTRL().cancelReservation(selected.getConfirmationCode()); 
-        }
-        showAlert("Cancelled", "Cancellation request sent.");
+        if (selected == null) { 
+        	showAlert("No Selection", "Please select a reservation."); 
+        	return; 
+    	}
+        
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, 
+                "Are you sure you want to cancel reservation " + selected.getConfirmationCode() + "?", 
+                ButtonType.YES, ButtonType.NO);
+                
+            confirm.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.YES && BistroClientGUI.client != null) {
+                    BistroClientGUI.client.getReservationCTRL().cancelReservation(selected.getConfirmationCode());
+                    showAlert("Cancelled", "Cancellation request sent.");
+                }
+            });
+
         loadData();
     }
 

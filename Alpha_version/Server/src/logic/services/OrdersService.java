@@ -400,40 +400,40 @@ public class OrdersService {
 	
 	// ******************************** New Method for Date Availability ***********************************
 	
-		/**
-		 * Returns a list of dates (starting from tomorrow up to 30 days ahead)
-		 * where there is at least one available time slot for the given number of diners.
-		 * * @param diners The number of diners.
-		 * @return List of available LocalDate objects.
-		 */
-		public List<LocalDate> getAvailableDates(int diners) {
-			getTablesCapacity(); // Refresh table sizes
-			List<LocalTime> openingHours = dbController.getOpeningHoursFromDB();
-			if (openingHours == null || openingHours.size() < 2) {
-				return new ArrayList<>();
-			}
-			LocalTime open = openingHours.get(0);
-			LocalTime close = openingHours.get(1);
-
-			List<LocalDate> resultDates = new ArrayList<>();
-			LocalDate startDate = LocalDate.now().plusDays(1); // Start checking from tomorrow
-			LocalDate endDate = startDate.plusDays(30); // Check for the next 30 days
-
-			// Iterate through each day
-			for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
-				// Get existing reservations for this specific date
-				List<Order> reservationsOnDate = dbController.getOrdersByDate(date);
-				
-				// Calculate available slots for this date
-				List<String> slots = computeAvailableSlots(open, close, diners, reservationsOnDate);
-				
-				// If there is at least one slot, add the date to the result
-				if (!slots.isEmpty()) {
-					resultDates.add(date);
-				}
-			}
-			return resultDates;
+	/**
+	 * Returns a list of dates (starting from tomorrow up to 30 days ahead)
+	 * where there is at least one available time slot for the given number of diners.
+	 * * @param diners The number of diners.
+	 * @return List of available LocalDate objects.
+	 */
+	public List<LocalDate> getAvailableDates(int diners) {
+		getTablesCapacity(); // Refresh table sizes
+		List<LocalTime> openingHours = dbController.getOpeningHoursFromDB();
+		if (openingHours == null || openingHours.size() < 2) {
+			return new ArrayList<>();
 		}
+		LocalTime open = openingHours.get(0);
+		LocalTime close = openingHours.get(1);
+
+		List<LocalDate> resultDates = new ArrayList<>();
+		LocalDate startDate = LocalDate.now().plusDays(0); // Start checking from today
+		LocalDate endDate = startDate.plusDays(30); // Check for the next 30 days
+
+		// Iterate through each day
+		for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+			// Get existing reservations for this specific date
+			List<Order> reservationsOnDate = dbController.getOrdersByDate(date);
+			
+			// Calculate available slots for this date
+			List<String> slots = computeAvailableSlots(open, close, diners, reservationsOnDate);
+			
+			// If there is at least one slot, add the date to the result
+			if (!slots.isEmpty()) {
+				resultDates.add(date);
+			}
+		}
+		return resultDates;
+	}
 
 
 }

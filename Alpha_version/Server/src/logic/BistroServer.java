@@ -188,7 +188,7 @@ public class BistroServer extends AbstractServer {
 		// Register API subjects
 		ConnectionSubject.register(router, logger);
 		UserSubject.register(router,userService, logger);
-		OrdersSubject.register(router, ordersService, logger);
+		OrdersSubject.register(router, ordersService, tableService, logger);
 		WaitingListSubject.register(router, waitingListService, logger);
 		TablesSubject.register(router, tableService, logger);
 		ReportsSubject.register(router, reportService, logger);

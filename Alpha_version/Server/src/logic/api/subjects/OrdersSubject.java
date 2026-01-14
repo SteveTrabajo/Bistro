@@ -1,6 +1,7 @@
 package logic.api.subjects;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +16,7 @@ import enums.OrderType;
 import logic.ServerLogger;
 import logic.api.Router;
 import logic.services.OrdersService;
+import logic.services.TableService;
 
 /**
  * API handlers related to orders.
@@ -32,7 +34,7 @@ public final class OrdersSubject {
      * @param ordersService
      * @param logger 
      */
-    public static void register(Router router, OrdersService ordersService, ServerLogger logger) {
+    public static void register(Router router, OrdersService ordersService, TableService tableService, ServerLogger logger) {
     	
     	
 		// New reservation order
@@ -133,25 +135,35 @@ public final class OrdersSubject {
         router.on("orders", "getOrdersByDate", (msg, client) -> {
             LocalDate date = (LocalDate) msg.getData();
             List<Order> orders = ordersService.getStaffReservations(date);
-            client.sendToClient(new Message(Api.ASK_GET_RESERVATIONS_BY_DATE + ".ok", orders));
+            client.sendToClient(new Message(Api.REPLY_GET_RESERVATIONS_BY_DATE_OK, orders));
+            logger.log("[INFO] Sent " + orders.size() + " reservations for date: " + date + " successfully.");
         });
-     // --------------------------------------------------------------------------
-     		// NEW HANDLER: Send available dates based on diner count
-     		// --------------------------------------------------------------------------
-     		router.on("orders", "getAvailableDates", (msg, client) -> {
-     		    int diners = (int) msg.getData();
-     		    
-     		    
-     		    List<LocalDate> availableDates = ordersService.getAvailableDates(diners);
-     		    
-     		    if(availableDates != null) {
-     		        client.sendToClient(new Message(Api.REPLY_AVAILABLE_DATES_OK, availableDates));
-     		        logger.log("[INFO] Client: " + client + " retrieved available dates successfully.");
-     		    } else {
-     		        client.sendToClient(new Message(Api.REPLY_AVAILABLE_DATES_FAIL, null));
-     		        logger.log("[ERROR] Client: " + client + " failed to get available dates.");
-     		    }
-     		});
+        
+ 		//Send available dates for reservation
+ 		router.on("orders", "getAvailableDates", (msg, client) -> {
+ 		    int diners = (int) msg.getData();
+ 		    List<LocalDate> availableDates = ordersService.getAvailableDates(diners);		    
+ 		    if(availableDates != null) {
+ 		        client.sendToClient(new Message(Api.REPLY_AVAILABLE_DATES_OK, availableDates));
+ 		        logger.log("[INFO] Client: " + client + " retrieved available dates successfully.");
+ 		    } else {
+ 		        client.sendToClient(new Message(Api.REPLY_AVAILABLE_DATES_FAIL, null));
+ 		        logger.log("[ERROR] Client: " + client + " failed to get available dates.");
+ 		    }
+ 		});
+ 		
+ 		router.on("orders", "seatCustomer", (msg, client) -> {
+ 	        String confirmationCode = (String) msg.getData();
+ 	        
+ 	        int tableNum = tableService.allocateTable(confirmationCode, LocalDateTime.now()); 	        
+ 	        if (tableNum != 0) {
+ 	            client.sendToClient(new Message(Api.REPLY_SEAT_CUSTOMER_OK, tableNum));
+ 	            logger.log("[INFO] Order " + confirmationCode + " seated at Table " + tableNum);
+ 	        } else {
+ 	            client.sendToClient(new Message(Api.REPLY_SEAT_CUSTOMER_FAIL, "No available table matches criteria."));
+ 	            logger.log("[WARN] Failed to seat order " + confirmationCode);
+ 	        }
+ 	    });
      		
     }
 }

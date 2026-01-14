@@ -124,6 +124,32 @@ public class OrderSubject {
 			// Send an empty list or null to indicate failure/no dates
 			BistroClientGUI.client.getReservationCTRL().setAvailableDates(new ArrayList<>());
 		});
+		
+		
+		router.on("orders", "seatCustomer.ok", msg -> {
+			BistroClient.awaitResponse = false;
+		    int tableNum = (int) msg.getData();
+		    Platform.runLater(() -> {
+		        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		        alert.setTitle("Seating Successful");
+		        alert.setHeaderText("Table Allocated!");
+		        alert.setContentText("Please seat the customer at Table: " + tableNum);
+		        alert.show();		        
+		        // Refresh the list to show status change
+		        BistroClientGUI.client.getReservationCTRL().askReservationsByDate(LocalDate.now());
+		    });
+		});
+
+		router.on("orders", "seatCustomer.fail", msg -> {
+			BistroClient.awaitResponse = false;
+		    Platform.runLater(() -> {
+		        Alert alert = new Alert(Alert.AlertType.WARNING);
+		        alert.setTitle("Seating Failed");
+		        alert.setHeaderText("No Table Available");
+		        alert.setContentText("There is currently no table available that fits this reservation.\nPlease ask the client to wait.");
+		        alert.show();
+		    });
+		});
 	}
 	
 }

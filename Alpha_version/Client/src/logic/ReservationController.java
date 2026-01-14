@@ -167,6 +167,10 @@ public class ReservationController {
 	    client.handleMessageFromClientUI(new Message(Api.ASK_CANCEL_RESERVATION, confirmationCode));
 	}
 	
+	public void seatCustomer(String confirmationCode) {
+	    client.handleMessageFromClientUI(new Message(Api.ASK_SEAT_CUSTOMER, confirmationCode));
+	}
+	
 	/*
 	 * Checks if a user's reservation is ready (for waiting list flow).
 	 */

@@ -974,7 +974,10 @@ public class BistroDataBase_Controller {
         if (date == null) return orders;
 
         // Select ALL fields needed for the staff table
-        String qry = "SELECT * FROM orders WHERE order_date = ? AND order_type = 'RESERVATION'";
+        String qry = "SELECT o.*, ts.tableNum " +
+	                 "FROM orders o " +
+	                 "LEFT JOIN table_sessions ts ON o.order_number = ts.order_number AND ts.left_at IS NULL " +
+	                 "WHERE o.order_date = ? AND o.order_type = 'RESERVATION'";
 
         Connection conn = null;
         try {
@@ -984,23 +987,20 @@ public class BistroDataBase_Controller {
 
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        // 1. Extract Basic Info
                         int id = rs.getInt("order_number");
                         LocalTime time = rs.getTime("order_time").toLocalTime();
                         int diners = rs.getInt("number_of_guests");
                         String statusStr = rs.getString("status");
                         String confirmCode = rs.getString("confirmation_code");
                         int userId = rs.getInt("user_id");
-                        int tableId = rs.getInt("table_id"); 
                         
-                        // 2. Create Order Object (Full Constructor)
+                        int tableId = rs.getInt("tableNum"); // can be null if no table assigned
+                        if (rs.wasNull()) {
+							tableId = 0; // to indicate no table assigned
+						}
+                        
                         Order order = new Order(id, date, time, diners, confirmCode, tableId, null, OrderStatus.valueOf(statusStr), null);
-                        order.setUserId(userId); 
-                        
-                        // 3. Optional: If you need the User's Name (e.g., "John Doe"), 
-                        // you might need a JOIN query here or a separate lookup.
-                        // For now, we stick to the Order table data.
-                        
+                        order.setUserId(userId);                         
                         orders.add(order);
                     }
                 }
