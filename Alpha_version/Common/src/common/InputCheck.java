@@ -294,10 +294,12 @@ public class InputCheck {
 			return "Confirmation code is required.";
 		}
 		String c = code.trim();
-		if (!c.matches("^\\d{8}$")) {
-			return "Confirmation code must be exactly 8 digits.";
-		}
-		return null;
+		// Format: R-123456 or W-123456
+		// regex breakdown: ^ = start, [RW]- = R- or W-, \d{6} = exactly 6 digits, $ = end
+		if (!c.matches("^[RW]-\\d{6}$")) {
+	        return "Confirmation code must start with 'R-' or 'W-' followed by 6 digits.";
+	    }
+	    return null;
 	}
 	
 }
