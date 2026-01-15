@@ -2,8 +2,7 @@ package gui.logic;
 
 
 
-import entities.Table;
-import entities.User;
+import entities.Order;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -26,12 +25,19 @@ public class ClientCheckInTableSuccessScreen {
 	//****************** FXML Methods ******************//
 	@FXML
 	public void initialize() {
-		int currentTable = BistroClientGUI.client.getTableCTRL().getUserAllocatedTable();
-		String confirmationCode = BistroClientGUI.client.getTableCTRL().getUserAllocatedOrderForTable()
-				.getConfirmationCode();
-		lblTableNum.setText(String.valueOf(currentTable));
-		lblTableNumber.setText(String.valueOf(currentTable));
-		lblConfirmCode.setText(confirmationCode);
+		Order storedOrder = BistroClientGUI.client.getTableCTRL().getUserAllocatedOrderForTable();
+		
+		if (storedOrder != null) {
+            int currentTable = storedOrder.getTableId();
+            String confirmationCode = storedOrder.getConfirmationCode();
+            
+            lblTableNum.setText(String.valueOf(currentTable));
+            lblTableNumber.setText(String.valueOf(currentTable));
+            lblConfirmCode.setText(confirmationCode);
+        } else {
+            lblTableNum.setText("Error");
+            lblConfirmCode.setText("");
+        }
 	}
 
 	/**

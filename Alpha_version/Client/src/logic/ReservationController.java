@@ -262,4 +262,8 @@ public class ReservationController {
         }
     }
 	
+	public boolean hasCheckInListener() {
+		return this.checkInCallback != null;
+	}
+	
 }

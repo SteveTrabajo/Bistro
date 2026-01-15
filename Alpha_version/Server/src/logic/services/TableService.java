@@ -6,16 +6,11 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import dto.Holiday;
 import dto.WeeklyHour;
 import entities.Order;
 import entities.Table;
-import entities.User;
 import enums.EndTableSessionType;
 import enums.OrderStatus;
 import enums.OrderType;
@@ -71,7 +66,14 @@ public class TableService {
 	            return -1;
 	        }
 	        //update order status to SEATED
-	        dbController.updateOrderStatusInDB(confirmationCode, OrderStatus.SEATED);
+	        boolean statusUpdated = dbController.updateOrderStatusInDB(confirmationCode, OrderStatus.SEATED);
+	        
+	        if (!statusUpdated) {
+	            logger.log("[ERROR] Critical: Session created but Status Update failed for " + confirmationCode);
+	            dbController.deleteActiveSession(order.getOrderNumber());
+	            logger.log("[INFO] Rolled back (deleted) orphan session for order " + order.getOrderNumber());
+	            return -1;
+	        }
 	        logger.log("[INFO] Allocated Table " + tableNum + " to Order " + confirmationCode);
 	        return tableNum;
 	    }

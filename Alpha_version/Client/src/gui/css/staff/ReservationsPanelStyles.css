@@ -33,3 +33,47 @@
     -fx-text-fill: #64748b; /* Slate Grey */
     -fx-font-style: italic;
 }
+
+#reservationsTable .table-row-cell:filled:selected {
+    -fx-background-color: #0078D7;  /* <--- CHANGE THIS to your preferred color */
+    -fx-text-fill: white;
+}
+
+/* Ensure text inside the cells (including your custom status) turns white */
+#reservationsTable .table-row-cell:filled:selected .text {
+    -fx-fill: white; 
+}
+
+/* 1. SEATED */
+/* Background override (Cell level) */
+#reservationsTable .table-row-cell:filled:selected .status-seated {
+    -fx-background-color: #dcfce7; 
+}
+/* Text color override (Text Node level) */
+#reservationsTable .table-row-cell:filled:selected .status-seated .text {
+    -fx-fill: #16a34a; 
+}
+
+/* 2. PENDING */
+#reservationsTable .table-row-cell:filled:selected .status-pending {
+    -fx-background-color: #ffedd5;
+}
+#reservationsTable .table-row-cell:filled:selected .status-pending .text {
+    -fx-fill: #ea580c; 
+}
+
+/* 3. CANCELLED */
+#reservationsTable .table-row-cell:filled:selected .status-cancelled {
+    -fx-background-color: white; 
+}
+#reservationsTable .table-row-cell:filled:selected .status-cancelled .text {
+    -fx-fill: #dc2626; 
+}
+
+/* 4. COMPLETED */
+#reservationsTable .table-row-cell:filled:selected .status-completed {
+    -fx-background-color: white;
+}
+#reservationsTable .table-row-cell:filled:selected .status-completed .text {
+    -fx-fill: #64748b; 
+}

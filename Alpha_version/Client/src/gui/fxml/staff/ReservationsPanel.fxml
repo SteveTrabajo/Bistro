@@ -47,10 +47,10 @@
             <columns>
                 <TableColumn fx:id="colDate" prefWidth="90" text="Date" />
                 <TableColumn fx:id="colTime" prefWidth="70" text="Time" />
-                <TableColumn fx:id="colOrderId" prefWidth="70" text="ID" />
+                <TableColumn fx:id="colOrderId" prefWidth="70" text="Order ID" />
                 <TableColumn fx:id="colCustomerType" prefWidth="90" text="Type" />
-                <TableColumn fx:id="colConfirm" prefWidth="100" text="Code" />
-                <TableColumn fx:id="colDiners" prefWidth="60" text="Pax" />
+                <TableColumn fx:id="colConfirm" prefWidth="100" text="Confirmation Code" />
+                <TableColumn fx:id="colDiners" prefWidth="60" text="Diners Amount" />
                 <TableColumn fx:id="colTable" prefWidth="70" text="Table #" />
                 <TableColumn fx:id="colStatus" prefWidth="110" text="Status" />
             </columns>

@@ -82,14 +82,24 @@ public class ClientCheckInTableScreen {
 				if (isSuccess) {
 					Order confirmedOrder = new Order();
 					confirmedOrder.setConfirmationCode(code);
+					
+					try {
+						int tableNum = Integer.parseInt(message);
+						confirmedOrder.setTableId(tableNum);
+					} catch (NumberFormatException e) {
+						System.err.println("Failed to parse table number: " + message);
+						confirmedOrder.setTableId(0);
+					}
+
 					BistroClientGUI.client.getTableCTRL().setUserAllocatedOrderForTable(confirmedOrder);
-					BistroClientGUI.switchScreen(event, "clientCheckInTableSuccessScreen", "Error loading Success Screen");
+					BistroClientGUI.switchScreen(event, "clientCheckInTableSuccessScreen", "Success");
 				} else {
 					BistroClientGUI.display(lblError, message, Color.RED);
 				}
 			});
 		});
-		BistroClientGUI.client.getReservationCTRL().CheckConfirmationCodeCorrect(code);
+		
+		BistroClientGUI.client.getReservationCTRL().seatCustomer(code);
 	}
 	
 	/**

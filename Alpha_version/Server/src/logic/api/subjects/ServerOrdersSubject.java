@@ -13,6 +13,7 @@ import entities.Order;
 import entities.User;
 import enums.OrderStatus;
 import enums.OrderType;
+import enums.UserType;
 import logic.ServerLogger;
 import logic.api.ServerRouter;
 import logic.services.OrdersService;
@@ -174,15 +175,49 @@ public final class ServerOrdersSubject {
  		
  		router.on("orders", "seatCustomer", (msg, client) -> {
  	        String confirmationCode = (String) msg.getData();
+ 	        User sessionUser = (User) client.getInfo("user");
+ 	        
+ 	        if (sessionUser == null) {
+ 	        	client.sendToClient(new Message(Api.REPLY_SEAT_CUSTOMER_FAIL, "Unauthorized"));
+ 	            logger.log("[SECURITY] Unauthorized seat customer attempt from " + client);
+ 	            return;
+ 	        }
+ 	        
+ 	        Order order = ordersService.getOrderByConfirmationCode(confirmationCode);
+ 	        if (order == null) {
+ 	        	client.sendToClient(new Message(Api.REPLY_SEAT_CUSTOMER_FAIL, "Reservation not found."));
+ 	            logger.log("[WARN] Attempted to seat non-existent order " + confirmationCode);
+ 	            return;
+ 	        }
+ 	        
+ 	        boolean isStaff = (sessionUser.getUserType() == UserType.EMPLOYEE || sessionUser.getUserType() == UserType.MANAGER);
+ 	        boolean isOrderOwner = order.getUserId() == sessionUser.getUserId();
+ 	        
+ 	        if (isStaff) {
+ 	        	if (order.getStatus() == OrderStatus.SEATED || order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.COMPLETED) {
+ 	        		client.sendToClient(new Message(Api.REPLY_SEAT_CUSTOMER_FAIL, "Order is already " + order.getStatus()));
+ 	        		return;
+ 	        	}
+ 	        	
+ 	        } else if (isOrderOwner) {
+ 	        	if (order.getStatus() != OrderStatus.NOTIFIED) {
+ 	        		client.sendToClient(new Message(Api.REPLY_SEAT_CUSTOMER_FAIL, "Reservation not ready for self-check-in. Please wait for notification or see host."));
+ 	        		return;
+ 	        	}
+ 	        	
+ 	        } else {
+ 	        	client.sendToClient(new Message(Api.REPLY_SEAT_CUSTOMER_FAIL, "Access Denied: This reservation does not belong to you."));
+ 	        	return;
+ 	        }
  	        
  	        int tableNum = tableService.allocateTable(confirmationCode, LocalDateTime.now()); 	        
- 	        if (tableNum != 0) {
- 	            client.sendToClient(new Message(Api.REPLY_SEAT_CUSTOMER_OK, tableNum));
- 	            logger.log("[INFO] Order " + confirmationCode + " seated at Table " + tableNum);
- 	        } else {
- 	            client.sendToClient(new Message(Api.REPLY_SEAT_CUSTOMER_FAIL, "No available table matches criteria."));
- 	            logger.log("[WARN] Failed to seat order " + confirmationCode);
- 	        }
+	        if (tableNum > 0) {
+	            client.sendToClient(new Message(Api.REPLY_SEAT_CUSTOMER_OK, tableNum));
+	            logger.log("[INFO] Order " + confirmationCode + " seated at Table " + tableNum + " by " + sessionUser.getUserType());
+	        } else {
+	            client.sendToClient(new Message(Api.REPLY_SEAT_CUSTOMER_FAIL, "No available table matches criteria."));
+	            logger.log("[WARN] Failed to seat order " + confirmationCode);
+	        }
  	    });
      		
  		router.on("orders", "cancelReservation", (msg, client) -> {

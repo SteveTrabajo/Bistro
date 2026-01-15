@@ -13,7 +13,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -985,8 +984,9 @@ public class BistroDataBase_Controller {
         if (date == null) return orders;
 
         // Select ALL fields needed for the staff table
-        String qry = "SELECT o.*, ts.tableNum " +
+        String qry = "SELECT o.*, ts.tableNum, u.type " +
 	                 "FROM orders o " +
+	                 "JOIN users u ON o.user_id = u.user_id " +
 	                 "LEFT JOIN table_sessions ts ON o.order_number = ts.order_number AND ts.left_at IS NULL " +
 	                 "WHERE o.order_date = ? AND o.order_type = 'RESERVATION'";
 
@@ -1010,8 +1010,11 @@ public class BistroDataBase_Controller {
 							tableId = 0; // to indicate no table assigned
 						}
                         
-                        Order order = new Order(id, date, time, diners, confirmCode, tableId, null, OrderStatus.valueOf(statusStr), null);
-                        order.setUserId(userId);                         
+                        String uType = rs.getString("type");
+                        
+                        Order order = new Order(id, date, time, diners, confirmCode, userId, null, OrderStatus.valueOf(statusStr), null);
+                        order.setTableId(tableId);  
+                        order.setUserTypeStr(uType);
                         orders.add(order);
                     }
                 }
@@ -1583,6 +1586,28 @@ public class BistroDataBase_Controller {
 		}
 		return queue;
 	}
+	
+	//TODO double check this method
+	/**
+     * Removes the active table session for a specific order.
+     * Used for rolling back a failed seating attempt.
+     */
+    public void deleteActiveSession(int orderNumber) {
+        String sql = "DELETE FROM table_sessions WHERE order_number = ? AND left_at IS NULL";
+        
+        Connection conn = null;
+        try {
+            conn = borrow();
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, orderNumber);
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            logger.log("[ERROR] Failed to rollback/delete session for order " + orderNumber + ": " + e.getMessage());
+        } finally {
+            release(conn);
+        }
+    }
 
 	// ****************************** Table Operations ******************************
 	

@@ -22,6 +22,7 @@ public class Order implements Serializable {
 	private int tableID; // temp var, doesnt get saved into DB
 	private LocalDateTime dateOfPlacingOrder;
 
+	private String userTypeStr; // temp var, doesnt get saved into DB
 	private OrderType orderType; // RESERVATION / WAITLIST
 	private OrderStatus status; // PENDING / ...
 	// ---- constructors ----		
@@ -167,5 +168,13 @@ public class Order implements Serializable {
 	
 	public void setTableId(int tableID) {
 		this.tableID = tableID;
+	}
+	
+	public String getUserTypeStr() {
+		return userTypeStr;
+	}
+	
+	public void setUserTypeStr(String userTypeStr) {
+		this.userTypeStr = userTypeStr;
 	}
 }

@@ -98,7 +98,6 @@ public class ReservationsPanel {
         loadData();
     }
 
-    //TODO change into our actual logic: remove mock items and implement real logic
     private void setupColumns() {
         colDate.setCellValueFactory(new PropertyValueFactory<>("orderDate"));
         
@@ -115,19 +114,17 @@ public class ReservationsPanel {
         colConfirm.setCellValueFactory(new PropertyValueFactory<>("confirmationCode"));
         colDiners.setCellValueFactory(new PropertyValueFactory<>("dinersAmount"));
 
-        // TODO change into our actual logic: 4. Customer Type (Logic: If UserID > 0 it's a member, else Guest. Adjust based on your real logic)
         colCustomerType.setCellValueFactory(new PropertyValueFactory<>("userId"));
         colCustomerType.setCellFactory(col -> new TableCell<>() {
             @Override
             protected void updateItem(Integer userId, boolean empty) {
                 super.updateItem(userId, empty);
-                if (empty || userId == null) {
+                if (empty) {
                     setText(null);
                 } else {
-                	// TODO change into our actual logic: 
-                    // MOCK LOGIC: You can adjust this threshold or check a specific field
-                    if (userId > 5000) setText("Member"); 
-                    else setText("Guest");
+                	Order order = getTableView().getItems().get(getIndex());
+                    String type = order.getUserTypeStr();
+                    setText(type != null ? type : "Unknown");
                 }
             }
         });
@@ -141,10 +138,7 @@ public class ReservationsPanel {
                 } else {
                     Order order = getTableView().getItems().get(getIndex());
                     if (order.getStatus() == OrderStatus.SEATED) {
-                    	// TODO change into our actual logic: 
-                        // In reality, you'd get order.getTableId(), but Order entity is missing it.
-                        // Showing dummy data for visual confirmation
-                        setText("T-" + (order.getOrderNumber() % 20 + 1)); 
+                        setText("T-" + order.getTableId()); 
                     } else {
                         setText("-");
                     }
