@@ -63,7 +63,7 @@
                     <children>
 
                         <!-- 6 cards grid -->
-                        <GridPane fx:id ="gridPane" alignment="CENTER" hgap="26" styleClass="mem-grid" vgap="26">
+                        <GridPane fx:id="gridPane" alignment="CENTER" hgap="26" styleClass="mem-grid" vgap="26">
 
                             <!-- Row 1 -->
                             <Button fx:id="btnNewReservation" onAction="#NewReservation" styleClass="mem-card-button" GridPane.columnIndex="0" GridPane.rowIndex="0">
@@ -255,7 +255,7 @@
                                 
                                 <VBox fx:id="becomeMemberVbox" styleClass="mem-statBlock" HBox.hgrow="ALWAYS">
                                     <children>
-                                        <Label styleClass="mem-statValue" text="Want exclusive discounts and benefits?" />
+                                        <Label prefHeight="47.0" prefWidth="594.0" styleClass="mem-statValue" text="Want exclusive discounts and benefits?" />
                                         <Label styleClass="mem-statLabel" text="Join our Club Member program today by contact any employee!" />
                                     </children>
                                 </VBox>
@@ -276,9 +276,10 @@
          <bottom>
             <BorderPane BorderPane.alignment="CENTER">
                <left>
-                  <HBox alignment="BOTTOM_LEFT">
+                  <HBox alignment="BOTTOM_LEFT" spacing="15.0">
                      <children>
                         <Label styleClass="footer-label" text="© 2025 Bistro · All rights reserved · v1.0.0" textFill="WHITE" />
+                        <Label fx:id="lblError" />
                      </children>
                      <padding>
                         <Insets bottom="16" left="24" right="0" top="0" />

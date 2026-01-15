@@ -1819,20 +1819,66 @@ public class BistroDataBase_Controller {
 		 * @return true if the table session was created successfully, false otherwise
 		 */
 		public boolean createTableSession(int orderNumber, int tableNum, int diningMinutes) {
-		    String sql =
+
+		    String insertSessionSql =
 		        "INSERT INTO table_sessions (order_number, tableNum, seated_at, expected_end_at) " +
 		        "VALUES (?, ?, NOW(), DATE_ADD(NOW(), INTERVAL ? MINUTE))";
 
-		    try (Connection conn = borrow(); PreparedStatement ps = conn.prepareStatement(sql)) {
-		        ps.setInt(1, orderNumber);
-		        ps.setInt(2, tableNum);
-		        ps.setInt(3, diningMinutes);
-		        return ps.executeUpdate() > 0;
+		    String insertBillSql =
+		        "INSERT INTO bills (session_id, billSum, subtotal_amount, discount_percent) " +
+		        "VALUES (?, 0.00, 0.00, 0.00)";
+
+		    Connection conn = null;
+		    try {
+		        conn = borrow();
+		        conn.setAutoCommit(false);
+
+		        int sessionId;
+
+		        // 1) create session
+		        try (PreparedStatement ps = conn.prepareStatement(insertSessionSql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+		            ps.setInt(1, orderNumber);
+		            ps.setInt(2, tableNum);
+		            ps.setInt(3, diningMinutes);
+
+		            int affected = ps.executeUpdate();
+		            if (affected != 1) {
+		                conn.rollback();
+		                return false;
+		            }
+
+		            try (ResultSet keys = ps.getGeneratedKeys()) {
+		                if (!keys.next()) {
+		                    conn.rollback();
+		                    throw new SQLException("Failed to read generated session_id");
+		                }
+		                sessionId = keys.getInt(1);
+		            }
+		        }
+
+		        // 2) create bill for that session
+		        try (PreparedStatement ps = conn.prepareStatement(insertBillSql)) {
+		            ps.setInt(1, sessionId);
+		            ps.executeUpdate();
+		        }
+
+		        conn.commit();
+		        return true;
+
 		    } catch (SQLException e) {
-		        logger.log("[DB ERROR] Failed to create table session: " + e.getMessage());
+		        try { if (conn != null) conn.rollback(); } catch (SQLException ignore) {}
+		        logger.log("[DB ERROR] Failed to create session+bill: " + e.getMessage());
+		        e.printStackTrace();
 		        return false;
+
+		    } finally {
+		        if (conn != null) {
+		            try { conn.setAutoCommit(true); } catch (SQLException ignore) {}
+		            release(conn);
+		        }
 		    }
 		}
+
 
 
 		/**
@@ -2479,7 +2525,7 @@ public class BistroDataBase_Controller {
 	/**
 	 * Updates the status of an order.
 	 */
-	public boolean updateOrderStatus(String confirmationCode, OrderStatus newStatus) {
+	public boolean updateOrderStatusByConfirmCode(String confirmationCode, OrderStatus newStatus) {
 		String qry = "UPDATE orders SET status = ? WHERE confirmation_code = ?";
 		Connection conn = null;
 
@@ -2501,7 +2547,7 @@ public class BistroDataBase_Controller {
 	}
 	
 	
-	public boolean updateOrderStatus(int userid, OrderStatus newStatus) {
+	public boolean updateOrderStatusByUserId(int userid, OrderStatus newStatus) {
 		String qry = "UPDATE orders SET status = ? WHERE confirmation_code = ?";
 		Connection conn = null;
 
@@ -2520,6 +2566,29 @@ public class BistroDataBase_Controller {
 		} finally {
 			release(conn);
 		}
+	}
+	
+	
+	public boolean updateOrderStatusByOrderNumber(int orderNumber, OrderStatus completed) {
+		String qry = "UPDATE orders SET status = ? WHERE order_number = ?";
+		Connection conn = null;
+
+		try {
+			conn = borrow();
+			try (PreparedStatement ps = conn.prepareStatement(qry)) {
+				ps.setString(1, completed.name());
+				ps.setInt(2, orderNumber);
+				int rowsAffected = ps.executeUpdate();
+				return rowsAffected > 0;
+			}
+		} catch (SQLException ex) {
+			logger.log("[ERROR] SQLException in updateOrderStatusInDB: " + ex.getMessage());
+			ex.printStackTrace();
+			return false;
+		} finally {
+			release(conn);
+		}
+		
 	}
 
 	/**
@@ -2836,20 +2905,46 @@ public class BistroDataBase_Controller {
 	}
 
 	
-	private int fetchDinersAmountByOrder(Connection conn, int orderId) throws SQLException {
+	private int fetchDinersAmountByOrder(Connection conn, int orderNumber) throws SQLException {
 	    final String sql =
-	            "SELECT number_of_guests " +
-	            "FROM orders " +
-	            "WHERE order_id = ?";
+	        "SELECT number_of_guests FROM orders WHERE order_number = ?";
 	    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-	        ps.setInt(1, orderId);
+	        ps.setInt(1, orderNumber);
 	        try (ResultSet rs = ps.executeQuery()) {
-	            if (rs.next()) {
-	                return rs.getInt("number_of_guests");
-	            }
+	            if (rs.next()) return rs.getInt("number_of_guests");
 	        }
 	    }
-	    return 1; // fallback בטיחותי
+	    return 1;
 	}
+
+
+	public Integer getOrderNumberByBillId(int billId) {
+	    final String sql =
+	        "SELECT ts.order_number " +
+	        "FROM bills b " +
+	        "JOIN table_sessions ts ON b.session_id = ts.session_id " +
+	        "WHERE b.billID = ?";
+
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	            ps.setInt(1, billId);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                if (!rs.next()) return null;
+	                return rs.getInt("order_number");
+	            }
+	        }
+	    } catch (SQLException e) {
+	        logger.log("[ERROR] getOrderNumberByBillId: " + e.getMessage());
+	        e.printStackTrace();
+	        return null;
+	    } finally {
+	        release(conn);
+	    }
+	}
+
+	
+
 
 }

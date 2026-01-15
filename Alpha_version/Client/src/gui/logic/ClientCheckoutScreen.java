@@ -69,9 +69,9 @@ public class ClientCheckoutScreen {
         btnPay.setDisable(true);
 
         setupTextFieldListeners();
-        int orderNumber= BistroClientGUI.client.getTableCTRL().getUserAllocatedOrderForTable().getOrderNumber();
+        int diners= BistroClientGUI.client.getTableCTRL().getUserAllocatedOrderForTable().getDinersAmount();
 		TaskRunner.run(mainPane, () -> {
-			BistroClientGUI.client.getPaymentCTRL().askBillItemsList(orderNumber);
+			BistroClientGUI.client.getPaymentCTRL().askBillItemsList(diners);
 		}, () -> {
 			List<Item> itemsFromServer = BistroClientGUI.client.getPaymentCTRL().getBillItemsList();
 			if(itemsFromServer != null) {

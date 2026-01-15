@@ -76,22 +76,6 @@ public class TableService {
 	        return tableNum;
 	    }
 
-	   /**
-	    * method to be called when payment is completed for an order
-	    * @param orderNumber
-	    */
-	    public boolean onPaymentCompleted(int orderNumber) {
-	    	//close table session when payment is completed
-	        Integer tableNum = dbController.getActiveTableNumByOrderNumber(orderNumber);
-	        dbController.closeTableSessionForOrder(orderNumber, EndTableSessionType.PAID);
-	        //case no active table session found
-	        if (tableNum == null) {
-	            logger.log("[WARN] Payment completed but no active table session found for order " + orderNumber);
-	            return false;
-	        }	       
-	        return tableFreed(tableNum); //when table is freed, try to seat WAITLIST/RESERVATION order if possible
-	    }
-
 	    /**
 	     * Handles logic when a table is freed.
 	     * @param tableNum The table number that was freed.

@@ -44,6 +44,7 @@ public class ClientPaymentSubject {
 				alert.setHeaderText(null);
 				alert.setContentText((String)msg.getData());
 				alert.showAndWait();
+				BistroClientGUI.switchScreen("clientDashboardScreen", "Failed to load Client Dashboard Screen");
 				});
 		});
 		

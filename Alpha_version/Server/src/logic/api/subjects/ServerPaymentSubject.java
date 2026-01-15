@@ -8,6 +8,7 @@ import comms.Api;
 import comms.Message;
 import entities.Bill;
 import entities.Item;
+import entities.Order;
 import entities.User;
 import enums.UserType;
 import logic.ServerLogger;
@@ -29,82 +30,81 @@ public class ServerPaymentSubject {
     	router.on("payment",  "billItemsList", (msg, client) -> {
 			User requester = (User) client.getInfo("user");
 			// Client sends billId (int)
-			int orderNumber = (int) msg.getData();
-			try {
-				List<Item> items = paymentService.getBillItemsList(orderNumber, requester);
+			int diners = (int) msg.getData();
+				List<Item> items = paymentService.createRandomBillItems(diners);
 				if (items != null) {
 					client.sendToClient(new Message(Api.REPLY_BILL_ITEMS_LIST_OK, items));
 				} else {
 					client.sendToClient(new Message(Api.REPLY_BILL_ITEMS_LIST_FAIL, null));
 				}
-			} catch (Exception e) {
-				logger.log("[ERROR] Failed to retrieve bill items list: " + e.getMessage());
-				client.sendToClient(new Message(Api.REPLY_BILL_ITEMS_LIST_FAIL, null));
-			}
 		});
     	
     	
     	
-        // --- ROUTE: Credit Card Payment ---
-        router.on("payment", "complete", (msg, client) -> {
-            User requester = (User) client.getInfo("user");
+    	router.on("payment", "complete", (msg, client) -> {
+    	    User requester = (User) client.getInfo("user");
+    	    if (requester == null) {
+    	        client.sendToClient(new Message(Api.REPLY_PAYMENT_COMPLETE_FAIL, "Not logged in."));
+    	        return;
+    	    }
 
-            // 1. Validate Client Input (List<Item>) - UNCHANGED
-            List<Item> itemsFromClient = (List<Item>) msg.getData();
-            if (itemsFromClient == null || itemsFromClient.isEmpty()) {
-                client.sendToClient(new Message(Api.REPLY_PAYMENT_COMPLETE_FAIL, "Cart is empty."));
-                return;
-            }
+    	    @SuppressWarnings("unchecked")
+    	    List<Item> itemsFromClient = (List<Item>) msg.getData();
+    	    if (itemsFromClient == null || itemsFromClient.isEmpty()) {
+    	        client.sendToClient(new Message(Api.REPLY_PAYMENT_COMPLETE_FAIL, "Cart is empty."));
+    	        return;
+    	    }
 
-            try {
-                // 2. Calculate Total (Now returns double)
-                double totalAmount = paymentService.calculateTotal(itemsFromClient, requester);
+    	    try {
+    	        Order seatedOrder = tableService.getSeatedOrderForClient(requester.getUserId());
+    	        if (seatedOrder == null) {
+    	            client.sendToClient(new Message(Api.REPLY_PAYMENT_COMPLETE_FAIL, "No active seated order found."));
+    	            return;
+    	        }
 
-                // 3. Find the Active Bill ID for this User
-                // Since the client doesn't send the Bill ID, we find the pending bill associated with this user.
-                List<Bill> pendingBills = paymentService.getPendingBillsForUser(requester.getUserId());
-                if (pendingBills == null || pendingBills.isEmpty()) {
-                    client.sendToClient(new Message(Api.REPLY_PAYMENT_COMPLETE_FAIL, "No active bill found for user."));
-                    return;
-                }
-                // Assuming the user has one active session/bill
-                int billId = pendingBills.get(0).getBillID();
+    	        int orderNumber = seatedOrder.getOrderNumber();
 
-                // 4. Generate a Mock Token
-                // Since the client UI doesn't send a card token yet, we generate a placeholder.
-                // In a real app, this token would come from msg.getData().
-                String mockCardToken = "TOK_" + requester.getUserId() + "_" + System.currentTimeMillis();
+    	        Integer billIdObj = paymentService.getBillIdByOrderNumber(orderNumber);
+    	        if (billIdObj == null) {
+    	            client.sendToClient(new Message(Api.REPLY_PAYMENT_COMPLETE_FAIL, "No bill found for active order."));
+    	            return;
+    	        }
+    	        int billId = billIdObj;
 
-                // 5. Process Payment via Gateway
-                boolean paymentSuccess = paymentService.processCreditCardPayment(billId, totalAmount, mockCardToken);
+    	        double totalAmount = paymentService.calculateTotal(itemsFromClient, requester);
 
-                if (paymentSuccess) {
-                	String successMessage = "Payment of $" + String.format("%.2f", totalAmount) + " completed successfully.\n"
-                			+ "Bill ID: " + billId + "\nThank you for dining with us!";
-                    client.sendToClient(new Message(Api.REPLY_PAYMENT_COMPLETE_OK, successMessage));
-                    userFailureMap.remove(requester.getUserId());
-                    
-                    // Notify Table Service
-                    //TableService.notifyPaymentCompletion(requester, tableService, logger);
-                } else {
-                    // Handle Failures
-                    int failures = userFailureMap.getOrDefault(requester.getUserId(), 0) + 1;
-                    userFailureMap.put(requester.getUserId(), failures);
+    	        String mockCardToken = "TOK_" + requester.getUserId() + "_" + System.currentTimeMillis();
 
-                    if (failures >= MAX_FAILURES) {
-                        String dishwasherMessage = "Payment Declined. You have failed 5 times. Welcome to the dishwashing team!";
-                        client.sendToClient(new Message(Api.REPLY_PAYMENT_COMPLETE_FAIL, dishwasherMessage));
-                        userFailureMap.remove(requester.getUserId());
-                    } else {
-                        client.sendToClient(new Message(Api.REPLY_PAYMENT_COMPLETE_FAIL, "Payment Declined"));
-                    }
-                }
-            } catch (Exception e) {
-                logger.log("[ERROR] Payment System Error: " + e.getMessage());
-                client.sendToClient(new Message(Api.REPLY_PAYMENT_COMPLETE_FAIL, "System Error"));
-            }
-        });
-        
+    	        boolean paymentSuccess = paymentService.processCreditCardPayment(billId, totalAmount, mockCardToken);
+
+    	        if (paymentSuccess) {
+    	            paymentService.onPaymentCompleted(orderNumber);
+
+    	            String successMessage =
+    	                "Payment of ₪" + String.format("%.2f", totalAmount) + " completed successfully.\n" +
+    	                "Bill ID: " + billId + "\n" +
+    	                "Order Number: " + orderNumber + "\nThank you for dining with us!";
+
+    	            client.sendToClient(new Message(Api.REPLY_PAYMENT_COMPLETE_OK, successMessage));
+    	            userFailureMap.remove(requester.getUserId());
+    	        } else {
+    	            int failures = userFailureMap.getOrDefault(requester.getUserId(), 0) + 1;
+    	            userFailureMap.put(requester.getUserId(), failures);
+
+    	            if (failures >= MAX_FAILURES) {
+    	                client.sendToClient(new Message(Api.REPLY_PAYMENT_COMPLETE_FAIL,
+    	                        "Payment Declined. You have failed 5 times. Welcome to the dishwashing team!"));
+    	                userFailureMap.remove(requester.getUserId());
+    	            } else {
+    	                client.sendToClient(new Message(Api.REPLY_PAYMENT_COMPLETE_FAIL, "Payment Declined"));
+    	            }
+    	        }
+    	    } catch (Exception e) {
+    	        logger.log("[ERROR] Payment System Error: " + e.getMessage());
+    	        client.sendToClient(new Message(Api.REPLY_PAYMENT_COMPLETE_FAIL, "System Error"));
+    	    }
+    	});
+
 
         // --- ROUTE: Manual (Cash) Payment ---
         router.on("payment", "processmanually", (msg, client) -> {

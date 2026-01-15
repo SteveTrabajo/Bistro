@@ -155,7 +155,7 @@ public class NoShowManager {
 	 * @param reason The reason for the no-show
 	 */
 	private void markAsNoShow(Order order, String reason) {
-		boolean updated = dbController.updateOrderStatus(order.getOrderNumber(), OrderStatus.NO_SHOW);
+		boolean updated = dbController.updateOrderStatusByUserId(order.getOrderNumber(), OrderStatus.NO_SHOW);
 		
 		if (updated) {
 			logger.log("[NO_SHOW] Order #" + order.getOrderNumber() + " marked as NO_SHOW. Reason: " + reason);
