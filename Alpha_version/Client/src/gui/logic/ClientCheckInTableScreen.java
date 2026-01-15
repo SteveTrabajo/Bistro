@@ -1,5 +1,6 @@
 package gui.logic;
 
+import entities.Order;
 import entities.User;
 import javafx.application.Platform;
 import javafx.event.Event;
@@ -66,31 +67,28 @@ public class ClientCheckInTableScreen {
 	public void btnCheckIn(Event event) {
 		String code = txtConfirmCode.getText();
 
-		// 1. Input Validation (Client Side)
 		String errorMsg = InputCheck.checkConfirmationCode(code);
 		if (errorMsg != null) {
 			BistroClientGUI.display(lblError, errorMsg, Color.RED);
 			return;
 		}
 
-		// 2. Clear previous errors
 		lblError.setText(""); 
-		btnCheckIn.setDisable(true); // Prevent double-clicking
+		btnCheckIn.setDisable(true); 
 
-		// 3. Register Listener for Server Response (Async)
-		BistroClientGUI.client.getTableCTRL().setCheckInListener((isSuccess, message) -> {
+		BistroClientGUI.client.getReservationCTRL().setCheckInListener((isSuccess, message) -> {
 			Platform.runLater(() -> {
-				btnCheckIn.setDisable(false); // Re-enable button
-				
+				btnCheckIn.setDisable(false);
 				if (isSuccess) {
-					BistroClientGUI.switchScreen(event, "clientCheckInTableSucces", "Error loading Success Screen");
+					Order confirmedOrder = new Order();
+					confirmedOrder.setConfirmationCode(code);
+					BistroClientGUI.client.getTableCTRL().setUserAllocatedOrderForTable(confirmedOrder);
+					BistroClientGUI.switchScreen(event, "clientCheckInTableSuccessScreen", "Error loading Success Screen");
 				} else {
 					BistroClientGUI.display(lblError, message, Color.RED);
 				}
 			});
 		});
-
-		// 4. Send Request
 		BistroClientGUI.client.getReservationCTRL().CheckConfirmationCodeCorrect(code);
 	}
 	

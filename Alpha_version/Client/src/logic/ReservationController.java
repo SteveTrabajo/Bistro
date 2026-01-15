@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import comms.Api;
@@ -31,6 +32,7 @@ public class ReservationController {
 	private Consumer<List<Order>> allReservationsCallback;
     private Consumer<String> onCodeRetrieveResult;
     private Consumer<List<LocalDate>> datesUpdateCallback;
+    private BiConsumer<Boolean, String> checkInCallback; //like "consumer" but with two parameters
 	
 	//******************************** Constructors ***********************************//
 	
@@ -100,6 +102,10 @@ public class ReservationController {
 	public void setCancelListener(Consumer<Boolean> callback) {
 		this.cancelResultCallback = callback;
 	}
+	
+	public void setCheckInListener(BiConsumer<Boolean, String> callback) {
+        this.checkInCallback = callback;
+    }
 		
 	//******************************** Instance Methods ***********************************//
 	
@@ -249,4 +255,11 @@ public class ReservationController {
 	public void askAvailableDates(int diners) {
 	    client.handleMessageFromClientUI(new Message(Api.ASK_AVAILABLE_DATES, diners));
 	}
+	
+	public void notifyCheckInResult(boolean success, String message) {
+        if (checkInCallback != null) {
+            Platform.runLater(() -> checkInCallback.accept(success, message));
+        }
+    }
+	
 }

@@ -129,6 +129,27 @@ public class OrdersService {
 		return dbController.checkOrderExistsInDB(confirmationCode);
 	}
 	
+	/**
+	 * Verifies if an order exists, belongs to the specific user, and is active.
+	 */
+	public boolean checkOrderBelongsToUser(String confirmationCode, int userId) {
+		Order order = dbController.getOrderByConfirmationCodeInDB(confirmationCode);
+		// Confirmation code does not exist
+		if (order == null) {
+			return false; 
+		}
+		// Checking code belongs to the requesting user
+		if (order.getUserId() != userId) {
+			logger.log("[SECURITY] User " + userId + " tried to check-in with order " + confirmationCode + " belonging to User " + order.getUserId());
+			return false; 
+		}
+		// Status Check: Can only check in if NOTIFIED (not pending, cancelled or completed)
+		if (!(order.getStatus() == OrderStatus.NOTIFIED)) {
+			return false;
+		}
+		return true;
+	}
+	
 	public List<Order> getClientHistory(int userId) {
 		return dbController.getOrdersByUserId(userId);
 	}

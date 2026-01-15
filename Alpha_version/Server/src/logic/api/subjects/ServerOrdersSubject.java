@@ -74,17 +74,25 @@ public final class ServerOrdersSubject {
 			}
 		});
 		
-		//check if order exists by confirmation code
+		//check if order exists and belongs to user by confirmation code and user data
 		router.on("orders", "checkOrderExists", (msg, client) ->{
 			String confirmationCode = (String) msg.getData();
-			boolean orderExists = ordersService.checkOrderExists(confirmationCode);
-			if(orderExists) {
-				client.sendToClient(new Message(Api.REPLY_ORDER_EXISTS, null));
-				logger.log("[INFO] Client: "+ client + " confirmed existence of order with confirmation code: " + confirmationCode + " successfully.");
-				}else {
-					client.sendToClient(new Message(Api.REPLY_ORDER_NOT_EXISTS, null));
-					logger.log("[INFO] Client: "+ client + " confirmed non-existence of order with confirmation code: " + confirmationCode + " successfully.");
-				}
+			User sessionUser = (User) client.getInfo("user");
+			
+			if (sessionUser == null) {
+				logger.log("[SECURITY] Unauthorized order existence check attempt from " + client);
+				client.sendToClient(new Message(Api.REPLY_ORDER_NOT_EXISTS, null));
+				return;
+			}
+			
+			boolean isValid = ordersService.checkOrderBelongsToUser(confirmationCode, sessionUser.getUserId());
+			if (isValid) {
+				client.sendToClient(new Message(Api.REPLY_ORDER_EXISTS, confirmationCode));
+				logger.log("[INFO] Client: "+ client + " confirmed valid check-in for code: " + confirmationCode);
+			} else {
+				client.sendToClient(new Message(Api.REPLY_ORDER_NOT_EXISTS, null));
+				logger.log("[INFO] Client: "+ client + " attempted invalid check-in for code: " + confirmationCode);
+			}
 		});
 		
 		// Send client order history

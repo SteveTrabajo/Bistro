@@ -92,13 +92,12 @@ public class ClientOrderSubject {
 		
 		router.on("orders", "order.exists", msg -> {
             BistroClient.awaitResponse = false;
-			Order order = (Order) msg.getData();
-			BistroClientGUI.client.getReservationCTRL().setOrderDTO(null); // Clear any existing order data
-			BistroClientGUI.client.getTableCTRL().setUserAllocatedOrderForTable(order);
+			BistroClientGUI.client.getReservationCTRL().notifyCheckInResult(true, "Check-in successful!");
 		});
 		
 		router.on("orders", "order.notExists", msg -> {
 			BistroClient.awaitResponse = false;
+			BistroClientGUI.client.getReservationCTRL().notifyCheckInResult(false, "Invalid confirmation code or reservation does not belong to you.");
 		});	
 		
 		router.on("orders", "getOrdersByDate.ok", msg -> {

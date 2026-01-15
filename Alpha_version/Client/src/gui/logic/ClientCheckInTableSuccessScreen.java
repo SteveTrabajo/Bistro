@@ -10,9 +10,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import logic.BistroClientGUI;
 /**
- * ClientCheckInTableSuccesScreen class handles the logic for the client check-in table success screen.
+ * ClientCheckInTableSuccessScreen class handles the logic for the client check-in table success screen.
  */
-public class ClientCheckInTableSuccesScreen {
+public class ClientCheckInTableSuccessScreen {
 	//****************** FXML Elements ******************//
 	@FXML
 	private Label lblTableNumber;
