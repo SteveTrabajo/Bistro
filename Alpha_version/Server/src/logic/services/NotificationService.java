@@ -24,22 +24,28 @@ public class NotificationService {
 
     private final BistroDataBase_Controller dbController;
     private final ServerLogger logger;
-    private final ScheduledExecutorService scheduler;
+    // removed "final" to allow shutdown and restart (might fix the thread issue)
+    private ScheduledExecutorService scheduler;
+    
     private final INotificationService notificationSimulator;
     private volatile boolean started = false;
 
     public NotificationService(BistroDataBase_Controller dbController, ServerLogger logger) {
         this.dbController = dbController;
         this.logger = logger;
-        this.scheduler = Executors.newSingleThreadScheduledExecutor();
+        // commented out to allow restart after shutdown (might fix the thread issue) => moved it to startBackgroundTasks
+        //this.scheduler = Executors.newSingleThreadScheduledExecutor();
         this.notificationSimulator = new MockNotificationService();
     }
 
 
     public synchronized void startBackgroundTasks() {
         if (started) return;
+        // moved from constructor to allow restart after shutdown (might fix the thread issue)
+        if (scheduler == null || scheduler.isShutdown()) {
+			scheduler = Executors.newSingleThreadScheduledExecutor();
+		}
         started = true;
-
         logger.log("[NOTIFICATIONS] Background service started. Polling every 15 minutes.");
         scheduler.scheduleAtFixedRate(() -> {
             try {
@@ -57,7 +63,8 @@ public class NotificationService {
         started = false;
 
         if (scheduler != null && !scheduler.isShutdown()) {
-            scheduler.shutdown();
+        	// changed shutdown to shutdownNow to forcefully stop the thread (might fix the thread issue)
+            scheduler.shutdownNow();
         }
     }
 

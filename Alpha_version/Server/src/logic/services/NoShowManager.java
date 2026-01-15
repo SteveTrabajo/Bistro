@@ -2,7 +2,6 @@ package logic.services;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -34,7 +33,9 @@ public class NoShowManager {
 	
 	private final BistroDataBase_Controller dbController;
 	private final ServerLogger logger;
-	private final ScheduledExecutorService scheduler;
+	// removed "final" to allow shutdown and restart (might fix the thread issue)
+	private ScheduledExecutorService scheduler;
+	
 	private final INotificationService notificationSimulator;
 	
 	private static final int NO_SHOW_THRESHOLD_MINUTES = 15;
@@ -45,7 +46,8 @@ public class NoShowManager {
 	public NoShowManager(BistroDataBase_Controller dbController, ServerLogger logger) {
 		this.dbController = dbController;
 		this.logger = logger;
-		this.scheduler = Executors.newSingleThreadScheduledExecutor();
+		// commented out to allow restart after shutdown (might fix the thread issue) => moved it to startBackgroundTasks
+		//this.scheduler = Executors.newSingleThreadScheduledExecutor();
 		this.notificationSimulator = new MockNotificationService();
 	}
 	
@@ -55,7 +57,11 @@ public class NoShowManager {
 	 * Starts the background task to check for no-shows.
 	 * Runs every 5 minutes to detect orders that have exceeded the no-show threshold.
 	 */
-	public void startBackgroundTasks() {
+	public synchronized void startBackgroundTasks() {
+		// moved from constructor to allow restart after shutdown (might fix the thread issue)
+		if (scheduler == null || scheduler.isShutdown()) {
+			scheduler = Executors.newSingleThreadScheduledExecutor();
+		}
 		logger.log("[NO_SHOW] Background service started. Checking every " + BACKGROUND_CHECK_INTERVAL_MINUTES + " minutes.");
 		scheduler.scheduleAtFixedRate(() -> {
 			try {
@@ -70,9 +76,10 @@ public class NoShowManager {
 	/**
 	 * Stops the background task.
 	 */
-	public void stop() {
+	public synchronized void stop() {
 		if (scheduler != null && !scheduler.isShutdown()) {
-			scheduler.shutdown();
+			// changed shutdown to shutdownNow to forcefully stop the thread (might fix the thread issue)
+			scheduler.shutdownNow();
 		}
 	}
 	
