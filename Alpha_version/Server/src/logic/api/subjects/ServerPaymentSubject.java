@@ -135,17 +135,14 @@ public class ServerPaymentSubject {
         });
 
         // --- ROUTE: Load Pending Bills ---
-        router.on("payment", "loadpendingbills", (msg, client) -> {
+        router.on("payment", "loadPendingBills", (msg, client) -> {
             User requester = (User) client.getInfo("user");
             if (requester.getUserType() == UserType.GUEST || requester.getUserType() == UserType.MEMBER) {
                 client.sendToClient(new Message(Api.REPLY_LOAD_PENDING_BILLS_FAIL,
                         "Only employees and managers can load pending bills."));
                 return; // Added return to prevent execution
             }
-            
-            // Note: You might need to add a method to get ALL pending bills for staff, 
-            // currently this method in your service gets bills for a specific user ID.
-            List<Bill> pendingBills = paymentService.getPendingBillsForUser(requester.getUserId());
+            List<Bill> pendingBills = paymentService.getPendingBillsForUser();
             client.sendToClient(new Message(Api.REPLY_LOAD_PENDING_BILLS_OK, pendingBills));
         });
     }

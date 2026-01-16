@@ -12,6 +12,7 @@ import java.util.TreeMap;
 import common.InputCheck;
 import entities.*;
 import enums.*;
+import gui.logic.TaskRunner;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -139,8 +140,6 @@ public class WaitingListPanel {
 		updateStats();
 	}
 
-
-
 	private void updateQueueTitle() {
 		lblQueueTitleLabel.setText("Current Queue (" + waitingList.size() + ")");
 		lblTotalInQueueLabel.setText(String.valueOf(waitingList.size()));
@@ -160,17 +159,18 @@ public class WaitingListPanel {
 	private void btnRemoveFromWaitlist(ActionEvent event) {
 		Order selectedOrder = waitingTable.getSelectionModel().getSelectedItem();
 		if (selectedOrder != null) {
-			BistroClientGUI.client.getWaitingListCTRL().removeFromWaitingList(selectedOrder.getConfirmationCode());
-			showAlert("Remove from Waitlist", "Requested removal of order: " + selectedOrder.getConfirmationCode());
+			String code = selectedOrder.getConfirmationCode();
+			BistroClientGUI.client.getWaitingListCTRL().removeFromWaitingList(code);
+			showAlert("Remove from Waitlist", "Requested removal of order: " + code);
 		} else {
 			showAlert("No Selection", "Please select an order to remove from the waitlist.");
 		}
 	}
 
+
 	private void updateStats() {
 		int waitingCount = 0;
 		int notifiedCount = 0;
-
 		// Loop through the current list to count statuses
 		for (Order order : waitingList) {
 			if (order.getStatus() == OrderStatus.PENDING) {
@@ -179,12 +179,10 @@ public class WaitingListPanel {
 				notifiedCount++;
 			}
 		}
-
 		// Update the Labels (Check for null to prevent crashes if ID is missing)
 		if (lblTotalWaitingLabel != null) {
 			lblTotalWaitingLabel.setText(String.valueOf(waitingCount));
 		}
-
 		if (lblTotalNotifiedLabel != null) {
 			lblTotalNotifiedLabel.setText(String.valueOf(notifiedCount));
 		}

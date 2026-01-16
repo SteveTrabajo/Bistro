@@ -2103,34 +2103,61 @@ public class BistroDataBase_Controller {
 	 * SQL: Finds all UNPAID bills for a specific User.
 	 * This requires joining Bills -> Session -> Order -> User.
 	 */
-	public List<Bill> getPendingBillsByUserId(int userId) {
-		List<Bill> bills = new ArrayList<>();
-		String sql = "SELECT b.* FROM bills b " + "JOIN table_sessions ts ON b.session_id = ts.session_id "
-				+ "JOIN orders o ON ts.order_number = o.order_number "
-				+ "WHERE o.user_id = ? AND b.payment_status = 'UNPAID'";
-		Connection conn = null;
-		try {
-			conn = borrow();
+	public List<Bill> getPendingBillsByUserId() {
 
-			try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-				pstmt.setInt(1, userId);
-				try (ResultSet rs = pstmt.executeQuery()) {
-					while (rs.next()) {
-						// Adjust this constructor based on your Bill.java entity
-						Bill bill = new Bill(rs.getInt("billID"), rs.getDouble("billSum"),
-								rs.getString("payment_status"), rs.getString("transaction_id"));
-						// Set other fields if your Bill constructor requires them
-						bills.add(bill);
-					}
+	    List<Bill> bills = new ArrayList<>();
 
-				}
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			release(conn);
-		}
-		return bills;
+	    String sql =
+	        "SELECT " +
+	        "  b.billID, " +
+	        "  b.billSum, " +
+	        "  b.payment_status, " +
+	        "  b.transaction_id, " +
+	        "  ts.tableNum, " +
+	        "  ts.order_number, " +
+	        "  ts.seated_at, " +
+	        "  o.confirmation_code " +
+	        "FROM table_sessions ts " +
+	        "JOIN bills b ON b.session_id = ts.session_id " +
+	        "JOIN orders o ON o.order_number = ts.order_number " +
+	        "WHERE ts.left_at IS NULL " +
+	        "  AND b.payment_status = 'UNPAID' " +
+	        "  AND DATE(ts.seated_at) = CURRENT_DATE " +
+	        "ORDER BY ts.seated_at ASC";
+
+	    Connection conn = null;
+
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(sql);
+	             ResultSet rs = ps.executeQuery()) {
+
+	            while (rs.next()) {
+
+	                Bill bill = new Bill(
+	                        rs.getInt("billID"),
+	                        rs.getDouble("billSum"),
+	                        rs.getString("payment_status"),
+	                        rs.getString("transaction_id")
+	                );
+
+	                bill.setTableId(rs.getInt("tableNum"));
+	                bill.setOrderNumber(rs.getInt("order_number"));
+	                bill.setDate(rs.getTimestamp("seated_at"));
+	                bill.setConfirmationCode(rs.getString("confirmation_code"));
+
+	                bills.add(bill);
+	            }
+	        }
+
+	    } catch (SQLException e) {
+	        logger.log("[ERROR] getActiveUnpaidBillsForStaffToday: " + e.getMessage());
+	        e.printStackTrace();
+	    } finally {
+	        release(conn);
+	    }
+
+	    return bills;
 	}
 	
 	//*************************************** Notification Operations ********************************
@@ -2991,6 +3018,29 @@ public class BistroDataBase_Controller {
 	    }
 	}
 
-
-
+	
+	public int getUserIdByMemberCode(int memberCode) {
+	    final String sql =
+	        "SELECT user_id " +
+	        "FROM users " +
+	        "WHERE member_code = ?";
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	            ps.setInt(1, memberCode);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                if (rs.next()) {
+	                    return rs.getInt("user_id");
+	                }
+	            }
+	        }
+	    } catch (SQLException e) {
+	        logger.log("[ERROR] getUserIdByMemberCode: " + e.getMessage());
+	        e.printStackTrace();
+	    } finally {
+	        release(conn);
+	    }
+	    return -1; // Return -1 if no user found
+	}
 }

@@ -13,6 +13,7 @@ import java.util.TreeMap;
 
 import entities.Order;
 import entities.Table;
+import entities.User;
 import enums.OrderStatus;
 import enums.OrderType;
 import logic.BistroDataBase_Controller;
@@ -479,6 +480,44 @@ public class OrdersService {
 
         return dbController.updateOrderStatusInDB(confirmationCode, OrderStatus.CANCELLED);
     }
+
+    public Order createReservationAsStaff(Map<String, Object> data) {
+        if (data == null) return null;
+        LocalDate date = (LocalDate) data.get("date");
+        LocalTime time = (LocalTime) data.get("time");
+        Integer dinersObj = (Integer) data.get("diners");
+        String customerType = (String) data.get("customerType"); 
+        String identifier = (String) data.get("identifier");
+        String customerName = (String) data.get("customerName");
+
+        if (date == null || time == null || dinersObj == null || dinersObj <= 0) {
+            logger.log("[WARN] createReservationAsStaff: invalid date/time/diners");
+            return null;
+        }
+        if (customerType == null || identifier == null || identifier.isBlank()) {
+            logger.log("[WARN] createReservationAsStaff: missing customerType/identifier");
+            return null;
+        }
+        String typeNorm = customerType.trim().toUpperCase();
+        User user = null;
+        if ("MEMBER".equals(typeNorm)) {
+        	int memberCode= Integer.parseInt(identifier);
+        	user = dbController.findMemberUserByCode(memberCode); 
+        } else {
+        	user = dbController.findOrCreateGuestUser(identifier,null);
+        }
+        if (user == null) {
+        	logger.log("[WARN] createReservationAsStaff: user not found and could not be created. type=" + typeNorm + " identifier=" + identifier);
+        	return null;            
+        }
+        List<Object> orderData = new ArrayList<>();
+        orderData.add(user.getUserId());
+        orderData.add(date);
+        orderData.add(dinersObj);
+        orderData.add(time);
+        return createNewOrder(orderData, OrderType.RESERVATION);
+    }
+
 	
 
 }

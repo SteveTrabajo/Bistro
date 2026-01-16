@@ -45,9 +45,10 @@ public class ClientOrderSubject {
 			alert.setContentText("An error occurred while creating your reservation. Please try again later.");
 		});
 		
-		router.on("orders", "createReservationAsStaff.ok", msg -> {
+		router.on("orders", "createReservation.asStaff.ok", msg -> {
             BistroClient.awaitResponse = false;
-            String confirmationCode = (String) msg.getData();
+            Order createdOrder = (Order) msg.getData();
+            String confirmationCode = createdOrder.getConfirmationCode();
             Platform.runLater(() -> {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Reservation Successful");
@@ -59,7 +60,7 @@ public class ClientOrderSubject {
             });
         });
 
-        router.on("orders", "createReservationAsStaff.fail", msg -> {
+        router.on("orders", "createReservation.asStaff.fail", msg -> {
             BistroClient.awaitResponse = false;
             String errorMessage = (String) msg.getData(); 
             Platform.runLater(() -> {

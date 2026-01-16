@@ -32,7 +32,7 @@ public class ServerWaitingListSubject {
 	 * @param waitingListService The BistroDataBase_Controller instance for database operations.
 	 * @param logger             The ServerLogger instance for logging.
 	 */
-	public static void register(ServerRouter router, WaitingListService waitingListService, ServerLogger logger) {
+	public static void register(ServerRouter router,BistroDataBase_Controller dbController, WaitingListService waitingListService, ServerLogger logger) {
 		// 1. Check if user is in waiting list
 		router.on("waitinglist", "isInWaitingList", (msg, client) -> {
 			int userID = (int) msg.getData();
@@ -124,6 +124,19 @@ public class ServerWaitingListSubject {
 			}
 		});
 		
+		router.on("waitinglist","leave.staff", (msg, client) -> {
+			String confirmationCode = (String) msg.getData();
+			boolean success = waitingListService.removeFromWaitingList(confirmationCode);
+			if (success) {
+				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_LEAVE_STAFF_OK, null));
+			} else {
+				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_LEAVE_STAFF_FAIL, null));
+			}
+		});
+		
+		
+		
+
 		
 		router.on("waitinglist", "getAll", (msg, client) -> {
 			List<Order> waitingList = waitingListService.getCurrentQueue();
@@ -136,32 +149,40 @@ public class ServerWaitingListSubject {
 			}
 		});
 		
-//		router.on("waitinglist", "addWalkIn", (msg, client) -> {
-//		    try {
-//		        @SuppressWarnings("unchecked")
-//		        Map<String, Object> data = (Map<String, Object>) msg.getData();
-//		        
-//		        int dinersAmount = ((Number) data.get("diners")).intValue();
-//		        String type = (String) data.get("type");
-//		        
-//		        Object response = null;
-//		        if ("MEMBER".equals(type)) {
-//		            response = waitingListService.handleMemberWalkIn(dinersAmount, (String) data.get("memberId"));
-//		        } else if ("GUEST".equals(type)) {
-//		            response = waitingListService.handleGuestWalkIn(dinersAmount, (String) data.get("phone"), (String) data.get("email"));
-//		        }
-//
-//		        if (response != null) {
-//		            // Could be Order or WaitListResponse
-//		            client.sendToClient(new Message(Api.REPLY_WAITING_LIST_ADD_WALKIN_OK, response));
-//		        } else {
-//		            client.sendToClient(new Message(Api.REPLY_WAITING_LIST_ADD_WALKIN_FAIL, "User registration failed"));
-//		        }
-//		    } catch (Exception e) {
-//		        logger.log("[ERROR] addWalkIn critical failure: " + e.getMessage());
-//		        client.sendToClient(new Message(Api.REPLY_WAITING_LIST_ADD_WALKIN_FAIL, "Internal Server Error"));
-//		    }
-//		});
+		router.on("waitinglist", "addWalkIn", (msg, client) -> {
+		    try {
+		        @SuppressWarnings("unchecked")
+		        Map<String, Object> data = (Map<String, Object>) msg.getData();
+
+		        int dinersAmount = ((Number) data.get("diners")).intValue();
+
+		        String customerType = ((String) data.get("customerType")).trim().toUpperCase();
+		        String identifier   = ((String) data.get("identifier")).trim();
+		        String email = data.get("email") == null ? "" : ((String) data.get("email")).trim();
+
+		        User user = null;
+		        if ("MEMBER".equals(customerType)) {
+		        	int memberCode= Integer.parseInt(identifier);
+		        	user = dbController.findMemberUserByCode(memberCode); 
+		        } else if ("GUEST".equals(customerType)) {
+		            // For guests, we create a new user record
+		        	user = dbController.findOrCreateGuestUser(identifier,email);
+		        } else if (user == null) {
+		            client.sendToClient(new Message(Api.REPLY_WAITING_LIST_ADD_WALKIN_FAIL, "Invalid customerType"));
+		            return;
+		        }
+
+		        Object response = waitingListService.checkAvailabilityAndSeat(dinersAmount, user.getUserId());
+
+		        client.sendToClient(new Message(Api.REPLY_WAITING_LIST_ADD_WALKIN_OK, response));
+
+		    } catch (Exception e) {
+		        logger.log("[ERROR] addWalkIn critical failure: " + e.getMessage());
+		        try {
+		            client.sendToClient(new Message(Api.REPLY_WAITING_LIST_ADD_WALKIN_FAIL, "Internal Server Error"));
+		        } catch (Exception ignored) {}
+		    }
+		});
 	}
 }
 // End of ServerWaitingListSubject class

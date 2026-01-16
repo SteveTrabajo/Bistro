@@ -42,12 +42,19 @@ public class WaitingListController {
 
 	// ******************************** Getters And Setters ***********************************
 	public boolean clearWaitingListController() {
+		System.out.println("Clearing Waiting List Controller");
 		this.orderWaitListDTO = null;
+		System.out.println("Order DTO cleared");
 		this.canSeatImmediately = false;
+		System.out.println("Can Seat Immediately cleared");
 		this.userOnWaitingList = false;
+		System.out.println("User On Waiting List cleared");
 		this.leaveWaitingListSuccess = false;
+		System.out.println("Leave Waiting List Success cleared");
 		this.estimatedWaitTimeMinutes = 0;
+		System.out.println("Estimated Wait Time cleared");
 		this.waitingList.clear();
+		System.out.println("Waiting List Controller cleared");
 		return true;
 	}
 	
@@ -112,10 +119,6 @@ public class WaitingListController {
 	
 	public void setLeaveWaitingListSuccess(boolean status) {
 		this.leaveWaitingListSuccess = status;
-		// If true (left successfully), refresh the list for the staff view
-		if (status && waitingListPanelController != null) {
-			askWaitingList();
-		}
 	}
 	
 	public boolean isLeaveWaitingListSuccess() {
@@ -149,6 +152,13 @@ public class WaitingListController {
 	public void leaveWaitingList() {
 		client.handleMessageFromClientUI(new Message(Api.ASK_WAITING_LIST_LEAVE, this.orderWaitListDTO.getConfirmationCode()));
 	}
+	
+	/**
+	 * Staff Method: Removes a specific customer from the list.
+	 */
+	public void removeFromWaitingList(String confirmationCode) {
+		client.handleMessageFromClientUI(new Message(Api.ASK_WAITING_LIST_LEAVE_STAFF,confirmationCode));
+	}
 
     /**
      * Staff Method: Requests the full waiting list from the server.
@@ -157,12 +167,6 @@ public class WaitingListController {
         client.handleMessageFromClientUI(new Message(Api.ASK_GET_WAITING_LIST, null));
     }
 
-    /**
-     * Staff Method: Removes a specific customer from the list.
-     */
-    public void removeFromWaitingList(String confirmationCode) {
-        client.handleMessageFromClientUI(new Message(Api.ASK_WAITING_LIST_LEAVE, confirmationCode));
-    }
     
     public void addWalkIn(Map<String, Object> details) {
         client.handleMessageFromClientUI(new Message(Api.ASK_WAITING_LIST_ADD_WALKIN, details));

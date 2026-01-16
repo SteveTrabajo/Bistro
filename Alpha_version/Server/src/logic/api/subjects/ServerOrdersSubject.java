@@ -62,6 +62,18 @@ public final class ServerOrdersSubject {
 			}
 		});
 		
+		router.on("orders","createReservation.asStaff", (msg, client) -> {
+			Map<String, Object> data = (Map<String, Object>) msg.getData();
+			Order createdOrder = ordersService.createReservationAsStaff(data);
+			if (createdOrder != null) {
+				client.sendToClient(new Message(Api.REPLY_CREATE_RESERVATION_AS_STAFF_OK, createdOrder));
+				logger.log("[INFO] Client: "+ client + " created a new reservation order as staff successfully.");
+			} else {
+				client.sendToClient(new Message(Api.REPLY_CREATE_RESERVATION_AS_STAFF_FAIL, null));
+				logger.log("[ERROR] Client: "+ client + " failed to create a new reservation order as staff.");
+			}
+		});
+		
 		// Send Order by confirmation code
 		router.on("orders", "getOrder", (msg, client) ->{
 			String confirmationCode = (String) msg.getData();

@@ -189,7 +189,7 @@ public class BistroServer extends AbstractServer {
 		ServerConnectionSubject.register(router, logger);
 		ServerUserSubject.register(router,userService, logger);
 		ServerOrdersSubject.register(router, ordersService, tableService, logger);
-		ServerWaitingListSubject.register(router, waitingListService, logger);
+		ServerWaitingListSubject.register(router, dbController, waitingListService, logger);
 		ServerTablesSubject.register(router, tableService, logger);
 		ServerReportsSubject.register(router, reportService, logger);
 		ServerPaymentSubject.register(router, tableService, logger, paymentService);

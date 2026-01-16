@@ -99,6 +99,8 @@ public final class Api {
 	// Responses
 	public static final String REPLY_CREATE_RESERVATION_OK = "orders.createReservation.ok";
 	public static final String REPLY_CREATE_RESERVATION_FAIL = "orders.createReservation.fail";
+	public static final String REPLY_CREATE_RESERVATION_AS_STAFF_OK = "orders.createReservation.asStaff.ok";
+	public static final String REPLY_CREATE_RESERVATION_AS_STAFF_FAIL = "orders.createReservation.asStaff.fail";
 	public static final String REPLY_AVAILABLE_DATES_OK = "orders.getAvailableDates.ok";
 	public static final String REPLY_AVAILABLE_DATES_FAIL = "orders.getAvailableDates.fail";
 	public static final String REPLY_ORDER_AVAILABLE_HOURS_OK = "orders.getAvailableHours.ok";
@@ -175,10 +177,11 @@ public final class Api {
 	public static final String ASK_WAITING_LIST_CHECK_AVAILABILITY = "waitinglist.checkAvailability";
 	public static final String ASK_WAITING_LIST_JOIN = "waitinglist.join";
 	public static final String ASK_WAITING_LIST_LEAVE = "waitinglist.leave";
+	public static final String ASK_WAITING_LIST_LEAVE_STAFF = "waitinglist.leave.staff";
 	public static final String ASK_IS_IN_WAITLIST = "waitinglist.isInWaitingList";
 	public static final String ASK_GET_WAITING_LIST = "waitinglist.getAll";
 	public static final String ASK_WAITING_LIST_ADD_WALKIN = "waitinglist.addWalkIn";
-
+	
 	// Responses
 	public static final String REPLY_WAITING_LIST_IS_IN_LIST = "waitinglist.isInWaitingList.yes";
 	public static final String REPLY_WAITING_LIST_IS_NOT_IN_LIST = "waitinglist.isInWaitingList.no";
@@ -188,7 +191,9 @@ public final class Api {
 	public static final String REPLY_WAITING_LIST_JOIN_OK = "waitinglist.join.ok";
 	public static final String REPLY_WAITING_LIST_JOIN_FAIL = "waitinglist.join.fail";
 	public static final String REPLY_WAITING_LIST_LEAVE_OK = "waitinglist.leave.ok";
+	public static final String REPLY_WAITING_LIST_LEAVE_STAFF_OK = "waitinglist.leave.staff.ok";
 	public static final String REPLY_WAITING_LIST_LEAVE_FAIL = "waitinglist.leave.fail";
+	public static final String REPLY_WAITING_LIST_LEAVE_STAFF_FAIL = "waitinglist.leave.staff.fail";
 	public static final String REPLY_WAITING_LIST_NOTIFIED_OK = "waitinglist.notified.ok";
 	public static final String REPLY_WAITING_LIST_NOTIFIED_FAIL = "waitinglist.notified.fail";
 	public static final String REPLY_GET_WAITING_LIST_OK = "waitinglist.getAll.ok";
@@ -210,13 +215,14 @@ public final class Api {
 	public static final String REPLY_PAYMENT_PENDING_VERIFICATION = "payment.complete.pendingVerification";
 	public static final String REPLY_PROCESS_PAYMENT_MANUALLY_OK = "payment.processmanually.ok";
 	public static final String REPLY_PROCESS_PAYMENT_MANUALLY_FAIL = "payment.processmanually.fail";
-	public static final String REPLY_LOAD_PENDING_BILLS_OK = "payment.loadpendingbills.ok";
-	public static final String REPLY_LOAD_PENDING_BILLS_FAIL = "payment.loadpendingbills.fail";
+	public static final String REPLY_LOAD_PENDING_BILLS_OK = "payment.loadPendingBills.ok";
+	public static final String REPLY_LOAD_PENDING_BILLS_FAIL = "payment.loadPendingBills.fail";
 	public static final String REPLY_BILL_ITEMS_LIST_OK = "payment.billItemsList.ok";
 	public static final String REPLY_BILL_ITEMS_LIST_FAIL = "payment.billItemsList.fail";
 
 // == System responses == //
 
 	public static final String REPLY_UNKNOWN_COMMAND = "system.unknownCommand";
+	
 
 }

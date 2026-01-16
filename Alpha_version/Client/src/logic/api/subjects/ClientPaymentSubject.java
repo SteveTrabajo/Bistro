@@ -27,11 +27,11 @@ public class ClientPaymentSubject {
 			}
 		});
 		
+		
 		router.on("payment", "billItemsList.fail", msg -> {
 			BistroClient.awaitResponse = false;
 			BistroClientGUI.client.getPaymentCTRL().setBillItemsList(null);
 		});
-		
 		
 		
 		router.on("payment", "complete.ok", msg -> {
@@ -48,6 +48,7 @@ public class ClientPaymentSubject {
 				});
 		});
 		
+		
 		router.on("payment", "complete.fail", msg -> {
             BistroClient.awaitResponse = false;
 			BistroClientGUI.client.getPaymentCTRL().setPaymentStatus(PaymentStatus.FAILED.name());
@@ -60,22 +61,36 @@ public class ClientPaymentSubject {
 				});
 		});
 		
+		
 		router.on("payment", "processManually.ok", msg -> {
             BistroClient.awaitResponse = false;
 			// Handle successful manual payment processing
 			BistroClientGUI.client.getPaymentCTRL().setIsPaymentManuallySuccessful(true);
 			BistroClientGUI.client.getTableCTRL().clearCurrentTable();
 		});
+		
+		
 		router.on("payment", "processManually.fail", msg -> {
             BistroClient.awaitResponse = false;
 		});
-		router.on("payment", "getPendingBills.ok", msg -> {
+		
+		
+		router.on("payment", "loadPendingBills.ok", msg -> {
             BistroClient.awaitResponse = false;
 			BistroClientGUI.client.getPaymentCTRL().setPendingBills((List<Bill>) msg.getData());
 		});
-		router.on("payment", "getPendingBills.fail", msg -> {
-            BistroClient.awaitResponse = false;
+		
+		
+		router.on("payment", "loadPendingBills.fail", msg -> {
+			BistroClient.awaitResponse = false;
+			Platform.runLater(() -> {
+				Alert alert = new Alert(Alert.AlertType.ERROR);
+				alert.setTitle("Error");
+				alert.setHeaderText(null);
+				alert.setContentText("Failed to load pending bills. Please try again later.");
+				alert.showAndWait();
+			});
 		});
 	}
-	
+
 }

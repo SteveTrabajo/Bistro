@@ -120,8 +120,8 @@ public class PaymentService {
     /**
      * Gets all UNPAID bills associated with a specific user.
      */
-    public List<Bill> getPendingBillsForUser(int userId) {
-        return dbController.getPendingBillsByUserId(userId);
+    public List<Bill> getPendingBillsForUser() {
+        return dbController.getPendingBillsByUserId();
     }
 
     
