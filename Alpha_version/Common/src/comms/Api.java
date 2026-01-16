@@ -24,7 +24,7 @@ public final class Api {
 	public static final String REPLY_CONNECTION_CONNECT_OK = "connection.connect.ok";
 	public static final String REPLY_CONNECTION_DISCONNECT_OK = "connection.disconnect.ok";
 
-	// == Login/signOut subject == //
+// == Login/signOut subject == //
 
 	// Requests
 	public static final String ASK_LOGIN_GUEST = "login.guest";
