@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: bistro
+-- Host: localhost    Database: bistro
 -- ------------------------------------------------------
 -- Server version	8.0.44
 
@@ -38,6 +38,7 @@ CREATE TABLE `opening_hours_special` (
 
 LOCK TABLES `opening_hours_special` WRITE;
 /*!40000 ALTER TABLE `opening_hours_special` DISABLE KEYS */;
+INSERT INTO `opening_hours_special` VALUES ('2026-01-01',1,NULL,NULL),('2026-01-15',0,'16:00:00','22:00:00');
 /*!40000 ALTER TABLE `opening_hours_special` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -50,4 +51,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-29  9:40:37
+-- Dump completed on 2026-01-16 19:00:18

@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: bistro
+-- Host: localhost    Database: bistro
 -- ------------------------------------------------------
 -- Server version	8.0.44
 
@@ -40,6 +40,7 @@ CREATE TABLE `members` (
 
 LOCK TABLES `members` WRITE;
 /*!40000 ALTER TABLE `members` DISABLE KEYS */;
+INSERT INTO `members` VALUES (410003,969693,'Yael','Shani','Hifa'),(410005,148050,'Yael','Peretz','Petah Tikva'),(410008,766563,'Tamar','Friedman','Jerusalem'),(410009,319684,'Yael','Biton','Haifa'),(410011,271339,'Lior','Azulay','Petah Tikva'),(410014,961722,'Ben','Friedman','Beer Sheva'),(410020,881177,'Eden','Bar','Petah Tikva'),(410026,260265,'Yael','Mizrahi','Beer Sheva'),(410033,905934,'Yael','Friedman','Haifa'),(410035,103402,'Niv','Halevi','Petah Tikva'),(410037,755674,'Itay','Amir','Rishon LeZion'),(410038,899550,'Noam','Bar','Tel Aviv'),(410039,612340,'Ben','Levi','Netanya'),(410042,189814,'Niv','Shavit','Haifa'),(410043,234628,'Yael','Shavit','Jerusalem');
 /*!40000 ALTER TABLE `members` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -52,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-29  9:40:39
+-- Dump completed on 2026-01-16 19:00:18

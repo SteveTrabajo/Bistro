@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: bistro
+-- Host: localhost    Database: bistro
 -- ------------------------------------------------------
 -- Server version	8.0.44
 
@@ -36,7 +36,7 @@ CREATE TABLE `tables` (
 
 LOCK TABLES `tables` WRITE;
 /*!40000 ALTER TABLE `tables` DISABLE KEYS */;
-INSERT INTO `tables` VALUES (1,4),(2,6),(3,8),(4,2),(5,3);
+INSERT INTO `tables` VALUES (1,2),(2,2),(3,2),(4,4),(5,4),(6,4),(7,6),(8,6),(9,6),(10,8),(11,8),(12,10),(13,10),(14,12),(15,12),(16,2),(17,4),(18,6),(19,8),(20,10);
 /*!40000 ALTER TABLE `tables` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -49,4 +49,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-29  9:40:38
+-- Dump completed on 2026-01-16 19:00:18

@@ -16,20 +16,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Temporary view structure for view `tables_current_status`
---
-
-DROP TABLE IF EXISTS `tables_current_status`;
-/*!50001 DROP VIEW IF EXISTS `tables_current_status`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `tables_current_status` AS SELECT 
- 1 AS `tableNum`,
- 1 AS `capacity`,
- 1 AS `occupied_now`*/;
-SET character_set_client = @saved_cs_client;
-
---
 -- Temporary view structure for view `view_waitlist_queue`
 --
 
@@ -48,22 +34,18 @@ SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = @saved_cs_client;
 
 --
--- Final view structure for view `tables_current_status`
+-- Temporary view structure for view `tables_current_status`
 --
 
+DROP TABLE IF EXISTS `tables_current_status`;
 /*!50001 DROP VIEW IF EXISTS `tables_current_status`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `tables_current_status` AS select `t`.`tableNum` AS `tableNum`,`t`.`capacity` AS `capacity`,exists(select 1 from `table_sessions` `s` where ((`s`.`tableNum` = `t`.`tableNum`) and (`s`.`left_at` is null))) AS `occupied_now` from `tables` `t` */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `tables_current_status` AS SELECT 
+ 1 AS `tableNum`,
+ 1 AS `capacity`,
+ 1 AS `occupied_now`*/;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Final view structure for view `view_waitlist_queue`
@@ -82,6 +64,24 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `tables_current_status`
+--
+
+/*!50001 DROP VIEW IF EXISTS `tables_current_status`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `tables_current_status` AS select `t`.`tableNum` AS `tableNum`,`t`.`capacity` AS `capacity`,exists(select 1 from `table_sessions` `s` where ((`s`.`tableNum` = `t`.`tableNum`) and (`s`.`left_at` is null))) AS `occupied_now` from `tables` `t` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -92,4 +92,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-01-13 17:52:39
+-- Dump completed on 2026-01-16 19:00:19
