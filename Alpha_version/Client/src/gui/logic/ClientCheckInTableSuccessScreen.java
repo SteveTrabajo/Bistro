@@ -28,7 +28,7 @@ public class ClientCheckInTableSuccessScreen {
 		Order storedOrder = BistroClientGUI.client.getTableCTRL().getUserAllocatedOrderForTable();
 		
 		if (storedOrder != null) {
-            int currentTable = storedOrder.getTableId();
+            int currentTable = BistroClientGUI.client.getTableCTRL().getUserAllocatedTable();
             String confirmationCode = storedOrder.getConfirmationCode();
             
             lblTableNum.setText(String.valueOf(currentTable));

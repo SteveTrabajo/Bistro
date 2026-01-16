@@ -99,7 +99,7 @@ public class WaitingListService {
         int tableNum = tableService.allocateTable(code, LocalDateTime.now());
 
         Order order = ordersService.getOrderByConfirmationCode(code);
-
+        
         Map<String, Object> res = new HashMap<>();
         res.put("order", order);
         res.put("table", tableNum);

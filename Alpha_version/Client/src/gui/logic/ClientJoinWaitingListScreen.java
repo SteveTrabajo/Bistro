@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import entities.User;
+import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -96,16 +97,21 @@ public class ClientJoinWaitingListScreen {
 	@FXML
 	public void btnCheckAvail(Event event) {
 		int dinersAmount = Integer.parseInt(lblDinersAmount.getText());
-		BistroClientGUI.client.getWaitingListCTRL().checkWaitingListAvailability(dinersAmount);
+		TaskRunner.run(event, ()->{
+			BistroClientGUI.client.getWaitingListCTRL().checkWaitingListAvailability(dinersAmount);
+		},()->{
 		if(BistroClientGUI.client.getWaitingListCTRL().getcanSeatImmediately()) {
 			BistroClientGUI.client.getWaitingListCTRL().setCanSeatImmediately(false);
-			BistroClientGUI.switchScreen(event, "clientCheckInTableSuccesScreen", "Client Check-In Table Success error messege");
-			return;
+			Platform.runLater(()->{
+				BistroClientGUI.switchScreen(event, "clientCheckInTableSuccessScreen", "Client Check-In Table Success error messege");	
+			});
+			
 		}
 		else {
 			showAskJoinWaitlistDialog(BistroClientGUI.client.getWaitingListCTRL().getEstimatedWaitTimeMinutes(), dinersAmount);
 			
 		}
+		});
 	}
 	
 	/**

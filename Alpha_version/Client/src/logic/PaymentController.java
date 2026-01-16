@@ -62,7 +62,7 @@ public class PaymentController {
 	}
 
 	public double calculateDiscount(double amount) {
-		return amount * (1 - discountRate);
+		return (amount +  calculateTax(amount)) * discountRate;
 	}
 
 	public void setOrderItems(Object orderItems) {

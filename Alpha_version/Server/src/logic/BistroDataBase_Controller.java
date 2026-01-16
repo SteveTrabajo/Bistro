@@ -2803,44 +2803,64 @@ public class BistroDataBase_Controller {
         }
     }
 
-	public Order getSeatedOrderForUser(int userId) {
-		String qry = "SELECT order_number, user_id, order_date, order_time, number_of_guests, " +
-					 "confirmation_code, order_type, status, date_of_placing_order " +
-					 "FROM orders WHERE user_id = ? AND status = 'SEATED'";
-		Connection conn = null;
-		Order order = null;
-		try {
-			conn = borrow();
-			try (PreparedStatement ps = conn.prepareStatement(qry)) {
-				ps.setInt(1, userId);
+    public Order getSeatedOrderForUser(int userId) {
+        String qry =
+            "SELECT o.order_number, o.user_id, o.order_date, o.order_time, o.number_of_guests, " +
+            "       o.confirmation_code, o.order_type, o.status, o.date_of_placing_order, " +
+            "       ts.tableNum AS seated_tableNum " +
+            "FROM orders o " +
+            "JOIN table_sessions ts ON ts.order_number = o.order_number " +
+            "WHERE o.user_id = ? " +
+            "  AND o.status = 'SEATED' " +
+            "  AND ts.left_at IS NULL " +
+            "LIMIT 1";
 
-				try (ResultSet rs = ps.executeQuery()) {
-					if (rs.next()) {
-						int orderNumber = rs.getInt("order_number");
-						Date sqlDate = rs.getDate("order_date");
-						LocalDate orderDate = (sqlDate != null) ? sqlDate.toLocalDate() : null;
-						Time sqlTime = rs.getTime("order_time");
-						LocalTime orderTime = (sqlTime != null) ? sqlTime.toLocalTime() : null;
-						int dinersAmount = rs.getInt("number_of_guests");
-						String confirmCode = rs.getString("confirmation_code");
-						OrderType type = OrderType.valueOf(rs.getString("order_type"));
-						OrderStatus orderStatus = OrderStatus.valueOf(rs.getString("status"));
-						Timestamp placingTs = rs.getTimestamp("date_of_placing_order");
-						LocalDateTime dateOfPlacing = placingTs != null ? placingTs.toLocalDateTime() : null;
+        Connection conn = null;
+        Order order = null;
 
-						order = new Order(orderNumber, orderDate, orderTime, dinersAmount, 
-												confirmCode, userId, type, orderStatus, dateOfPlacing);
-					}
-				}
-			}
-		} catch (SQLException ex) {
-			logger.log("[ERROR] SQLException in getSeatedOrderForUser: " + ex.getMessage());
-			ex.printStackTrace();
-		} finally {
-			release(conn);
-		}
-		return order;
-	}
+        try {
+            conn = borrow();
+            try (PreparedStatement ps = conn.prepareStatement(qry)) {
+                ps.setInt(1, userId);
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        int orderNumber = rs.getInt("order_number");
+
+                        Date sqlDate = rs.getDate("order_date");
+                        LocalDate orderDate = (sqlDate != null) ? sqlDate.toLocalDate() : null;
+
+                        Time sqlTime = rs.getTime("order_time");
+                        LocalTime orderTime = (sqlTime != null) ? sqlTime.toLocalTime() : null;
+
+                        int dinersAmount = rs.getInt("number_of_guests");
+                        String confirmCode = rs.getString("confirmation_code");
+                        OrderType type = OrderType.valueOf(rs.getString("order_type"));
+                        OrderStatus orderStatus = OrderStatus.valueOf(rs.getString("status"));
+
+                        Timestamp placingTs = rs.getTimestamp("date_of_placing_order");
+                        LocalDateTime dateOfPlacing =
+                                placingTs != null ? placingTs.toLocalDateTime() : null;
+
+                        int tableNum = rs.getInt("seated_tableNum");
+                        System.out.println("DEBUG: Seated tableNum for order " + orderNumber + " is " + tableNum);
+
+                        order = new Order(orderNumber, orderDate, orderTime, dinersAmount,
+                                confirmCode, userId, type, orderStatus, dateOfPlacing);
+
+                        order.setTableId(tableNum);
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            logger.log("[ERROR] SQLException in getSeatedOrderForUser: " + ex.getMessage());
+            ex.printStackTrace();
+        } finally {
+            release(conn);
+        }
+
+        return order;
+    }
 
 	public Order getWaitingListOrderByUserId(int userID) {
 		String qry = "SELECT order_number, user_id, order_date, order_time, number_of_guests, " +

@@ -75,8 +75,7 @@ public class ServerWaitingListSubject {
 			if (result instanceof Map) {
 				// SUCCESS: Seated Immediately
 				Map<String, Object> resMap = (Map<String, Object>) result;
-				logger.log("[INFO] Immediate Seating Success. Order: "
-						+ ((Order) resMap.get("order")).getConfirmationCode());
+				logger.log("[INFO] Immediate Seating Success. Order: "+ ((Order) resMap.get("order")).getConfirmationCode());
 				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_CHECK_AVALIBILTY_SKIPPED_TO_SEAT, resMap));
 
 			} else if (result instanceof WaitListResponse) {
