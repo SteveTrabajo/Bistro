@@ -130,7 +130,7 @@ public class ClientUserSubject {
 			userController.setRegistrationSuccessFlag(true);
 		});
 		
-		router.on("user", "registerNewMember.fail", msg -> {
+		router.on("user", "registerNewMember.failed", msg -> {
 			BistroClient.awaitResponse = false;
 			BistroClientGUI.client.getUserCTRL().setRegistrationSuccessFlag(false);
 		});

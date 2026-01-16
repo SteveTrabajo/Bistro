@@ -22,6 +22,7 @@ public class UserData implements Serializable {
     	this.address = address;
 		this.phone = phone;
 		this.email = email;
+		this.userType = userType;
 		this.MemberCode = MemberCode;
 	}
     

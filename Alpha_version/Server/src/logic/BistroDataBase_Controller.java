@@ -655,16 +655,19 @@ public class BistroDataBase_Controller {
 		}
 	}
 	
-	/**
-	 * Retrieves all customers (members and guests) from the database.
-	 * 
-	 * @return List of User objects representing all customers
+	
+	/*
+	 * Retrieves all customers and converts them to DTOs for the client.
+	 * Returns List<UserData>.
 	 */
-	public List<User> getAllCustomersInDB() {
-		List<User> usersList = new ArrayList<>();
-		final String qry = "SELECT u.phoneNumber, u.email, u.type, " + "m.member_code, m.f_name, m.l_name "
-				+ "FROM users u " + "LEFT JOIN members m ON u.user_id = m.user_id";
-		Connection conn = null;
+	public List<UserData> getAllCustomers() {
+		List<UserData> usersList = new ArrayList<>();
+		final String qry = "SELECT u.phoneNumber, u.email, u.type, " 
+                         + "m.member_code, m.f_name, m.l_name, m.address "
+				         + "FROM users u " 
+                         + "LEFT JOIN members m ON u.user_id = m.user_id";
+		
+        Connection conn = null;
 		try {
 			conn = borrow();
 			try (PreparedStatement ps = conn.prepareStatement(qry)) {
@@ -673,29 +676,24 @@ public class BistroDataBase_Controller {
 						String email = rs.getString("email");
 						String phone = rs.getString("phoneNumber");
 						UserType type = UserType.valueOf(rs.getString("type"));
-						User user = null;
-						switch (type) {
-						case MEMBER: {
+                        
+						if (type == UserType.MEMBER) {
 							String fname = rs.getString("f_name");
 							String lname = rs.getString("l_name");
+                            String address = rs.getString("address");
 							String memberCode = rs.getString("member_code");
-							String fullName = fname + " " + lname;
-							user = new User(fullName, email, phone, memberCode, UserType.MEMBER);
-							break;
+							
+							usersList.add(new UserData(fname, lname, memberCode, phone, email, type, address));
+						} 
+                        else if (type == UserType.GUEST) {
+                            // sending null because GUEST has no additional data
+							usersList.add(new UserData(null, null, null, phone, email, UserType.GUEST, null));
 						}
-						case GUEST: {
-							user = new User(null, email, phone, null, UserType.GUEST);
-							break;
-						}
-						default:
-							continue;
-						}
-						usersList.add(user);
 					}
 				}
 			}
 		} catch (SQLException ex) {
-			logger.log("[ERROR] SQLException in getOrderByConfirmationCodeInDB: " + ex.getMessage());
+			logger.log("[ERROR] SQLException in getAllCustomersInDB: " + ex.getMessage());
 			ex.printStackTrace();
 			return null;
 		} finally {
@@ -703,6 +701,9 @@ public class BistroDataBase_Controller {
 		}
 		return usersList;
 	}
+	
+	
+	
 	
 	/**
 	 * Generates a unique 6-digit member_code not already present in the members table.
@@ -2970,50 +2971,6 @@ public class BistroDataBase_Controller {
 	    }
 	}
 
-	public List<UserData> getAllCustomers() {
-	    List<UserData> users = new ArrayList<>();
-
-	    String sql =
-	            "SELECT u.user_id, u.phoneNumber, u.email, u.type, m.member_code " +
-	            "FROM users u " +
-	            "LEFT JOIN members m ON u.user_id = m.user_id AND u.type = 'MEMBER' " +
-	            "WHERE u.type IN ('GUEST', 'MEMBER')";
-
-	    Connection conn = null;
-	    try {
-	        conn = borrow();
-	        try (PreparedStatement pstmt = conn.prepareStatement(sql);
-	             ResultSet rs = pstmt.executeQuery()) {
-
-	            while (rs.next()) {
-	                int userId = rs.getInt("user_id");
-	                String phoneNumber = rs.getString("phoneNumber");
-	                String email = rs.getString("email");
-	                String userTypeStr = rs.getString("type");
-
-	                UserType userType = UserType.valueOf(userTypeStr);
-
-	                String memberCode = rs.getString("member_code"); // יהיה null ל-GUEST
-
-	                UserData u = new UserData(userId, phoneNumber, email, memberCode, userType);
-
-	             
-
-	                users.add(u);
-	            }
-	        }
-	    } catch (SQLException e) {
-	        logger.log("[ERROR] getAllCustomers: " + e.getMessage());
-	        e.printStackTrace();
-	    } finally {
-	        release(conn);
-	    }
-
-	    return users;
-	}
-
-
-	
 
 
 }

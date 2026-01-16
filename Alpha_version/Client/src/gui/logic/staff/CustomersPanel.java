@@ -1,11 +1,11 @@
 package gui.logic.staff;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import common.InputCheck;
 import dto.UserData;
-import entities.User;
 import enums.UserType;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -77,7 +77,11 @@ public class CustomersPanel {
 
 // Send updated user data to server
 	private void setupColumns() {
-		colFullName.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFirstName()));
+		colFullName.setCellValueFactory(cellData -> {
+		    UserData u = cellData.getValue();
+		    if (u.getFirstName() == null) return new SimpleStringProperty("Guest");
+		    return new SimpleStringProperty(u.getFirstName() + " " + u.getLastName());
+		});
 		colEmail.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEmail()));
 		colPhone.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPhone()));
 		colMemberCode.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getMemberCode()));
@@ -200,8 +204,19 @@ public class CustomersPanel {
 	}
 
 	private void handleCustomerDoubleClick(UserData editUser) {
+		// Check if the user is a Guest, remind the employee that Guest details cannot be edited as we do not store them
+		if (editUser.getUserType() == UserType.GUEST) {
+			Alert alert = new Alert(Alert.AlertType.INFORMATION);
+			alert.setTitle("Guest User");
+			alert.setHeaderText("Action Not Allowed");
+			alert.setContentText("Guest details cannot be edited. Only registered Members can be updated.");
+			alert.showAndWait();
+			return;
+		}
+		
 		// Create the custom dialog
 		Dialog<UserData> dialog = new Dialog<>();
+		String titleName = editUser.getFirstName() != null ? editUser.getFirstName() : "Guest";
 		dialog.setTitle("Edit Customer: " + editUser.getFirstName());
 		dialog.setHeaderText("Update details for " + editUser.getFirstName());
 
@@ -215,21 +230,20 @@ public class CustomersPanel {
 		grid.setVgap(10);
 		grid.setPadding(new Insets(20, 150, 10, 10));
 
-		TextField nameField = new TextField(editUser.getFirstName());
-		TextField lastNameField = new TextField(editUser.getLastName());
-		TextField addressField = new TextField(editUser.getAddress());
-		TextField emailField = new TextField(editUser.getEmail());
-		TextField phoneField = new TextField(editUser.getPhone());
+		TextField nameField = new TextField(editUser.getFirstName() != null ? editUser.getFirstName() : "");
+		TextField lastNameField = new TextField(editUser.getLastName() != null ? editUser.getLastName() : "");
+		TextField addressField = new TextField(editUser.getAddress() != null ? editUser.getAddress() : "");
+		TextField emailField = new TextField(editUser.getEmail() != null ? editUser.getEmail() : "");
+		TextField phoneField = new TextField(editUser.getPhone() != null ? editUser.getPhone() : "");
 
 		ComboBox<UserType> typeComboBox = new ComboBox<>();
-		typeComboBox.getItems().setAll(java.util.Arrays.stream(UserType.values())
-				.filter(type -> type != UserType.MANAGER).collect(Collectors.toList()));
+		typeComboBox.getItems().setAll(Arrays.stream(UserType.values()).filter(type -> type != UserType.MANAGER).collect(Collectors.toList()));
 		typeComboBox.setValue(editUser.getUserType());
 		typeComboBox.setMaxWidth(Double.MAX_VALUE);
 		typeComboBox.setDisable(true); 
 		typeComboBox.setOpacity(0.9);
 		
-		// Member code is usually read-only
+		// Member code is read-only
 		TextField memberCodeField = new TextField(editUser.getMemberCode());
 		memberCodeField.setEditable(false);
 		memberCodeField.setDisable(true);
@@ -239,10 +253,10 @@ public class CustomersPanel {
 		grid.add(nameField, 1, 0);
 		
 		grid.add(new Label("Last Name:"), 0, 1);
-		grid.add(nameField, 1, 1);
+		grid.add(lastNameField, 1, 1);
 		
-		grid.add(new Label("Adress:"), 0, 2);
-		grid.add(nameField, 1, 2);
+		grid.add(new Label("Address:"), 0, 2);
+		grid.add(addressField, 1, 2);
 
 		grid.add(new Label("Email:"), 0, 3);
 		grid.add(emailField, 1, 3);
@@ -262,11 +276,19 @@ public class CustomersPanel {
 		Node saveButton = dialog.getDialogPane().lookupButton(saveButtonType);
 
 		saveButton.disableProperty().bind(Bindings.createBooleanBinding(
-	            () -> nameField.getText().trim().isEmpty() 
-	                    || lastNameField.getText().trim().isEmpty()
-	                    || addressField.getText().trim().isEmpty()
-	                    || !InputCheck.validateEmail(emailField.getText()).isEmpty()
-	                    || !InputCheck.validatePhoneNumber(phoneField.getText()).isEmpty(),
+	            () -> {
+	            	String first = nameField.getText();
+	            	String last = lastNameField.getText();
+	            	String addr = addressField.getText();
+	            	String mail = emailField.getText();
+	            	String ph = phoneField.getText();
+	            	
+	            	return (first == null || first.trim().isEmpty())
+	            		|| (last == null || last.trim().isEmpty())
+	            		|| (addr == null || addr.trim().isEmpty())
+	            		|| (mail != null && !InputCheck.validateEmail(mail).isEmpty())
+	            		|| (ph != null && !InputCheck.validatePhoneNumber(ph).isEmpty());
+	            },
 
 	            nameField.textProperty(), 
 	            lastNameField.textProperty(), 
@@ -277,14 +299,14 @@ public class CustomersPanel {
 		// Convert the result when save is clicked
 		dialog.setResultConverter(dialogButton -> {
 	        if (dialogButton == saveButtonType) {
-	            // Update your UserData constructor call to match your class structure
 	            return new UserData(
 	                nameField.getText().trim(),
 	                lastNameField.getText().trim(),
-	                emailField.getText().trim(),
+	                memberCodeField.getText().trim(),
 	                phoneField.getText().trim(),
-	                addressField.getText().trim(),
-	                typeComboBox.getValue(),memberCodeField.getText().trim()
+	                emailField.getText().trim(),
+	                typeComboBox.getValue(),
+	                addressField.getText().trim()
 	            );
 	        }
 	        return null;
@@ -292,7 +314,7 @@ public class CustomersPanel {
 
 		// Show dialog and handle the result
 		dialog.showAndWait().ifPresent(updatedUser -> {
-			Node rootNode = grid.getScene().getRoot();
+			Node rootNode = customersTable.getScene().getRoot();
 			rootNode.setDisable(true);
 			rootNode.setCursor(Cursor.WAIT);
 
@@ -303,14 +325,14 @@ public class CustomersPanel {
 					boolean success = BistroClientGUI.client.getUserCTRL().getUserUpdateSuccessful();
 
 					Platform.runLater(() -> {
-						if (success)
-							refreshdata();
-						else
+						if (success) {
+							refreshdata();							
+						} else {
 							new Alert(Alert.AlertType.ERROR, "Update failed on server.").showAndWait();
+						}
 					});
 				} catch (Exception e) {
-					Platform.runLater(() -> new Alert(Alert.AlertType.ERROR, "Connection error: " + e.getMessage())
-							.showAndWait());
+					Platform.runLater(() -> new Alert(Alert.AlertType.ERROR, "Connection error: " + e.getMessage()).showAndWait());
 				} finally {
 					// ALWAYS unlock the UI, even if an error occurred
 					Platform.runLater(() -> {
