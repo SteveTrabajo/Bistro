@@ -170,7 +170,8 @@ public class CustomersPanel {
 			masterData.setAll(customersData);
 		});
 	}
-
+	
+	@FXML
 	public void btnRefresh() {
 		refreshdata();
 		searchField.clear();

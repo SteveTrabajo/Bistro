@@ -1,6 +1,8 @@
 package logic.api.subjects;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.function.Consumer;
 
 import entities.Order;
 import entities.Table;
@@ -35,6 +37,16 @@ public class ClientTablesSubject {
 			
 		});
 		
+		router.on("tables", "getAll.ok", msg -> {
+		    BistroClient.awaitResponse = false;
+		    @SuppressWarnings("unchecked")
+		    List<Table> tables = (List<Table>) msg.getData();
+		    Platform.runLater(() -> {
+		        BistroClientGUI.client.getTableCTRL().fireAllTables(tables);
+		    });
+		});
+
+		
 		router.on("tables", "getUserAllocatedTable.ok", msg -> {
 			BistroClient.awaitResponse = false;
 			Platform.runLater(() -> {
@@ -68,7 +80,6 @@ public class ClientTablesSubject {
 				BistroClientGUI.client.getTableCTRL().setUserAllocatedOrderForTable(null);
 			});
 		});
-		
 	}
 
 }

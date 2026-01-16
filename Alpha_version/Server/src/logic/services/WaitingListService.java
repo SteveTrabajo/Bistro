@@ -183,6 +183,7 @@ public class WaitingListService {
 	public Order getWaitingListOrderByUserId(int userID) {
 		return dbController.getWaitingListOrderByUserId(userID);
 	}
+
     
 //   /**
 //	* Logic for Members using the existing getUserInfo logic in UserService
@@ -261,9 +262,9 @@ public class WaitingListService {
 //       return null; // Registration failed
 //   }
 //   
-//    public List<Order> getCurrentQueue() {
-//        // We return a list of Order entities that are currently in the waitlist
-//        return dbController.getWaitingQueueFromView();
-//    }
+    public List<Order> getCurrentQueue() {
+        // We return a list of Order entities that are currently in the waitlist
+        return dbController.getWaitingQueueFromView();
+    }
 
 }

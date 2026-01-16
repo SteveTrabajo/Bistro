@@ -25,6 +25,13 @@ public class UserData implements Serializable {
 		this.MemberCode = MemberCode;
 	}
     
+  public UserData(int userId, String phoneNumber, String email2, Object object, UserType userType2) {
+		this.phone = phoneNumber;
+		this.email = email2;
+		this.userType = userType2;
+		this.MemberCode = String.valueOf(object);
+	}
+
   public String getFirstName() {
 	  		return firstName;
   }

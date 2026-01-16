@@ -192,6 +192,17 @@ public final class ServerUserSubject {
 		        client.sendToClient(new Message(Api.REPLY_STAFF_CREATE_FAILED, null));
 		    }
 		});
+		
+		router.on("customers", "getalldata", (msg,client)->{
+			List<UserData> allCustomers = userService.getAllCustomers();
+			if(allCustomers != null) {
+				logger.log("[INFO] Sent all customer data to client: " + client);
+				client.sendToClient(new Message(Api.REPLY_LOAD_CUSTOMERS_DATA_OK, allCustomers));
+				} else {
+					logger.log("[ERROR] Failed to retrieve all customer data for client: " + client);
+					client.sendToClient(new Message(Api.REPLY_LOAD_CUSTOMERS_DATA_FAIL, null));
+				}
+		});
 	}
 }
 

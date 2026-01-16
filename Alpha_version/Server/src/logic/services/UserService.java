@@ -177,5 +177,9 @@ public class UserService {
 	public User findStaffUser(String username, String password) {
 	    return dbController.findEmployeeUser(username, password);
 	}
+
+	public List<UserData> getAllCustomers() {
+		return dbController.getAllCustomers();
+	}
 }
 // End of UserService.java

@@ -1550,13 +1550,14 @@ public class BistroDataBase_Controller {
 		// We filter by 'PENDING' to show only active waiters.
 		// We order by date_of_placing_order ASC so the first person who arrived is
 		// first in the list.
-		String query = "SELECT o.order_number, o.confirmation_code, o.number_of_guests,"
-				+ "o.date_of_placing_order, o.status, o.order_type,"
-				+ "w.quoted_wait_time, w.priority, w.requested_time, w.wl_status"
-				+ "FROM orders o"
-				+ "JOIN waiting_list w ON o.confirmation_code = w.confirmation_code"
-				+ "WHERE w.wl_status = 'WAITING'"
-				+ "ORDER BY w.priority, w.requested_time, w.joined_at; ";
+		String query =
+		        "SELECT o.order_number, o.confirmation_code, o.number_of_guests, " +
+		        "o.date_of_placing_order, o.status, o.order_type, " +
+		        "w.quoted_wait_time, w.priority, w.requested_time, w.wl_status " +
+		        "FROM orders o " +
+		        "JOIN waiting_list w ON o.confirmation_code = w.confirmation_code " +
+		        "WHERE w.wl_status IN ('WAITING', 'NOTIFIED') " +
+		        "ORDER BY w.priority, w.requested_time, w.joined_at";
 		Connection conn = null;
 		try {
 			conn = borrow();
@@ -2968,6 +2969,49 @@ public class BistroDataBase_Controller {
 	        release(conn);
 	    }
 	}
+
+	public List<UserData> getAllCustomers() {
+	    List<UserData> users = new ArrayList<>();
+
+	    String sql =
+	            "SELECT u.user_id, u.phoneNumber, u.email, u.type, m.member_code " +
+	            "FROM users u " +
+	            "LEFT JOIN members m ON u.user_id = m.user_id AND u.type = 'MEMBER' " +
+	            "WHERE u.type IN ('GUEST', 'MEMBER')";
+
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement pstmt = conn.prepareStatement(sql);
+	             ResultSet rs = pstmt.executeQuery()) {
+
+	            while (rs.next()) {
+	                int userId = rs.getInt("user_id");
+	                String phoneNumber = rs.getString("phoneNumber");
+	                String email = rs.getString("email");
+	                String userTypeStr = rs.getString("type");
+
+	                UserType userType = UserType.valueOf(userTypeStr);
+
+	                String memberCode = rs.getString("member_code"); // יהיה null ל-GUEST
+
+	                UserData u = new UserData(userId, phoneNumber, email, memberCode, userType);
+
+	             
+
+	                users.add(u);
+	            }
+	        }
+	    } catch (SQLException e) {
+	        logger.log("[ERROR] getAllCustomers: " + e.getMessage());
+	        e.printStackTrace();
+	    } finally {
+	        release(conn);
+	    }
+
+	    return users;
+	}
+
 
 	
 

@@ -1,5 +1,6 @@
 package logic.api.subjects;
 
+import java.util.List;
 import java.util.Map;
 
 import comms.Api;
@@ -126,16 +127,18 @@ public class ServerWaitingListSubject {
 		});
 		
 		
-//		router.on("waitingList", "getAll", (msg, client) -> {
-//			client.sendToClient(new Message(Api.REPLY_GET_WAITING_LIST_OK, waitingListService.getCurrentQueue()));
-//			if (waitingListService.getCurrentQueue() != null) {
-//				logger.log("[INFO] Sent current waiting list to client: " + client);
-//			} else {
-//				logger.log("[ERROR] Failed to retrieve waiting list for client: " + client);
-//				client.sendToClient(new Message(Api.REPLY_GET_WAITING_LIST_FAIL, null));
-//			}
-//		});
-//		router.on("waitingList", "addWalkIn", (msg, client) -> {
+		router.on("waitinglist", "getAll", (msg, client) -> {
+			List<Order> waitingList = waitingListService.getCurrentQueue();
+			if (waitingList != null) {
+				logger.log("[INFO] Sent current waiting list to client: " + client);
+				client.sendToClient(new Message(Api.REPLY_GET_WAITING_LIST_OK, waitingList));
+			} else {
+				logger.log("[ERROR] Failed to retrieve waiting list for client: " + client);
+				client.sendToClient(new Message(Api.REPLY_GET_WAITING_LIST_FAIL, null));
+			}
+		});
+		
+//		router.on("waitinglist", "addWalkIn", (msg, client) -> {
 //		    try {
 //		        @SuppressWarnings("unchecked")
 //		        Map<String, Object> data = (Map<String, Object>) msg.getData();

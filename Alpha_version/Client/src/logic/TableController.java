@@ -73,6 +73,12 @@ public class TableController {
 		this.allTablesCallback = callback;
 	}
 	
+	public void fireAllTables(List<Table> tables) {
+	    if (allTablesCallback != null) {
+	        allTablesCallback.accept(tables);
+	    }
+	}
+	
 	//******************************** Instance Methods ***********************************//
 	
 	public boolean clearTableController() {
