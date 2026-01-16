@@ -1,8 +1,10 @@
 package gui.logic.staff;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -55,7 +57,7 @@ public class WaitingListPanel {
 	@FXML
 	private TableColumn<Order, Integer> colParty;
 	@FXML
-	private TableColumn<Order, LocalTime> colJoined;
+	private TableColumn<Order, LocalDateTime> colJoined;
 	@FXML
 	private TableColumn<Order, OrderStatus> colStatus;
 
@@ -74,10 +76,10 @@ public class WaitingListPanel {
 		colQueue.setCellValueFactory(new PropertyValueFactory<>("confirmationCode"));
 		colParty.setCellValueFactory(new PropertyValueFactory<>("dinersAmount"));
 
-		colJoined.setCellValueFactory(new PropertyValueFactory<>("orderHour"));
+		colJoined.setCellValueFactory(new PropertyValueFactory<>("dateOfPlacingOrder"));
 		colJoined.setCellFactory(column -> new TableCell<>() {
 			@Override
-			protected void updateItem(LocalTime item, boolean empty) {
+			protected void updateItem(LocalDateTime item, boolean empty) {
 				super.updateItem(item, empty);
 				if (empty || item == null) {
 					setText(null);
@@ -206,4 +208,5 @@ public class WaitingListPanel {
 		alert.setContentText(content);
 		alert.showAndWait();
 	}
+
 }

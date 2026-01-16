@@ -13,6 +13,7 @@ import entities.Order;
 import enums.OrderStatus;
 import enums.OrderType;
 import gui.logic.staff.WaitingListPanel;
+import javafx.application.Platform;
 
 /*
  * This class represents the controller for waiting list operations in the BistroClient.
@@ -70,12 +71,18 @@ public class WaitingListController {
 		return waitingList;
 	}
 	
-	public void setWaitingList(ArrayList<Order> waitingList) {
-		this.waitingList = waitingList;
-		// If the UI is open, update it immediately
-		if (waitingListPanelController != null) {
-			waitingListPanelController.updateListFromServer(waitingList);
-		}
+	public void setWaitingListPanelController(WaitingListPanel panel) {
+	    this.waitingListPanelController = panel;
+	}
+	
+	public void setWaitingList(ArrayList<Order> list) {
+		this.waitingList = list;
+		if (this.waitingListPanelController != null) {
+	        // Run on UI thread to be safe
+	        Platform.runLater(() -> {
+	            this.waitingListPanelController.updateListFromServer(list);
+	        });
+	    }
 	}
 	
 	public long getEstimatedWaitTimeMinutes() {

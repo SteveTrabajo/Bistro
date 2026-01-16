@@ -29,8 +29,7 @@ public class ServerWaitingListSubject {
 	 * Registers handlers related to waiting list operations.
 	 * 
 	 * @param router             The ServerRouter instance to register handlers with.
-	 * @param waitingListService The BistroDataBase_Controller instance for database
-	 *                           operations.
+	 * @param waitingListService The BistroDataBase_Controller instance for database operations.
 	 * @param logger             The ServerLogger instance for logging.
 	 */
 	public static void register(ServerRouter router, WaitingListService waitingListService, ServerLogger logger) {
@@ -49,7 +48,7 @@ public class ServerWaitingListSubject {
 				client.sendToClient(new Message(Api.REPLY_WAITING_LIST_IS_NOT_IN_LIST, false));
 			}
 		});
-
+		
 		// 2. Check Availability AND Seat if possible (Optimistic Scheduling)
 		// Client sends: int (dinersAmount)
 		// Server uses: client.getInfo("user") to get contact info
