@@ -2373,8 +2373,10 @@ public class BistroDataBase_Controller {
 		            			"AND MONTH(o.order_date) = ? " +
 		            			"AND YEAR(o.order_date) = ? " +
 		            			"AND ts.seated_at IS NOT NULL " +
-		            			"AND ts.seated_at > TIMESTAMP(o.order_date, o.order_time)";
-		    					
+		            			"AND ts.seated_at >= TIMESTAMP(o.order_date, o.order_time)  " +
+		            			"AND ts.seated_at <= TIMESTAMP(o.order_date, o.order_time) + INTERVAL 15 MINUTE ";
+		   						
+		    				
 		   Connection conn = null;
 
 		   try {
@@ -2416,7 +2418,7 @@ public class BistroDataBase_Controller {
 			            			"AND MONTH(o.order_date) = ? " +
 			            			"AND YEAR(o.order_date) = ? " +
 			            			"AND ts.seated_at IS NOT NULL " +
-			            			"AND ts.seated_at = TIMESTAMP(o.order_date, o.order_time)";
+			            			"AND ts.seated_at <= TIMESTAMP(o.order_date, o.order_time)";
 			    					
 			 Connection conn = null;
 
