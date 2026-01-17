@@ -132,19 +132,19 @@ public class InputCheck {
 		String temp;
 		
 		temp = validateFirstName(firstName);
-		if(!temp.isEmpty()) errorMsg.append("• ").append(temp).append("\n");
+		if(!temp.isEmpty()) errorMsg.append("* ").append(temp).append("\n");
 		
 		temp = validateLastName(lastName);
-		if(!temp.isEmpty()) errorMsg.append("• ").append(temp).append("\n");
+		if(!temp.isEmpty()) errorMsg.append("* ").append(temp).append("\n");
 		
 		temp = validatePhoneNumber(phoneNumber);
-		if(!temp.isEmpty()) errorMsg.append("• ").append(temp).append("\n");
+		if(!temp.isEmpty()) errorMsg.append("* ").append(temp).append("\n");
 		
 		temp = validateEmail(email);
-		if(!temp.isEmpty()) errorMsg.append("• ").append(temp).append("\n");
+		if(!temp.isEmpty()) errorMsg.append("* ").append(temp).append("\n");
 		
 		temp = validateAddress(address);
-		if(!temp.isEmpty()) errorMsg.append("• ").append(temp).append("\n");
+		if(!temp.isEmpty()) errorMsg.append("* ").append(temp).append("\n");
 		
 		return errorMsg.toString().trim();
 	}
@@ -261,20 +261,26 @@ public class InputCheck {
 	/**
 	 * Validates all staff account data at once
 	 */
-	public static String validateAllStaffData(String username, String password, String email, String phoneNumber) {
-		String usernameError = InputCheck.validateUsername(username);
-		if (usernameError != null) return usernameError;
-		
-		String passwordError = validatePassword(password);
-		if (passwordError != null) return passwordError;
-		
-		String emailError = validateEmail(email);
-		if (emailError != null) return emailError;
-		
-		String phoneError = validatePhoneNumber(phoneNumber);
-		if (phoneError != null) return phoneError;
-		
-		return null;
+	public static String validateAllStaffData(
+	        String username,
+	        String password,
+	        String email,
+	        String phoneNumber,
+	        String firstName,
+	        String lastName,
+	        String address
+	) {
+	    String usernameError = InputCheck.validateUsername(username);
+	    if (usernameError != null) return usernameError;
+
+	    String passwordError = validatePassword(password);
+	    if (passwordError != null) return passwordError;
+
+	    // Personal details validator returns "" when ok and a BULLET LIST when not ok
+	    String personalDetailsError = validatePersonalDetails(firstName, lastName, phoneNumber, email, address);
+	    if (personalDetailsError != null && !personalDetailsError.isBlank()) return personalDetailsError;
+
+	    return null;
 	}
 
 	private InputCheck() {

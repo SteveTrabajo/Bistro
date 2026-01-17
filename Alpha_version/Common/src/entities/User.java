@@ -49,6 +49,7 @@ public class User implements Serializable {
 		this.type = type;
 		this.phoneNumber = phoneNumber;
 		this.email = email;
+		this.username = username;
 	}
 	
 	//Constructor for display User in Management tool

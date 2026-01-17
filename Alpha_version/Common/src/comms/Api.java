@@ -220,9 +220,26 @@ public final class Api {
 	public static final String REPLY_BILL_ITEMS_LIST_OK = "payment.billItemsList.ok";
 	public static final String REPLY_BILL_ITEMS_LIST_FAIL = "payment.billItemsList.fail";
 
+	
+	
+// == Reports Subject == //
+	
+	// Requests
+	public static final String ASK_REPORTS_LIST_MONTHS = "reports.listMonths";
+	public static final String ASK_REPORTS_GET_OR_GENERATE = "reports.getOrGenerate";
+
+	// Responses
+	public static final String REPLY_REPORTS_LIST_MONTHS_OK = "reports.listMonths.ok";
+	public static final String REPLY_REPORTS_LIST_MONTHS_FAIL = "reports.listMonths.fail";
+	public static final String REPLY_REPORTS_GET_OR_GENERATE_OK = "reports.getOrGenerate.ok";
+	public static final String REPLY_REPORTS_GET_OR_GENERATE_FAIL = "reports.getOrGenerate.fail";
+	
+	
 // == System responses == //
 
 	public static final String REPLY_UNKNOWN_COMMAND = "system.unknownCommand";
+	
+	
 	
 
 }

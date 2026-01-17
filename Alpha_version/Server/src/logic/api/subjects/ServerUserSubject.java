@@ -170,7 +170,13 @@ public final class ServerUserSubject {
 		    String password = (String) staffData.get("password");
 		    String email = (String) staffData.get("email");
 		    String phoneNumber = (String) staffData.get("phoneNumber");
-		    String validationError = InputCheck.validateAllStaffData(username, password, email, phoneNumber);
+		    String firstName = (String) staffData.get("firstName");
+		    String lastName  = (String) staffData.get("lastName");
+		    String address   = (String) staffData.get("address");
+		    String validationError = InputCheck.validateAllStaffData(
+		            username, password, email, phoneNumber,
+		            firstName, lastName, address
+		    );
 		    if (validationError != null) {
 		    	logger.log("[MANAGER] Staff creation failed due to invalid data: " + validationError);
 		        client.sendToClient(new Message(Api.REPLY_STAFF_CREATE_INVALID_DATA, validationError));

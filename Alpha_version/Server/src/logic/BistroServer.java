@@ -7,6 +7,7 @@ import comms.Api;
 import comms.Message;
 import entities.MonthlyReport;
 import entities.Order;
+import entities.ReportRequest;
 import gui.controllers.ServerConsoleController;
 import logic.api.ServerRouter;
 import logic.api.subjects.ServerConnectionSubject;
@@ -15,6 +16,14 @@ import ocsf.server.AbstractServer;
 import ocsf.server.ConnectionToClient;
 import logic.api.subjects.*;
 import logic.services.*;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.YearMonth;
+
+
+
 
 /**
  * BistroServer class that extends AbstractServer to handle client-server
@@ -40,8 +49,11 @@ public class BistroServer extends AbstractServer {
 	private final ReportsService reportService;
 	private final PaymentService paymentService;
 	private final NoShowManager noShowManager;
+	
 	// Scheduler for background tasks:
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	/** Scheduler used to run monthly report generation checks once per day. */
+	private final ScheduledExecutorService monthlyReportsScheduler = Executors.newScheduledThreadPool(1);
 	
 	// ******************************** Constructors***********************************
 
@@ -145,6 +157,7 @@ public class BistroServer extends AbstractServer {
 			logger.log("Connected to database successfully");
 			notificationService.startBackgroundTasks(); // Start notification background tasks
 			noShowManager.startBackgroundTasks(); // Start no-show detection background tasks
+			startMonthlyReportGenerationScheduler();
 		} else {
 			logger.log("Failed to connect to database");
 		}
@@ -157,6 +170,7 @@ public class BistroServer extends AbstractServer {
 		logger.log("Server stopped");
 		notificationService.stop(); // Stop notification background tasks
 		noShowManager.stop(); // Stop no-show detection background tasks
+		monthlyReportsScheduler.shutdownNow(); // Stop monthly report generation scheduler
 		dbController.closeConnection();
 	}
 
@@ -206,6 +220,51 @@ public class BistroServer extends AbstractServer {
 	
 	public NotificationService getNotificationService() {
 		return this.notificationService;
+	}
+	/**
+	 * Starts a daily task (00:05 server time) that checks whether today is the first day of the month.
+	 * If yes, generates both required monthly reports (MEMBERS + TIMES) for the previous month.
+	 *
+	 * <p>Matches the project story: reports are generated automatically at the end of each month.</p>
+	 */
+	private void startMonthlyReportGenerationScheduler() {
+	    long initialDelaySec = secondsUntilNextRun(LocalTime.of(0, 5));
+	    long periodSec = TimeUnit.DAYS.toSeconds(1);
+
+	    monthlyReportsScheduler.scheduleAtFixedRate(() -> {
+	        try {
+	            LocalDate today = LocalDate.now();
+	            if (today.getDayOfMonth() != 1) return;
+
+	            YearMonth prev = YearMonth.from(today).minusMonths(1);
+
+	            logger.log("[REPORTS] Auto-generating monthly reports for "
+	                    + prev.getYear() + "-" + String.format("%02d", prev.getMonthValue()));
+
+	            // force=true ensures fresh generation (overwrites cached payload if exists)
+	            reportService.getOrGenerate(new ReportRequest("MEMBERS", prev.getYear(), prev.getMonthValue(), true));
+	            reportService.getOrGenerate(new ReportRequest("TIMES", prev.getYear(), prev.getMonthValue(), true));
+
+	            logger.log("[REPORTS] Auto-generation done.");
+	        } catch (Exception e) {
+	            logger.log("[REPORTS] Auto-generation failed: " + e.getMessage());
+	        }
+	    }, initialDelaySec, periodSec, TimeUnit.SECONDS);
+
+	    logger.log("[REPORTS] Monthly report scheduler started (daily 00:05).");
+	}
+
+	/**
+	 * Computes the delay in seconds until the next occurrence of the given target time.
+	 *
+	 * @param targetTime the time of day to schedule the next run for
+	 * @return seconds until next run
+	 */
+	private static long secondsUntilNextRun(LocalTime targetTime) {
+	    LocalDateTime now = LocalDateTime.now();
+	    LocalDateTime next = now.toLocalDate().atTime(targetTime);
+	    if (!next.isAfter(now)) next = next.plusDays(1);
+	    return Duration.between(now, next).getSeconds();
 	}
 
 }

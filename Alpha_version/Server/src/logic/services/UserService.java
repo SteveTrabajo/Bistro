@@ -57,12 +57,21 @@ public class UserService {
 		String email = (String) staffData.get("email");
 		String phoneNumber = (String) staffData.get("phoneNumber");
 		String userTypeStr = String.valueOf(staffData.get("userType"));
+		String firstName = (String) staffData.get("firstName");
+		String lastName  = (String) staffData.get("lastName");
+		String address   = (String) staffData.get("address");
+
+		
 		// Validate all fields
-		String validationError = InputCheck.validateAllStaffData(username, password, email, phoneNumber);
+		String validationError = InputCheck.validateAllStaffData(
+		        username, password, email, phoneNumber,
+		        firstName, lastName, address
+		);
 		if (validationError != null) {
-			logger.log("[STAFF_CREATE] Validation failed: " + validationError);
-			return null;
+		    logger.log("[STAFF_CREATE] Validation failed: " + validationError);
+		    return null;
 		}
+
 		// Validate user type
 		UserType userType;
 		try {
@@ -81,7 +90,10 @@ public class UserService {
 			return null;
 		}
 		// Create the employee account
-		User newUser = dbController.createEmployeeUser(username, password, email, phoneNumber, userType);
+		User newUser = dbController.createEmployeeUser(
+		        username, password, email, phoneNumber, userType,
+		        firstName, lastName, address
+		);
 		if (newUser != null) {
 			logger.log("[STAFF_CREATE] Successfully created new staff account: " + username);
 		}

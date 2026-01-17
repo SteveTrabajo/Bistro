@@ -1,8 +1,6 @@
 package gui.logic.staff;
 
-import java.net.URL;
 import java.util.Map;
-import java.util.ResourceBundle;
 
 import entities.MonthlyReport;
 import javafx.application.Platform;
@@ -10,203 +8,222 @@ import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import logic.BistroClientGUI;
+import javafx.geometry.Pos;
 
 public class AnalyticsPanel {
-	//*********************** FXML Variables ************************//
-    @FXML 
-    private Label totalReservationsLabel;
-    
-    @FXML 
-    private Label totalReservationsDelta;
-    
-    @FXML 
-    private Label rateOfMemberInReservationLabel;
-    
-    @FXML
-    private Label rateOfMemberInReservationDelta;
-            
-    @FXML 
-    private Label onTimeRateLabel;
-    
-    @FXML 
-    private Label onTimeDelta;
-    
-    @FXML 
-    private Label customersThisMonthLabel;
-    
-    @FXML 
-    private Label currentMonthLabel;
 
-    // ****** Chart Arrival Times ******
+    // ===== KPIs =====
+    @FXML private Label totalReservationsLabel;
+    @FXML private Label customersThisMonthLabel;
+
+    // ===== Charts =====
     @FXML private BarChart<String, Number> arrivalBarChart;
+    @FXML private LineChart<String, Number> reservationsLineChart;
     @FXML private Label totalOnTimeLabel;
     @FXML private Label totalLateLabel;
 
-    // ****** Chart Monthly Trends ******
-    @FXML private LineChart<String, Number> reservationsLineChart;
-    @FXML private Label peakMonthLabel;
-    @FXML private Label peakMonthValueLabel;
-    @FXML private Label lowestMonthLabel;
-    @FXML private Label lowestMonthValueLabel;
-    @FXML private Label growthRateLabel;
-
-    // ****** Dynamic Bottom Sections ******
+    // ===== Bottom =====
     @FXML private VBox peakTimesBox;
-    @FXML private VBox partySizeBox;
-    
-    //*********************** FXML Methods ************************//
-    
+
+    // ===== Selector =====
+    @FXML private ComboBox<String> reportTypeCombo;
+    @FXML private ComboBox<String> monthCombo;
+
     public void initialize() {
-        // Initial setup if needed (e.g., clear charts)
-        arrivalBarChart.setAnimated(true);
-        reservationsLineChart.setAnimated(true);
-        BistroClientGUI.client.getMonthlyReportsCTRL().requestMonthlyReportData();
-        Platform.runLater(() -> {
-        	updateDashboard(BistroClientGUI.client.getMonthlyReportsCTRL().getCurrentMonthlyReport());
-        });
+        reportTypeCombo.getItems().setAll("MEMBERS", "TIMES");
+        reportTypeCombo.getSelectionModel().selectFirst();
+
+        loadMonths();
+
+        reportTypeCombo.setOnAction(e -> loadMonths());
     }
 
-    /**
-     * Updates the entire dashboard with new data from MonthlyReport
-     * @param data The MonthlyReport 
-     */
-    public void updateDashboard(MonthlyReport data) {
-        if (data == null) return;
+    private void loadMonths() {
+        new Thread(() -> {
+            BistroClientGUI.client.getMonthlyReportsCTRL()
+                    .requestAvailableMonths(reportTypeCombo.getValue());
 
-        totalReservationsLabel.setText(String.valueOf(data.getTotalReservations()));
-
-        rateOfMemberInReservationLabel.setText(String.valueOf(data.getMemberReservationPrecetage()) + "%");
-               
-        onTimeRateLabel.setText(String.valueOf(data.getOnTimeRate()) + "%");
-     
-
-        customersThisMonthLabel.setText(String.valueOf(data.getTotalCostumer()));      
-        currentMonthLabel.setText(data.getMonth()); 
-
-        // 2. Update Bar Chart (Arrival Times)
-        updateArrivalChart(data);
-
-        // 3. Update Line Chart (Trends)
-        updateTrendChart(data);
-
-        // 4. Update Summaries
-        totalOnTimeLabel.setText(String.valueOf(data.getTotalOnTimeCostumer()));
-        totalLateLabel.setText(String.valueOf(data.getTotalLateCostumer()));
-        
-//        data.getPeakMonth()); 
-//        peakMonthValueLabel.setText(String.valueOf(data.getPeakMonthValue())); 
-//        
-//        lowestMonthLabel.setText(data.getLowestMonth()); 
-//        lowestMonthValueLabel.setText(String.valueOf(data.getLowestMonthValue())); 
-//        
-//        growthRateLabel.setText(String.format("%+.1f%%", data.getGrowthRateYearly())); 
-
-//        // 5. Build Dynamic Bottom Rows
-//        populateDistributionRows(peakTimesBox, data.getPeakReservationTimes(), "ad-bar-blue");
-//        populateDistributionRows(partySizeBox, data.getDinersAmountDistribution(), "ad-bar-green");
+            Platform.runLater(() -> {
+                monthCombo.getItems().clear();
+                for (int[] ym : BistroClientGUI.client.getMonthlyReportsCTRL().getAvailableMonths()) {
+                    monthCombo.getItems().add(ym[0] + "-" + String.format("%02d", ym[1]));
+                }
+                if (!monthCombo.getItems().isEmpty()) {
+                    monthCombo.getSelectionModel().selectFirst();
+                    onLoadReport();
+                }
+            });
+        }).start();
     }
 
-    /**
-	 * Helper to set delta label text and color based on value
-	 * @param label The Label to update
-	 * @param value The delta value (positive/negative)
-	 */
-    private void setDeltaLabel(Label label, double value) {
-        label.setText(String.format("%+.1f%%", value));
-        // Simple logic to change color class based on positive/negative
-        label.getStyleClass().removeAll("ad-kpi-delta", "ad-kpi-delta-red");
-        if (value >= 0) {
-            label.setStyle("-fx-text-fill: #16a34a;"); // Green
+    @FXML
+    private void onLoadReport() {
+        String ym = monthCombo.getValue();
+        if (ym == null) return;
+
+        int year = Integer.parseInt(ym.substring(0, 4));
+        int month = Integer.parseInt(ym.substring(5, 7));
+
+        new Thread(() -> {
+            BistroClientGUI.client.getMonthlyReportsCTRL()
+                    .requestReport(reportTypeCombo.getValue(), year, month, false);
+
+            MonthlyReport report =
+                    BistroClientGUI.client.getMonthlyReportsCTRL().getCurrentMonthlyReport();
+
+            Platform.runLater(() -> updateDashboard(report));
+        }).start();
+    }
+
+    private void updateDashboard(MonthlyReport r) {
+        if (r == null) return;
+
+        totalReservationsLabel.setText(String.valueOf(r.getTotalReservations()));
+        customersThisMonthLabel.setText(String.valueOf(r.getTotalCostumer()));
+
+        updateBarChart(r);
+        updateLineChart(r);
+        updateBottom(r);
+    }
+
+    private void updateBarChart(MonthlyReport r) {
+        arrivalBarChart.getData().clear();
+        XYChart.Series<String, Number> s = new XYChart.Series<>();
+
+        if ("TIMES".equalsIgnoreCase(r.getReportType())) {
+            s.getData().add(new XYChart.Data<>("On Time", r.getTotalOnTimeCostumer()));
+            s.getData().add(new XYChart.Data<>("Late", r.getTotalLateCostumer()));
+            totalOnTimeLabel.setText(String.valueOf(r.getTotalOnTimeCostumer()));
+            totalLateLabel.setText(String.valueOf(r.getTotalLateCostumer()));
         } else {
-            label.setStyle("-fx-text-fill: #ef4444;"); // Red
+            s.getData().add(new XYChart.Data<>("Reservations", r.getTotalReservations()));
+            s.getData().add(new XYChart.Data<>("Waitlist", sum(r.getWaitlistByDay())));
+        }
+
+        arrivalBarChart.getData().add(s);
+    }
+
+    private void updateLineChart(MonthlyReport r) {
+        reservationsLineChart.getData().clear();
+        prepareDayAxis(r.getYearInt(), r.getMonthInt());
+
+        if ("TIMES".equalsIgnoreCase(r.getReportType())) {
+            addSeries("On Time", r.getOnTimeArrivalsByDay());
+            addSeries("Late", r.getLateArrivalsByDay());
+        } else {
+            addSeries("Reservations", r.getReservationsByDay());
+            addSeries("Waitlist", r.getWaitlistByDay());
         }
     }
 
     /**
-	 * Updates the arrival times bar chart with new data
-	 * @param data The MonthlyReport DTO
-	 */
-    private void updateArrivalChart(MonthlyReport data) {
-        arrivalBarChart.getData().clear();
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("Arrivals");
+     * Adds a sorted series (by day-of-month) to the trend chart.
+     *
+     * @param name series name
+     * @param data day->count map (may be null)
+     */
+    private void addSeries(String name, Map<Integer, Integer> data) {
+        XYChart.Series<String, Number> s = new XYChart.Series<>();
+        s.setName(name);
 
-//        Map<String, Integer> dist = data.getArrivalTimeDistribution();
-//        if (dist != null) {
-//            dist.forEach((category, count) -> {
-//                series.getData().add(new XYChart.Data<>(category, count));
-//            });
-//        }
-//        arrivalBarChart.getData().add(series);
+        if (data != null && !data.isEmpty()) {
+            data.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(e -> {
+                    // Use 2-digit day label so "1" and "01" don't collide visually and ordering is stable
+                    String dayLabel = String.format("%02d", e.getKey());
+                    s.getData().add(new XYChart.Data<>(dayLabel, e.getValue()));
+                });
+        }
+
+        reservationsLineChart.getData().add(s);
+    }
+
+
+    private void updateBottom(MonthlyReport r) {
+        peakTimesBox.getChildren().clear();
+
+        if ("TIMES".equalsIgnoreCase(r.getReportType())) {
+            populateDistribution(r.getLatenessBuckets());
+        } else {
+            populateDistributionFromIntMap(r.getWaitlistByDay());
+        }
+    }
+
+    private void populateDistribution(Map<String, Integer> map) {
+        if (map == null || map.isEmpty()) return;
+        int total = map.values().stream().mapToInt(i -> i).sum();
+
+        map.forEach((k, v) -> addRow(k, v, total));
+    }
+
+    private void populateDistributionFromIntMap(Map<Integer, Integer> map) {
+        if (map == null || map.isEmpty()) return;
+        int total = map.values().stream().mapToInt(i -> i).sum();
+
+        map.forEach((k, v) -> addRow(String.valueOf(k), v, total));
     }
 
     /**
-     * Updates the monthly reservations trend line chart
-     * @param data
+     * Adds a single distribution row: label | progress bar | percent.
+     *
+     * @param label row label
+     * @param value bucket value
+     * @param total sum of all values
      */
-    private void updateTrendChart(MonthlyReport data) {
-        reservationsLineChart.getData().clear();
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName(data.getMonth());
+    private void addRow(String label, int value, int total) {
+        double pct = (total <= 0) ? 0.0 : (double) value / total;
 
-//        Map<String, Integer> trends = data.getMonthlyReservationsMap();
-//        // Ensure month order is correct (Logic depends on Map implementation, LinkedHashMap is best)
-//        if (trends != null) {
-//            trends.forEach((month, count) -> {
-//                series.getData().add(new XYChart.Data<>(month, count));
-//            });
-//        }
-//        reservationsLineChart.getData().add(series);
+        HBox row = new HBox(10);
+        row.setAlignment(Pos.CENTER_LEFT);
+
+        Label l = new Label(label);
+        l.setMinWidth(70);
+        l.setMaxWidth(70);
+
+        ProgressBar pb = new ProgressBar(pct);
+        pb.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(pb, Priority.ALWAYS);
+
+        Label p = new Label(String.format("%.0f%%", pct * 100));
+        p.setMinWidth(55);
+        p.setMaxWidth(55);
+        p.setAlignment(Pos.CENTER_RIGHT);
+
+        row.getChildren().addAll(l, pb, p);
+        peakTimesBox.getChildren().add(row);
     }
 
 
-	/**
-     * Dynamically creates progress bar rows for the bottom cards
-     * @param container The VBox container to populate
-     * @param dataMap The data map to visualize (key: label, value: count)
-     * @param colorStyleClass The CSS style class for the progress bar color
+    private int sum(Map<Integer, Integer> map) {
+        if (map == null) return 0;
+        return map.values().stream().mapToInt(i -> i).sum();
+    }
+    
+    /**
+     * Prepares the x-axis categories for the selected year/month so points don’t collapse.
+     *
+     * @param year report year
+     * @param month report month (1-12)
      */
-    private void populateDistributionRows(VBox container, Map<String, Integer> dataMap, String colorStyleClass) {
-        container.getChildren().clear();
-        if (dataMap == null || dataMap.isEmpty()) return;
+    private void prepareDayAxis(int year, int month) {
+        // assumes xAxis is CategoryAxis (as in your FXML)
+        javafx.scene.chart.CategoryAxis x =
+            (javafx.scene.chart.CategoryAxis) reservationsLineChart.getXAxis();
 
-        // Calculate total for percentage calculation
-        int total = dataMap.values().stream().mapToInt(Integer::intValue).sum();
+        x.getCategories().clear();
 
-        dataMap.forEach((key, value) -> {
-            double progress = (double) value / total;
-            
-            // Build the UI structure matching your CSS logic
-            VBox rowContainer = new VBox(4);
-            rowContainer.getStyleClass().add("ad-row");
-
-            // Title and Percentage Row
-            HBox labelsBox = new HBox();
-            Label title = new Label(key);
-            title.getStyleClass().add("ad-row-title");
-            
-            HBox spacer = new HBox();
-            HBox.setHgrow(spacer, Priority.ALWAYS);
-            
-            Label pct = new Label(String.format("%.0f%%", progress * 100));
-            pct.getStyleClass().add("ad-row-pct");
-            
-            labelsBox.getChildren().addAll(title, spacer, pct);
-
-            // Progress Bar
-            ProgressBar pb = new ProgressBar(progress);
-            pb.setMaxWidth(Double.MAX_VALUE);
-            pb.getStyleClass().add(colorStyleClass); // e.g., ad-bar-green
-
-            rowContainer.getChildren().addAll(labelsBox, pb);
-            container.getChildren().add(rowContainer);
-        });
+        int daysInMonth = java.time.YearMonth.of(year, month).lengthOfMonth();
+        for (int d = 1; d <= daysInMonth; d++) {
+            x.getCategories().add(String.format("%02d", d));
+        }
     }
 
 }
