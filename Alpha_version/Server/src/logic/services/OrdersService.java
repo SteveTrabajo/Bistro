@@ -269,29 +269,37 @@ public class OrdersService {
 	 * @return A list of available reservation hours in "HH:mm" format.
 	 */
 	public List<String> getAvailableReservationHours(Map<String, Object> requestData) {
-		getTablesCapacity(); // Fetch table sizes from DB
-		//Get opening hours and existing reservations from DB:
-		List<LocalTime> openingHours = dbController.getOpeningHoursFromDB();
-		LocalDate date = (LocalDate) requestData.get("date");
-		LocalTime openingTime = openingHours.get(0);
-		LocalTime closingTime = openingHours.get(1);
+	    getTablesCapacity();
+
+	    LocalDate date = (LocalDate) requestData.get("date");
+	    int dinersAmount = (int) requestData.get("dinersAmount");
+
+	    // IMPORTANT: use the date-aware hours
+	    List<LocalTime> openingHours = dbController.getOpeningHoursFromDB(date);
+
+	    // If closed (holiday closed) or missing hours - no slots
+	    if (openingHours == null || openingHours.size() < 2) {
+	        return new ArrayList<>();
+	    }
+
+	    LocalTime openingTime = openingHours.get(0);
+	    LocalTime closingTime = openingHours.get(1);
+
 	    LocalTime effectiveOpeningTime = openingTime;
-	    // If the requested date is today, adjust the effective opening time:
 	    if (date.equals(LocalDate.now())) {
-	        LocalTime now = LocalTime.now().plusHours(1); // Add 1 hour buffer
-	        // If current time is after opening time, adjust effective opening time
+	        LocalTime now = LocalTime.now().plusHours(1);
 	        if (now.isAfter(openingTime)) {
 	            int minutes = now.getMinute();
-	            int remainder = minutes % slotStepMinutes; 
+	            int remainder = minutes % slotStepMinutes;
 	            int minutesToAdd = (remainder == 0) ? 0 : (slotStepMinutes - remainder);
 	            effectiveOpeningTime = now.plusMinutes(minutesToAdd).withSecond(0).withNano(0);
 	        }
 	    }
-		int dinersAmount = (int) requestData.get("dinersAmount");
-		List<Order> reservationsByDate = dbController.getOrdersByDate(date);
-		//Compute available slots:
-		return computeAvailableSlots(effectiveOpeningTime, closingTime, dinersAmount, reservationsByDate);
+
+	    List<Order> reservationsByDate = dbController.getOrdersByDate(date);
+	    return computeAvailableSlots(effectiveOpeningTime, closingTime, dinersAmount, reservationsByDate);
 	}
+
 	
 	/*
 	 * Fetches all table sizes from the database and stores them in the tableSizes list.
@@ -473,17 +481,22 @@ public class OrdersService {
 
 		// Iterate through each day
 		for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
-			// Get existing reservations for this specific date
-			List<Order> reservationsOnDate = dbController.getOrdersByDate(date);
-			
-			// Calculate available slots for this date
-			List<String> slots = computeAvailableSlots(open, close, diners, reservationsOnDate);
-			
-			// If there is at least one slot, add the date to the result
-			if (!slots.isEmpty()) {
-				resultDates.add(date);
-			}
+
+		    List<LocalTime> hours = dbController.getOpeningHoursFromDB(date);
+
+		    // closed day / holiday closed => skip date completely
+		    if (hours == null || hours.size() < 2) {
+		        continue;
+		    }
+
+		    List<Order> reservationsOnDate = dbController.getOrdersByDate(date);
+		    List<String> slots = computeAvailableSlots(open, close, diners, reservationsOnDate);
+
+		    if (!slots.isEmpty()) {
+		        resultDates.add(date);
+		    }
 		}
+
 		return resultDates;
 	}
 
