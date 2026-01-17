@@ -57,7 +57,7 @@
                     </padding>
 
                     <children>
-                  <VBox prefHeight="597.0" prefWidth="388.0">
+                  <VBox prefHeight="597.0" prefWidth="388.0" spacing="30.0">
                      <children>
       
                                     <!-- RIGHT CARD -->
@@ -100,6 +100,29 @@
                               <String fx:value="card" />
                            </styleClass>
                               </VBox>
+                        <VBox minHeight="193.0" prefHeight="193.0" spacing="14">
+                           <padding>
+                              <Insets bottom="18.0" left="18.0" right="18.0" top="18.0" />
+                           </padding>
+                           <children>
+                              <Label styleClass="card-title" text="Opening Hours" />
+                              <VBox spacing="5.0" styleClass="legend-box">
+                                 <children>
+                                    <Label fx:id="lblSunday" styleClass="legend-text" text="Sunday:" />
+                                    <Label fx:id="lblMonday" styleClass="legend-text" text="Monday:" />
+                                    <Label fx:id="lblTuesday" styleClass="legend-text" text="Tuesday:" />
+                                    <Label fx:id="lblWednesday" styleClass="legend-text" text="Wednesday:" />
+                                    <Label fx:id="lblThursday" styleClass="legend-text" text="Thursday:" />
+                                    <Label fx:id="lblFriday" styleClass="legend-text" text="Friday:" />
+                                    <Label fx:id="lblSaturday" styleClass="legend-text" text="Saturday:" />
+                                 </children>
+                              </VBox>
+                           </children>
+                           <styleClass>
+                              <String fx:value="legend-card" />
+                              <String fx:value="card" />
+                           </styleClass>
+                        </VBox>
                      </children>
                   </VBox>
 
