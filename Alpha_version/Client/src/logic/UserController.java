@@ -20,9 +20,6 @@ public class UserController {
 	// ****************************** Instance variables ******************************
 	private final BistroClient client; // final reference to the BistroClient to ensure only one instance is associated
 	private User loggedInUser;
-	
-	
-	
 	// User registration related variables:
 	private Consumer<String> onMemberIDFoundListener; // Listener for forgot member ID responses
 	private Consumer<String> onStaffCredentialsFoundListener; // Listener for staff password recovery responses
@@ -35,6 +32,10 @@ public class UserController {
 	private ArrayList<Integer> memberRegistrationStats; //for member registration statistics
 	private boolean staffCreationSuccessFlag = false;
 	private String staffCreationErrorMessage = null;
+	
+	// Member registration UI callbacks
+	private Consumer<Integer> onRegisterNewMemberOkListener;
+	private Consumer<String> onRegisterNewMemberFailListener;
 	
 	// ******************************** Constructors ***********************************
 	/*
@@ -49,6 +50,11 @@ public class UserController {
 
 	// ******************************** Getters And Setters ***********************************
 	
+	/**
+	 * Method to clear the user controller state.
+	 * 
+	 * @return true if the state was cleared successfully.
+	 */
 	public boolean clearUserController() {
 		this.registrationSuccessFlag = false;
 		this.userUpdateSuccessFlag = false;
@@ -60,27 +66,38 @@ public class UserController {
 		return true;
 	}
 	
-	// Member registration UI callbacks
-	private Consumer<Integer> onRegisterNewMemberOkListener;
-	private Consumer<String> onRegisterNewMemberFailListener;
-	
+	/**
+	 * Set listener for successful new member registration.
+	 * @param listener
+	 */
 	public void setOnRegisterNewMemberOkListener(Consumer<Integer> listener) {
 	    this.onRegisterNewMemberOkListener = listener;
 	}
 
+	/**
+	 * Set listener for failed new member registration.
+	 * @param listener
+	 */
 	public void setOnRegisterNewMemberFailListener(Consumer<String> listener) {
 	    this.onRegisterNewMemberFailListener = listener;
 	}
 	
+	/**
+	 * Handle successful new member registration.
+	 * @param newMemberCode
+	 */
 	public void handleRegisterNewMemberOk(int newMemberCode) {
 	    this.newMemberID = newMemberCode;
 	    this.registrationSuccessFlag = true;
-
 	    if (onRegisterNewMemberOkListener != null) {
 	        onRegisterNewMemberOkListener.accept(newMemberCode);
 	    }
 	}
 
+	/**
+	 * Handle failed new member registration.
+	 * @param reason
+	 */
 	public void handleRegisterNewMemberFail(String reason) {
 	    this.registrationSuccessFlag = false;
 
@@ -371,29 +388,21 @@ public class UserController {
 	 * @param phoneNumber The new staff phone number (9-15 digits)
 	 * @param userType    The role: EMPLOYEE
 	 */
-	public void createNewEmployee(
-	        String username,
-	        String password,
-	        String email,
-	        String phoneNumber,
-	        String firstName,
-	        String lastName,
-	        String address
-	) {
-	    Map<String, Object> staffData = new HashMap<>();
-	    staffData.put("username", username);
-	    staffData.put("password", password);
-	    staffData.put("email", email);
-	    staffData.put("phoneNumber", phoneNumber);
+	public void createNewEmployee(String username, String password, String email, String phoneNumber, String firstName,
+			String lastName, String address) {
+		Map<String, Object> staffData = new HashMap<>();
+		staffData.put("username", username);
+		staffData.put("password", password);
+		staffData.put("email", email);
+		staffData.put("phoneNumber", phoneNumber);
 
-	    staffData.put("firstName", firstName);
-	    staffData.put("lastName", lastName);
-	    staffData.put("address", address);
+		staffData.put("firstName", firstName);
+		staffData.put("lastName", lastName);
+		staffData.put("address", address);
 
-	    staffData.put("userType", UserType.EMPLOYEE.name());
-	    client.handleMessageFromClientUI(new Message(Api.ASK_STAFF_CREATE, staffData));
+		staffData.put("userType", UserType.EMPLOYEE.name());
+		client.handleMessageFromClientUI(new Message(Api.ASK_STAFF_CREATE, staffData));
 	}
-
 
 	/**
 	 * Clear staff creation status for next operation
@@ -403,23 +412,41 @@ public class UserController {
 		this.staffCreationErrorMessage = null;
 	}
 	
+	/**
+	 * Method to recover staff password using email and phone number.
+	 * 
+	 * @param email       The email address associated with the staff account.
+	 * @param phoneNumber The phone number associated with the staff account.
+	 */
 	public void recoverStaffPassword(String email, String phoneNumber) {
 		Map<String, String> staffContactInfo = new HashMap<>();
 		staffContactInfo.put("email", email);
 		staffContactInfo.put("phoneNumber", phoneNumber);
 		client.handleMessageFromClientUI(new Message(Api.ASK_RECOVER_STAFF_PASSWORD, staffContactInfo));
-		
 	}
 
-public void setOnStaffCredentialsListener(Consumer<String> listener) {
+	/**
+	 * Set listener for staff credentials recovery responses
+	 * @param listener
+	 */
+	public void setOnStaffCredentialsListener(Consumer<String> listener) {
 		this.onStaffCredentialsFoundListener = listener;
 	}
 
 	//******************************** Event Listeners Methods ***********************************
+	
+	/**
+	 * Set listener for forgot member ID responses
+	 * @param listener
+	 */
 	public void setOnMemberIDFoundListener(Consumer<String> listener) {
 		this.onMemberIDFoundListener = listener;
 	}
 
+	/**
+	 * Handle forgot member ID response from server
+	 * @param result
+	 */
 	public void handleForgotIDResponse(String result) {
 		if (onMemberIDFoundListener != null) {
 			Platform.runLater(() -> {
@@ -430,6 +457,10 @@ public void setOnStaffCredentialsListener(Consumer<String> listener) {
 		}
 	}
 	
+	/**
+	 * Handle staff credentials recovery response from server
+	 * @param result
+	 */
 	public void handleStaffCredentialsResponse(String result) {
 		if (onStaffCredentialsFoundListener != null) {
 			Platform.runLater(() -> {

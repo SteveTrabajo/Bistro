@@ -2,18 +2,22 @@ package logic;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-
 import javax.imageio.ImageIO;
-
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.MultiFormatReader;
 import com.google.zxing.Result;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 
+/**
+ *  Class for decoding QR codes from image files.
+ */
 public final class QRCodeDecoder {
 
-    private QRCodeDecoder() {}
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+    private QRCodeDecoder() {} 
 
     /**
      * Decodes the QR code content from an image file.
@@ -40,3 +44,4 @@ public final class QRCodeDecoder {
         return result == null ? null : result.getText().trim();
     }
 }
+// End of QRCodeDecoder.java

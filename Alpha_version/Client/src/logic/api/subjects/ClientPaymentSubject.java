@@ -8,7 +8,7 @@ import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import logic.BistroClient;
 import logic.BistroClientGUI;
-import logic.PaymentController.PaymentStatus;
+import enums.PaymentStatus;
 import logic.api.ClientRouter;
 
 public class ClientPaymentSubject {

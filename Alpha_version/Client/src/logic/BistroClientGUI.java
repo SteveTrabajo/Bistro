@@ -62,6 +62,15 @@ public class BistroClientGUI extends Application {
 
 	// ****************************** Static Methods ******************************
 
+	/**
+	 * Method to switch the current screen to a new FXML layout.
+	 * 
+	 * @param event        The event that triggered the screen switch.
+	 * 
+	 * @param fxmlName     The name of the FXML file (without extension) to load.
+	 * 
+	 * @param errorMessage The error message to display if loading fails.
+	 */
 	public static void switchScreen(Event event, String fxmlName, String errorMessage) {
 		try {
 			String path = "/gui/fxml/" + fxmlName + ".fxml";
@@ -83,6 +92,14 @@ public class BistroClientGUI extends Application {
 		}
 	}
 
+	/**
+	 * Method to switch the current screen to a new FXML layout using the primary
+	 * stage.
+	 * 
+	 * @param fxmlName     The name of the FXML file (without extension) to load.
+	 * 
+	 * @param errorMessage The error message to display if loading fails.
+	 */
 	public static void switchScreen(String fxmlName, String errorMessage) {
 		try {
 			String path = "/gui/fxml/" + fxmlName + ".fxml";
@@ -136,7 +153,6 @@ public class BistroClientGUI extends Application {
 		}
 		
 		Parent root = scene.getRoot();
-
 		// Disable interaction with the entire app
 		root.setDisable(true);
 
@@ -150,7 +166,7 @@ public class BistroClientGUI extends Application {
 		alert.setTitle("Server Disconnected");
 		alert.setHeaderText("Connection to the server was lost");
 		alert.setContentText(message);
-
+		
 		ButtonType exitButton = new ButtonType("Exit", ButtonBar.ButtonData.OK_DONE);
 		alert.getButtonTypes().setAll(exitButton);
 
@@ -175,3 +191,4 @@ public class BistroClientGUI extends Application {
 		System.exit(0);
 	}
 }
+// End of BistroClientGUI.java

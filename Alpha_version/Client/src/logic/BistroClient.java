@@ -199,7 +199,6 @@ public class BistroClient extends AbstractClient {
 		}
 	}
 	
-	//TODO: check if method below are neccessary:
 	/**
 	 * Method to notify the server when the client is exiting.
 	 */
