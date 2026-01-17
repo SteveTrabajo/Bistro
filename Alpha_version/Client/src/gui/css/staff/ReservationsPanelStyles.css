@@ -35,7 +35,7 @@
 }
 
 #reservationsTable .table-row-cell:filled:selected {
-    -fx-background-color: #0078D7;  /* <--- CHANGE THIS to your preferred color */
+    -fx-background-color: #0078D7;  /* blue */
     -fx-text-fill: white;
 }
 

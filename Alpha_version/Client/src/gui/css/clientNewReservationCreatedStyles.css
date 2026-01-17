@@ -13,7 +13,7 @@
 /* main card centered */
 .rc-card {
     -fx-pref-width: 700px;
-    -fx-max-width: 700px;   /* חשוב שלא יימתח */
+    -fx-max-width: 700px;  
     -fx-max-height: 480px;
     -fx-background-color: white;
     -fx-background-radius: 18px;

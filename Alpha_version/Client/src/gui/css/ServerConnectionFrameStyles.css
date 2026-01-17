@@ -75,7 +75,6 @@
     -fx-border-width: 1.5px;
 }
 
-/* OR row */
 .connect-orRow { -fx-padding: 4px 0 0 0; }
 
 .connect-line {
