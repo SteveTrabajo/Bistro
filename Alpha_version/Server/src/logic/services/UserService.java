@@ -196,7 +196,7 @@ public class UserService {
 
 	public String findMemberCode(String email, String phoneNumber) {
 		int memberCode = dbController.findMemberCodeByEmailOrPhone(email, phoneNumber);
-		if (memberCode != -1) {
+		if (memberCode > 0) {
 			return String.valueOf(memberCode);
 		}
 		return null;

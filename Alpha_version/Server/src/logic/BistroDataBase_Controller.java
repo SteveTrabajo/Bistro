@@ -958,10 +958,12 @@ public class BistroDataBase_Controller {
 	        }
 	    }
 	}
+	
+	
 	public int findMemberCodeByEmailOrPhone(String email, String phoneNumber) {
 		boolean hasPhone = phoneNumber != null && !phoneNumber.isBlank();
 	    boolean hasEmail = email != null && !email.isBlank();
-	    		if (!hasPhone && !hasEmail) {
+		if (!hasPhone && !hasEmail) {
 	        throw new IllegalArgumentException("Must provide phoneNumber or email to find member code");
 	    }
 		final String FIND_MEMBER_SQL = "SELECT m.member_code " + "FROM members m "
@@ -992,7 +994,7 @@ public class BistroDataBase_Controller {
 			release(conn);
 
 		}
-		return 0;
+		return -1;
 	}
 
 	// ****************************** Order Operations ******************************

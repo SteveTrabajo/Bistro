@@ -66,7 +66,7 @@ public final class Api {
 	public static final String REPLY_MEMBER_UPDATE_INFO_OK = "member.updateInfo.ok";
 	public static final String REPLY_MEMBER_UPDATE_INFO_FAILED = "member.updateInfo.failed";
 	public static final String REPLY_FORGOT_MEMBER_ID_OK = "user.forgotMemberID.ok";
-	public static final String REPLY_FORGOT_MEMBER_ID_FAILED = "user.forgotMemberID.failed";
+	public static final String REPLY_FORGOT_MEMBER_ID_FAILED = "user.forgotMemberID.fail";
 	public static final String REPLY_FORGOT_CONFIRMATION_CODE_OK = "reservation.forgotConfirmationCode.ok";
 	public static final String REPLY_FORGOT_CONFIRMATION_CODE_FAILED = "reservation.forgotConfirmationCode.failed";
 	public static final String REPLY_REGISTER_NEW_MEMBER_OK = "user.registerNewMember.ok";

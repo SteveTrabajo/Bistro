@@ -77,7 +77,7 @@ public class ClientForgotIDScreen {
 
             if ("NOT_FOUND".equals(result)) {
                 lblError.setTextFill(Color.RED);
-                lblError.setText("No account found with these details.");
+                lblError.setText("The provided information does not match any member. You're more than welcome to approach our staff and register as a new member!");
             } else {
                 lblError.setTextFill(Color.GREEN);
                 lblError.setText("Your Member ID is: " + result);
