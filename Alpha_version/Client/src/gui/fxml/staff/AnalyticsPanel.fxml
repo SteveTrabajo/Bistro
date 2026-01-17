@@ -1,197 +1,99 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.String?>
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.chart.BarChart?>
 <?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="ad-scroll" vbarPolicy="AS_NEEDED" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.staff.AnalyticsPanel">
+<ScrollPane fitToWidth="true"
+            hbarPolicy="NEVER"
+            vbarPolicy="AS_NEEDED"
+            styleClass="ad-scroll"
+            xmlns="http://javafx.com/javafx/25"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="gui.logic.staff.AnalyticsPanel">
 
     <content>
         <VBox spacing="16" styleClass="ad-root">
             <padding>
-                <Insets bottom="18" left="18" right="18" top="18" />
+                <Insets top="18" right="18" bottom="18" left="18"/>
             </padding>
 
             <!-- Header -->
             <VBox spacing="4">
-                <Label styleClass="ad-title" text="Analytics Dashboard" />
-                <Label styleClass="ad-subtitle" text="Monthly reports and performance metrics" />
+                <Label styleClass="ad-title" text="Analytics Dashboard"/>
+                <Label styleClass="ad-subtitle" text="Monthly reports"/>
             </VBox>
 
-            <!-- KPI Cards -->
-            <HBox spacing="14">
-                <HBox HBox.hgrow="ALWAYS">
-                    <VBox spacing="6" HBox.hgrow="ALWAYS">
-                        <Label styleClass="ad-kpi-label" text="Total Reservations This Month" />
-                        <Label fx:id="totalReservationsLabel" styleClass="ad-kpi-value" text="0" />
-                    </VBox>
-                    <VBox alignment="TOP_RIGHT" spacing="6">
-                        <Label fx:id="totalReservationsDelta" text="+0.0%">
-                     <styleClass>
-                        <String fx:value="ad-kpi-delta" />
-                        <String fx:value="ad-kpi-delta" />
-                     </styleClass></Label>
-                    </VBox>
-               <styleClass>
-                  <String fx:value="ad-kpi" />
-                  <String fx:value="ad-left-blue" />
-               </styleClass>
-                </HBox>
-
-                <HBox HBox.hgrow="ALWAYS">
-                    <VBox spacing="6" HBox.hgrow="ALWAYS">
-                        <Label styleClass="ad-kpi-label" text="Mebmer Percentage in Reservation" />
-                        <Label fx:id="rateOfMemberInReservationLabel" styleClass="ad-kpi-value" text="0" />
-                    </VBox>
-                    <VBox alignment="TOP_RIGHT" spacing="6">
-                        <Label styleClass="ad-kpi-icon" text="👤" />
-                        <Label fx:id="rateOfMemberInReservationDelta" styleClass="ad-kpi-delta" text="+0.0%" />
-                    </VBox>
-               <styleClass>
-                  <String fx:value="ad-kpi" />
-                  <String fx:value="ad-left-green" />
-               </styleClass>
-                </HBox>
-
-                <HBox HBox.hgrow="ALWAYS">
-                    <VBox spacing="6" HBox.hgrow="ALWAYS">
-                        <Label styleClass="ad-kpi-label" text="On-Time Arrival Rate" />
-                        <Label fx:id="onTimeRateLabel" styleClass="ad-kpi-value" text="0.0%" />
-                    </VBox>
-                    <VBox alignment="TOP_RIGHT" spacing="6">
-                        <Label styleClass="ad-kpi-icon" text="🕒" />
-                        <Label fx:id="onTimeDelta" styleClass="ad-kpi-delta" text="+0.0%" />
-                    </VBox>
-               <styleClass>
-                  <String fx:value="ad-kpi" />
-                  <String fx:value="ad-left-orange" />
-               </styleClass>
-                </HBox>
-
-                <HBox HBox.hgrow="ALWAYS">
-                    <VBox spacing="6" HBox.hgrow="ALWAYS">
-                        <Label styleClass="ad-kpi-label" text="Customers This Month" />
-                        <Label fx:id="customersThisMonthLabel" styleClass="ad-kpi-value" text="0" />
-                    </VBox>
-                    <VBox alignment="TOP_RIGHT" spacing="6">
-                        <Label fx:id="currentMonthLabel" styleClass="ad-kpi-month" text="Month" />
-                        <Label styleClass="ad-kpi-icon" text="👥" />
-                    </VBox>
-               <styleClass>
-                  <String fx:value="ad-kpi" />
-                  <String fx:value="ad-left-purple" />
-               </styleClass>
-                </HBox>
+            <!-- Selector -->
+            <HBox spacing="10">
+                <ComboBox fx:id="reportTypeCombo" prefWidth="160"/>
+                <ComboBox fx:id="monthCombo" prefWidth="200"/>
+                <Button text="Load" onAction="#onLoadReport"/>
             </HBox>
 
-            <!-- Card 1: Arrival Times -->
-            <VBox spacing="12" styleClass="ad-card">
-                <VBox spacing="2">
-                    <Label styleClass="ad-card-title" text="Customer Arrival Times" />
-                    <Label styleClass="ad-card-subtitle" text="Monthly comparison of on-time vs. late arrivals" />
+            <!-- KPIs -->
+            <HBox spacing="14">
+
+                <VBox styleClass="ad-kpi" HBox.hgrow="ALWAYS">
+                    <Label styleClass="ad-kpi-label" text="Total Reservations"/>
+                    <Label fx:id="totalReservationsLabel" styleClass="ad-kpi-value" text="0"/>
                 </VBox>
 
-                <BarChart fx:id="arrivalBarChart" styleClass="ad-chart">
-                    <xAxis>
-                        <CategoryAxis label="" />
-                    </xAxis>
-                    <yAxis>
-                        <NumberAxis label="" />
-                    </yAxis>
+                <VBox styleClass="ad-kpi" HBox.hgrow="ALWAYS">
+                    <Label styleClass="ad-kpi-label" text="Customers"/>
+                    <Label fx:id="customersThisMonthLabel" styleClass="ad-kpi-value" text="0"/>
+                </VBox>
+
+            </HBox>
+
+            <!-- Bar Chart -->
+            <VBox spacing="10" styleClass="ad-card">
+                <Label styleClass="ad-card-title" text="Monthly Comparison"/>
+                <BarChart fx:id="arrivalBarChart">
+                    <xAxis><CategoryAxis/></xAxis>
+                    <yAxis><NumberAxis/></yAxis>
                 </BarChart>
 
-                <HBox spacing="14">
-                    <VBox HBox.hgrow="ALWAYS">
-                        <Label styleClass="ad-mini-label" text="Total On-Time" />
-                        <Label fx:id="totalOnTimeLabel" styleClass="ad-mini-value" text="0" />
-                  <styleClass>
-                     <String fx:value="ad-mini" />
-                     <String fx:value="ad-mini-green" />
-                  </styleClass>
+                <HBox spacing="12">
+                    <VBox>
+                        <Label text="On Time"/>
+                        <Label fx:id="totalOnTimeLabel"/>
                     </VBox>
-
-                    <VBox HBox.hgrow="ALWAYS">
-                        <Label styleClass="ad-mini-label" text="Total Late" />
-                        <Label fx:id="totalLateLabel" styleClass="ad-mini-value" text="0" />
-                  <styleClass>
-                     <String fx:value="ad-mini" />
-                     <String fx:value="ad-mini-red" />
-                  </styleClass>
+                    <VBox>
+                        <Label text="Late"/>
+                        <Label fx:id="totalLateLabel"/>
                     </VBox>
                 </HBox>
             </VBox>
 
-            <!-- Card 2: Monthly Trend -->
-            <VBox spacing="12" styleClass="ad-card">
-                <VBox spacing="2">
-                    <Label styleClass="ad-card-title" text="Monthly Members Reservations" />
-                    <Label styleClass="ad-card-subtitle" text="Reservation volume throughout the Month" />
-                </VBox>
-
-                <LineChart fx:id="reservationsLineChart" createSymbols="true" styleClass="ad-chart">
-                    <xAxis>
-                        <CategoryAxis label="" prefWidth="720.0" />
-                    </xAxis>
-                    <yAxis>
-                        <NumberAxis label="" />
-                    </yAxis>
+            <!-- Line Chart -->
+            <VBox spacing="10" styleClass="ad-card">
+                <Label styleClass="ad-card-title" text="Monthly Trend"/>
+                <LineChart fx:id="reservationsLineChart">
+                    <xAxis><CategoryAxis/></xAxis>
+                    <yAxis><NumberAxis/></yAxis>
                 </LineChart>
-
-                <HBox spacing="14">
-                    <VBox HBox.hgrow="ALWAYS">
-                        <Label styleClass="ad-summary-label" text="Peak Month" />
-                        <Label fx:id="peakMonthLabel" styleClass="ad-summary-value" text="-" />
-                        <Label fx:id="peakMonthValueLabel" styleClass="ad-summary-big" text="0" />
-                  <styleClass>
-                     <String fx:value="ad-summary" />
-                     <String fx:value="ad-summary-blue" />
-                  </styleClass>
-                    </VBox>
-
-                    <VBox styleClass="ad-summary" HBox.hgrow="ALWAYS">
-                        <Label styleClass="ad-summary-label" text="Lowest Month" />
-                        <Label fx:id="lowestMonthLabel" styleClass="ad-summary-value" text="-" />
-                        <Label fx:id="lowestMonthValueLabel" styleClass="ad-summary-big" text="0" />
-                    </VBox>
-
-                    <VBox HBox.hgrow="ALWAYS">
-                        <Label styleClass="ad-summary-label" text="Growth Rate" />
-                        <Label styleClass="ad-summary-value" text="Year over Year" />
-                        <Label fx:id="growthRateLabel" styleClass="ad-summary-big" text="+0.0%" />
-                  <styleClass>
-                     <String fx:value="ad-summary-purple" />
-                     <String fx:value="ad-summary" />
-                  </styleClass>
-                    </VBox>
-                </HBox>
             </VBox>
 
-            <!-- Bottom row -->
-            <HBox spacing="16">
-                <!-- Peak Reservation Times -->
-                <VBox spacing="12" styleClass="ad-card" HBox.hgrow="ALWAYS">
-                    <Label styleClass="ad-card-title" text="Peak Reservation Times" />
-                    <VBox fx:id="peakTimesBox" spacing="10" />
-                </VBox>
-
-                <!-- Party Size Distribution -->
-                <VBox spacing="12" styleClass="ad-card" HBox.hgrow="ALWAYS">
-                    <Label styleClass="ad-card-title" text="Party Size Distribution" />
-                    <VBox fx:id="partySizeBox" spacing="10" />
-                </VBox>
-            </HBox>
+            <!-- Bottom distribution (single, story-only) -->
+            <VBox spacing="10" styleClass="ad-card">
+                <Label styleClass="ad-card-title" text="Distribution"/>
+                <VBox fx:id="peakTimesBox" spacing="8"/>
+            </VBox>
 
         </VBox>
     </content>
-   <stylesheets>
-      <URL value="@../../css/staff/AnalyticsPanelStyles.css" />
-   </stylesheets>
+
+    <stylesheets>
+        <URL value="@../../css/staff/AnalyticsPanelStyles.css"/>
+    </stylesheets>
 </ScrollPane>

@@ -15,6 +15,10 @@ public class AddStaffFormController {
     @FXML private PasswordField txtPassword;
     @FXML private TextField txtEmail;
     @FXML private TextField txtPhone;
+    @FXML private TextField txtFirstName;
+    @FXML private TextField txtLastName;
+    @FXML private TextField txtAddress;
+
 
     @FXML private RadioButton rbEmployee;
     @FXML private RadioButton rbManager;
@@ -62,14 +66,21 @@ public class AddStaffFormController {
             String email = safeTrim(txtEmail);
             String phone = safeTrim(txtPhone);
 
+            String firstName = safeTrim(txtFirstName);
+            String lastName  = safeTrim(txtLastName);
+            String address   = safeTrim(txtAddress);
+
             UserType userType = (rbManager != null && rbManager.isSelected())
                     ? UserType.MANAGER
                     : UserType.EMPLOYEE;
 
-            String validationError = InputCheck.validateAllStaffData(username, password, email, phone);
+            String validationError = InputCheck.validateAllStaffData(
+                    username, password, email, phone,
+                    firstName, lastName, address
+            );
             if (validationError != null && !validationError.isBlank()) {
-            	showError(validationError);
-            	return;
+                showError(validationError);
+                return;
             }
 
             if (server.getDBController().employeeUsernameExists(username)) {
@@ -80,7 +91,8 @@ public class AddStaffFormController {
             btnCreate.setDisable(true);
 
             User created = server.getDBController().createEmployeeUser(
-                    username, password, email, phone, userType
+                    username, password, email, phone, userType,
+                    firstName, lastName, address
             );
 
             if (created == null) {
@@ -90,6 +102,7 @@ public class AddStaffFormController {
 
             showSuccess("Created " + userType + " account: " + username);
             clearForm();
+
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -115,8 +128,12 @@ public class AddStaffFormController {
         if (txtPassword != null) txtPassword.clear();
         if (txtEmail != null) txtEmail.clear();
         if (txtPhone != null) txtPhone.clear();
+        if (txtFirstName != null) txtFirstName.clear();
+        if (txtLastName != null) txtLastName.clear();
+        if (txtAddress != null) txtAddress.clear();
         if (rbEmployee != null) rbEmployee.setSelected(true);
     }
+
 
     private void clearMessages() {
         if (lblError != null) lblError.setText("");

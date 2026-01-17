@@ -1,33 +1,60 @@
 package logic.api.subjects;
 
-import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import logic.BistroClient;
 import logic.BistroClientGUI;
 import logic.api.ClientRouter;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
+
 import java.util.List;
 
 import entities.MonthlyReport;
 
 public class ClientMonthlyReportsSubject {
-	
-	private ClientMonthlyReportsSubject() {}
-	
-	public static void register(ClientRouter router) {
-		// Handler for new reservation creation messages
-		router.on("monthlyReports", "getData.ok", msg -> {
-            BistroClient.awaitResponse = false;
+
+    private ClientMonthlyReportsSubject() {}
+
+    public static void register(ClientRouter router) {
+
+        // New pipeline: reports.getOrGenerate.ok
+        router.on("reports", "getOrGenerate.ok", msg -> {
             MonthlyReport report = (MonthlyReport) msg.getData();
-			Platform.runLater(() -> BistroClientGUI.client.getMonthlyReportsCTRL().setCurrentMonthlyReport(report));
-		});
-		
-		router.on("monthlyReports", "getData.fail", msg -> {
-			BistroClient.awaitResponse = false;
-			Alert alert = new Alert(Alert.AlertType.ERROR);
-			alert.setTitle("MonthlyReports Failed");
-			alert.setHeaderText("Could not create MonthlyReports");
-			alert.setContentText("An error occurred while creating your MonthlyReports. Please try again later.");
-		});
-	}
-	
+            BistroClientGUI.client.getMonthlyReportsCTRL().setCurrentMonthlyReport(report);
+            BistroClient.awaitResponse = false; // unblock waiting thread
+        });
+
+        // reports.getOrGenerate.fail
+        router.on("reports", "getOrGenerate.fail", msg -> {
+        	BistroClient.awaitResponse = false;
+
+            Platform.runLater(() -> {
+                Alert a = new Alert(Alert.AlertType.ERROR);
+                a.setTitle("Reports Failed");
+                a.setHeaderText("Could not list report months");
+                a.setContentText(String.valueOf(msg.getData()));
+                a.showAndWait();
+            });
+        });
+        
+        router.on("reports", "listMonths.ok", msg -> {
+            @SuppressWarnings("unchecked")
+            List<int[]> months = (List<int[]>) msg.getData();
+
+            BistroClientGUI.client.getMonthlyReportsCTRL().setAvailableMonths(months);
+            BistroClient.awaitResponse = false;
+        });
+
+        router.on("reports", "listMonths.fail", msg -> {
+            BistroClient.awaitResponse = false;
+
+            Platform.runLater(() -> {
+                Alert a = new Alert(Alert.AlertType.ERROR);
+                a.setTitle("Reports Failed");
+                a.setHeaderText("Could not list report months");
+                a.setContentText(String.valueOf(msg.getData()));
+                a.showAndWait();
+            });
+        });
+    }
 }

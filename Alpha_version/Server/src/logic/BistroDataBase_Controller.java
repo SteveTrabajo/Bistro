@@ -18,6 +18,8 @@ import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.HashMap;
+import java.util.Map;
 
 import dto.Holiday;
 import dto.UserData;
@@ -598,62 +600,171 @@ public class BistroDataBase_Controller {
 	 * @param userType    The user type (EMPLOYEE or MANAGER)
 	 * @return The newly created User object, or null if creation failed
 	 */
-	public User createEmployeeUser(String username, String password, String email, String phoneNumber,
-			UserType userType) {
-		if (userType != UserType.EMPLOYEE && userType != UserType.MANAGER) {
-			logger.log("[ERROR] Invalid user type for employee creation: " + userType);
-			return null;
-		}
-		Connection conn = null;
-		try {
-			conn = borrow();
-			conn.setAutoCommit(false); // Start transaction
-			try {
-				// Hash the password
-				String hashedPassword = PasswordUtil.hashPassword(password);
-				final String insertUserQry = "INSERT INTO users (phoneNumber, email, type) VALUES (?, ?, ?)";
-				int userId;
-				try (PreparedStatement ps = conn.prepareStatement(insertUserQry,
-						java.sql.Statement.RETURN_GENERATED_KEYS)) {
-					ps.setString(1, phoneNumber);
-					ps.setString(2, email);
-					ps.setString(3, userType.name());
-					ps.executeUpdate();
+	public User createEmployeeUser(
+	        String username,
+	        String password,
+	        String email,
+	        String phoneNumber,
+	        UserType userType,
+	        String firstName,
+	        String lastName,
+	        String address
+	) {
+	    if (userType != UserType.EMPLOYEE && userType != UserType.MANAGER) {
+	        logger.log("[ERROR] Invalid user type for employee creation: " + userType);
+	        return null;
+	    }
 
-					try (ResultSet keys = ps.getGeneratedKeys()) {
-						if (!keys.next()) {
-							throw new SQLException("Failed to read generated user_id");
-						}
-						userId = keys.getInt(1);
-					}
-				}
-				// staff_accounts schema: (user_id, username, password)
-				final String insertStaffQry = "INSERT INTO staff_accounts (user_id, username, password) VALUES (?, ?, ?)";
-				try (PreparedStatement ps = conn.prepareStatement(insertStaffQry)) {
-					ps.setInt(1, userId);
-					ps.setString(2, username);
-					ps.setString(3, hashedPassword);
-					ps.executeUpdate();
-				}
-				conn.commit();
-				conn.setAutoCommit(true);
-				logger.log("[ADMIN] New staff user created: username=" + username + ", type=" + userType);
-				return new User(userId, phoneNumber, email, username, userType);
-			} catch (Exception e) {
-				conn.rollback();
-				conn.setAutoCommit(true);
-				logger.log("[ERROR] Failed to create staff user: " + e.getMessage());
-				e.printStackTrace();
-				return null;
-			}
-		} catch (SQLException ex) {
-			logger.log("[ERROR] SQLException in createStaffUser: " + ex.getMessage());
-			ex.printStackTrace();
-			return null;
-		} finally {
-			release(conn);
-		}
+	    phoneNumber = (phoneNumber == null) ? null : phoneNumber.trim();
+	    email = (email == null) ? null : email.trim();
+	    if (phoneNumber != null && phoneNumber.isEmpty()) phoneNumber = null;
+	    if (email != null && email.isEmpty()) email = null;
+
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        conn.setAutoCommit(false);
+
+	        try {
+	            Integer userIdByPhone = null;
+	            Integer userIdByEmail = null;
+
+	            if (phoneNumber != null) {
+	                try (PreparedStatement ps = conn.prepareStatement(
+	                        "SELECT user_id FROM users WHERE phoneNumber=?")) {
+	                    ps.setString(1, phoneNumber);
+	                    try (ResultSet rs = ps.executeQuery()) {
+	                        if (rs.next()) userIdByPhone = rs.getInt(1);
+	                    }
+	                }
+	            }
+
+	            if (email != null) {
+	                try (PreparedStatement ps = conn.prepareStatement(
+	                        "SELECT user_id FROM users WHERE email=?")) {
+	                    ps.setString(1, email);
+	                    try (ResultSet rs = ps.executeQuery()) {
+	                        if (rs.next()) userIdByEmail = rs.getInt(1);
+	                    }
+	                }
+	            }
+
+	            // If phone belongs to one user and email belongs to another => ambiguous
+	            if (userIdByPhone != null && userIdByEmail != null && !userIdByPhone.equals(userIdByEmail)) {
+	                conn.rollback();
+	                conn.setAutoCommit(true);
+	                logger.log("[STAFF_CREATE] Conflict: phone and email belong to different users.");
+	                return null;
+	            }
+
+	            Integer userId = (userIdByPhone != null) ? userIdByPhone : userIdByEmail;
+
+	            // Hash password
+	            String hashedPassword = PasswordUtil.hashPassword(password);
+
+	            if (userId == null) {
+	                // Create new user
+	                try (PreparedStatement ps = conn.prepareStatement(
+	                        "INSERT INTO users (phoneNumber, email, type) VALUES (?, ?, ?)",
+	                        java.sql.Statement.RETURN_GENERATED_KEYS)) {
+	                    ps.setString(1, phoneNumber);
+	                    ps.setString(2, email);
+	                    ps.setString(3, userType.name());
+	                    ps.executeUpdate();
+	                    try (ResultSet keys = ps.getGeneratedKeys()) {
+	                        if (!keys.next()) throw new SQLException("Failed to read generated user_id");
+	                        userId = keys.getInt(1);
+	                    }
+	                }
+	            } else {
+	                // Promote existing user + fill missing contact fields
+	                try (PreparedStatement ps = conn.prepareStatement(
+	                        "UPDATE users SET type=?, phoneNumber=COALESCE(phoneNumber, ?), email=COALESCE(email, ?) WHERE user_id=?")) {
+	                    ps.setString(1, userType.name());
+	                    ps.setString(2, phoneNumber);
+	                    ps.setString(3, email);
+	                    ps.setInt(4, userId);
+	                    ps.executeUpdate();
+	                }
+
+	                // Prevent creating staff twice
+	                try (PreparedStatement ps = conn.prepareStatement("SELECT 1 FROM staff_accounts WHERE user_id=?")) {
+	                    ps.setInt(1, userId);
+	                    try (ResultSet rs = ps.executeQuery()) {
+	                        if (rs.next()) {
+	                            conn.rollback();
+	                            conn.setAutoCommit(true);
+	                            logger.log("[STAFF_CREATE] user_id already has staff_accounts row.");
+	                            return null;
+	                        }
+	                    }
+	                }
+	            }
+
+	            // Insert staff account
+	            try (PreparedStatement ps = conn.prepareStatement(
+	                    "INSERT INTO staff_accounts (user_id, username, password) VALUES (?, ?, ?)")) {
+	                ps.setInt(1, userId);
+	                ps.setString(2, username);
+	                ps.setString(3, hashedPassword);
+	                ps.executeUpdate();
+	            }
+
+	            // Ensure members row exists (staff are members too)
+	            boolean memberExists;
+	            try (PreparedStatement ps = conn.prepareStatement("SELECT 1 FROM members WHERE user_id=?")) {
+	                ps.setInt(1, userId);
+	                try (ResultSet rs = ps.executeQuery()) {
+	                    memberExists = rs.next();
+	                }
+	            }
+
+	            if (!memberExists) {
+	                int memberCode = generateUniqueMemberCode(conn);
+	                try (PreparedStatement ps = conn.prepareStatement(
+	                        "INSERT INTO members (user_id, member_code, f_name, l_name, address) VALUES (?, ?, ?, ?, ?)")) {
+	                    ps.setInt(1, userId);
+	                    ps.setInt(2, memberCode);
+	                    ps.setString(3, firstName);
+	                    ps.setString(4, lastName);
+	                    ps.setString(5, address);
+	                    ps.executeUpdate();
+	                }
+	            } else {
+	                // Keep member details aligned with input
+	                try (PreparedStatement ps = conn.prepareStatement(
+	                        "UPDATE members SET f_name=?, l_name=?, address=? WHERE user_id=?")) {
+	                    ps.setString(1, firstName);
+	                    ps.setString(2, lastName);
+	                    ps.setString(3, address);
+	                    ps.setInt(4, userId);
+	                    ps.executeUpdate();
+	                }
+	            }
+
+	            conn.commit();
+	            conn.setAutoCommit(true);
+
+	            logger.log("[ADMIN] Staff created/promoted: username=" + username + ", type=" + userType + ", user_id=" + userId);
+	            return new User(userId, phoneNumber, email, username, userType);
+
+	        } catch (Exception e) {
+	            conn.rollback();
+	            conn.setAutoCommit(true);
+	            logger.log("[ERROR] Failed to create/promote staff user: " + e.getMessage());
+	            e.printStackTrace();
+	            return null;
+	        }
+
+	    } catch (SQLException ex) {
+	        logger.log("[ERROR] SQLException in createEmployeeUser: " + ex.getMessage());
+	        ex.printStackTrace();
+	        return null;
+	    } finally {
+	        release(conn);
+	    }
 	}
+
 	
 	
 	/*
@@ -3045,4 +3156,338 @@ public class BistroDataBase_Controller {
 	    }
 	    return -1; // Return -1 if no user found
 	}
+	// ===================== Reports (Persisted Monthly Reports) =====================
+
+	public byte[] getReportPayload(String type, int year, int month) {
+	    final String sql = "SELECT payload FROM reports WHERE report_type=? AND report_year=? AND report_month=?";
+	    Connection conn = null;
+
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	            ps.setString(1, type.toUpperCase());
+	            ps.setInt(2, year);
+	            ps.setInt(3, month);
+
+	            try (ResultSet rs = ps.executeQuery()) {
+	                if (rs.next()) return rs.getBytes("payload");
+	                return null;
+	            }
+	        }
+	    } catch (SQLException e) {
+	        logger.log("[ERROR] getReportPayload: " + e.getMessage());
+	        return null;
+	    } finally {
+	        release(conn);
+	    }
+	}
+
+	public boolean upsertReportPayload(String type, int year, int month, byte[] payload) {
+	    final String sql =
+	        "INSERT INTO reports (report_type, report_year, report_month, payload) " +
+	        "VALUES (?, ?, ?, ?) " +
+	        "ON DUPLICATE KEY UPDATE payload=VALUES(payload), generated_at=CURRENT_TIMESTAMP";
+
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	            ps.setString(1, type.toUpperCase());
+	            ps.setInt(2, year);
+	            ps.setInt(3, month);
+	            ps.setBytes(4, payload);
+	            return ps.executeUpdate() > 0;
+	        }
+	    } catch (SQLException e) {
+	        logger.log("[ERROR] upsertReportPayload: " + e.getMessage());
+	        return false;
+	    } finally {
+	        release(conn);
+	    }
+	}
+
+	/**
+	 * Lists available (year, month) pairs for which a report can be generated, based on actual activity.
+	 *
+	 * <p>Important: this must NOT rely on the {@code reports} table because tests often truncate it.
+	 * Instead, months are derived from real data:
+	 * <ul>
+	 *   <li>MEMBERS: reservation dates + waiting list joins</li>
+	 *   <li>TIMES: reservation dates that have matching table sessions</li>
+	 * </ul>
+	 *
+	 * @param type report type (expected: "MEMBERS" or "TIMES")
+	 * @return list of pairs, each pair is {@code int[]{year, month}}
+	 */
+	public List<int[]> listReportMonths(String type) {
+
+	    final String sqlMembers =
+	        "SELECT DISTINCT YEAR(x.dt) AS report_year, MONTH(x.dt) AS report_month " +
+	        "FROM ( " +
+	        "  SELECT o.order_date AS dt " +
+	        "  FROM orders o " +
+	        "  WHERE o.order_type='RESERVATION' AND o.order_date IS NOT NULL " +
+	        "  UNION ALL " +
+	        "  SELECT wl.joined_at AS dt " +
+	        "  FROM waiting_list wl " +
+	        ") x " +
+	        "WHERE x.dt IS NOT NULL " +
+	        "ORDER BY report_year DESC, report_month DESC";
+
+	    final String sqlTimes =
+	        "SELECT DISTINCT YEAR(o.order_date) AS report_year, MONTH(o.order_date) AS report_month " +
+	        "FROM orders o " +
+	        "JOIN table_sessions ts ON ts.order_number = o.order_number " +
+	        "WHERE o.order_type='RESERVATION' AND o.order_date IS NOT NULL " +
+	        "ORDER BY report_year DESC, report_month DESC";
+
+	    final String sql = "TIMES".equalsIgnoreCase(type) ? sqlTimes : sqlMembers;
+
+	    List<int[]> out = new ArrayList<>();
+	    Connection conn = null;
+
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(sql);
+	             ResultSet rs = ps.executeQuery()) {
+
+	            while (rs.next()) {
+	                out.add(new int[] { rs.getInt("report_year"), rs.getInt("report_month") });
+	            }
+	        }
+	    } catch (SQLException e) {
+	        logger.log("[ERROR] listReportMonths: " + e.getMessage());
+	    } finally {
+	        release(conn);
+	    }
+
+	    return out;
+	}
+
+
+	// MEMBERS report graphs
+	public Map<Integer, Integer> getReservationsByDay(int year, int month) {
+	    final String sql =
+	        "SELECT DAY(order_date) d, COUNT(*) c " +
+	        "FROM orders " +
+	        "WHERE YEAR(order_date)=? AND MONTH(order_date)=? AND order_type='RESERVATION' " +
+	        "GROUP BY DAY(order_date)";
+
+	    Map<Integer, Integer> out = new HashMap<>();
+	    Connection conn = null;
+
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	            ps.setInt(1, year);
+	            ps.setInt(2, month);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                while (rs.next()) out.put(rs.getInt("d"), rs.getInt("c"));
+	            }
+	        }
+	    } catch (SQLException e) {
+	        logger.log("[ERROR] getReservationsByDay: " + e.getMessage());
+	    } finally {
+	        release(conn);
+	    }
+
+	    return out;
+	}
+
+	public Map<Integer, Integer> getWaitlistJoinsByDay(int year, int month) {
+	    final String sql =
+	        "SELECT DAY(joined_at) d, COUNT(*) c " +
+	        "FROM waiting_list " +
+	        "WHERE YEAR(joined_at)=? AND MONTH(joined_at)=? " +
+	        "GROUP BY DAY(joined_at)";
+
+	    Map<Integer, Integer> out = new HashMap<>();
+	    Connection conn = null;
+
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	            ps.setInt(1, year);
+	            ps.setInt(2, month);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                while (rs.next()) out.put(rs.getInt("d"), rs.getInt("c"));
+	            }
+	        }
+	    } catch (SQLException e) {
+	        logger.log("[ERROR] getWaitlistJoinsByDay: " + e.getMessage());
+	    } finally {
+	        release(conn);
+	    }
+
+	    return out;
+	}
+
+	/**
+	 * Returns counts of late arrivals per day for a given month.
+	 * Late is defined as arrival after scheduled time and up to 15 minutes (story cancellation threshold).
+	 *
+	 * @param year report year
+	 * @param month report month (1-12)
+	 * @return map day->count
+	 */
+	public Map<Integer, Integer> getLateArrivalsByDay(int year, int month) {
+	    final String sql =
+	        "SELECT DAY(o.order_date) d, COUNT(*) c " +
+	        "FROM orders o " +
+	        "JOIN table_sessions ts ON ts.order_number = o.order_number " +
+	        "WHERE o.order_type='RESERVATION' " +
+	        "AND YEAR(o.order_date)=? AND MONTH(o.order_date)=? " +
+	        "AND ts.seated_at IS NOT NULL " +
+	        "AND ts.seated_at >= TIMESTAMP(o.order_date, o.order_time) " +
+	        "AND ts.seated_at <= TIMESTAMP(o.order_date, o.order_time) + INTERVAL 15 MINUTE " +
+	        "GROUP BY DAY(o.order_date)";
+
+	    Map<Integer, Integer> out = new HashMap<>();
+	    Connection conn = null;
+
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	            ps.setInt(1, year);
+	            ps.setInt(2, month);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                while (rs.next()) out.put(rs.getInt("d"), rs.getInt("c"));
+	            }
+	        }
+	    } catch (SQLException e) {
+	        logger.log("[ERROR] getLateArrivalsByDay: " + e.getMessage());
+	    } finally {
+	        release(conn);
+	    }
+
+	    return out;
+	}
+
+	/**
+	 * Returns counts of on-time arrivals per day for a given month.
+	 * On-time is defined as arrival at or before the scheduled time.
+	 *
+	 * @param year report year
+	 * @param month report month (1-12)
+	 * @return map day->count
+	 */
+	public Map<Integer, Integer> getOnTimeArrivalsByDay(int year, int month) {
+	    final String sql =
+	        "SELECT DAY(o.order_date) d, COUNT(*) c " +
+	        "FROM orders o " +
+	        "JOIN table_sessions ts ON ts.order_number = o.order_number " +
+	        "WHERE o.order_type='RESERVATION' " +
+	        "AND YEAR(o.order_date)=? AND MONTH(o.order_date)=? " +
+	        "AND ts.seated_at IS NOT NULL " +
+	        "AND ts.seated_at <= TIMESTAMP(o.order_date, o.order_time) " +
+	        "GROUP BY DAY(o.order_date)";
+
+	    Map<Integer, Integer> out = new HashMap<>();
+	    Connection conn = null;
+
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	            ps.setInt(1, year);
+	            ps.setInt(2, month);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                while (rs.next()) out.put(rs.getInt("d"), rs.getInt("c"));
+	            }
+	        }
+	    } catch (SQLException e) {
+	        logger.log("[ERROR] getOnTimeArrivalsByDay: " + e.getMessage());
+	    } finally {
+	        release(conn);
+	    }
+
+	    return out;
+	}
+
+
+	public Map<String, Integer> getLatenessBuckets(int year, int month) {
+	    final String sql =
+	        "SELECT " +
+	        "  CASE " +
+	        "    WHEN TIMESTAMPDIFF(MINUTE, TIMESTAMP(o.order_date,o.order_time), ts.seated_at) BETWEEN 0 AND 5 THEN '0-5' " +
+	        "    WHEN TIMESTAMPDIFF(MINUTE, TIMESTAMP(o.order_date,o.order_time), ts.seated_at) BETWEEN 6 AND 15 THEN '6-15' " +
+	        "    WHEN TIMESTAMPDIFF(MINUTE, TIMESTAMP(o.order_date,o.order_time), ts.seated_at) BETWEEN 16 AND 30 THEN '16-30' " +
+	        "    WHEN TIMESTAMPDIFF(MINUTE, TIMESTAMP(o.order_date,o.order_time), ts.seated_at) >= 31 THEN '31+' " +
+	        "    ELSE 'early' " +
+	        "  END AS bucket, " +
+	        "  COUNT(*) c " +
+	        "FROM orders o " +
+	        "JOIN table_sessions ts ON ts.order_number = o.order_number " +
+	        "WHERE o.order_type='RESERVATION' " +
+	        "AND YEAR(o.order_date)=? AND MONTH(o.order_date)=? " +
+	        "AND ts.seated_at IS NOT NULL " +
+	        "GROUP BY bucket";
+
+	    Map<String, Integer> out = new HashMap<>();
+	    Connection conn = null;
+
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	            ps.setInt(1, year);
+	            ps.setInt(2, month);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                while (rs.next()) out.put(rs.getString("bucket"), rs.getInt("c"));
+	            }
+	        }
+	    } catch (SQLException e) {
+	        logger.log("[ERROR] getLatenessBuckets: " + e.getMessage());
+	    } finally {
+	        release(conn);
+	    }
+
+	    return out;
+	}
+	/**
+	 * Builds leaving-delay (overstay) distribution buckets for a given month.
+	 * Overstay is defined as minutes beyond the 2-hour reservation slot:
+	 * (left_at - seated_at) - 120.
+	 *
+	 * @param year report year
+	 * @param month report month (1-12)
+	 * @return map bucketLabel->count
+	 */
+	public Map<String, Integer> getOverstayBuckets(int year, int month) {
+	    final String sql =
+	        "SELECT " +
+	        "  CASE " +
+	        "    WHEN ts.left_at IS NULL OR ts.seated_at IS NULL THEN 'unknown' " +
+	        "    WHEN TIMESTAMPDIFF(MINUTE, ts.seated_at, ts.left_at) <= 120 THEN '0' " +
+	        "    WHEN TIMESTAMPDIFF(MINUTE, ts.seated_at, ts.left_at) BETWEEN 121 AND 130 THEN '1-10' " +
+	        "    WHEN TIMESTAMPDIFF(MINUTE, ts.seated_at, ts.left_at) BETWEEN 131 AND 150 THEN '11-30' " +
+	        "    WHEN TIMESTAMPDIFF(MINUTE, ts.seated_at, ts.left_at) BETWEEN 151 AND 180 THEN '31-60' " +
+	        "    ELSE '61+' " +
+	        "  END AS bucket, " +
+	        "  COUNT(*) c " +
+	        "FROM orders o " +
+	        "JOIN table_sessions ts ON ts.order_number = o.order_number " +
+	        "WHERE o.order_type='RESERVATION' " +
+	        "AND YEAR(o.order_date)=? AND MONTH(o.order_date)=? " +
+	        "GROUP BY bucket";
+
+	    Map<String, Integer> out = new HashMap<>();
+	    Connection conn = null;
+
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	            ps.setInt(1, year);
+	            ps.setInt(2, month);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                while (rs.next()) out.put(rs.getString("bucket"), rs.getInt("c"));
+	            }
+	        }
+	    } catch (SQLException e) {
+	        logger.log("[ERROR] getOverstayBuckets: " + e.getMessage());
+	    } finally {
+	        release(conn);
+	    }
+
+	    return out;
+	}
+
 }

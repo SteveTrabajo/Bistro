@@ -342,15 +342,29 @@ public class UserController {
 	 * @param phoneNumber The new staff phone number (9-15 digits)
 	 * @param userType    The role: EMPLOYEE
 	 */
-	public void createNewEmployee(String username, String password, String email, String phoneNumber) {
-		Map<String, Object> staffData = new HashMap<>();
-		staffData.put("username", username);
-		staffData.put("password", password);
-		staffData.put("email", email);
-		staffData.put("phoneNumber", phoneNumber);
-		staffData.put("userType", UserType.EMPLOYEE.name());
-		client.handleMessageFromClientUI(new Message(Api.ASK_STAFF_CREATE, staffData));
+	public void createNewEmployee(
+	        String username,
+	        String password,
+	        String email,
+	        String phoneNumber,
+	        String firstName,
+	        String lastName,
+	        String address
+	) {
+	    Map<String, Object> staffData = new HashMap<>();
+	    staffData.put("username", username);
+	    staffData.put("password", password);
+	    staffData.put("email", email);
+	    staffData.put("phoneNumber", phoneNumber);
+
+	    staffData.put("firstName", firstName);
+	    staffData.put("lastName", lastName);
+	    staffData.put("address", address);
+
+	    staffData.put("userType", UserType.EMPLOYEE.name());
+	    client.handleMessageFromClientUI(new Message(Api.ASK_STAFF_CREATE, staffData));
 	}
+
 
 	/**
 	 * Clear staff creation status for next operation

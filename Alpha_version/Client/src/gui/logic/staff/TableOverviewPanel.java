@@ -30,7 +30,6 @@ public class TableOverviewPanel {
 
     @FXML
     public void initialize() {
-    	BistroClientGUI.client.getTableCTRL().requestTableStatus();
     	System.out.println("Requested table statuses");
     	TaskRunner.run(panelPane, ()->{
     		BistroClientGUI.client.getTableCTRL().requestTableStatus();

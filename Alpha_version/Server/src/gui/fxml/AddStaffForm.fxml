@@ -15,34 +15,44 @@
     <Label text="Add Staff Account" style="-fx-font-size: 18; -fx-font-weight: bold;" />
 
     <GridPane hgap="10" vgap="10">
-        <columnConstraints>
-            <ColumnConstraints minWidth="110" halignment="RIGHT" />
-            <ColumnConstraints hgrow="ALWAYS" />
-        </columnConstraints>
+    <columnConstraints>
+        <ColumnConstraints minWidth="110" halignment="RIGHT" />
+        <ColumnConstraints hgrow="ALWAYS" />
+    </columnConstraints>
 
-        <Label text="Username:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
-        <TextField fx:id="txtUsername" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+    <Label text="Username:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+    <TextField fx:id="txtUsername" GridPane.rowIndex="0" GridPane.columnIndex="1" />
 
-        <Label text="Password:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
-        <PasswordField fx:id="txtPassword" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+    <Label text="Password:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+    <PasswordField fx:id="txtPassword" GridPane.rowIndex="1" GridPane.columnIndex="1" />
 
-        <Label text="Email:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
-        <TextField fx:id="txtEmail" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+    <Label text="Email:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+    <TextField fx:id="txtEmail" GridPane.rowIndex="2" GridPane.columnIndex="1" />
 
-        <Label text="Phone:" GridPane.rowIndex="3" GridPane.columnIndex="0" />
-        <TextField fx:id="txtPhone" GridPane.rowIndex="3" GridPane.columnIndex="1" />
+    <Label text="Phone:" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+    <TextField fx:id="txtPhone" GridPane.rowIndex="3" GridPane.columnIndex="1" />
 
-        <Label text="Role:" GridPane.rowIndex="4" GridPane.columnIndex="0" />
-        <HBox spacing="12" GridPane.rowIndex="4" GridPane.columnIndex="1">
-            <fx:define>
-                <ToggleGroup fx:id="roleGroup" />
-            </fx:define>
-            <children>
-                <RadioButton fx:id="rbEmployee" text="Employee" toggleGroup="$roleGroup" />
-                <RadioButton fx:id="rbManager" text="Manager" toggleGroup="$roleGroup" />
-            </children>
-        </HBox>
-    </GridPane>
+    <Label text="First name:" GridPane.rowIndex="4" GridPane.columnIndex="0" />
+    <TextField fx:id="txtFirstName" GridPane.rowIndex="4" GridPane.columnIndex="1" />
+
+    <Label text="Last name:" GridPane.rowIndex="5" GridPane.columnIndex="0" />
+    <TextField fx:id="txtLastName" GridPane.rowIndex="5" GridPane.columnIndex="1" />
+
+    <Label text="Address:" GridPane.rowIndex="6" GridPane.columnIndex="0" />
+    <TextField fx:id="txtAddress" GridPane.rowIndex="6" GridPane.columnIndex="1" />
+
+    <Label text="Role:" GridPane.rowIndex="7" GridPane.columnIndex="0" />
+    <HBox spacing="12" GridPane.rowIndex="7" GridPane.columnIndex="1">
+        <fx:define>
+            <ToggleGroup fx:id="roleGroup" />
+        </fx:define>
+        <children>
+            <RadioButton fx:id="rbEmployee" text="Employee" toggleGroup="$roleGroup" />
+            <RadioButton fx:id="rbManager" text="Manager" toggleGroup="$roleGroup" />
+        </children>
+    </HBox>
+</GridPane>
+
 
     <Label fx:id="lblError" text="" style="-fx-text-fill: #c0392b; -fx-font-weight: bold;" wrapText="true" />
     <Label fx:id="lblSuccess" text="" style="-fx-text-fill: #1e8449; -fx-font-weight: bold;" wrapText="true" />
