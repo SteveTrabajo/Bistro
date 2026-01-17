@@ -13,87 +13,98 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane fitToWidth="true"
-            hbarPolicy="NEVER"
-            vbarPolicy="AS_NEEDED"
-            styleClass="ad-scroll"
-            xmlns="http://javafx.com/javafx/25"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="gui.logic.staff.AnalyticsPanel">
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER"
+	vbarPolicy="AS_NEEDED" styleClass="ad-scroll"
+	xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="gui.logic.staff.AnalyticsPanel">
 
-    <content>
-        <VBox spacing="16" styleClass="ad-root">
-            <padding>
-                <Insets top="18" right="18" bottom="18" left="18"/>
-            </padding>
+	<content>
+		<VBox spacing="16" styleClass="ad-root">
+			<padding>
+				<Insets top="18" right="18" bottom="18" left="18" />
+			</padding>
 
-            <!-- Header -->
-            <VBox spacing="4">
-                <Label styleClass="ad-title" text="Analytics Dashboard"/>
-                <Label styleClass="ad-subtitle" text="Monthly reports"/>
-            </VBox>
+			<!-- Header -->
+			<VBox spacing="4">
+				<Label styleClass="ad-title" text="Analytics Dashboard" />
+				<Label styleClass="ad-subtitle" text="Monthly reports" />
+			</VBox>
 
-            <!-- Selector -->
-            <HBox spacing="10">
-                <ComboBox fx:id="reportTypeCombo" prefWidth="160"/>
-                <ComboBox fx:id="monthCombo" prefWidth="200"/>
-                <Button text="Load" onAction="#onLoadReport"/>
-            </HBox>
+			<!-- Selector -->
+			<HBox spacing="10">
+				<ComboBox fx:id="reportTypeCombo" prefWidth="160" />
+				<ComboBox fx:id="monthCombo" prefWidth="200" />
+				<Button text="Load" onAction="#onLoadReport" />
+				<Button text="Generate This Month" onAction="#onGenerateThisMonth"/>
+			</HBox>
 
-            <!-- KPIs -->
-            <HBox spacing="14">
+			<!-- KPIs -->
+			<HBox spacing="14">
 
-                <VBox styleClass="ad-kpi" HBox.hgrow="ALWAYS">
-                    <Label styleClass="ad-kpi-label" text="Total Reservations"/>
-                    <Label fx:id="totalReservationsLabel" styleClass="ad-kpi-value" text="0"/>
-                </VBox>
+				<VBox styleClass="ad-kpi" HBox.hgrow="ALWAYS">
+					<Label styleClass="ad-kpi-label" text="Total Reservations" />
+					<Label fx:id="totalReservationsLabel"
+						styleClass="ad-kpi-value" text="0" />
+				</VBox>
 
-                <VBox styleClass="ad-kpi" HBox.hgrow="ALWAYS">
-                    <Label styleClass="ad-kpi-label" text="Customers"/>
-                    <Label fx:id="customersThisMonthLabel" styleClass="ad-kpi-value" text="0"/>
-                </VBox>
+				<VBox styleClass="ad-kpi" HBox.hgrow="ALWAYS">
+					<Label styleClass="ad-kpi-label" text="Customers" />
+					<Label fx:id="customersThisMonthLabel"
+						styleClass="ad-kpi-value" text="0" />
+				</VBox>
 
-            </HBox>
+			</HBox>
 
-            <!-- Bar Chart -->
-            <VBox spacing="10" styleClass="ad-card">
-                <Label styleClass="ad-card-title" text="Monthly Comparison"/>
-                <BarChart fx:id="arrivalBarChart">
-                    <xAxis><CategoryAxis/></xAxis>
-                    <yAxis><NumberAxis/></yAxis>
-                </BarChart>
+			<!-- Bar Chart -->
+			<VBox spacing="10" styleClass="ad-card">
+				<Label styleClass="ad-card-title" text="Monthly Comparison" />
+				<BarChart fx:id="arrivalBarChart">
+					<xAxis>
+						<CategoryAxis />
+					</xAxis>
+					<yAxis>
+						<NumberAxis />
+					</yAxis>
+				</BarChart>
 
-                <HBox spacing="12">
-                    <VBox>
-                        <Label text="On Time"/>
-                        <Label fx:id="totalOnTimeLabel"/>
-                    </VBox>
-                    <VBox>
-                        <Label text="Late"/>
-                        <Label fx:id="totalLateLabel"/>
-                    </VBox>
-                </HBox>
-            </VBox>
+				<HBox spacing="12">
+					<VBox>
+						<Label text="On Time" />
+						<Label fx:id="totalOnTimeLabel" />
+					</VBox>
+					<VBox>
+						<Label text="Late" />
+						<Label fx:id="totalLateLabel" />
+					</VBox>
+				</HBox>
+			</VBox>
 
-            <!-- Line Chart -->
-            <VBox spacing="10" styleClass="ad-card">
-                <Label styleClass="ad-card-title" text="Monthly Trend"/>
-                <LineChart fx:id="reservationsLineChart">
-                    <xAxis><CategoryAxis/></xAxis>
-                    <yAxis><NumberAxis/></yAxis>
-                </LineChart>
-            </VBox>
+			<!-- Line Chart -->
+			<VBox spacing="10" styleClass="ad-card">
+				<Label styleClass="ad-card-title" text="Monthly Trend" />
+				<LineChart fx:id="reservationsLineChart">
+					<xAxis>
+						<CategoryAxis />
+					</xAxis>
+					<yAxis>
+						<NumberAxis />
+					</yAxis>
+				</LineChart>
+			</VBox>
 
-            <!-- Bottom distribution (single, story-only) -->
-            <VBox spacing="10" styleClass="ad-card">
-                <Label styleClass="ad-card-title" text="Distribution"/>
-                <VBox fx:id="peakTimesBox" spacing="8"/>
-            </VBox>
+			<VBox spacing="6" styleClass="ad-card">
+				<Label fx:id="distributionTitleLabel"
+					styleClass="ad-card-title" text="Distribution" />
+				<Label fx:id="distributionSubtitleLabel"
+					styleClass="ad-card-subtitle" text="" />
+				<VBox fx:id="peakTimesBox" spacing="8" />
+			</VBox>
 
-        </VBox>
-    </content>
 
-    <stylesheets>
-        <URL value="@../../css/staff/AnalyticsPanelStyles.css"/>
-    </stylesheets>
+		</VBox>
+	</content>
+
+	<stylesheets>
+		<URL value="@../../css/staff/AnalyticsPanelStyles.css" />
+	</stylesheets>
 </ScrollPane>

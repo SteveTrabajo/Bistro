@@ -3242,17 +3242,10 @@ public class BistroDataBase_Controller {
 	}
 
 	/**
-	 * Lists available (year, month) pairs for which a report can be generated, based on actual activity.
+	 * Lists months that have data for the requested report type.
 	 *
-	 * <p>Important: this must NOT rely on the {@code reports} table because tests often truncate it.
-	 * Instead, months are derived from real data:
-	 * <ul>
-	 *   <li>MEMBERS: reservation dates + waiting list joins</li>
-	 *   <li>TIMES: reservation dates that have matching table sessions</li>
-	 * </ul>
-	 *
-	 * @param type report type (expected: "MEMBERS" or "TIMES")
-	 * @return list of pairs, each pair is {@code int[]{year, month}}
+	 * @param type report type ("TIMES" or "MEMBERS")
+	 * @return list of {year, month} pairs in descending order
 	 */
 	public List<int[]> listReportMonths(String type) {
 
@@ -3265,6 +3258,7 @@ public class BistroDataBase_Controller {
 	        "  UNION ALL " +
 	        "  SELECT wl.joined_at AS dt " +
 	        "  FROM waiting_list wl " +
+	        "  WHERE wl.joined_at IS NOT NULL " +
 	        ") x " +
 	        "WHERE x.dt IS NOT NULL " +
 	        "ORDER BY report_year DESC, report_month DESC";
@@ -3276,28 +3270,48 @@ public class BistroDataBase_Controller {
 	        "WHERE o.order_type='RESERVATION' AND o.order_date IS NOT NULL " +
 	        "ORDER BY report_year DESC, report_month DESC";
 
-	    final String sql = "TIMES".equalsIgnoreCase(type) ? sqlTimes : sqlMembers;
+	    final String baseSql = "TIMES".equalsIgnoreCase(type) ? sqlTimes : sqlMembers;
 
-	    List<int[]> out = new ArrayList<>();
+	    List<int[]> months = new ArrayList<>();
 	    Connection conn = null;
 
 	    try {
 	        conn = borrow();
-	        try (PreparedStatement ps = conn.prepareStatement(sql);
-	             ResultSet rs = ps.executeQuery()) {
 
+	        // 1) Load all possible months (activity-based)
+	        try (PreparedStatement ps = conn.prepareStatement(baseSql);
+	             ResultSet rs = ps.executeQuery()) {
 	            while (rs.next()) {
-	                out.add(new int[] { rs.getInt("report_year"), rs.getInt("report_month") });
+	                months.add(new int[] { rs.getInt("report_year"), rs.getInt("report_month") });
 	            }
 	        }
+
+	        // 2) Exclude current month IF that doesn't make the list empty
+	        if (!months.isEmpty()) {
+	            java.time.YearMonth now = java.time.YearMonth.now();
+
+	            List<int[]> filtered = new ArrayList<>();
+	            for (int[] ym : months) {
+	                if (!(ym[0] == now.getYear() && ym[1] == now.getMonthValue())) {
+	                    filtered.add(ym);
+	                }
+	            }
+
+	            // if removing current month leaves at least one month -> use filtered
+	            if (!filtered.isEmpty()) {
+	                months = filtered;
+	            }
+	        }
+
 	    } catch (SQLException e) {
 	        logger.log("[ERROR] listReportMonths: " + e.getMessage());
 	    } finally {
 	        release(conn);
 	    }
 
-	    return out;
+	    return months;
 	}
+
 
 
 	// MEMBERS report graphs
