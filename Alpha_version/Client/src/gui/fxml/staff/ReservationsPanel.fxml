@@ -14,35 +14,27 @@
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.staff.ReservationsPanel">
-
     <padding>
         <Insets bottom="18" left="18" right="18" top="18" />
     </padding>
-
     <top>
         <VBox spacing="14" BorderPane.alignment="CENTER">
             <VBox spacing="4">
                 <Label styleClass="card-title" text="Reservations Management" />
                 <Label style="-fx-text-fill: #64748b;" text="View and manage daily reservations" />
             </VBox>
-
             <HBox alignment="CENTER_LEFT" spacing="12" style="-fx-background-color: white; -fx-padding: 12; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 4, 0, 0, 1);">
-                
                 <Label styleClass="field-label" text="Search:" />
                 <TextField fx:id="txtSearch" prefWidth="200" promptText="Name, Code or ID..." styleClass="field-input" />
-                
                 <Region prefWidth="10" /> <Label styleClass="field-label" text="Date:" />
                 <DatePicker fx:id="dateFilter" onAction="#onDateChanged" prefWidth="140" />
                 <Button fx:id="btnRefresh" onAction="#btnRefresh" styleClass="wl-btn" text="⟳" />
-                
                 <Region prefWidth="10" />
                 <Label styleClass="field-label" text="Member Code:" />
                 <TextField fx:id="txtMemberId" prefWidth="100" promptText="e.g. 123456" styleClass="field-input" />
                 <Button fx:id="btnSearchMember" onAction="#btnSearchMember" styleClass="wl-btn-call" text="View History" />
                 <Button fx:id="btnClearMember" onAction="#btnClearMember" styleClass="wl-btn" text="Clear" />
-
                 <Region HBox.hgrow="ALWAYS" />
-
                 <Button fx:id="btnNewReservation" onAction="#btnNewReservation" styleClass="btn-primary" text="+ New Reservation" />
             </HBox>
         </VBox>

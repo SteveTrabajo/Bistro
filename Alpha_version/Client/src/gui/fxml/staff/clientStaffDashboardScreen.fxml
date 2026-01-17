@@ -12,10 +12,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="720" prefWidth="1280"
-	stylesheets="@../../css/staff/clientStaffDashboardStyles.css"
-	xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
-	fx:controller="gui.logic.staff.ClientStaffDashboardScreen">
+<BorderPane prefHeight="720" prefWidth="1280" stylesheets="@../../css/staff/clientStaffDashboardStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.staff.ClientStaffDashboardScreen">
 	<!-- Sidebar -->
 	<left>
 		<VBox prefWidth="260" styleClass="mgmt-sidebar">
@@ -28,10 +25,8 @@
 								<Image url="@/resources/bistro_logo.png" />
 							</image>
 						</ImageView>
-						<Label styleClass="mgmt-sidebar-subtitle"
-							text="Management Portal" />
-						<Label styleClass="mgmt-sidebar-user"
-							text="Logged in as:" />
+						<Label styleClass="mgmt-sidebar-subtitle" text="Management Portal" />
+						<Label styleClass="mgmt-sidebar-user" text="Logged in as:" />
 						<HBox alignment="CENTER_LEFT" spacing="8">
 							<ImageView fitHeight="25.0" fitWidth="25.0">
 								<image>
@@ -66,8 +61,7 @@
 								</ImageView>
 							</graphic>
 						</Button>
-						<Button fx:id="btnReservations" onAction="#btnReservations"
-							styleClass="mgmt-menu-button" text="Reservations">
+						<Button fx:id="btnReservations" onAction="#btnReservations" styleClass="mgmt-menu-button" text="Reservations">
 							<graphic>
 								<ImageView fitHeight="22.0" fitWidth="22.0">
 									<image>
@@ -76,8 +70,7 @@
 								</ImageView>
 							</graphic>
 						</Button>
-						<Button fx:id="btnWaitingList" onAction="#btnWaitingList"
-							styleClass="mgmt-menu-button" text="Waiting List">
+						<Button fx:id="btnWaitingList" onAction="#btnWaitingList" styleClass="mgmt-menu-button" text="Waiting List">
 							<graphic>
 								<ImageView fitHeight="26.0" fitWidth="26.0">
 									<image>
@@ -86,8 +79,7 @@
 								</ImageView>
 							</graphic>
 						</Button>
-						<Button fx:id="btnPayment" onAction="#btnPayment"
-							styleClass="mgmt-menu-button" text="Payment">
+						<Button fx:id="btnPayment" onAction="#btnPayment" styleClass="mgmt-menu-button" text="Payment">
 							<graphic>
 								<ImageView fitHeight="20.0" fitWidth="20.0">
 									<image>
@@ -96,8 +88,7 @@
 								</ImageView>
 							</graphic>
 						</Button>
-						<Button fx:id="btnCustomers" onAction="#btnCustomers"
-							styleClass="mgmt-menu-button" text="Customers">
+						<Button fx:id="btnCustomers" onAction="#btnCustomers" styleClass="mgmt-menu-button" text="Customers">
 							<graphic>
 								<ImageView fitHeight="28.0" fitWidth="26.0">
 									<image>
@@ -106,9 +97,7 @@
 								</ImageView>
 							</graphic>
 						</Button>
-						<Button fx:id="btnMemberRegister"
-							onAction="#btnMemberRegister" styleClass="mgmt-menu-button"
-							text="Member Registration">
+						<Button fx:id="btnMemberRegister" onAction="#btnMemberRegister" styleClass="mgmt-menu-button" text="Member Registration">
 							<graphic>
 								<ImageView fitHeight="26.0" fitWidth="26.0">
 									<image>
@@ -117,8 +106,7 @@
 								</ImageView>
 							</graphic>
 						</Button>
-						<Button fx:id="btnAnalytics" onAction="#btnAnalytics"
-							styleClass="mgmt-menu-button" text="Analytics">
+						<Button fx:id="btnAnalytics" onAction="#btnAnalytics" styleClass="mgmt-menu-button" text="Analytics">
 							<graphic>
 								<ImageView fitHeight="18.0" fitWidth="18.0">
 									<image>
@@ -127,9 +115,7 @@
 								</ImageView>
 							</graphic>
 						</Button>
-						<Button fx:id="btnRestaurantManagment"
-							onAction="#btnRestaurantManagment" styleClass="mgmt-menu-button"
-							text="Restaurant Management">
+						<Button fx:id="btnRestaurantManagment" onAction="#btnRestaurantManagment" styleClass="mgmt-menu-button" text="Restaurant Management">
 							<graphic>
 								<ImageView fitHeight="25.0" fitWidth="25.0">
 									<image>
@@ -147,8 +133,7 @@
 				<VBox spacing="8" styleClass="mgmt-sidebar-footer">
 					<children>
 						<Separator prefWidth="200.0" />
-						<Button fx:id="btnLogout" onAction="#btnLogout"
-							styleClass="mgmt-secondary-button" text="Logout">
+						<Button fx:id="btnLogout" onAction="#btnLogout" styleClass="mgmt-secondary-button" text="Logout">
 							<graphic>
 								<ImageView fitHeight="17.0" fitWidth="17.0">
 									<image>
@@ -168,8 +153,7 @@
 
 	<!-- Main content area -->
 	<center>
-		<StackPane fx:id="contentPane"
-			styleClass="mgmt-content-root">
+		<StackPane fx:id="contentPane" styleClass="mgmt-content-root">
 		</StackPane>
 	</center>
 </BorderPane>

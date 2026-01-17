@@ -4,9 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="gui.controllers.AddStaffFormController"
-      spacing="12">
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controllers.AddStaffFormController" spacing="12">
 
     <padding>
         <Insets top="16" right="16" bottom="16" left="16"/>
