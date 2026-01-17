@@ -3127,7 +3127,7 @@ public class BistroDataBase_Controller {
         String query =
             "INSERT INTO opening_hours_special " +
             "(special_date, holiday_name, is_closed, open_time, close_time) " +
-            "VALUES (?, ?, ?, NULL, NULL) " +
+            "VALUES (?, ?, ?, ?, ?) " +
             "ON DUPLICATE KEY UPDATE " +
             "holiday_name = VALUES(holiday_name), " +
             "is_closed = VALUES(is_closed), " +
@@ -3141,6 +3141,15 @@ public class BistroDataBase_Controller {
                 ps.setDate(1, Date.valueOf(holiday.getDate()));
                 ps.setString(2, holiday.getName());
                 ps.setInt(3, holiday.isClosed() ? 1 : 0);
+
+                // If closed -> NULL times. If open -> set provided times (or NULL if not provided).
+                if (holiday.isClosed() || holiday.getOpenTime() == null || holiday.getCloseTime() == null) {
+                    ps.setNull(4, java.sql.Types.TIME);
+                    ps.setNull(5, java.sql.Types.TIME);
+                } else {
+                    ps.setTime(4, Time.valueOf(holiday.getOpenTime()));
+                    ps.setTime(5, Time.valueOf(holiday.getCloseTime()));
+                }
 
                 ps.executeUpdate();
                 return true;
@@ -3162,7 +3171,7 @@ public class BistroDataBase_Controller {
             try (PreparedStatement ps = conn.prepareStatement(query)) {
                 ps.setDate(1, Date.valueOf(holiday.getDate()));
                 int affected = ps.executeUpdate();
-                return affected > 0; // true ?? ?? ???? ???? ????
+                return affected > 0; // true 
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -3171,6 +3180,44 @@ public class BistroDataBase_Controller {
             release(conn);
         }
     }
+    
+    public List<Holiday> getHolidays() {
+        String sql = "SELECT special_date, holiday_name, is_closed, open_time, close_time " +
+                     "FROM opening_hours_special " +
+                     "ORDER BY special_date";
+
+        List<Holiday> list = new ArrayList<>();
+        Connection conn = null;
+
+        try {
+            conn = borrow();
+            try (PreparedStatement ps = conn.prepareStatement(sql);
+                 ResultSet rs = ps.executeQuery()) {
+
+                while (rs.next()) {
+                    LocalDate date = rs.getDate("special_date").toLocalDate();
+                    String name = rs.getString("holiday_name");
+                    boolean closed = rs.getInt("is_closed") == 1;
+
+                    Time ot = rs.getTime("open_time");
+                    Time ct = rs.getTime("close_time");
+                    LocalTime open = (ot == null) ? null : ot.toLocalTime();
+                    LocalTime close = (ct == null) ? null : ct.toLocalTime();
+
+                    list.add(new Holiday(date, name, closed, open, close));
+
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            release(conn);
+        }
+
+        return list;
+    }
+
 	
 	//TODO check these 2 methods and place them in the correct area
 	/**

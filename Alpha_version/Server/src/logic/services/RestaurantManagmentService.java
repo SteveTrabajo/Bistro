@@ -49,5 +49,9 @@ public class RestaurantManagmentService {
 		return dbController.getWeeklyHours();
 	}
 	
+	public List<Holiday> getHolidays() {
+	    return dbController.getHolidays();
+	}
+	
 	
 }

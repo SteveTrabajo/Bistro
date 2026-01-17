@@ -62,5 +62,15 @@ public class ServerRestaurantManageSubject {
 			logger.log("Weekly hours retrieved: " + hours.toString());
 			client.sendToClient(new Message(Api.REPLY_GET_WEEKLY_HOURS_OK, hours));
 		});
+		router.on("hours", "getHolidays", (msg, client) -> {
+		    List<Holiday> holidays = restaurantService.getHolidays();
+		    if (holidays == null) {
+		        logger.log("Failed to retrieve holidays.");
+		        client.sendToClient(new Message(Api.REPLY_GET_HOLIDAYS_FAIL, null));
+		        return;
+		    }
+		    logger.log("Holidays retrieved: " + holidays.toString());
+		    client.sendToClient(new Message(Api.REPLY_GET_HOLIDAYS_OK, holidays));
+		});
 	}
 }
