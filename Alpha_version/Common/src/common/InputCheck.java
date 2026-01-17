@@ -117,6 +117,13 @@ public class InputCheck {
 		return "";
 	}
 
+	/*
+	 * Validates if the given address contains only valid characters.
+	 * 
+	 * @param address The address to validate.
+	 * 
+	 * @return An error message if validation fails, otherwise an empty string.
+	 */
 	public static String validateAddress(String address) {
 		if (address == null || address.trim().isEmpty()) {
 			return "Address is required.";
@@ -127,6 +134,22 @@ public class InputCheck {
 		return "";
 	}
 	
+	/*
+	 * Validates all personal details at once.
+	 * 
+	 * @param firstName   The first name to validate.
+	 * 
+	 * @param lastName    The last name to validate.
+	 * 
+	 * @param phoneNumber The phone number to validate.
+	 * 
+	 * @param email       The email to validate.
+	 * 
+	 * @param address     The address to validate.
+	 * 
+	 * @return A concatenated error message if there are validation issues,
+	 * otherwise an empty string.
+	 */
 	public static String validatePersonalDetails(String firstName, String lastName, String phoneNumber, String email, String address) {
 		StringBuilder errorMsg = new StringBuilder();
 		String temp;
@@ -186,7 +209,6 @@ public class InputCheck {
 			return "Email is required.";
 		}
 		
-		// Updated to use the strict Pattern instead of just contains("@")
 		if (!EMAIL_PATTERN.matcher(email).matches()) {
 			return "Error: Invalid email format (example: user@domain.com)";
 		}
@@ -260,33 +282,39 @@ public class InputCheck {
 	
 	/**
 	 * Validates all staff account data at once
+	 * @param username   The username to validate.
+	 * @param password   The password to validate.
+	 * @param email      The email to validate.
+	 * @param phoneNumber The phone number to validate.
+	 * @param firstName  The first name to validate.
+	 * @param lastName   The last name to validate.
+	 * @param address    The address to validate.
+	 * @return An error message if there are validation issues, otherwise null.
 	 */
-	public static String validateAllStaffData(
-	        String username,
-	        String password,
-	        String email,
-	        String phoneNumber,
-	        String firstName,
-	        String lastName,
-	        String address
-	) {
+	public static String validateAllStaffData(String username, String password, String email, String phoneNumber,
+			String firstName, String lastName, String address) {
+		
 	    String usernameError = InputCheck.validateUsername(username);
 	    if (usernameError != null) return usernameError;
 
 	    String passwordError = validatePassword(password);
 	    if (passwordError != null) return passwordError;
 
-	    // Personal details validator returns "" when ok and a BULLET LIST when not ok
 	    String personalDetailsError = validatePersonalDetails(firstName, lastName, phoneNumber, email, address);
 	    if (personalDetailsError != null && !personalDetailsError.isBlank()) return personalDetailsError;
-
 	    return null;
 	}
 
+	/*
+	 * Private constructor to prevent instantiation of this utility class.
+	 */
 	private InputCheck() {
 		// Private constructor to prevent instantiation
 	}
 
+	/*
+	 * Validates walk-in customer information based on membership status.
+	 */
 	public static String validateWalkIn(boolean isMember, String memberCode, String phone, String email) {
         if (isMember) {
             return validateMemberCode6DigitsNoLeadingZero(memberCode);
@@ -295,6 +323,11 @@ public class InputCheck {
         }
     }
 	
+	/*
+	 * Validates a confirmation code that starts with 'R-' or 'W-' followed by 6 digits.
+	 * @param code The confirmation code to validate.
+	 * @return An error message if validation fails, otherwise null.
+	 */
 	public static String checkConfirmationCode(String code) {
 		if (code == null || code.trim().isEmpty()) {
 			return "Confirmation code is required.";
@@ -309,3 +342,4 @@ public class InputCheck {
 	}
 	
 }
+// End of InputCheck.java
