@@ -156,6 +156,8 @@ public class ReservationController {
 	}
 	
 	public void receiveStaffReservations(List<Order> orders) {
+		System.out.println("[DEBUG] receiveStaffReservations called with " + (orders == null ? "null" : orders.size() + " orders"));
+		System.out.println("[DEBUG] allReservationsCallback is " + (this.allReservationsCallback == null ? "null" : "set"));
 	    if (this.allReservationsCallback != null) {
 	        this.allReservationsCallback.accept(orders);
 	    }
@@ -175,6 +177,16 @@ public class ReservationController {
 	
 	public void askClientOrderHistory() {
 		client.handleMessageFromClientUI(new Message(Api.ASK_CLIENT_ORDER_HISTORY, null));
+	}
+	
+	/**
+	 * Requests order history for a specific member by member code.
+	 * Only accessible by staff members (Employee/Manager).
+	 * @param memberCode The member code to look up
+	 */
+	public void askMemberHistory(int memberCode) {
+		System.out.println("[DEBUG] askMemberHistory sending request for memberCode: " + memberCode);
+		client.handleMessageFromClientUI(new Message(Api.ASK_GET_MEMBER_HISTORY, memberCode));
 	}
 	
 	public void askOrderDetails(String confirmationCode) {

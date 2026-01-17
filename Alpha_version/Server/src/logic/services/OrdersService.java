@@ -156,6 +156,31 @@ public class OrdersService {
 	}
 	
 	/**
+	 * Gets order history for a member using their member code.
+	 * First looks up the user by member code, then retrieves their order history.
+	 * 
+	 * @param memberCode The member's code
+	 * @return List of orders for the member, or null if member not found
+	 */
+	public List<Order> getMemberHistoryByCode(int memberCode) {
+		logger.log("[DEBUG] getMemberHistoryByCode called with memberCode: " + memberCode);
+		User member = dbController.findMemberUserByCode(memberCode);
+		if (member == null) {
+			logger.log("[DEBUG] No member found with code: " + memberCode);
+			return null;
+		}
+		logger.log("[DEBUG] Found member: userId=" + member.getUserId() + ", name=" + member.getFirstName() + " " + member.getLastName() + ", memberCode=" + member.getMemberCode());
+		List<Order> orders = dbController.getOrdersByUserId(member.getUserId());
+		logger.log("[DEBUG] getOrdersByUserId(" + member.getUserId() + ") returned " + (orders == null ? "null" : orders.size() + " orders"));
+		if (orders != null && !orders.isEmpty()) {
+			for (Order o : orders) {
+				logger.log("[DEBUG]   Order #" + o.getOrderNumber() + " - date: " + o.getOrderDate() + ", status: " + o.getStatus());
+			}
+		}
+		return orders;
+	}
+	
+	/**
 	 * Generates a unique 6-digit code with a prefix (e.g., "R-123456").
 	 * Verifies against the DB to ensure no duplicates exist.
 	 * @param prefix The prefix for the code (e.g., "R" for reservations).

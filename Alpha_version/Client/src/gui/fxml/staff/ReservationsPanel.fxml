@@ -34,6 +34,12 @@
                 <Region prefWidth="10" /> <Label styleClass="field-label" text="Date:" />
                 <DatePicker fx:id="dateFilter" onAction="#onDateChanged" prefWidth="140" />
                 <Button fx:id="btnRefresh" onAction="#btnRefresh" styleClass="wl-btn" text="⟳" />
+                
+                <Region prefWidth="10" />
+                <Label styleClass="field-label" text="Member Code:" />
+                <TextField fx:id="txtMemberId" prefWidth="100" promptText="e.g. 123456" styleClass="field-input" />
+                <Button fx:id="btnSearchMember" onAction="#btnSearchMember" styleClass="wl-btn-call" text="View History" />
+                <Button fx:id="btnClearMember" onAction="#btnClearMember" styleClass="wl-btn" text="Clear" />
 
                 <Region HBox.hgrow="ALWAYS" />
 

@@ -438,6 +438,7 @@ public class BistroDataBase_Controller {
 	 * @return The User object if found, null otherwise
 	 */
 	public User findMemberUserByCode(int memberCode) {
+		logger.log("[DEBUG] findMemberUserByCode called with memberCode: " + memberCode);
 		final String sql = "SELECT u.user_id, u.phoneNumber, u.email, u.type, "
 				+ "       m.member_code, m.f_name, m.l_name, m.address " + "FROM members m "
 				+ "JOIN users u ON u.user_id = m.user_id " + "WHERE m.member_code = ? AND u.type = 'MEMBER' "
@@ -448,9 +449,12 @@ public class BistroDataBase_Controller {
 			try (PreparedStatement ps = conn.prepareStatement(sql)) {
 				ps.setInt(1, memberCode);
 				try (ResultSet rs = ps.executeQuery()) {
-					if (!rs.next())
+					if (!rs.next()) {
+						logger.log("[DEBUG] No result found for memberCode: " + memberCode);
 						return null;
+					}
 					int userId = rs.getInt("user_id");
+					logger.log("[DEBUG] Found userId: " + userId + " for memberCode: " + memberCode);
 					String phone = rs.getString("phoneNumber");
 					String email = rs.getString("email");
 					String codeStr = String.valueOf(rs.getInt("member_code"));
@@ -461,6 +465,7 @@ public class BistroDataBase_Controller {
 				}
 			}
 		} catch (SQLException ex) {
+			logger.log("[ERROR] findMemberUserByCode SQLException: " + ex.getMessage());
 			ex.printStackTrace();
 			return null;
 		} finally {
@@ -1176,7 +1181,7 @@ public class BistroDataBase_Controller {
 	            ps.setInt(1, userId);
 
 
-	            // ✅ MUST match chk_order_slot_rules
+	            // ? MUST match chk_order_slot_rules
 	            if (type == OrderType.WAITLIST) {
 	                ps.setNull(2, Types.DATE);
 	                ps.setNull(4, Types.TIME);
@@ -1324,11 +1329,13 @@ public class BistroDataBase_Controller {
 	 *  Retrieves all orders associated with a specific user ID. 
 	 */
 	public List<Order> getOrdersByUserId(int userId) {
+		logger.log("[DEBUG] getOrdersByUserId called with userId: " + userId);
 		List<Order> orders = new ArrayList<>();
-        // Query joins with table_sessions to get tableNum if currently seated
-		String query = "SELECT o.*, ts.tableNum " +
+        // Query joins with table_sessions to get tableNum and users to get user type
+		String query = "SELECT o.*, ts.tableNum, u.type as user_type " +
                        "FROM orders o " +
                        "LEFT JOIN table_sessions ts ON o.order_number = ts.order_number AND ts.left_at IS NULL " +
+                       "LEFT JOIN users u ON o.user_id = u.user_id " +
                        "WHERE o.user_id = ? " +
                        "ORDER BY o.order_date DESC, o.order_time DESC";
 		
@@ -1352,12 +1359,15 @@ public class BistroDataBase_Controller {
                         OrderType type = (typeStr != null) ? OrderType.valueOf(typeStr) : OrderType.RESERVATION;
                         int tableId = rs.getInt("tableNum");
                         if (rs.wasNull()) tableId = 0; // no table assigned
+                        String userType = rs.getString("user_type");
                         Order order = new Order(orderNumber, orderDate, orderTime, diners, code, userId, type, status, null);
                         order.setTableId(tableId); // set tableId if applicable
+                        order.setUserTypeStr(userType); // set user type for display
                         orders.add(order);
 					}
 				}
 			}
+			logger.log("[DEBUG] getOrdersByUserId returning " + orders.size() + " orders for userId: " + userId);
 		} catch (SQLException ex) {
 			logger.log("[ERROR] getOrdersByUserId: " + ex.getMessage());
 			ex.printStackTrace();
@@ -3129,7 +3139,7 @@ public class BistroDataBase_Controller {
             try (PreparedStatement ps = conn.prepareStatement(query)) {
                 ps.setDate(1, Date.valueOf(holiday.getDate()));
                 int affected = ps.executeUpdate();
-                return affected > 0; // true רק אם באמת נמחק משהו
+                return affected > 0; // true ?? ?? ???? ???? ????
             }
         } catch (SQLException e) {
             e.printStackTrace();

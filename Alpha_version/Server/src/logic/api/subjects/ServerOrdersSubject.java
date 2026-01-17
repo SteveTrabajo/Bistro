@@ -120,6 +120,7 @@ public final class ServerOrdersSubject {
 			}
 		});
 		
+<<<<<<< Updated upstream
 		// Request: Get all active reservations for the logged-in member (for Check-In)
 		router.on("orders", "getMemberActiveReservations", (msg, client) -> {
 		    User sessionUser = (User) client.getInfo("user");
@@ -142,6 +143,30 @@ public final class ServerOrdersSubject {
 		        client.sendToClient(new Message(Api.REPLY_MEMBER_ACTIVE_RESERVATIONS_FAIL, null));
 		        logger.log("[ERROR] Failed to retrieve active reservations for member " + sessionUser.getUsername());
 		    }
+=======
+		// Send member history by member code (staff only)
+		router.on("orders", "getMemberHistory", (msg, client) -> {
+			User sessionUser = (User) client.getInfo("user");
+			if (sessionUser == null || (sessionUser.getUserType() != UserType.EMPLOYEE && sessionUser.getUserType() != UserType.MANAGER)) {
+				client.sendToClient(new Message(Api.REPLY_GET_MEMBER_HISTORY_FAIL, "Unauthorized"));
+				logger.log("[SECURITY] Unauthorized member history access attempt from " + client);
+				return;
+			}
+			
+			int memberCode = (int) msg.getData();
+			logger.log("[DEBUG] Looking up member history for member code: " + memberCode);
+			
+			List<Order> history = ordersService.getMemberHistoryByCode(memberCode);
+			logger.log("[DEBUG] Member history lookup result: " + (history == null ? "null" : history.size() + " orders"));
+			
+			if (history != null) {
+				client.sendToClient(new Message(Api.REPLY_GET_MEMBER_HISTORY_OK, history));
+				logger.log("[INFO] Staff " + sessionUser.getUserId() + " retrieved history for member code " + memberCode + " (" + history.size() + " orders)");
+			} else {
+				client.sendToClient(new Message(Api.REPLY_GET_MEMBER_HISTORY_FAIL, "Member not found"));
+				logger.log("[WARN] Member not found with code " + memberCode);
+			}
+>>>>>>> Stashed changes
 		});
 		
         //Send available time slots for reservation

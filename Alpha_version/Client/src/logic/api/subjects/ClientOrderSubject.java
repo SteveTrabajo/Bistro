@@ -227,6 +227,29 @@ public class ClientOrderSubject {
 				alert.showAndWait();
 			});
 		});
+		
+		// Handler for staff viewing member history
+		router.on("orders", "getMemberHistory.ok", msg -> {
+			BistroClient.awaitResponse = false;
+			@SuppressWarnings("unchecked")
+			List<Order> orders = (List<Order>) msg.getData();
+			System.out.println("[DEBUG] Received member history: " + (orders == null ? "null" : orders.size() + " orders"));
+			
+			Platform.runLater(() -> {
+				BistroClientGUI.client.getReservationCTRL().receiveStaffReservations(orders);
+			});
+		});
+		
+		router.on("orders", "getMemberHistory.fail", msg -> {
+			BistroClient.awaitResponse = false;
+			Platform.runLater(() -> {
+				Alert alert = new Alert(Alert.AlertType.WARNING);
+				alert.setTitle("Member Not Found");
+				alert.setHeaderText("Could not retrieve member history");
+				alert.setContentText("No history found for this member ID. Please verify the ID and try again.");
+				alert.showAndWait();
+			});
+		});
 		router.on("reservation", "forgotConfirmationCode.ok", msg -> {
 		    BistroClient.awaitResponse = false;
 
