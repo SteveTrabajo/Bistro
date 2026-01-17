@@ -121,7 +121,7 @@ public class ClientCheckInTableScreen {
 		}
 
 		if (ForgotIDModalRoot == null) {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/fxml/ClientForgotConfirmationCode.fxml"));
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/fxml/clientForgotConfirmationCode.fxml"));
 			try {
 				ForgotIDModalRoot = loader.load();
 				forgotModalsCTRL = loader.getController();

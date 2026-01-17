@@ -84,7 +84,7 @@ public class ClientEmployeeLoginScreen {
 	}
 
 	public void btnForgotPassword(Event event) {
-		BistroClientGUI.switchScreen(event, "employeeForgotPasswordScreen", "employee forgot password error messege");
+		BistroClientGUI.switchScreen(event, "FullReleaseScreen", "employee forgot password error messege");
 	}
 
 }

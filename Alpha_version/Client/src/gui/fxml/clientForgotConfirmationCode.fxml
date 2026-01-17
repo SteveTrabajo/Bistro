@@ -11,10 +11,11 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import java.lang.String?>
 
-<StackPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
+<StackPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.ClientForgotConfirmCodeScreen" stylesheets="@../css/clientForgotStyles.css">
   <!-- Card wrapper so we can pin the X to top-right -->
-  <StackPane maxWidth="560" styleClass="fmid-card-wrap">
+  <StackPane prefWidth="420" maxHeight="-Infinity" styleClass="fmid-card-wrap">
     <!-- Card -->
     <VBox spacing="14" styleClass="fmid-card">
       <padding>
@@ -32,7 +33,7 @@
           <ColumnConstraints hgrow="ALWAYS" />
         </columnConstraints>
         <Label styleClass="fmid-label" text="Phone Number:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-        <TextField fx:id="txtPhoneNum" onAction="#txtPhoneNum" promptText="e.g. 054-1234567" styleClass="fmid-field" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        <TextField fx:id="txtPhoneNum" promptText="e.g. 054-1234567" styleClass="fmid-field" GridPane.columnIndex="1" GridPane.rowIndex="0" />
         <Label styleClass="fmid-label" text="Email:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
         <TextField fx:id="txtEmail" promptText="name@example.com" styleClass="fmid-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             <rowConstraints>
@@ -56,8 +57,4 @@
       </StackPane.margin>
     </Button>
   </StackPane>
-   <stylesheets>
-      <URL value="@forgotMemberIdDialog.css" />
-      <URL value="@clientForgotIStyles.css" />
-   </stylesheets>
 </StackPane>

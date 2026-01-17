@@ -12,9 +12,9 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.ClientForgotIDScreen">
+<StackPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.ClientForgotIDScreen" stylesheets="@../css/clientForgotStyles.css">
   <!-- Card wrapper so we can pin the X to top-right -->
-  <StackPane styleClass="fmid-card-wrap">
+  <StackPane prefWidth="420" maxHeight="-Infinity" styleClass="fmid-card-wrap">
     <!-- Card -->
     <VBox spacing="14" styleClass="fmid-card">
       <padding>
@@ -56,7 +56,4 @@
       </StackPane.margin>
     </Button>
   </StackPane>
-   <stylesheets>
-      <URL value="@../../gui/css/clientForgotStyles.css" />
-   </stylesheets>
 </StackPane>

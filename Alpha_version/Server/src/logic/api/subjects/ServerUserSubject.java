@@ -147,6 +147,21 @@ public final class ServerUserSubject {
 				client.sendToClient(new Message(Api.REPLY_REGISTER_NEW_MEMBER_FAILED, null));
 			}
 		});
+		router.on("user", "forgotMemberID", (msg, client) -> {
+			@SuppressWarnings("unchecked")
+			Map<String, String> requestData = (Map<String, String>) msg.getData();
+			String email = requestData.get("email");
+			String phoneNumber = requestData.get("phoneNumber");
+			String memberID = userService.findMemberCode(email, phoneNumber);
+			if (memberID != null) {
+				logger.log("[INFO] Retrieved member ID for email: " + email);
+				client.sendToClient(new Message(Api.REPLY_FORGOT_MEMBER_ID_OK, memberID));
+			} else {
+				logger.log("[WARN] Failed to retrieve member ID for email: " + email);
+				client.sendToClient(new Message(Api.REPLY_FORGOT_MEMBER_ID_FAILED, null));
+			}
+		});
+		
 		
 	
 

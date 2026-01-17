@@ -158,7 +158,7 @@ public class UserService {
 		}
 		return userfound;
 	}
-
+	
 	/**
 	 * Updates member information in the database.
 	 * 
@@ -192,6 +192,14 @@ public class UserService {
 
 	public List<UserData> getAllCustomers() {
 		return dbController.getAllCustomers();
+	}
+
+	public String findMemberCode(String email, String phoneNumber) {
+		int memberCode = dbController.findMemberCodeByEmailOrPhone(email, phoneNumber);
+		if (memberCode != -1) {
+			return String.valueOf(memberCode);
+		}
+		return null;
 	}
 }
 // End of UserService.java
