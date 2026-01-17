@@ -18,7 +18,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="op-scroll" stylesheets="@../../css/staff/RestaurantManagementPanelStyles.css" vbarPolicy="AS_NEEDED" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.staff.RestaurantManagementPanel">
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="op-scroll" stylesheets="@../../css/staff/RestaurantManagementPanelStyles.css" vbarPolicy="AS_NEEDED" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.staff.RestaurantManagementPanel">
 
     <content>
         <VBox spacing="16" styleClass="op-root">
@@ -139,6 +139,10 @@
                     </columns>
                 </TableView>
 
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <Button fx:id="btnEditTable" onAction="#btnEditTable" styleClass="op-btn-primary" text="Edit Selected Table" />
+                </HBox>
+
                 <Region styleClass="op-divider" />
 
                 <Label styleClass="op-section-title" text="Add New Table" />
@@ -147,7 +151,6 @@
                     <TextField fx:id="txtTableID" prefWidth="220" promptText="Table ID (e.g., T13)" styleClass="op-field" />
                     <Spinner fx:id="spinDinersAmount" prefWidth="120" styleClass="op-spinner" />
                     <Button fx:id="btnAddTable" onAction="#btnAddTable" styleClass="op-btn-primary" text="➕  Add Table" />
-               <Button fx:id="btnRemoveTable" mnemonicParsing="false" onAction="#btnRemoveTable" styleClass="op-row-del" text="Remove Table" />
                 </HBox>
             </VBox>
 
