@@ -518,6 +518,39 @@ public class OrdersService {
         return createNewOrder(orderData, OrderType.RESERVATION);
     }
 
+	public List<String> getReservationCodesByUserId(int userId) {
+		List<Order> orders = dbController.getOrdersByUserId(userId);
+		if (orders != null) {
+			List<String> codes = new ArrayList<>();
+			for (Order o : orders) {
+				codes.add(o.getConfirmationCode());
+			}
+			return codes;
+		}
+		return null;
+	}
+
+	public String getEarlierReservationCodeByUserId(int userId) {
+		List<Order> orders = dbController.getOrdersByUserId(userId);
+		if (orders != null) {
+			LocalDateTime now = LocalDateTime.now();
+			Order earliest = null;
+			for (Order o : orders) {
+				LocalDateTime orderDateTime = LocalDateTime.of(o.getOrderDate(), o.getOrderHour());
+				if (orderDateTime.isAfter(now)) {
+					if (earliest == null || orderDateTime
+							.isBefore(LocalDateTime.of(earliest.getOrderDate(), earliest.getOrderHour()))) {
+						earliest = o;
+					}
+				}
+			}
+			if (earliest != null) {
+				return earliest.getConfirmationCode();
+			}
+		}
+		return null;
+	}
+
 	
 
 }

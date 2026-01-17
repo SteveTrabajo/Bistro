@@ -243,6 +243,26 @@ public final class ServerOrdersSubject {
                 logger.log("[WARN] Failed to cancel order " + confirmationCode);
             }
         });
+		router.on("reservation", "forgotConfirmationCode", (msg, client) -> {
+			User sessionUser = (User) client.getInfo("user");
+			if (sessionUser == null) {
+				logger.log("[SECURITY] Unauthorized forgot confirmation code attempt from " + client);
+				client.sendToClient(new Message(Api.REPLY_FORGOT_CONFIRMATION_CODE_FAILED, "Unauthorized"));
+				return;
+			}
+			String code = ordersService.getEarlierReservationCodeByUserId(sessionUser.getUserId());
+			if (code != null && !code.isEmpty()) {
+				client.sendToClient(new Message(Api.REPLY_FORGOT_CONFIRMATION_CODE_OK, code));
+				logger.log("[INFO] Client: " + client + " retrieved reservation confirmation codes successfully.");
+			} else {
+				client.sendToClient(
+						new Message(Api.REPLY_FORGOT_CONFIRMATION_CODE_FAILED, "No reservation codes found."));
+				logger.log("[ERROR] Client: " + client + " failed to retrieve reservation confirmation codes.");
+			}
+		});
+    
+ 		
+ 		}
  		
     }
-}
+

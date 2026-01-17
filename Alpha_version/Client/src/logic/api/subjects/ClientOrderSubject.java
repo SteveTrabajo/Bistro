@@ -1,16 +1,20 @@
 package logic.api.subjects;
 
-import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import logic.BistroClient;
-import logic.BistroClientGUI;
-import logic.api.ClientRouter;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import entities.Order;
+import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
+import logic.BistroClient;
+import logic.BistroClientGUI;
+import logic.api.ClientRouter;
 
 public class ClientOrderSubject {
 	
@@ -55,8 +59,8 @@ public class ClientOrderSubject {
                 alert.setHeaderText("Booking Confirmed!");
                 alert.setContentText("Please provide the customer with their confirmation code: " + confirmationCode); 
                 alert.showAndWait();
-                
-                BistroClientGUI.switchScreen("clientStaffDashboardScreen", "Error returning to Staff Dashboard.");
+                System.out.println("Created Reservation Confirmation Code: " + confirmationCode);
+                BistroClientGUI.switchScreen("staff/clientStaffDashboardScreen", "Error returning to Staff Dashboard.");
             });
         });
 
@@ -198,6 +202,76 @@ public class ClientOrderSubject {
 			Platform.runLater(() -> {
 				//TODO maybe rename method to receiveOrderHistory
 				BistroClientGUI.client.getReservationCTRL().receiveStaffReservations(orders);
+			});
+		});
+		router.on("orders", "getClientHistory.fail", msg -> {
+			BistroClient.awaitResponse = false;
+			Platform.runLater(() -> {
+				Alert alert = new Alert(Alert.AlertType.ERROR);
+				alert.setTitle("Error");
+				alert.setHeaderText("Could not retrieve order history");
+				alert.setContentText("An error occurred while fetching the order history. Please try again later.");
+				alert.showAndWait();
+			});
+		});
+		router.on("reservation", "forgotConfirmationCode.ok", msg -> {
+		    BistroClient.awaitResponse = false;
+
+		    // 1. Cast the data directly to String (since the server sends a single String)
+		    String confirmationCode = (String) msg.getData();
+
+		    Platform.runLater(() -> {
+		        // --- Create a Styled Dialog ---
+		        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		        alert.setTitle("Code Retrieved");
+		        alert.setHeaderText(null);
+		        alert.setGraphic(null);
+
+		        // Create container
+		        VBox content = new VBox(15);
+		        content.setAlignment(Pos.CENTER);
+		        content.setPadding(new Insets(20));
+
+		        // Styled Title
+		        Label lblTitle = new Label("Your Confirmation Code is:");
+		        lblTitle.setStyle("-fx-font-size: 16px; -fx-text-fill: #555555;");
+
+		        // Styled Code Box (TextField is best for single codes)
+		        TextField codeField = new TextField(confirmationCode);
+		        codeField.setEditable(false); // Read-only
+		        codeField.setAlignment(Pos.CENTER);
+		        
+		        // CSS for a "Card/Badge" look
+		        codeField.setStyle(
+		            "-fx-font-size: 24px; " +
+		            "-fx-font-weight: bold; " +
+		            "-fx-text-fill: #2c3e50; " +
+		            "-fx-background-color: #f0f2f5; " +
+		            "-fx-background-radius: 8px; " +
+		            "-fx-border-color: #d1d8e0; " +
+		            "-fx-border-radius: 8px;"
+		        );
+		        
+		        // Remove focus ring
+		        codeField.setFocusTraversable(false);
+
+		        content.getChildren().addAll(lblTitle, codeField);
+		        alert.getDialogPane().setContent(content);
+
+		        alert.showAndWait();
+
+		        // Pass the single code to the controller
+		        BistroClientGUI.client.getReservationCTRL().handleForgotConfirmationCodeResponse(confirmationCode);
+		    });
+		});
+		router.on("reservation", "forgotConfirmationCode.fail", msg -> {
+			BistroClient.awaitResponse = false;
+			Platform.runLater(() -> {
+				Alert alert = new Alert(Alert.AlertType.ERROR);
+				alert.setTitle("Error");
+				alert.setHeaderText("Could not retrieve confirmation code");
+				alert.setContentText("An error occurred while retrieving your confirmation code. Please try again later.");
+				alert.showAndWait();
 			});
 		});
 		

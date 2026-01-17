@@ -12,6 +12,7 @@ import logic.api.ClientRouter;
 import enums.UserType;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 
 public class ClientUserSubject {
 
@@ -90,7 +91,19 @@ public class ClientUserSubject {
 		router.on("user", "forgotMemberID.ok", msg -> {
 			BistroClient.awaitResponse = false;
 			String memberID = (String) msg.getData();
-			userController.handleForgotIDResponse(memberID);
+			// Execute UI changes on the JavaFX thread
+			Platform.runLater(() -> {
+				Alert alert = new Alert(Alert.AlertType.INFORMATION);
+				alert.setTitle("Member Recovery");
+				alert.setHeaderText("ID Retrieval Successful");
+				Label label = new Label("Your Member ID is: " + memberID);
+				label.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;");
+				alert.getDialogPane().setContent(label);
+				alert.showAndWait();
+				userController.handleForgotIDResponse(memberID);
+				BistroClientGUI.switchScreen("clientLoginScreen",
+						"Failed to load Login Screen after retrieving Member ID.");
+			});
 		});
 		
 		router.on("user", "forgotMemberID.fail", msg -> {

@@ -958,7 +958,42 @@ public class BistroDataBase_Controller {
 	        }
 	    }
 	}
+	public int findMemberCodeByEmailOrPhone(String email, String phoneNumber) {
+		boolean hasPhone = phoneNumber != null && !phoneNumber.isBlank();
+	    boolean hasEmail = email != null && !email.isBlank();
+	    		if (!hasPhone && !hasEmail) {
+	        throw new IllegalArgumentException("Must provide phoneNumber or email to find member code");
+	    }
+		final String FIND_MEMBER_SQL = "SELECT m.member_code " + "FROM members m "
+				+ "JOIN users u ON m.user_id = u.user_id " + "WHERE u.type = 'MEMBER' " + "AND ("
+				+ (hasPhone ? "u.phoneNumber = ?" : "") + (hasPhone && hasEmail ? " OR " : "")
+				+ (hasEmail ? "u.email = ?" : "") + ") LIMIT 1";
+		Connection conn = null;
+		try {
+			conn = borrow();
+			try (PreparedStatement ps = conn.prepareStatement(FIND_MEMBER_SQL)) {
+				int paramIndex = 1;
+				if (hasPhone) {
+					ps.setString(paramIndex++, phoneNumber);
+				}
+				if (hasEmail) {
+					ps.setString(paramIndex++, email);
+				}
+				try (ResultSet rs = ps.executeQuery()) {
+					if (rs.next()) {
+						return rs.getInt("member_code");
+					}
+				}
+			}
+		} catch (SQLException ex) {
+			logger.log("[ERROR] SQLException in findMemberCodeByEmailOrPhone: " + ex.getMessage());
+			ex.printStackTrace();
+		} finally {
+			release(conn);
 
+		}
+		return 0;
+	}
 
 	// ****************************** Order Operations ******************************
 
@@ -3489,5 +3524,7 @@ public class BistroDataBase_Controller {
 
 	    return out;
 	}
+
+
 
 }
