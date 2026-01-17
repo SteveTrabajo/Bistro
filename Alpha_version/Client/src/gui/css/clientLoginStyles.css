@@ -83,7 +83,6 @@
     -fx-border-width: 1.5px;
 }
 
-/* OR row */
 .loginD-orRow { -fx-padding: 4px 0 0 0; }
 
 .loginD-line {
