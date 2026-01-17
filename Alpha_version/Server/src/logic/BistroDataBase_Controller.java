@@ -2892,9 +2892,16 @@ public class BistroDataBase_Controller {
     }
 
     public boolean addHoliday(Holiday holiday) {
-        // Ensure you ran the ALTER TABLE command first!
-        String query = "INSERT INTO opening_hours_special (special_date, name, is_closed, open_time, close_time) VALUES (?, ?, ?, NULL, NULL)";
-        
+        String query =
+            "INSERT INTO opening_hours_special " +
+            "(special_date, holiday_name, is_closed, open_time, close_time) " +
+            "VALUES (?, ?, ?, NULL, NULL) " +
+            "ON DUPLICATE KEY UPDATE " +
+            "holiday_name = VALUES(holiday_name), " +
+            "is_closed = VALUES(is_closed), " +
+            "open_time = VALUES(open_time), " +
+            "close_time = VALUES(close_time)";
+
         Connection conn = null;
         try {
             conn = borrow();
@@ -2902,8 +2909,7 @@ public class BistroDataBase_Controller {
                 ps.setDate(1, Date.valueOf(holiday.getDate()));
                 ps.setString(2, holiday.getName());
                 ps.setInt(3, holiday.isClosed() ? 1 : 0);
-                // For simplicity, this code assumes holidays are full-day closed. 
-                // If you want partial hours, you need to add logic for open/close times here.
+
                 ps.executeUpdate();
                 return true;
             }
@@ -2915,24 +2921,25 @@ public class BistroDataBase_Controller {
         }
     }
 
-	public boolean removeHoliday(Holiday holiday) {
-		String query = "DELETE FROM opening_hours_special WHERE special_date = ?";
-		
-		Connection conn = null;
-		try {
-			conn = borrow();
-			try (PreparedStatement ps = conn.prepareStatement(query)) {
-				ps.setDate(1, Date.valueOf(holiday.getDate()));
-				ps.executeUpdate();
-				return true;
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
-		} finally {
-			release(conn);
-		}
-	}
+    public boolean removeHoliday(Holiday holiday) {
+        String query = "DELETE FROM opening_hours_special WHERE special_date = ?";
+
+        Connection conn = null;
+        try {
+            conn = borrow();
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                ps.setDate(1, Date.valueOf(holiday.getDate()));
+                int affected = ps.executeUpdate();
+                return affected > 0; // true רק אם באמת נמחק משהו
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            release(conn);
+        }
+    }
+
 	
 	//TODO check these 2 methods and place them in the correct area
 	/**

@@ -151,7 +151,8 @@ public class BistroClient extends AbstractClient {
 		ClientTablesSubject.register(router);
 		ClientConnectionSubject.register(router);
 		ClientPaymentSubject.register(router);
-		ClientSystemSubject.register(router);	
+		ClientSystemSubject.register(router);
+		ClientRestaurantManageSubject.register(router);
 	}
 
 	/**

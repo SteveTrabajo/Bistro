@@ -45,6 +45,7 @@ public class BistroServer extends AbstractServer {
 	private final TableService tableService;
 	private final WaitingListService waitingListService;
 	private final NotificationService notificationService;
+	private final RestaurantManagmentService restaurantManagmentService;
 	private final UserService userService;
 	private final ReportsService reportService;
 	private final PaymentService paymentService;
@@ -74,6 +75,7 @@ public class BistroServer extends AbstractServer {
 		this.reportService = new ReportsService(this.dbController, this.logger);
 		this.noShowManager = new NoShowManager(this.dbController, this.logger);
 		this.notificationService = new NotificationService(this.dbController, this.logger);
+		this.restaurantManagmentService = new RestaurantManagmentService(this.dbController, this.logger);
 		this.ordersService = new OrdersService(this, this.dbController,this.logger);
 		this.tableService = new TableService(this.dbController, this.logger, this.ordersService, this.notificationService);
 		this.paymentService = new PaymentService(this.dbController, this.logger, this.tableService);
@@ -207,6 +209,7 @@ public class BistroServer extends AbstractServer {
 		ServerTablesSubject.register(router, tableService, logger);
 		ServerReportsSubject.register(router, reportService, logger);
 		ServerPaymentSubject.register(router, tableService, logger, paymentService);
+		ServerRestaurantManageSubject.register(router, logger, restaurantManagmentService);
 	}
 	
 	// ******************************** Getters for Services ********************************

@@ -137,10 +137,10 @@ public final class Api {
 	public static final String ASK_LOAD_CUSTOMERS_DATA = "customers.getalldata";
 	public static final String ASK_MONTHLY_REPORT_DATA = "monthlyReports.getData";
 	
-	public static final String ASK_SAVE_WEEKLY_HOURS = "hours.saveWeeklyHours";
-	public static final String ASK_ADD_HOLIDAY = "hours.addHoliday";
+	public static final String ASK_SAVE_WEEKLY_HOURS = "hours.saveWeekly";
+	public static final String ASK_ADD_HOLIDAY      = "hours.addHoliday";
+	public static final String ASK_REMOVE_HOLIDAY   = "hours.removeHoliday";
 	public static final String ASK_GET_HOLIDAYS = "hours.getHolidays";
-	public static final String ASK_REMOVE_HOLIDAY = "hours.removeHoliday";
 
 	// Responses
 	public static final String REPLY_TABLE_STATUS_OK = "tables.getStatus.ok";
