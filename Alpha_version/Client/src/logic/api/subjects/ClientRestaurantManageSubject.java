@@ -88,6 +88,7 @@ public class ClientRestaurantManageSubject {
 		    @SuppressWarnings("unchecked")
 		    List<WeeklyHour> hours = (List<WeeklyHour>) msg.getData();
 		    BistroClientGUI.client.getTableCTRL().setWeeklyHours(hours);
+		    BistroClientGUI.client.getReservationCTRL().setWeeklyHours(hours);
 		});
 		
 		router.on("hours", "getWeeklyHours.fail", msg -> {

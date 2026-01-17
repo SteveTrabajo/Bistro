@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 
 import comms.Api;
 import comms.Message;
+import dto.WeeklyHour;
 import entities.Order;
 import enums.OrderStatus;
 import javafx.application.Platform;
@@ -22,9 +23,8 @@ public class ReservationController {
 	private final BistroClient client;
 	private Order orderDTO;
 	private List<String> availableTimeSlots;
-	
+	private List<WeeklyHour> weeklyHours;
 	private Consumer<List<String>> uiUpdateCallback;
-	
 	private Consumer<Order> orderLoadedCallback;
 	private Consumer<List<String>> availableSlotsCallback;
 	private Consumer<Boolean> updateResultCallback;
@@ -111,6 +111,14 @@ public class ReservationController {
 	public void setOnMemberReservationsListListener(Consumer<List<Order>> listener) {
         this.onMemberReservationsListListener = listener;
     }
+	
+	public List<WeeklyHour> getWeeklyHours() {
+		return weeklyHours;
+	}
+	
+	public void setWeeklyHours(List<WeeklyHour> weeklyHours) {
+		this.weeklyHours = weeklyHours;
+	}
 		
 	//******************************** Instance Methods ***********************************//
 	
@@ -295,5 +303,10 @@ public class ReservationController {
             });
         }
     }
+
+
+	public void askWeeklyHours() {
+		client.handleMessageFromClientUI(new Message(Api.ASK_GET_WEEKLY_HOURS, null));
+	}
 	
 }

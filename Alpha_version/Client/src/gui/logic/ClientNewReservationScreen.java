@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import dto.WeeklyHour;
 import entities.User;
 import javafx.application.Platform;
 import javafx.event.Event;
@@ -42,6 +43,20 @@ public class ClientNewReservationScreen {
     private Button btnBack;
     @FXML
     private Label lblUser;
+    @FXML
+    private Label lblSunday;
+    @FXML
+    private Label lblMonday;
+    @FXML
+    private Label lblTuesday;
+    @FXML
+    private Label lblWednesday;
+    @FXML
+    private Label lblThursday;
+    @FXML
+    private Label lblFriday;
+    @FXML
+    private Label lblSaturday;
     
     private String selectedTimeSlot = null;
     private Map<String, Object> staffProxyData = null;
@@ -54,7 +69,7 @@ public class ClientNewReservationScreen {
     	Locale.setDefault(Locale.ENGLISH);
         setupDinersAmountComboBox();
         setupDatePicker();
-        
+          
         // Initial state: Date selection is disabled until diners are chosen
         datePicker.setDisable(true); 
         btnConfirmReservation.setDisable(true);
@@ -80,10 +95,58 @@ public class ClientNewReservationScreen {
                 refreshTimeSlots();
             }
         });
+        
+        askUpdateDayLabels();
     }
     
-    //*********************** Logic Methods ************************//
 
+	//*********************** Logic Methods ************************//
+
+    private void askUpdateDayLabels() {
+		BistroClientGUI.client.getReservationCTRL().askWeeklyHours();
+		Platform.runLater(() -> {
+			List<WeeklyHour> weeklyHours = BistroClientGUI.client.getReservationCTRL().getWeeklyHours();
+			updateLabelsWithData(weeklyHours);
+		});
+    }
+    
+    public void updateLabelsWithData(List<WeeklyHour> data) {
+		if (data != null && !data.isEmpty()) {
+			for (WeeklyHour wh : data) {
+				int day = wh.getDayOfWeek();
+				String hours = wh.getOpenTime() + " - " + wh.getCloseTime();
+				switch (day) {
+				case 1:
+					lblSunday.setText("Sunday: " + hours);
+					break;
+				case 2:
+					lblMonday.setText("Monday: " + hours);
+					break;
+				case 3:
+					lblTuesday.setText("Tuesday: " + hours);
+					break;
+				case 4:
+					lblWednesday.setText("Wednesday: " + hours);
+					break;
+				case 5:
+					lblThursday.setText("Thursday: " + hours);
+					break;
+				case 6:
+					lblFriday.setText("Friday: " + hours);
+					break;
+				case 7:
+					lblSaturday.setText("Saturday: " + hours);
+					break;
+				}
+			}
+		}
+		else {
+			lblSunday.setText("Restaurant Hours Unavailable");
+		}
+    }
+    
+    
+    
     /**
 	 * Fetches available reservation dates from the server based on selected number of diners.
 	 * Updates the DatePicker to enable only those dates.
