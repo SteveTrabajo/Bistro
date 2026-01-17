@@ -202,6 +202,10 @@ public class PaymentPanel {
             }
         };
 
+        actualPaymentField.textProperty().addListener((obs, oldVal, newVal) -> validateInput.run());
+        paymentMethod.valueProperty().addListener((obs, oldVal, newVal) -> validateInput.run());
+        validateInput.run();
+        
         dialog.setResultConverter(btn -> (btn == payButtonType) ? paymentMethod.getValue() : null);
 
         dialog.showAndWait().ifPresent(method -> {
@@ -211,8 +215,7 @@ public class PaymentPanel {
 
             Thread updateThread = new Thread(() -> {
                 try {
-                    // Assuming your controller handles the 'Wait' internally 
-                    BistroClientGUI.client.getPaymentCTRL().processPayment(bill.getOrderNumber());
+                    BistroClientGUI.client.getPaymentCTRL().processPayment(bill.getOrderNumber(), method);
                     boolean success = BistroClientGUI.client.getPaymentCTRL().getIsPaymentManuallySuccessful();
 
                     Platform.runLater(() -> {
@@ -229,6 +232,7 @@ public class PaymentPanel {
                     Platform.runLater(() -> {
                         rootNode.setDisable(false);
                         rootNode.setCursor(Cursor.DEFAULT);
+                        billsTable.setCursor(Cursor.DEFAULT);
                     });
                 }
             });

@@ -43,6 +43,7 @@ public class PaymentService {
         	total += item.getPrice() * item.getQuantity();
         }
 
+        // TODO Do we want to calculate member discount before or after tax?
         // Apply 10% discount for MEMBERS
         if (requester.getUserType() == UserType.MEMBER) {
             total = total * 0.90; 
@@ -75,6 +76,7 @@ public class PaymentService {
 
         if (transactionId != null) {
             dbController.markBillAsPaid(billId, "CREDIT", transactionId);
+            finalizeOrderPayment(billId);
             logger.log("[SUCCESS] Bill " + billId + " paid. Transaction Ref: " + transactionId);
             return true;
         } else {
@@ -97,10 +99,28 @@ public class PaymentService {
         }
 
         dbController.markBillAsPaid(billId, "CASH", null);
+        finalizeOrderPayment(billId);
         logger.log("[SUCCESS] Bill " + billId + " paid via CASH.");
         return true;
     }
 
+    /**
+	 * Finalizes the order/session associated with a paid bill.
+	 */
+    private void finalizeOrderPayment(int billId) {
+        try {
+            Integer orderNum = dbController.getOrderNumberByBillId(billId);
+            if (orderNum != null) {
+                onPaymentCompleted(orderNum);
+            } else {
+                logger.log("[WARN] Could not find Order Number for Bill ID: " + billId);
+            }
+        } catch (Exception e) {
+            logger.log("[ERROR] Failed to finalize order/session for bill " + billId + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
     
     /**
      * Finds the bill ID linked to a specific Order Number.
@@ -130,6 +150,7 @@ public class PaymentService {
 	 * 
 	 * @param orderNumber
 	 */
+    /*
     public boolean onPaymentCompleted(int orderNumber) {
     	//close table session when payment is completed
         Integer tableNum = dbController.getActiveTableNumByOrderNumber(orderNumber);
@@ -142,7 +163,28 @@ public class PaymentService {
         }	       
         return tableService.tableFreed(tableNum); //when table is freed, try to seat WAITLIST/RESERVATION order if possible
     }
+    */
     
+    /**
+     * Method to be called when payment is completed for an order.
+     * Updates Order Status and Table Session.
+     */
+    public boolean onPaymentCompleted(int orderNumber) {
+        Integer tableNum = dbController.getActiveTableNumByOrderNumber(orderNumber);
+        dbController.closeTableSessionForOrder(orderNumber, EndTableSessionType.PAID);
+        dbController.updateOrderStatusByOrderNumber(orderNumber, OrderStatus.COMPLETED); 
+
+        if (tableNum == null) {
+            logger.log("[INFO] Payment completed, but table session was already closed or not found for order " + orderNumber);
+            return true; 
+        }          
+        
+        if (tableService != null) {
+            tableService.tableFreed(tableNum);
+        }
+        
+        return true;
+    }
    
 
 	

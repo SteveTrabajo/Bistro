@@ -89,8 +89,9 @@ public class PaymentController {
 		client.handleMessageFromClientUI(new Message(Api.ASK_PAYMENT_COMPLETE, randomItems));
 	}
 
-	public void processPayment(int orderNumber) {
-		client.handleMessageFromClientUI(new Message(Api.ASK_PROCESS_PAYMENT_MANUALLY, orderNumber));
+	public void processPayment(int orderNumber, String paymentMethod) {
+		Object[] payload = new Object[] { orderNumber, paymentMethod };
+		client.handleMessageFromClientUI(new Message(Api.ASK_PROCESS_PAYMENT_MANUALLY, payload));
 
 	}
 

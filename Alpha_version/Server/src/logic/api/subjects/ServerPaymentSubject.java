@@ -107,13 +107,11 @@ public class ServerPaymentSubject {
 
 
         // --- ROUTE: Manual (Cash) Payment ---
-        router.on("payment", "processmanually", (msg, client) -> {
-            // Client sends orderNumber (int) - UNCHANGED
-            int orderNumber = (int) msg.getData();
+        router.on("payment", "processManually", (msg, client) -> {
+        	Object[] data = (Object[]) msg.getData();
+            int orderNumber = (int) data[0];
+            String method = (String) data[1]; // Expecting "CASH" or "CREDIT"
             
-            // We need to find the billId associated with this orderNumber
-            // Assumption: PaymentService or DBController has a lookup method. 
-            // If not, you must add 'getBillIdByOrderNumber' to your service/controller.
             Integer billId = paymentService.getBillIdByOrderNumber(orderNumber);
 
             if (billId == null) {
@@ -121,12 +119,16 @@ public class ServerPaymentSubject {
                 return;
             }
 
-            // Calculate amount (Or fetch from bill). For Cash, we often assume full payment.
-            // We retrieve the bill to get the total.
             Bill bill = paymentService.getBillById(billId); 
-            
-            boolean isSuccessful = paymentService.processCashPayment(billId, bill.getTotal());
+            boolean isSuccessful;
 
+            if ("Credit Card".equalsIgnoreCase(method)) {
+                String manualToken = "MANUAL-CARD-" + System.currentTimeMillis();
+                isSuccessful = paymentService.processCreditCardPayment(billId, bill.getTotal(), manualToken);
+            } else {
+                isSuccessful = paymentService.processCashPayment(billId, bill.getTotal());
+            }
+            
             if (isSuccessful) {
                 client.sendToClient(new Message(Api.REPLY_PROCESS_PAYMENT_MANUALLY_OK, "Manual Payment Successful"));
             } else {
