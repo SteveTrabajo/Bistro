@@ -19,7 +19,6 @@ import common.InputCheck;
 import javafx.event.Event;
 import enums.UserType;
 import logic.QRCodeDecoder;
-
 import java.io.File;
 import javafx.stage.FileChooser;
 
@@ -47,22 +46,21 @@ public class ClientLoginScreen {
 	@FXML
 	private TextField txtEmailAddress;	
 	@FXML
+	private BorderPane contentPane;
+	@FXML
 	private StackPane mainPane;	
 	@FXML
 	private StackPane modalOverlay; // Overlay pane for modals
+	@FXML
+	private Label lblError;	
 	
 	private Parent ForgotIDModalRoot;
 	
-	@FXML
-	private Label lblError;	
-	@FXML
-	private BorderPane contentPane;
-	
-	// ******************************** Variables ********************************
-
 	private Map<String, Object> userLoginData; // holds received user login data
 	
 	private ClientForgotIDScreen forgotModalsCTRL;
+	
+	
 	// ****************************** FXML Methods *****************************
 
 	/**
@@ -97,8 +95,10 @@ public class ClientLoginScreen {
 	public void btnGuest(Event event) {
 		String phoneNumber = txtPhoneNumber.getText().trim();
 		String emailAddress = txtEmailAddress.getText().trim();
-		if (phoneNumber.isEmpty()) phoneNumber = null;
-		if (emailAddress.isEmpty()) emailAddress = null;
+		if (phoneNumber.isEmpty())
+			phoneNumber = null;
+		if (emailAddress.isEmpty())
+			emailAddress = null;
 		String errorMessage = InputCheck.isValidGuestInfo(phoneNumber, emailAddress);
 		UserType userType = UserType.GUEST;
 		if (!errorMessage.equals("")) {
@@ -108,23 +108,19 @@ public class ClientLoginScreen {
 			userLoginData.put("userType", userType);
 			userLoginData.put("phoneNumber", phoneNumber);
 			userLoginData.put("email", emailAddress);
-			TaskRunner.run(event, 
-		            () -> {
-			BistroClientGUI.client.getUserCTRL().signInUser(userLoginData);
-		            }, 
-		            () -> {
-			if (BistroClientGUI.client.getUserCTRL().isUserLoggedInAs(userType)) {
-				BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
-			} else {
-				BistroClientGUI.display(lblError, "Error has occured!", Color.RED);
-				return;
-			}
-		            }
-		        );
+			TaskRunner.run(event, () -> {
+				BistroClientGUI.client.getUserCTRL().signInUser(userLoginData);
+			}, () -> {
+				if (BistroClientGUI.client.getUserCTRL().isUserLoggedInAs(userType)) {
+					BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error Message");
+				} else {
+					BistroClientGUI.display(lblError, "Error has occured!", Color.RED);
+					return;
+				}
+			});
 		}
 	}
 
-	
 	/**
      * Handles the "Sign In" button click event.
      * Validates input, shows a loading screen, and attempts to log the user in via a background thread.
@@ -135,30 +131,23 @@ public class ClientLoginScreen {
     public void btnSignIn(Event event) {
         String memberCodeText = txtMemberID.getText();
         UserType userType = UserType.MEMBER;
-        
-        // 1. Input Validation (UI Thread)
+        //intput validation
         String err = InputCheck.validateMemberCode6DigitsNoLeadingZero(memberCodeText);
         if (!err.isEmpty()) {
             lblError.setText(err);
             return;
         }
-
         lblError.setText("");
-        
         // Prepare login data
         userLoginData = new HashMap<>();
         userLoginData.put("userType", userType);
         userLoginData.put("memberCode", Integer.parseInt(memberCodeText));
-
-        // 2. Run Async Task with Loading Screen
-        // Using 'event' allows TaskRunner to find the root pane automatically
+		// Run login in background thread
         TaskRunner.run(event, 
             () -> {
-                // @param backgroundTask: Code that runs in the background
                 BistroClientGUI.client.getUserCTRL().signInUser(userLoginData);
             }, 
             () -> {
-                // @param onSuccess: Code that runs on UI thread after background task finishes
                 if (BistroClientGUI.client.getUserCTRL().isUserLoggedInAs(userType)) {
                     BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client Dashboard Error");
                 } else {
@@ -167,6 +156,7 @@ public class ClientLoginScreen {
             }
         );
     }
+    
     /**
 	 * Handles the "Scan QR" button click event.
 	 * Opens a file chooser to select an image file containing a QR code,
@@ -182,22 +172,20 @@ public class ClientLoginScreen {
             chooser.getExtensionFilters().addAll(
                     new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg")
             );
-
+            //open file dialog
             File file = chooser.showOpenDialog(btnScanQR.getScene().getWindow());
             if (file == null) {
                 return; // user cancelled
             }
-
+			// Decode QR code from selected file
             String decoded = QRCodeDecoder.decodeFromFile(file);
             if (decoded == null || decoded.isBlank()) {
                 BistroClientGUI.display(lblError, "QR code could not be decoded.", Color.RED);
                 return;
             }
-
             // Behave exactly like manual member login
             txtMemberID.setText(decoded.trim());
             btnSignIn(event);
-
         } catch (com.google.zxing.NotFoundException nf) {
             BistroClientGUI.display(lblError, "No QR code was found in the selected image.", Color.RED);
         } catch (Exception e) {
@@ -206,7 +194,12 @@ public class ClientLoginScreen {
         }
     }
 
-	
+	/**
+	 * Handles the forgot member ID hyperlink click event. Opens the forgot member
+	 * ID modal dialog.
+	 * 
+	 * @param event The event triggered by clicking the forgot member ID hyperlink.
+	 */
 	@FXML
 	public void lnkForgotMemberID(Event event) {
 		if (ForgotIDModalRoot == null) {
@@ -216,7 +209,6 @@ public class ClientLoginScreen {
 						Color.RED);
 				return;
 			}
-
 			FXMLLoader loader = new FXMLLoader(url);
 			try {
 				ForgotIDModalRoot = loader.load();
@@ -225,10 +217,8 @@ public class ClientLoginScreen {
 				BistroClientGUI.display(lblError, "Unable to open Forgot Member ID screen.", Color.RED);
 				return;
 			}
-
 			forgotModalsCTRL = loader.getController();
 			forgotModalsCTRL.setParentCtrl(this);
-
 			modalOverlay.getChildren().add(ForgotIDModalRoot);
 		}
 		mainPane.setEffect(new GaussianBlur(18));
@@ -247,7 +237,6 @@ public class ClientLoginScreen {
 		BistroClientGUI.switchScreen(event, "staff/clientEmployeeLoginScreen", "Employee Login Error Message");
 	}
 	
-	
 	/**
 	 * Closes the forgot member ID modal dialog.
 	 */
@@ -256,6 +245,5 @@ public class ClientLoginScreen {
 		modalOverlay.setVisible(false);
 		modalOverlay.setManaged(false);
 	}
-	
 }
 //End of ClientLoginScreen.java

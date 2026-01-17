@@ -1,9 +1,6 @@
 package gui.logic;
 
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-
 import entities.Order;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -11,26 +8,28 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import logic.BistroClientGUI;
 
+/**
+ * Controller for the Client New Reservation Created Screen.
+ * Displays reservation details and provides navigation options.
+ */
 public class ClientNewReservationCreatedScreen {
-
+	
+	//*********************** FXML Components ***********************//
     @FXML
     private Label lblDate;
-    
     @FXML
-    private Label lblHour;
-    
+    private Label lblHour;    
     @FXML
-    private Label lblDinersAmount;
-    
+    private Label lblDinersAmount;    
     @FXML
-    private Label lblConfirmCode;
-    
+    private Label lblConfirmCode;    
     @FXML
-    private Button btnBack;
-    
+    private Button btnBack;    
     @FXML
     private Button btnNewReserve;
-
+    
+    //*********************** Instance Methods ***********************//
+    
     /**
      * Better practice: Fetch data inside initialize() to ensure 
      * the Client instance is fully ready.
@@ -55,12 +54,20 @@ public class ClientNewReservationCreatedScreen {
             e.printStackTrace();
         }
     }
-
+    
+    /**
+     * Handles the Back button action.
+     * @param event
+     */
     @FXML
     public void btnBack(Event event) {
     	cleanAndSwitch(event, "clientDashboardScreen");
     }
-
+    
+    /**
+	 * Handles the New Reserve button action.
+	 * @param event
+	 */
     @FXML
     public void btnNewReserve(Event event) {
     	cleanAndSwitch(event, "clientNewReservationScreen");
@@ -75,3 +82,4 @@ public class ClientNewReservationCreatedScreen {
         BistroClientGUI.switchScreen(event, screenName, errorMsg);
     }
 }
+// End of ClientNewReservationCreatedScreen.java

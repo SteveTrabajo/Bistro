@@ -1,17 +1,17 @@
 package gui.logic;
 
-
-
 import entities.Order;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import logic.BistroClientGUI;
+
 /**
  * ClientCheckInTableSuccessScreen class handles the logic for the client check-in table success screen.
  */
 public class ClientCheckInTableSuccessScreen {
+	
 	//****************** FXML Elements ******************//
 	@FXML
 	private Label lblTableNumber;
@@ -23,6 +23,10 @@ public class ClientCheckInTableSuccessScreen {
 	private Button btnBack;
 	
 	//****************** FXML Methods ******************//
+	
+	/**
+	 * Initializes the Client Check-In Table Success screen.
+	 */
 	@FXML
 	public void initialize() {
 		Order storedOrder = BistroClientGUI.client.getTableCTRL().getUserAllocatedOrderForTable();

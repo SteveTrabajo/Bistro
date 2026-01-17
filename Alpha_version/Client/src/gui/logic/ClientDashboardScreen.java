@@ -58,8 +58,7 @@ public class ClientDashboardScreen {
 	private Label LblButtonDescrip;
 	@FXML 
 	private StackPane rootPane;
-	
-	
+
 	// ******************************** FXML Methods ***********************************
 
 	/**
@@ -92,13 +91,11 @@ public class ClientDashboardScreen {
 	 * Centralizes the logic for button states and labels to avoid code duplication.
 	 */
 	private void applyBusinessRules(boolean isOnWaitingList, boolean hasActiveSeatedReservation) {
-	    // Handle Waiting List button text
-		
+	    // Handle Waiting List button text and actions
 		if (isOnWaitingList && BistroClientGUI.client.getWaitingListCTRL().getOrderStatus()==OrderStatus.NOTIFIED) {
 			 BistroClientGUI.switchScreen("clientCheckInTableScreen", "Failed to load Client Check-In For Table Screen.");
 		}
 	    LblButtonDescrip.setText(isOnWaitingList ? "Waiting List Status" : "Add to queue");
-	    //btnJoinWaitingList.setText(isOnWaitingList ? "View Status": "Join Waiting List");
 	    lblJoinListTitle.setText(isOnWaitingList ? "View Status" : "Join Waiting List");
 	    btnJoinWaitingList.setText("");
 	    // Disable actions if an active reservation exists
@@ -127,9 +124,7 @@ public class ClientDashboardScreen {
 	
 	private void updateGridColumns(int numColumns) {
 	    gridPane.getColumnConstraints().clear();
-	    
 	    double percent = 100.0 / numColumns; // Calculates 50% or 33.3%
-	    
 	    for (int i = 0; i < numColumns; i++) {
 	        ColumnConstraints col = new ColumnConstraints();
 	        col.setPercentWidth(percent);

@@ -1,9 +1,5 @@
 package gui.logic;
 
-
-import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import entities.User;
 import javafx.application.Platform;
@@ -45,7 +41,9 @@ public class ClientJoinWaitingListScreen {
 	@FXML
 	private Label lblError;
 	
+	
 	//**************** FXML Methods ****************//
+	
 	/**
 	 * Initializes the screen by setting up user information and button actions.
 	 */
@@ -71,7 +69,6 @@ public class ClientJoinWaitingListScreen {
 		}
 	}
 	
-	
 	/**
 	 * Handles the action when the "-" button is clicked.
 	 * It decrements the number of diners, ensuring it does not go below 1.
@@ -87,7 +84,6 @@ public class ClientJoinWaitingListScreen {
 		}
 	}
 	
-	
 	/**
 	 * Handles the action when the "Check Availability" button is clicked.
 	 * It attempts to join the waiting list with the specified number of diners.
@@ -97,20 +93,19 @@ public class ClientJoinWaitingListScreen {
 	@FXML
 	public void btnCheckAvail(Event event) {
 		int dinersAmount = Integer.parseInt(lblDinersAmount.getText());
-		TaskRunner.run(event, ()->{
+		TaskRunner.run(event, () -> {
 			BistroClientGUI.client.getWaitingListCTRL().checkWaitingListAvailability(dinersAmount);
-		},()->{
-		if(BistroClientGUI.client.getWaitingListCTRL().getcanSeatImmediately()) {
-			BistroClientGUI.client.getWaitingListCTRL().setCanSeatImmediately(false);
-			Platform.runLater(()->{
-				BistroClientGUI.switchScreen(event, "clientCheckInTableSuccessScreen", "Client Check-In Table Success error messege");	
-			});
-			
-		}
-		else {
-			showAskJoinWaitlistDialog(BistroClientGUI.client.getWaitingListCTRL().getEstimatedWaitTimeMinutes(), dinersAmount);
-			
-		}
+		}, () -> {
+			if (BistroClientGUI.client.getWaitingListCTRL().getcanSeatImmediately()) {
+				BistroClientGUI.client.getWaitingListCTRL().setCanSeatImmediately(false);
+				Platform.runLater(() -> {
+					BistroClientGUI.switchScreen(event, "clientCheckInTableSuccessScreen",
+							"Client Check-In Table Success error messege");
+				});
+			} else {
+				showAskJoinWaitlistDialog(BistroClientGUI.client.getWaitingListCTRL().getEstimatedWaitTimeMinutes(),
+						dinersAmount);
+			}
 		});
 	}
 	
@@ -132,7 +127,6 @@ public class ClientJoinWaitingListScreen {
 	    //convert long to int via string:
 	    String estimatedMinutesStr = Long.toString(estimatedMinutes);
 	    Integer estimatedMinutesInt = Integer.valueOf(estimatedMinutesStr);
-	    System.out.println("Estimated wait time (int): " + estimatedMinutesInt);
 	    ButtonType joinButton = new ButtonType("Join Waiting List");
 	    ButtonType cancelButton = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
 	    alert.getButtonTypes().setAll(joinButton, cancelButton);
@@ -141,7 +135,6 @@ public class ClientJoinWaitingListScreen {
 	    	BistroClientGUI.client.getWaitingListCTRL().joinWaitingList(dinersAmount, estimatedMinutesInt);
 	    }
 	}
-
 
 	/**
 	 * Handles the action when the "Back" button is clicked.
@@ -157,5 +150,5 @@ public class ClientJoinWaitingListScreen {
 			e.printStackTrace();
 		}
 	}
-
 }
+// End of ClientJoinWaitingListScreen.java

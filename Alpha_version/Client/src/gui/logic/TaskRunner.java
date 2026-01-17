@@ -16,9 +16,13 @@ import java.net.URL;
  * Provides a generic way to run blocking tasks without freezing the UI.
  */
 public class TaskRunner {
-
+	
+	//********************** Instance Variables ************************
+	
     private static Parent loadingView;
-
+ 
+    //********************** Instance Methods ************************
+    
     /**
      * Loads the FXML for the loading screen. Singleton pattern.
      *
@@ -46,22 +50,18 @@ public class TaskRunner {
     }
 
     /**
-     * Executes a background task automatically finding the root StackPane from the Event.
-     * Best used when the UI root is a StackPane (standard for overlaying loading screens).
-     *
-     * @param event          The UI event (e.g., button click) used to find the active scene.
+     * Executes a background task while displaying a loading overlay on the root container of the event source.
+     * @param event ,The event triggered by a UI action.
      * @param backgroundTask The logic to run in a separate thread.
-     * @param onSuccess      The logic to run on the UI thread after success.
+     * @param onSuccess The logic to run on the UI thread after the background task completes.
      */
     public static void run(Event event, Runnable backgroundTask, Runnable onSuccess) {
-        // 1. Find the source Node (the button clicked)
+        //Find the source Node
         Node source = (Node) event.getSource();
-        
-        // 2. Get the Scene and then the Root container
+        //Get the Scene and then the Root container
         Scene scene = source.getScene();
         Parent root = scene.getRoot();
-
-        // 3. Check if we can overlay the loading screen
+        //Check if we can overlay the loading screen
         if (root instanceof StackPane) {
             run((StackPane) root, backgroundTask, onSuccess);
         }
@@ -85,91 +85,75 @@ public class TaskRunner {
     /**
      * Executes a background task while displaying a loading overlay on a specific StackPane.
      *
-     * @param rootPane       The StackPane where the loading overlay will be attached.
-     * @param backgroundTask The logic to run in a separate thread (e.g., database queries).
-     * @param onSuccess      The logic to run on the UI thread after the background task completes.
+     * @param rootPane, The StackPane where the loading overlay will be attached.
+     * @param backgroundTask, The logic to run in a separate thread.
+     * @param onSuccess, The logic to run on the UI thread after the background task completes.
      */
     public static void run(StackPane rootPane, Runnable backgroundTask, Runnable onSuccess) {
-        
-        // 1. Prepare loading view
+        //Prepare loading view
         Parent loading = getLoadingView();
-        
         // Add to UI if not already there
         if (!rootPane.getChildren().contains(loading)) {
             rootPane.getChildren().add(loading);
         }
-        
         // Block interactions
         loading.setMouseTransparent(false);
         loading.toFront(); // Ensure it's on top
-
-        // 2. Run Background Thread
+        //Run Background Thread
         new Thread(() -> {
             try {
                 // Execute heavy logic
                 backgroundTask.run();
-
-                // 3. Back to UI Thread
+                //Back to UI Thread
                 Platform.runLater(() -> {
                     rootPane.getChildren().remove(loading);
                     if (onSuccess != null) {
                         onSuccess.run();
                     }
                 });
-
             } catch (Exception e) {
                 e.printStackTrace();
                 // Always remove loading screen on error
                 Platform.runLater(() -> rootPane.getChildren().remove(loading));
-                // Optional: Re-throw if you want to catch it higher up, 
-                // but usually better to handle UI error display here or pass an onError callback.
             }
         }).start();
     }
-    
     
     /**
      * Executes a background task while displaying a loading overlay on a specific StackPane.
-     *@param rootPane       The BorderPane where the loading overlay will be attached.
-     * @param backgroundTask The logic to run in a separate thread (e.g., database queries).
-     * @param onSuccess      The logic to run on the UI thread after the background task completes.
+     * 
+     *@param rootPane, The BorderPane where the loading overlay will be attached.
+     * @param backgroundTask, The logic to run in a separate thread.
+     * @param onSuccess, The logic to run on the UI thread after the background task completes.
      */
     public static void run(BorderPane rootPane, Runnable backgroundTask, Runnable onSuccess) {
-        
-        // 1. Prepare loading view
+        //Prepare loading view
         Parent loading = getLoadingView();
-        
         // Add to UI if not already there
         if (!rootPane.getChildren().contains(loading)) {
             rootPane.getChildren().add(loading);
         }
-        
         // Block interactions
         loading.setMouseTransparent(false);
         loading.toFront(); // Ensure it's on top
-
-        // 2. Run Background Thread
+        //Run Background Thread
         new Thread(() -> {
             try {
                 // Execute heavy logic
                 backgroundTask.run();
-
-                // 3. Back to UI Thread
+                //Back to UI Thread
                 Platform.runLater(() -> {
                     rootPane.getChildren().remove(loading);
                     if (onSuccess != null) {
                         onSuccess.run();
                     }
                 });
-
             } catch (Exception e) {
                 e.printStackTrace();
                 // Always remove loading screen on error
                 Platform.runLater(() -> rootPane.getChildren().remove(loading));
-                // Optional: Re-throw if you want to catch it higher up, 
-                // but usually better to handle UI error display here or pass an onError callback.
             }
         }).start();
-    }
-    
+    } 
 }
+//End TaskRunner.java

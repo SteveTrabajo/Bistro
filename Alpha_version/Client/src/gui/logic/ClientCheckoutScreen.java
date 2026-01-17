@@ -7,15 +7,17 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.StackPane;
 import javafx.collections.FXCollections;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import entities.Item;
 import logic.BistroClientGUI;
 
+/**
+ * Controller class for the Client Checkout Screen.
+ * Manages the display and processing of the client's bill and payment.
+ */
 public class ClientCheckoutScreen {
-
+	//*********************** FXML Components ***********************//
 	@FXML
 	private StackPane mainPane;
 	@FXML 
@@ -50,14 +52,17 @@ public class ClientCheckoutScreen {
     private TableColumn<Item, Double> colPrice;
     @FXML 
     private TableColumn<Item, Double> colTotal;
-
-
+    
     private double finalAmount = 0.0;
     private double minValue = 0.0;
-
     private List<Item> billItems = new ArrayList<>();
 
-    // ======================== Initialization ========================
+    //***************************** Instance Methods *****************************//
+    
+    /**
+     * Initializes the controller class. This method is automatically called
+     * after the FXML file has been loaded.
+     */
     @FXML
     public void initialize() {
         colItem.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -67,7 +72,6 @@ public class ClientCheckoutScreen {
         billTable.setItems(FXCollections.observableArrayList());
         billTable.setPlaceholder(new Label("Loading bill items from server..."));
         btnPay.setDisable(true);
-
         setupTextFieldListeners();
         int diners= BistroClientGUI.client.getTableCTRL().getUserAllocatedOrderForTable().getDinersAmount();
 		TaskRunner.run(mainPane, () -> {
@@ -80,9 +84,10 @@ public class ClientCheckoutScreen {
 		});
     }
 
-    // ======================== Server Request ========================
-
-
+    /**
+     * Handles the reception of bill items from the server.
+     * @param itemsFromServer
+     */
     private void onBillItemsReceived(List<Item> itemsFromServer) {
         Platform.runLater(() -> {
             if (itemsFromServer == null || itemsFromServer.isEmpty()) {
@@ -91,62 +96,55 @@ public class ClientCheckoutScreen {
                 resetTotalsToZero();
                 return;
             }
-
             this.billItems = new ArrayList<>(itemsFromServer);
             populateBill(this.billItems);
             btnPay.setDisable(false);
         });
     }
+    
+    /**
+     * Populates the bill table and summary labels with the provided items.
+     * @param items
+     */
+	private void populateBill(List<Item> items) {
+		// Table
+		billTable.setItems(FXCollections.observableArrayList(items));
+		// Subtotal
+		double subtotal = 0.0;
+		for (Item it : items) {
+			subtotal += it.getTotal();
+		}
+		double tax = BistroClientGUI.client.getPaymentCTRL().calculateTax(subtotal);
+		// Discount
+		double discount = 0.0;
+		boolean isMember = BistroClientGUI.client.getUserCTRL().getLoggedInUser().getUserType().name().equals("MEMBER");
+		if (isMember) {
+			LabelUserBenefits.setStyle("-fx-text-fill: green;");
+			LabelUserBenefits.setText("Discount Applied");
+			discount = BistroClientGUI.client.getPaymentCTRL().calculateDiscount(subtotal);
+			summaryDiscount.setText(String.format("-%.2f", discount));
+		} else {
+			LabelUserBenefits.setStyle("-fx-text-fill: red;");
+			LabelUserBenefits.setText("Sorry, no benefits for you :(");
+			summaryDiscount.setText("0.00");
+		}
+		double total = subtotal + tax - discount;
+		// Labels
+		summarySubtotal.setText(String.format("%.2f", subtotal));
+		summarySubTax.setText(String.format("%.2f", tax));
+		subtotalLabel.setText(String.format("%.2f", subtotal));
+		taxLabel.setText(String.format("%.2f", tax));
+		discountLabel.setText(String.format("-%.2f", discount));
+		totalLabel.setText(String.format("%.2f", total));
+		// Payment values
+		minValue = total;
+		finalAmount = total;
+		txtAmountToPay.setText(String.format("%.2f", total));
+	}
 
-    // ======================== UI Populate & Calculations ========================
-    private void populateBill(List<Item> items) {
-        // Table
-        billTable.setItems(FXCollections.observableArrayList(items));
-
-        // Subtotal
-        double subtotal = 0.0;
-        for (Item it : items) {
-            subtotal += it.getTotal();
-        }
-
-        double tax = BistroClientGUI.client.getPaymentCTRL().calculateTax(subtotal);
-
-        // Discount
-        double discount = 0.0;
-        boolean isMember = BistroClientGUI.client.getUserCTRL()
-                .getLoggedInUser()
-                .getUserType()
-                .name()
-                .equals("MEMBER");
-
-        if (isMember) {
-            LabelUserBenefits.setStyle("-fx-text-fill: green;");
-            LabelUserBenefits.setText("Discount Applied");
-            discount = BistroClientGUI.client.getPaymentCTRL().calculateDiscount(subtotal);
-            summaryDiscount.setText(String.format("-%.2f", discount));
-        } else {
-            LabelUserBenefits.setStyle("-fx-text-fill: red;");
-            LabelUserBenefits.setText("Sorry, no benefits for you :(");
-            summaryDiscount.setText("0.00");
-        }
-
-        double total = subtotal + tax - discount;
-
-        // Labels
-        summarySubtotal.setText(String.format("%.2f", subtotal));
-        summarySubTax.setText(String.format("%.2f", tax));
-
-        subtotalLabel.setText(String.format("%.2f", subtotal));
-        taxLabel.setText(String.format("%.2f", tax));
-        discountLabel.setText(String.format("-%.2f", discount));
-        totalLabel.setText(String.format("%.2f", total));
-
-        // Payment values
-        minValue = total;
-        finalAmount = total;
-        txtAmountToPay.setText(String.format("%.2f", total));
-    }
-
+	/**
+	 * Resets all total labels and payment values to zero.
+	 */
     private void resetTotalsToZero() {
         summarySubtotal.setText("0.00");
         summarySubTax.setText("0.00");
@@ -159,15 +157,16 @@ public class ClientCheckoutScreen {
         finalAmount = 0.0;
         txtAmountToPay.setText("0.00");
     }
-
-    // ======================== Text Field Listeners ========================
+    
+    /**
+     * Sets up listeners for the amount to pay text field to ensure valid input.
+     */
     private void setupTextFieldListeners() {
         txtAmountToPay.textProperty().addListener((obs, oldVal, newVal) -> {
             if (!newVal.matches("\\d*(\\.\\d{0,2})?")) {
                 txtAmountToPay.setText(oldVal);
                 return;
             }
-
             if (!newVal.isEmpty()) {
                 try {
                     finalAmount = Double.parseDouble(newVal);
@@ -178,12 +177,14 @@ public class ClientCheckoutScreen {
                 finalAmount = 0.0;
             }
         });
-
         txtAmountToPay.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
             if (!isNowFocused) enforceMinimumValue();
         });
     }
 
+    /**
+	 * Ensures that the final amount to pay is not less than the minimum value.
+	 */
     private void enforceMinimumValue() {
         if (finalAmount < minValue) {
             finalAmount = minValue;
@@ -191,7 +192,10 @@ public class ClientCheckoutScreen {
         txtAmountToPay.setText(String.format("%.2f", finalAmount));
     }
 
-    // ======================== Button Actions ========================
+    /**
+	 * Handles the payment button action.
+	 * @param event
+	 */
     @FXML
     public void btnPay(Event event) {
         enforceMinimumValue();
@@ -209,7 +213,10 @@ public class ClientCheckoutScreen {
             alert.showAndWait();
         }
     }
-
+    /**
+     * Handles the back button action.
+     * @param event
+     */
     public void btnBack(Event event) {
         try {
             BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Client back error messege");
@@ -218,3 +225,4 @@ public class ClientCheckoutScreen {
         }
     }
 }
+// End of ClientCheckoutScreen.java
