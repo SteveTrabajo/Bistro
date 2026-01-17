@@ -518,11 +518,12 @@ public class BistroDataBase_Controller {
 				ps.setString(1, username);
 				try (ResultSet rs = ps.executeQuery()) {
 					if (rs.next()) {
-						String hashedPassword = rs.getString("password");
+						String encryptedPassword = rs.getString("password");
 
-						// Verify the provided password against the hash
+						// Decrypt and verify the password
 						try {
-							if (PasswordUtil.verifyPassword(password, hashedPassword)) {
+							String decryptedPassword = PasswordUtil.decrypt(encryptedPassword);
+							if (password.equals(decryptedPassword)) {
 								int userId = rs.getInt("user_id");
 								String phoneNumber = rs.getString("phoneNumber");
 								String email = rs.getString("email");
@@ -691,7 +692,7 @@ public class BistroDataBase_Controller {
 						ps.setString(1, phoneNumber);
 						try (ResultSet rs = ps.executeQuery()) {
 							if (rs.next())
-								userIdByPhone = rs.getInt(1);
+							userIdByPhone = rs.getInt(1);
 						}
 					}
 				}
@@ -716,8 +717,8 @@ public class BistroDataBase_Controller {
 
 				Integer userId = (userIdByPhone != null) ? userIdByPhone : userIdByEmail;
 
-				// Hash password
-				String hashedPassword = PasswordUtil.hashPassword(password);
+				// Encrypt password (reversible for password recovery)
+				String encryptedPassword = PasswordUtil.encrypt(password);
 
 				if (userId == null) {
 					// Create new user
@@ -764,7 +765,7 @@ public class BistroDataBase_Controller {
 						"INSERT INTO staff_accounts (user_id, username, password) VALUES (?, ?, ?)")) {
 					ps.setInt(1, userId);
 					ps.setString(2, username);
-					ps.setString(3, hashedPassword);
+					ps.setString(3, encryptedPassword);
 					ps.executeUpdate();
 				}
 
@@ -833,17 +834,11 @@ public class BistroDataBase_Controller {
 	 *         no match, or "ERROR_DB" on failure.
 	 */
 	public String recoverStaffLogin(String email, String phoneNumber) {
-		// 1. Prepare search terms.
-		// If input is null/empty, set to a dummy value that won't match anything in DB
-		// to prevent accidental empty-string matches.
 		String searchEmail = (email != null && !email.trim().isEmpty()) ? email.trim() : "IMPOSSIBLE_EMAIL_XYZ";
 		String searchPhone = (phoneNumber != null && !phoneNumber.trim().isEmpty()) ? phoneNumber.trim()
 				: "IMPOSSIBLE_PHONE_XYZ";
 
-		// 2. The Query
-		// Join users and staff_accounts.
-		// Check that the user is an EMPLOYEE or MANAGER.
-		final String qry = "SELECT sa.username, sa.password " + "FROM users u "
+		final String qry = "SELECT sa.user_id, sa.username " + "FROM users u "
 				+ "JOIN staff_accounts sa ON u.user_id = sa.user_id " + "WHERE (u.email = ? OR u.phoneNumber = ?) "
 				+ "AND u.type IN ('EMPLOYEE', 'MANAGER')";
 
@@ -856,14 +851,25 @@ public class BistroDataBase_Controller {
 
 				try (ResultSet rs = ps.executeQuery()) {
 					if (rs.next()) {
+						int userId = rs.getInt("user_id");
 						String foundUser = rs.getString("username");
-						String foundPass = rs.getString("password");
 
-						// Decrypt the password before sending to user
-						String decryptedPass = PasswordUtil.decrypt(foundPass);
+						// Generate a new temporary password
+						String tempPassword = generateTempPassword();
 
-						// Return in the format expected by the client
-						return foundUser + ":" + decryptedPass;
+						// Encrypt password (must match findEmployeeUser which decrypts)
+						String encryptedPassword = PasswordUtil.encrypt(tempPassword);
+
+						// Update the password in the database
+						String updateQry = "UPDATE staff_accounts SET password = ? WHERE user_id = ?";
+						try (PreparedStatement updatePs = conn.prepareStatement(updateQry)) {
+						    updatePs.setString(1, encryptedPassword);
+						    updatePs.setInt(2, userId);
+						    updatePs.executeUpdate();
+						}
+
+						// Return username and new temporary password
+						return foundUser + ":" + tempPassword;
 					} else {
 						return "NOT_FOUND";
 					}
@@ -876,6 +882,19 @@ public class BistroDataBase_Controller {
 		} finally {
 			release(conn);
 		}
+	}
+	
+	/**
+	 * Generates a random 8-character temporary password.
+	 */
+	private String generateTempPassword() {
+		String chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+		StringBuilder sb = new StringBuilder();
+		Random random = new Random();
+		for (int i = 0; i < 8; i++) {
+			sb.append(chars.charAt(random.nextInt(chars.length())));
+		}
+		return sb.toString();
 	}
 
 	/*
@@ -3627,25 +3646,24 @@ public class BistroDataBase_Controller {
 	public Integer getOrderNumberByBillId(int billId) {
 		final String sql = "SELECT ts.order_number " + "FROM bills b "
 				+ "JOIN table_sessions ts ON b.session_id = ts.session_id " + "WHERE b.billID = ?";
-
 		Connection conn = null;
 		try {
 			conn = borrow();
-			try (PreparedStatement ps = conn.prepareStatement(sql)) {
-				ps.setInt(1, billId);
-				try (ResultSet rs = ps.executeQuery()) {
-					if (!rs.next())
-						return null;
-					return rs.getInt("order_number");
+			try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+				pstmt.setInt(1, billId);
+				try (ResultSet rs = pstmt.executeQuery()) {
+					if (rs.next()) {
+						return rs.getInt("order_number");
+					}
+
 				}
 			}
 		} catch (SQLException e) {
-			logger.log("[ERROR] getOrderNumberByBillId: " + e.getMessage());
 			e.printStackTrace();
-			return null;
 		} finally {
 			release(conn);
 		}
+		return null; // Return null if no bill found
 	}
 
 	/**
