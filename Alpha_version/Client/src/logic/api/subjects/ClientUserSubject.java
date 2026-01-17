@@ -137,16 +137,29 @@ public class ClientUserSubject {
 		
 		// Member registration responses:
 		router.on("user", "registerNewMember.ok", msg -> {
-			BistroClient.awaitResponse = false;
-			int newMemberCode = (int) msg.getData();
-			userController.setNewMemberID(newMemberCode);
-			userController.setRegistrationSuccessFlag(true);
+		    BistroClient.awaitResponse = false;
+		    int newMemberCode = (int) msg.getData();
+
+		    Platform.runLater(() -> {
+		        userController.handleRegisterNewMemberOk(newMemberCode);
+		    });
 		});
-		
+
 		router.on("user", "registerNewMember.failed", msg -> {
-			BistroClient.awaitResponse = false;
-			BistroClientGUI.client.getUserCTRL().setRegistrationSuccessFlag(false);
+		    BistroClient.awaitResponse = false;
+
+		    // Server now sends a String reason (can be null)
+		    String reason = (msg.getData() instanceof String) ? (String) msg.getData() : null;
+		    if (reason == null || reason.isBlank()) {
+		        reason = "Member registration failed. Email/phone may already exist.";
+		    }
+
+		    final String finalReason = reason;
+		    Platform.runLater(() -> {
+		        userController.handleRegisterNewMemberFail(finalReason);
+		    });
 		});
+
 		
 		router.on("member", "registerationStats.ok", msg -> {
 			BistroClient.awaitResponse = false;

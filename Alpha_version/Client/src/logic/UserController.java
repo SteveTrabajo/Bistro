@@ -59,6 +59,35 @@ public class UserController {
 		return true;
 	}
 	
+	// Member registration UI callbacks
+	private Consumer<Integer> onRegisterNewMemberOkListener;
+	private Consumer<String> onRegisterNewMemberFailListener;
+	
+	public void setOnRegisterNewMemberOkListener(Consumer<Integer> listener) {
+	    this.onRegisterNewMemberOkListener = listener;
+	}
+
+	public void setOnRegisterNewMemberFailListener(Consumer<String> listener) {
+	    this.onRegisterNewMemberFailListener = listener;
+	}
+	
+	public void handleRegisterNewMemberOk(int newMemberCode) {
+	    this.newMemberID = newMemberCode;
+	    this.registrationSuccessFlag = true;
+
+	    if (onRegisterNewMemberOkListener != null) {
+	        onRegisterNewMemberOkListener.accept(newMemberCode);
+	    }
+	}
+
+	public void handleRegisterNewMemberFail(String reason) {
+	    this.registrationSuccessFlag = false;
+
+	    if (onRegisterNewMemberFailListener != null) {
+	        onRegisterNewMemberFailListener.accept(reason);
+	    }
+	}
+
 	/*
 	 * Getter for the currently logged-in user.
 	 * 

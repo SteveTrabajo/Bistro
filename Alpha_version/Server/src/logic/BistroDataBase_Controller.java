@@ -588,6 +588,75 @@ public class BistroDataBase_Controller {
 			release(conn);
 		}
 	}
+	// Returns user_id for an exact phone match, or null if not found
+	public Integer findUserIdByPhone(String phoneNumber) {
+	    phoneNumber = (phoneNumber == null) ? null : phoneNumber.trim();
+	    if (phoneNumber == null || phoneNumber.isEmpty()) return null;
+
+	    final String qry = "SELECT user_id FROM users WHERE phoneNumber=?";
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(qry)) {
+	            ps.setString(1, phoneNumber);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                return rs.next() ? rs.getInt(1) : null;
+	            }
+	        }
+	    } catch (SQLException ex) {
+	        logger.log("[ERROR] SQLException in findUserIdByPhone: " + ex.getMessage());
+	        ex.printStackTrace();
+	        return null;
+	    } finally {
+	        release(conn);
+	    }
+	}
+
+	// Returns user_id for an exact email match, or null if not found
+	public Integer findUserIdByEmail(String email) {
+	    email = (email == null) ? null : email.trim();
+	    if (email == null || email.isEmpty()) return null;
+
+	    final String qry = "SELECT user_id FROM users WHERE email=?";
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(qry)) {
+	            ps.setString(1, email);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                return rs.next() ? rs.getInt(1) : null;
+	            }
+	        }
+	    } catch (SQLException ex) {
+	        logger.log("[ERROR] SQLException in findUserIdByEmail: " + ex.getMessage());
+	        ex.printStackTrace();
+	        return null;
+	    } finally {
+	        release(conn);
+	    }
+	}
+
+	// True if that user already has a staff_accounts row
+	public boolean staffAccountExistsForUserId(int userId) {
+	    final String qry = "SELECT 1 FROM staff_accounts WHERE user_id=?";
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(qry)) {
+	            ps.setInt(1, userId);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                return rs.next();
+	            }
+	        }
+	    } catch (SQLException ex) {
+	        logger.log("[ERROR] SQLException in staffAccountExistsForUserId: " + ex.getMessage());
+	        ex.printStackTrace();
+	        return false;
+	    } finally {
+	        release(conn);
+	    }
+	}
+
 
 	/**
 	 * Creates a new employee account (EMPLOYEE or MANAGER). Performs atomic insert
@@ -840,11 +909,6 @@ public class BistroDataBase_Controller {
 	    throw new SQLException("Failed to generate unique 6-digit member_code after 50 attempts.");
 	}
 	
-	/**
-	 * Registers a new member in the database.
-	 * @param newMemberData
-	 * @return The newly generated member code if registration is successful, -1 otherwise
-	 */
 	public int registerNewMember(List<String> newMemberData) {
 	    String fName = newMemberData.get(0);
 	    String lName = newMemberData.get(1);
@@ -861,49 +925,77 @@ public class BistroDataBase_Controller {
 	        conn = borrow();
 	        conn.setAutoCommit(false);
 
-	        Integer userId = null;
+	        Integer userIdByPhone = null;
+	        String typeByPhone = null;
 
-	        // 1) check if user exists by phone or email
-	        final String checkSql =
-	                "SELECT user_id, type FROM users " +
-	                "WHERE (phoneNumber = ? AND phoneNumber IS NOT NULL) " +
-	                "   OR (email = ? AND email IS NOT NULL) " +
-	                "LIMIT 1";
+	        Integer userIdByEmail = null;
+	        String typeByEmail = null;
 
-	        try (PreparedStatement psCheck = conn.prepareStatement(checkSql)) {
-	            psCheck.setString(1, phoneNumber);
-	            psCheck.setString(2, email);
-
-	            try (ResultSet rs = psCheck.executeQuery()) {
-	                if (rs.next()) {
-	                    userId = rs.getInt("user_id");
-	                    String existingType = rs.getString("type");
-
-	                    if ("GUEST".equals(existingType)) {
-	                        // upgrade guest - member; fill missing fields only
-	                        final String upgradeSql =
-	                                "UPDATE users " +
-	                                "SET type = 'MEMBER', " +
-	                                "    email = COALESCE(?, email), " +
-	                                "    phoneNumber = COALESCE(?, phoneNumber) " +
-	                                "WHERE user_id = ?";
-
-	                        try (PreparedStatement psUpgrade = conn.prepareStatement(upgradeSql)) {
-	                            psUpgrade.setString(1, email);
-	                            psUpgrade.setString(2, phoneNumber);
-	                            psUpgrade.setInt(3, userId);
-	                            psUpgrade.executeUpdate();
-	                        }
-	                    } else {
-	                        // already member or staff -> cannot register
-	                        conn.rollback();
-	                        return -1;
+	        // Look up phone match
+	        if (phoneNumber != null) {
+	            final String qPhone = "SELECT user_id, type FROM users WHERE phoneNumber = ? LIMIT 1";
+	            try (PreparedStatement ps = conn.prepareStatement(qPhone)) {
+	                ps.setString(1, phoneNumber);
+	                try (ResultSet rs = ps.executeQuery()) {
+	                    if (rs.next()) {
+	                        userIdByPhone = rs.getInt("user_id");
+	                        typeByPhone = rs.getString("type");
 	                    }
 	                }
 	            }
 	        }
 
-	        // 2) if not found - insert new MEMBER user (AUTO_INCREMENT id)
+	        // Look up email match
+	        if (email != null) {
+	            final String qEmail = "SELECT user_id, type FROM users WHERE email = ? LIMIT 1";
+	            try (PreparedStatement ps = conn.prepareStatement(qEmail)) {
+	                ps.setString(1, email);
+	                try (ResultSet rs = ps.executeQuery()) {
+	                    if (rs.next()) {
+	                        userIdByEmail = rs.getInt("user_id");
+	                        typeByEmail = rs.getString("type");
+	                    }
+	                }
+	            }
+	        }
+
+	        // Conflict: phone belongs to one user, email belongs to another
+	        if (userIdByPhone != null && userIdByEmail != null && !userIdByPhone.equals(userIdByEmail)) {
+	            conn.rollback();
+	            return -4; // CONTACT_CONFLICT
+	        }
+
+	        Integer userId = (userIdByPhone != null) ? userIdByPhone : userIdByEmail;
+	        String existingType = (userIdByPhone != null) ? typeByPhone : typeByEmail;
+
+	        // If user exists
+	        if (userId != null) {
+	            if ("GUEST".equals(existingType)) {
+	                // upgrade guest -> member; fill missing only
+	                final String upgradeSql =
+	                        "UPDATE users " +
+	                        "SET type = 'MEMBER', " +
+	                        "    email = COALESCE(?, email), " +
+	                        "    phoneNumber = COALESCE(?, phoneNumber) " +
+	                        "WHERE user_id = ?";
+
+	                try (PreparedStatement psUpgrade = conn.prepareStatement(upgradeSql)) {
+	                    psUpgrade.setString(1, email);
+	                    psUpgrade.setString(2, phoneNumber);
+	                    psUpgrade.setInt(3, userId);
+	                    psUpgrade.executeUpdate();
+	                }
+	            } else if ("MEMBER".equals(existingType)) {
+	                conn.rollback();
+	                return -2; // ALREADY_MEMBER
+	            } else {
+	                // EMPLOYEE / MANAGER / anything else
+	                conn.rollback();
+	                return -3; // ALREADY_STAFF
+	            }
+	        }
+
+	        // If not found, insert new MEMBER user
 	        if (userId == null) {
 	            final String insertUserSql =
 	                    "INSERT INTO users (phoneNumber, email, type) VALUES (?, ?, 'MEMBER')";
@@ -927,7 +1019,7 @@ public class BistroDataBase_Controller {
 	            }
 	        }
 
-	        // 3) insert members row
+	        // Insert members row
 	        int memberCode = generateUniqueMemberCode(conn);
 
 	        final String insertMemberSql =

@@ -136,17 +136,38 @@ public final class ServerUserSubject {
 		});
 		
 		router.on("user", "registerNewMember", (msg,client) -> {
-			@SuppressWarnings("unchecked")
-			List<String> newMemberData = (ArrayList<String>) msg.getData();
-			int code = userService.registerNewMember(newMemberData);
-			if (code != -1) {
-				logger.log("[INFO] New member registered successfully.");
-				client.sendToClient(new Message(Api.REPLY_REGISTER_NEW_MEMBER_OK, code));
-			} else {
-				logger.log("[ERROR] New member registration failed.");
-				client.sendToClient(new Message(Api.REPLY_REGISTER_NEW_MEMBER_FAILED, null));
-			}
+		    @SuppressWarnings("unchecked")
+		    List<String> newMemberData = (ArrayList<String>) msg.getData();
+
+		    int code = userService.registerNewMember(newMemberData);
+
+		    if (code > 0) {
+		        logger.log("[INFO] New member registered successfully.");
+		        client.sendToClient(new Message(Api.REPLY_REGISTER_NEW_MEMBER_OK, code));
+		        return;
+		    }
+
+		    String reason;
+		    switch (code) {
+		        case -2:
+		            reason = "This email/phone is already registered as a MEMBER.";
+		            break;
+		        case -3:
+		            reason = "This email/phone belongs to a STAFF account (employee/manager).";
+		            break;
+		        case -4:
+		            reason = "Phone and email exist but belong to different users (conflict).";
+		            break;
+		        default:
+		            reason = "Member registration failed due to a server/database error.";
+		            break;
+		    }
+
+		    logger.log("[ERROR] New member registration failed: " + reason);
+		    client.sendToClient(new Message(Api.REPLY_REGISTER_NEW_MEMBER_FAILED, reason));
 		});
+
+
 		router.on("user", "forgotMemberID", (msg, client) -> {
 			@SuppressWarnings("unchecked")
 			Map<String, String> requestData = (Map<String, String>) msg.getData();
