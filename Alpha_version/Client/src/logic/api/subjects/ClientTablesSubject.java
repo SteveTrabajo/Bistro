@@ -106,7 +106,32 @@ public class ClientTablesSubject {
 			alert.setContentText("An error occurred while removing the table. Please try again later.");
 			alert.showAndWait();
 			});
-		});	
+		});
+		
+		router.on("tables", "updateSeats.ok", msg -> {
+			BistroClient.awaitResponse = false;
+			@SuppressWarnings("unchecked")
+			List<Table> tables = (List<Table>) msg.getData();
+			Platform.runLater(() -> {
+				BistroClientGUI.client.getTableCTRL().fireAllTables(tables);
+				Alert alert = new Alert(Alert.AlertType.INFORMATION);
+				alert.setTitle("Success");
+				alert.setHeaderText("Table updated successfully");
+				alert.setContentText("The table capacity has been updated.");
+				alert.showAndWait();
+			});
+		});
+		
+		router.on("tables", "updateSeats.fail", msg -> {
+			BistroClient.awaitResponse = false;
+			Platform.runLater(() -> {
+				Alert alert = new Alert(Alert.AlertType.ERROR);
+				alert.setTitle("Error");
+				alert.setHeaderText("Could not update table");
+				alert.setContentText("An error occurred while updating the table. Please try again later.");
+				alert.showAndWait();
+			});
+		});
 		
 	}
 

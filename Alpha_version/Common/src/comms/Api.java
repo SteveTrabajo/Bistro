@@ -142,6 +142,7 @@ public final class Api {
 	public static final String ASK_ALL_TABLES = "tables.getAll";
 	public static final String ASK_ADD_TABLE = "tables.add";
 	public static final String ASK_REMOVE_TABLE = "tables.remove";
+	public static final String ASK_UPDATE_TABLE_SEATS = "tables.updateSeats";
 	public static final String ASK_USER_ALLOCATED_TABLE = "tables.getUserAllocatedTable";
 	public static final String ASK_SEATED_ORDER = "tables.askSeatedOrder";
 	
@@ -163,6 +164,8 @@ public final class Api {
 	public static final String REPLY_ADD_TABLE_FAIL = "tables.add.fail";
 	public static final String REPLY_REMOVE_TABLE_OK = "tables.remove.ok";
 	public static final String REPLY_REMOVE_TABLE_FAIL = "tables.remove.fail";
+	public static final String REPLY_UPDATE_TABLE_SEATS_OK = "tables.updateSeats.ok";
+	public static final String REPLY_UPDATE_TABLE_SEATS_FAIL = "tables.updateSeats.fail";
 	public static final String REPLY_USER_ALLOCATED_TABLE_OK = "tables.getUserAllocatedTable.ok";
 	public static final String REPLY_USER_ALLOCATED_TABLE_FAIL = "tables.getUserAllocatedTable.fail";
 	public static final String REPLY_SEATED_ORDER_OK = "tables.askSeatedOrder.ok";

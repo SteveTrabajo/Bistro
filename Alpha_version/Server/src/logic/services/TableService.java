@@ -191,6 +191,10 @@ public class TableService {
 	    public boolean deleteTable(int tableId) {
 	        return dbController.removeTable(tableId);
 	    }
+	    
+	    public boolean updateTableSeats(int tableId, int newSeats) {
+	        return dbController.updateTableCapacity(tableId, newSeats);
+	    }
 
 		public Order getSeatedOrderForClient(int userId) {
 			return dbController.getSeatedOrderForUser(userId);

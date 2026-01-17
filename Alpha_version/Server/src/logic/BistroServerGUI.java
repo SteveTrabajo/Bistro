@@ -20,7 +20,7 @@ public class BistroServerGUI extends Application {
 	public static void main(String[] args) {
 		launch(args); // Launch the JavaFX application
 	}
-
+	
 	/*
 	 * Start method to initialize the primary stage of the JavaFX application.
 	 * 
