@@ -30,29 +30,38 @@ public class ClientForgotIDScreen {
     @FXML
     private Label lblError;
 
-    // ****************************** Initialize ******************************
-
+    
+    // ****************************** FXML Methods ******************************
+    
+    /**
+	 * Initializes the controller class. This method is automatically called
+	 * after the FXML file has been loaded.
+	 */
     @FXML
     public void initialize() {
         // Clear error label on start
         lblError.setText("");
-
         // Add listeners to clear error messages and validate as the user types
         txtEmail.textProperty().addListener((obs, old, newValue) -> clearError());
         txtPhoneNum.textProperty().addListener((obs, old, newValue) -> clearError());
-        
         // Focus the phone number field by default when opened
         Platform.runLater(() -> txtPhoneNum.requestFocus());
     }
 
-    // ****************************** FXML Methods ******************************
-
+    
+    /**
+	 * Sets the parent controller.
+	 *
+	 * @param parentCtrl The parent ClientLoginScreen controller.
+	 */
     public void setParentCtrl(ClientLoginScreen parentCtrl) {
         this.parentCtrl = parentCtrl;
     }
 
     /**
      * Logic for the "Find Member ID" button.
+     * 
+     * @Param event The event triggered by clicking the button.
      */
     @FXML
     private void btnFindMemberID(Event event) {
@@ -64,17 +73,15 @@ public class ClientForgotIDScreen {
             BistroClientGUI.display(lblError, validationError, Color.RED);
             return;
         }
-
         //  Prepare UI for the wait
         lblError.setText("Searching for member...");
         lblError.setTextFill(Color.GRAY);
         btnFindMemberID.setDisable(true); // Prevent spam clicks
-
         // Set up the Consumer listener to handle the server response
         BistroClientGUI.client.getUserCTRL().setOnMemberIDFoundListener(result -> {
             // Re-enable the button regardless of the result
             btnFindMemberID.setDisable(false);
-
+            //case NOT_FOUND or found member ID 
             if ("NOT_FOUND".equals(result)) {
                 lblError.setTextFill(Color.RED);
                 lblError.setText("The provided information does not match any member. You're more than welcome to approach our staff and register as a new member!");
@@ -86,30 +93,43 @@ public class ClientForgotIDScreen {
                 txtPhoneNum.clear();
             }
         });
-
         //Send the request to the server
         BistroClientGUI.client.getUserCTRL().forgotMemberID(email, phoneNum);
     }
 
+    /**
+	 * Logic for the "Cancel" button.
+	 * 
+	 * @Param event The event triggered by clicking the button.
+	 */
     @FXML
     private void btnCancel(Event event) {
         closeScreen();
     }
-
+    
+    /**
+     * Logic for the "Close" button.
+     * 
+     * @param event
+     */
     @FXML
     private void btnClose(Event event) {
         closeScreen();
     }
 
-    // ****************************** Helper Methods ******************************
-
+    /**
+     * Clears the error message and re-enables the Find Member ID button.
+     */
     private void clearError() {
         if (!lblError.getText().isEmpty()) {
             lblError.setText("");
         }
         btnFindMemberID.setDisable(false);
     }
-
+    
+	/**
+	 * Closes the Forgot ID screen and clears the listener.
+	 */
     private void closeScreen() {
         if (parentCtrl != null) {
             // Clear the listener so the server response doesn't trigger on a closed window
@@ -118,3 +138,4 @@ public class ClientForgotIDScreen {
         }
     }
 }
+//End of ClientForgotIDScreen.java

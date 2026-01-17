@@ -7,9 +7,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
-import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
@@ -24,9 +22,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import logic.BistroClientGUI;
-
 import java.util.Optional;
-
 import common.InputCheck;
 
 /**
@@ -36,19 +32,22 @@ import common.InputCheck;
 public class ClientCheckInTableScreen {
 	
 	// ****************************** FXML Elements ******************************
-	@FXML private Button btnCheckIn;
-	@FXML private Button btnBack;
-	@FXML private Hyperlink lnkForgot;
-	@FXML private TextField txtConfirmCode;
-	@FXML private Label lblUser;
-	@FXML private Label lblError;
 	
-	// Modal containers
-	@FXML private StackPane modalOverlay;
+	@FXML 
+	private Button btnCheckIn;
+	@FXML 
+	private Button btnBack;
+	@FXML 
+	private Hyperlink lnkForgot;
+	@FXML
+	private TextField txtConfirmCode;
+	@FXML
+	private Label lblUser;
+	@FXML
+	private Label lblError;
+	@FXML
+	private StackPane modalOverlay;
 	
-	private ClientForgotConfirmCodeScreen forgotModalsCTRL;
-	private Parent ForgotIDModalRoot;
-
 	// ****************************** Instance Methods ******************************
 
 	/**
@@ -62,8 +61,7 @@ public class ClientCheckInTableScreen {
 				lblUser.setText(currentUser.getUserType().name());
 			}
 		}
-		// 2. Length Limiter (UX)
-		int maxLength = 8;
+		int maxLength = 8; // Example max length
 		txtConfirmCode.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue.length() > maxLength) {
 				txtConfirmCode.setText(oldValue);
@@ -73,28 +71,25 @@ public class ClientCheckInTableScreen {
 	
 	/**
 	 * Handles the Check-In button click event.
-	 * Now uses ASYNC listener logic instead of immediate checking.
+	 * @Param event The event triggered by clicking the Check-In button.
 	 */
 	@FXML
 	public void btnCheckIn(Event event) {
 		String code = txtConfirmCode.getText();
-
 		String errorMsg = InputCheck.checkConfirmationCode(code);
 		if (errorMsg != null) {
 			BistroClientGUI.display(lblError, errorMsg, Color.RED);
 			return;
 		}
-
 		lblError.setText(""); 
 		btnCheckIn.setDisable(true); 
-
 		BistroClientGUI.client.getReservationCTRL().setCheckInListener((isSuccess, message) -> {
 			Platform.runLater(() -> {
 				btnCheckIn.setDisable(false);
-				if (isSuccess) {
+				if (isSuccess) { // case of success
 					Order confirmedOrder = new Order();
 					confirmedOrder.setConfirmationCode(code);
-					
+					// Parse table number from message
 					try {
 						int tableNum = Integer.parseInt(message);
 						confirmedOrder.setTableId(tableNum);
@@ -102,7 +97,6 @@ public class ClientCheckInTableScreen {
 						System.err.println("Failed to parse table number: " + message);
 						confirmedOrder.setTableId(0);
 					}
-
 					BistroClientGUI.client.getTableCTRL().setUserAllocatedOrderForTable(confirmedOrder);
 					BistroClientGUI.switchScreen(event, "clientCheckInTableSuccessScreen", "Success");
 				} else {
@@ -116,170 +110,156 @@ public class ClientCheckInTableScreen {
 	
 	/**
 	 * Handles the Back button click event.
+	 * @Param event The event triggered by clicking the Back button.
 	 */
 	@FXML
 	public void btnBack(Event event) {
 		BistroClientGUI.switchScreen(event, "ClientDashboardScreen", "Error returning to Dashboard");
 	}
 	
-	
+	/**
+	 * Handles the Forgot Confirmation Code link click event.
+	 * @Param event The event triggered by clicking the Forgot Confirmation Code link.
+	 */
     @FXML
     public void lnkForgot(Event event) {
         User currentUser = BistroClientGUI.client.getUserCTRL().getLoggedInUser();
-        
-        // 1. MEMBER FLOW
+        //case of member user
         if (currentUser != null && currentUser.getUserType() == UserType.MEMBER) {
             showMemberSelectionDialog();
         } 
-        // 2. GUEST FLOW (or not logged in)
-        else {
+        else { //case of guest user
             showGuestRecoveryDialog();
         }
     }
 
-    // ============================================================================================
-    // LOGIC 1: GUEST FLOW (Email/Phone Lookup)
-    // ============================================================================================
-    private void showGuestRecoveryDialog() {
-        Dialog<String> dialog = new Dialog<>();
-        dialog.setTitle("Find Booking Code");
-        dialog.setHeaderText("Enter the contact details used for the booking.");
+    /**
+     * Displays the guest recovery dialog for finding a booking code.
+     */
+	private void showGuestRecoveryDialog() {
+		// Create Dialog
+		Dialog<String> dialog = new Dialog<>();
+		dialog.setTitle("Find Booking Code");
+		dialog.setHeaderText("Enter the contact details used for the booking.");
+		// Set the button types
+		ButtonType searchType = new ButtonType("Find Code", ButtonData.OK_DONE);
+		dialog.getDialogPane().getButtonTypes().addAll(searchType, ButtonType.CANCEL);
+		// Create the email and phone labels and fields
+		GridPane grid = new GridPane();
+		grid.setHgap(10);
+		grid.setVgap(10);
+		grid.setPadding(new Insets(20, 50, 10, 10));
+		// Input Fields
+		TextField emailField = new TextField();
+		emailField.setPromptText("Email Address");
+		TextField phoneField = new TextField();
+		phoneField.setPromptText("Phone Number");
+		Label statusLabel = new Label();
+		statusLabel.setWrapText(true);
+		statusLabel.setMaxWidth(300);
+		// Add to Grid
+		grid.add(new Label("Email:"), 0, 0);
+		grid.add(emailField, 1, 0);
+		grid.add(new Label("Phone:"), 0, 1);
+		grid.add(phoneField, 1, 1);
+		grid.add(statusLabel, 0, 2, 2, 1);
+		// Enable/Disable search button depending on whether a field was entered.
+		dialog.getDialogPane().setContent(grid);
+		Platform.runLater(emailField::requestFocus);
+		// Handle Search Button Action	
+		final Button btSearch = (Button) dialog.getDialogPane().lookupButton(searchType);
+		// Custom Action
+		btSearch.addEventFilter(ActionEvent.ACTION, e -> {
+			e.consume(); // Prevent close
+			String email = emailField.getText().trim();
+			String phone = phoneField.getText().trim();
+			if (email.isEmpty() && phone.isEmpty()) {
+				statusLabel.setTextFill(Color.RED);
+				statusLabel.setText("Please enter Email or Phone.");
+				return;
+			}
+			statusLabel.setTextFill(Color.BLUE);
+			statusLabel.setText("Searching...");
+			btSearch.setDisable(true);
+			// Set Callback
+			BistroClientGUI.client.getReservationCTRL().setOnConfirmationCodeRetrieveResult(result -> {
+				Platform.runLater(() -> {
+					btSearch.setDisable(false);
+					if (result == null || "NOT_FOUND".equals(result)) {
+						statusLabel.setTextFill(Color.RED);
+						statusLabel.setText("No active reservation found for today.");
+					} else {
+						// Success! Fill the field and close
+						txtConfirmCode.setText(result);
+						dialog.setResult(result);
+						dialog.close();
+					}
+				});
+			});
+			// Send Request
+			BistroClientGUI.client.getReservationCTRL().retrieveConfirmationCode(email, phone);
+		});
+		dialog.showAndWait();
+	}
 
-        ButtonType searchType = new ButtonType("Find Code", ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(searchType, ButtonType.CANCEL);
-
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20, 50, 10, 10));
-
-        TextField emailField = new TextField();
-        emailField.setPromptText("Email Address");
-        TextField phoneField = new TextField();
-        phoneField.setPromptText("Phone Number");
-        Label statusLabel = new Label();
-        statusLabel.setWrapText(true);
-        statusLabel.setMaxWidth(300);
-
-        grid.add(new Label("Email:"), 0, 0);
-        grid.add(emailField, 1, 0);
-        grid.add(new Label("Phone:"), 0, 1);
-        grid.add(phoneField, 1, 1);
-        grid.add(statusLabel, 0, 2, 2, 1);
-
-        dialog.getDialogPane().setContent(grid);
-        Platform.runLater(emailField::requestFocus);
-
-        final Button btSearch = (Button) dialog.getDialogPane().lookupButton(searchType);
-        
-        btSearch.addEventFilter(ActionEvent.ACTION, e -> {
-            e.consume(); // Prevent close
-
-            String email = emailField.getText().trim();
-            String phone = phoneField.getText().trim();
-
-            if (email.isEmpty() && phone.isEmpty()) {
-                statusLabel.setTextFill(Color.RED);
-                statusLabel.setText("Please enter Email or Phone.");
-                return;
-            }
-
-            statusLabel.setTextFill(Color.BLUE);
-            statusLabel.setText("Searching...");
-            btSearch.setDisable(true);
-
-            // Set Listener
-            BistroClientGUI.client.getReservationCTRL().setOnConfirmationCodeRetrieveResult(result -> {
-                Platform.runLater(() -> {
-                    btSearch.setDisable(false);
-                    if (result == null || "NOT_FOUND".equals(result)) {
-                        statusLabel.setTextFill(Color.RED);
-                        statusLabel.setText("No active reservation found for today.");
-                    } else {
-                        // Success! Fill the field and close
-                        txtConfirmCode.setText(result);
-                        dialog.setResult(result);
-                        dialog.close();
-                    }
-                });
-            });
-
-            // Send Request
-            BistroClientGUI.client.getReservationCTRL().retrieveConfirmationCode(email, phone);
-        });
-
-        dialog.showAndWait();
-    }
-
-    // ============================================================================================
-    // LOGIC 2: MEMBER FLOW (List Selection)
-    // ============================================================================================
-    private void showMemberSelectionDialog() {
-        // Show loading state first? Or just wait for callback. 
-        // For better UX, let's trigger the request and wait for the response.
-        
-        BistroClientGUI.client.getReservationCTRL().setOnMemberReservationsListListener(ordersList -> {
-            if (ordersList == null || ordersList.isEmpty()) {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("No Reservations");
-                alert.setHeaderText("No Active Reservations Found");
-                alert.setContentText("You don't have any upcoming reservations.");
-                alert.showAndWait();
-                return;
-            }
-
-            // Create Selection Dialog
-            Dialog<Order> dialog = new Dialog<>();
-            dialog.setTitle("Select Reservation");
-            dialog.setHeaderText("Select the reservation to check in:");
-
-            ButtonType selectType = new ButtonType("Select", ButtonData.OK_DONE);
-            dialog.getDialogPane().getButtonTypes().addAll(selectType, ButtonType.CANCEL);
-
-            ListView<Order> listView = new ListView<>();
-            listView.getItems().addAll(ordersList);
-            listView.setPrefHeight(200);
-            
-            // Custom Cell Factory to show pretty text
-            listView.setCellFactory(param -> new ListCell<>() {
-                @Override
-                protected void updateItem(Order item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (empty || item == null) {
-                        setText(null);
-                    } else {
-                        // Format: "12/05 19:00 - 4 Guests (Code: R-1234)"
-                        setText(String.format("%s %s - %d Guests (Code: %s)", 
-                            item.getOrderDate().toString(),
-                            item.getOrderHour().toString(),
-                            item.getDinersAmount(),
-                            item.getConfirmationCode()));
-                    }
-                }
-            });
-
-            dialog.getDialogPane().setContent(listView);
-
-            // Handle Selection
-            dialog.setResultConverter(dialogButton -> {
-                if (dialogButton == selectType) {
-                    return listView.getSelectionModel().getSelectedItem();
-                }
-                return null;
-            });
-
-            Optional<Order> result = dialog.showAndWait();
-            result.ifPresent(order -> {
-                txtConfirmCode.setText(order.getConfirmationCode());
-            });
-        });
-
-        // Send Request
-        BistroClientGUI.client.getReservationCTRL().askMemberActiveReservations();
-    }
+ 	/**
+	 * Displays a dialog for member users to select from their active reservations.
+	 */
+	private void showMemberSelectionDialog() {
+		BistroClientGUI.client.getReservationCTRL().setOnMemberReservationsListListener(ordersList -> {
+			if (ordersList == null || ordersList.isEmpty()) {
+				Alert alert = new Alert(Alert.AlertType.INFORMATION);
+				alert.setTitle("No Reservations");
+				alert.setHeaderText("No Active Reservations Found");
+				alert.setContentText("You don't have any upcoming reservations.");
+				alert.showAndWait();
+				return;
+			}
+			// Create Selection Dialog
+			Dialog<Order> dialog = new Dialog<>();
+			dialog.setTitle("Select Reservation");
+			dialog.setHeaderText("Select the reservation to check in:");
+			// Set the button types
+			ButtonType selectType = new ButtonType("Select", ButtonData.OK_DONE);
+			dialog.getDialogPane().getButtonTypes().addAll(selectType, ButtonType.CANCEL);
+			// Create List View
+			ListView<Order> listView = new ListView<>();
+			listView.getItems().addAll(ordersList);
+			listView.setPrefHeight(200);
+			// Custom Cell Factory to show pretty text
+			listView.setCellFactory(param -> new ListCell<>() {
+				@Override
+				protected void updateItem(Order item, boolean empty) {
+					super.updateItem(item, empty);
+					if (empty || item == null) {
+						setText(null);
+					} else {
+						setText(String.format("%s %s - %d Guests (Code: %s)", item.getOrderDate().toString(),
+								item.getOrderHour().toString(), item.getDinersAmount(), item.getConfirmationCode()));
+					}
+				}
+			});
+			dialog.getDialogPane().setContent(listView);
+			// Handle Selection
+			dialog.setResultConverter(dialogButton -> {
+				if (dialogButton == selectType) {
+					return listView.getSelectionModel().getSelectedItem();
+				}
+				return null;
+			});
+			// Show Dialog and Handle Result
+			Optional<Order> result = dialog.showAndWait();
+			result.ifPresent(order -> {
+				txtConfirmCode.setText(order.getConfirmationCode());
+			});
+		});
+		// Send Request
+		BistroClientGUI.client.getReservationCTRL().askMemberActiveReservations();
+	}
 	
 	/**
 	 * Displays an error message on the screen.
+	 * @Param message The error message to display.
 	 */
 	public void showSuccessMessage(String message) {
 		BistroClientGUI.display(lblError, message, Color.GREEN);
@@ -293,9 +273,6 @@ public class ClientCheckInTableScreen {
 		if (modalOverlay != null) {
 			modalOverlay.setVisible(false);
 			modalOverlay.setManaged(false);
-			// Optional: Remove it to save memory or keep it to load faster next time
-			// modalOverlay.getChildren().clear(); 
-			// ForgotIDModalRoot = null; 
 		} else {
 			Alert alert = new Alert(Alert.AlertType.ERROR);
 			alert.setContentText("Unable to close the Forgot Code screen (Overlay not found).");
@@ -303,3 +280,4 @@ public class ClientCheckInTableScreen {
 		}
 	}
 }
+//End of ClientCheckInTableScreen.java

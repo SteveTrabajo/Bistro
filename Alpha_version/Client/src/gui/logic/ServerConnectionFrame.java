@@ -50,51 +50,34 @@ public class ServerConnectionFrame {
 	public void btnConnect(Event event) {
 		String ip = ipTextField.getText();
 		String port = portTextField.getText();
-
-		// 1. Validation (Runs on UI Thread immediately)
-		String errorMessage = InputCheck.isValidPortAndIP(ip, port);
-		
+		String errorMessage = InputCheck.isValidPortAndIP(ip, port);		
 		if (!errorMessage.equals("")) {
 			BistroClientGUI.display(lblError, errorMessage.trim(), Color.RED);
 			return;
 		}
-
 		int intPort = Integer.parseInt(port);
-
-		// 2. Use TaskRunner for the blocking connection
-		// We pass 'event' so TaskRunner can automatically find the StackPane
 		TaskRunner.run(event,
 			() -> {
-				// --- [Background Thread] Heavy Lifting ---
-				// @param (Implicit) This lambda runs in a separate thread
 				try {
 					// Attempt connection
 					BistroClientGUI.client = BistroClient.getInstance(ip, intPort);
 					System.out.println("IP Entered Successfully");
 					BistroClientGUI.client.notifyServerOnConnection();
-					
 				} catch (Exception e) {
-					// If connection fails:
 					System.out.println("Error: Can't setup connection!");
 					e.printStackTrace();
-					
-					// Update the Error Label on the UI Thread
 					Platform.runLater(() -> 
 						BistroClientGUI.display(lblError, "Can't setup connection", Color.RED)
 					);
-					
 					// Throw runtime exception to stop TaskRunner from executing the 'onSuccess' block
 					throw new RuntimeException("Connection failed", e);
 				}
 			}, 
 			() -> {
-				// --- [UI Thread] On Success ---
-				// @param (Implicit) This lambda runs on the JavaFX Application Thread
 				BistroClientGUI.switchScreen(event, "clientLoginScreen", "Server Connection");
 			}
 		);
 	}
-	
 	
 	/**
 	 * Handles the exit hyperlink click event.

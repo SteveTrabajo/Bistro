@@ -44,3 +44,4 @@ public class ClientWaitingOverScreen {
 	    BistroClientGUI.switchScreen(event, "ClientDashboardScreen", "Error returning to Client Dashboard Screen.");
 	}
 }
+// End of ClientWaitingOverScreen.java

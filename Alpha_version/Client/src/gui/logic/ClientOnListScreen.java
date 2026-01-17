@@ -1,8 +1,6 @@
 package gui.logic;
 
 import java.util.ArrayList;
-import java.util.Optional;
-
 import entities.Order;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -16,8 +14,9 @@ import logic.BistroClientGUI;
  * the waiting list.
  */
 public class ClientOnListScreen {
+	
 	// ************* FXML Variables *************//
-
+	
 	@FXML
 	private Button btnBack;
 	@FXML
@@ -33,7 +32,6 @@ public class ClientOnListScreen {
 	 * Initializes the screen by retrieving and displaying the confirmation code
 	 * for the logged-in user from the waiting list.
 	 */
-
 	@FXML
     public void initialize() {
         String code = retrieveConfirmationCode();
@@ -51,28 +49,24 @@ public class ClientOnListScreen {
     private String retrieveConfirmationCode() {
         // Check for a ready reservation specific to this session
         Order activeOrder = BistroClientGUI.client.getWaitingListCTRL().getOrderWaitListDTO();
-        
+        // If found, return its confirmation code
         if (activeOrder != null && activeOrder.getConfirmationCode() != null) {
             return activeOrder.getConfirmationCode();
         }
-
         // Check the Waiting List
         ArrayList<Order> waitingList = BistroClientGUI.client.getWaitingListCTRL().getWaitingList();
-        
         // Guard clause: if list is missing or empty, stop here
         if (waitingList == null || waitingList.isEmpty()) {
             return null;
         }
-
+        // Get the current logged-in user's ID
         int currentUserId = BistroClientGUI.client.getUserCTRL().getLoggedInUser().getUserId();
-
         // Iterate through the list to find the matching user ID
         for (Order order : waitingList) {
             if (order.getUserId() == currentUserId) {
                 return order.getConfirmationCode();
             }
         }
-
         return null;
     }
 	
@@ -107,3 +101,4 @@ public class ClientOnListScreen {
 		BistroClientGUI.switchScreen(event, "clientDashboardScreen", "Error returning to dashboard");
 	}
 }
+// End of ClientOnListScreen.java

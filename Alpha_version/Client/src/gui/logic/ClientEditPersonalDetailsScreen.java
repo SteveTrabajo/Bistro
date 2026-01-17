@@ -10,14 +10,13 @@ import logic.BistroClientGUI;
 import common.InputCheck;
 import dto.UserData;
 import entities.User;
-import enums.UserType;
 
 /**
  * This class represents the controller for the Client Edit Personal screen in
  * the BistroClientGUI.
  */
-
 public class ClientEditPersonalDetailsScreen {
+	
 	// ****************************** FXML Elements ******************************
 	@FXML
 	private Button btnBack;
@@ -39,6 +38,7 @@ public class ClientEditPersonalDetailsScreen {
 	private Label lblError;
 
 	private User originalUser;
+	
 	// ****************************** Instance Methods ******************************
 
 	/**
@@ -56,27 +56,23 @@ public class ClientEditPersonalDetailsScreen {
 		txtPhoneNumber.setText(originalUser.getPhoneNumber());
 		txtEmail.setText(originalUser.getEmail());
 		txtAddress.setText(originalUser.getAddress());
-		
 		// Restriction for First Name - only English letters
 		txtFirstName.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (!newValue.matches("[a-zA-Z]*")) {
 				txtFirstName.setText(oldValue);
 			}
 		});
-		
 		// Restriction for Last Name - only English letters
 		txtLastName.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (!newValue.matches("[a-zA-Z]*")) {
 				txtLastName.setText(oldValue);
 			}
 		});
-
 		// Restriction for Phone - digits only, optional + at start, dynamic length check
 		txtPhoneNumber.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue == null) return;
 			// Allow 13 chars if it starts with +, otherwise 10
 			int maxLength = newValue.startsWith("+") ? 13 : 10;
-			
 			if (!newValue.matches("^\\+?\\d*$") || newValue.length() > maxLength) {
 				txtPhoneNumber.setText(oldValue);
 			}
@@ -117,7 +113,7 @@ public class ClientEditPersonalDetailsScreen {
 			lblError.setText(errorMessage);
 			return;
 		}
-
+		// Check if any changes were made
 		boolean isChanged = !email.equals(originalUser.getEmail()) || !phoneNumber.equals(originalUser.getPhoneNumber())
 				|| !firstName.equals(originalUser.getFirstName()) || !lastName.equals(originalUser.getLastName())
 				|| !address.equals(originalUser.getAddress());
@@ -125,12 +121,12 @@ public class ClientEditPersonalDetailsScreen {
 			lblError.setText("No changes were made.");
 			return;
 		}
-
+		// Create updated UserData object
 		UserData updatedUser = new UserData(firstName, lastName, originalUser.getMemberCode(), phoneNumber, email,
 				originalUser.getUserType(), address);
-
+		// Send update request to server
 		BistroClientGUI.client.getUserCTRL().updateUserDetails(updatedUser);
-
+		// Check update result
 		if (!BistroClientGUI.client.getUserCTRL().getUserUpdateSuccessful()) {
 			lblError.setText("Error: Failed to save details. Please try again.");
 			return;
@@ -142,5 +138,5 @@ public class ClientEditPersonalDetailsScreen {
 		alert.setContentText("Your details have been updated successfully.");
 		alert.showAndWait();
 	}
-
 }
+// End of ClientEditPersonalDetailsScreen.java
