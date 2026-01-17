@@ -115,6 +115,19 @@ public class ClientOrderSubject {
 		        BistroClientGUI.client.getReservationCTRL().receiveStaffReservations(orders);
 		    });
 		});
+		
+		router.on("orders", "getMemberActiveReservations.ok", msg -> {
+		    BistroClient.awaitResponse = false;
+		    @SuppressWarnings("unchecked")
+		    List<Order> orders = (List<Order>) msg.getData();
+		    BistroClientGUI.client.getReservationCTRL().handleMemberReservationsListResponse(orders);
+		});
+
+		router.on("orders", "getMemberActiveReservations.fail", msg -> {
+		    BistroClient.awaitResponse = false;
+		    BistroClientGUI.client.getReservationCTRL().handleMemberReservationsListResponse(new ArrayList<>());
+		});
+		
 
 		router.on("orders", "getAvailableDates.ok", msg -> {
 			BistroClient.awaitResponse = false;

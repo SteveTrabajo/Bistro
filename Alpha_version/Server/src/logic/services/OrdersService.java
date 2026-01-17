@@ -518,6 +518,10 @@ public class OrdersService {
         return createNewOrder(orderData, OrderType.RESERVATION);
     }
 
+    public List<Order> getMemberActiveReservations(int userId) {
+        return dbController.getMemberActiveReservationsForToday(userId);
+    }
+    
 	public List<String> getReservationCodesByUserId(int userId) {
 		List<Order> orders = dbController.getOrdersByUserId(userId);
 		if (orders != null) {

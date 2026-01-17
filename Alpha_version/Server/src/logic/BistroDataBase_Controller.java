@@ -1517,6 +1517,59 @@ public class BistroDataBase_Controller {
 	    return orders;
 	}
 	
+	
+	/**
+	 * Retrieves all active reservations for a specific user for TODAY.
+	 * Used for the Member "Forgot Code" feature at check-in.
+	 */
+	public List<Order> getMemberActiveReservationsForToday(int userId) {
+	    List<Order> orders = new ArrayList<>();
+	    
+	    // Logic: User's ID + Type is RESERVATION + Status is valid + Date is TODAY
+	    String qry = "SELECT * FROM orders " +
+	                 "WHERE user_id = ? " +
+	                 "AND order_type = 'RESERVATION' " +
+	                 "AND status IN ('PENDING', 'NOTIFIED', 'APPROVED') " +
+	                 "AND order_date = CURRENT_DATE " + 
+	                 "ORDER BY order_time ASC";
+
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(qry)) {
+	            ps.setInt(1, userId);
+
+	            try (ResultSet rs = ps.executeQuery()) {
+	                while (rs.next()) {
+	                    Order order = new Order();
+	                    order.setOrderNumber(rs.getInt("order_number"));
+	                    order.setUserId(rs.getInt("user_id"));
+	                    
+	                    Date sqlDate = rs.getDate("order_date");
+	                    if(sqlDate != null) order.setOrderDate(sqlDate.toLocalDate());
+	                    
+	                    Time sqlTime = rs.getTime("order_time");
+	                    if(sqlTime != null) order.setOrderHour(sqlTime.toLocalTime());
+	                    
+	                    order.setDinersAmount(rs.getInt("number_of_guests"));
+	                    order.setConfirmationCode(rs.getString("confirmation_code"));
+	                    order.setStatus(OrderStatus.valueOf(rs.getString("status")));
+	                    order.setOrderType(OrderType.valueOf(rs.getString("order_type")));
+	                    
+	                    orders.add(order);
+	                }
+	            }
+	        }
+	    } catch (SQLException ex) {
+	        logger.log("[ERROR] getMemberActiveReservationsForToday: " + ex.getMessage());
+	        ex.printStackTrace();
+	    } finally {
+	        release(conn);
+	    }
+	    return orders;
+	}
+	
+	
 	/**
 	 * Updates the status of an order in the database based on the confirmation code.
 	 * 

@@ -33,6 +33,7 @@ public class ReservationController {
     private Consumer<String> onCodeRetrieveResult;
     private Consumer<List<LocalDate>> datesUpdateCallback;
     private BiConsumer<Boolean, String> checkInCallback; //like "consumer" but with two parameters
+    private Consumer<List<Order>> onMemberReservationsListListener;
 	
 	//******************************** Constructors ***********************************//
 	
@@ -106,6 +107,10 @@ public class ReservationController {
 	public void setCheckInListener(BiConsumer<Boolean, String> callback) {
         this.checkInCallback = callback;
     }
+	
+	public void setOnMemberReservationsListListener(Consumer<List<Order>> listener) {
+        this.onMemberReservationsListListener = listener;
+    }
 		
 	//******************************** Instance Methods ***********************************//
 	
@@ -119,6 +124,10 @@ public class ReservationController {
         requestData.put("date", date);
         requestData.put("dinersAmount", diners);
         client.handleMessageFromClientUI(new Message(Api.ASK_ORDER_AVAILABLE_HOURS, requestData));
+    }
+	
+	public void askMemberActiveReservations() {
+        client.handleMessageFromClientUI(new Message(Api.ASK_MEMBER_ACTIVE_RESERVATIONS, null));
     }
 	
 	/**
@@ -265,5 +274,14 @@ public class ReservationController {
 	public boolean hasCheckInListener() {
 		return this.checkInCallback != null;
 	}
+	
+	public void handleMemberReservationsListResponse(List<Order> orders) {
+        if (onMemberReservationsListListener != null) {
+            Platform.runLater(() -> {
+                onMemberReservationsListListener.accept(orders);
+                onMemberReservationsListListener = null;
+            });
+        }
+    }
 	
 }

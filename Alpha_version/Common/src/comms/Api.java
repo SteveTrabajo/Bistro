@@ -98,6 +98,7 @@ public final class Api {
 	public static final String ASK_GET_RESERVATIONS_BY_DATE = "orders.getOrdersByDate";
 	public static final String ASK_SEAT_CUSTOMER = "orders.seatCustomer";
 	public static final String ASK_CLIENT_ORDER_HISTORY = "orders.getClientHistory";
+	public static final String ASK_MEMBER_ACTIVE_RESERVATIONS = "orders.getMemberActiveReservations";
 
 	// Responses
 	public static final String REPLY_CREATE_RESERVATION_OK = "orders.createReservation.ok";
@@ -126,6 +127,8 @@ public final class Api {
 	public static final String REPLY_SEAT_CUSTOMER_FAIL = "orders.seatCustomer.fail";
 	public static final String REPLY_CLIENT_ORDER_HISTORY_OK = "orders.getClientHistory.ok";
 	public static final String REPLY_CLIENT_ORDER_HISTORY_FAIL = "orders.getClientHistory.fail";
+	public static final String REPLY_MEMBER_ACTIVE_RESERVATIONS_OK = "orders.getMemberActiveReservations.ok";
+	public static final String REPLY_MEMBER_ACTIVE_RESERVATIONS_FAIL = "orders.getMemberActiveReservations.fail";
 
 // == Restaurant Management subject == //
 

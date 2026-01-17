@@ -120,6 +120,30 @@ public final class ServerOrdersSubject {
 			}
 		});
 		
+		// Request: Get all active reservations for the logged-in member (for Check-In)
+		router.on("orders", "getMemberActiveReservations", (msg, client) -> {
+		    User sessionUser = (User) client.getInfo("user");
+		    
+		    // Security Check
+		    if (sessionUser == null) {
+		        logger.log("[SECURITY] Unauthorized active reservations request from " + client);
+		        client.sendToClient(new Message(Api.REPLY_MEMBER_ACTIVE_RESERVATIONS_FAIL, null));
+		        return;
+		    }
+
+		    // Get Data from Service
+		    List<Order> activeOrders = ordersService.getMemberActiveReservations(sessionUser.getUserId());
+
+		    if (activeOrders != null) {
+		        // Even if empty, we send OK so the UI knows the search finished successfully
+		        client.sendToClient(new Message(Api.REPLY_MEMBER_ACTIVE_RESERVATIONS_OK, activeOrders));
+		        logger.log("[INFO] Sent " + activeOrders.size() + " active reservations to member " + sessionUser.getUsername());
+		    } else {
+		        client.sendToClient(new Message(Api.REPLY_MEMBER_ACTIVE_RESERVATIONS_FAIL, null));
+		        logger.log("[ERROR] Failed to retrieve active reservations for member " + sessionUser.getUsername());
+		    }
+		});
+		
         //Send available time slots for reservation
         router.on("orders", "getAvailableHours", (msg, client) -> {
 			@SuppressWarnings("unchecked")
