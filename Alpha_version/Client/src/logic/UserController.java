@@ -18,7 +18,6 @@ import javafx.application.Platform;
 public class UserController {
 
 	// ****************************** Instance variables ******************************
-
 	private final BistroClient client; // final reference to the BistroClient to ensure only one instance is associated
 	private User loggedInUser;
 	

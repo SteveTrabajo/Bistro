@@ -18,6 +18,10 @@ import java.util.Map;
 import common.InputCheck;
 import javafx.event.Event;
 import enums.UserType;
+import logic.QRCodeDecoder;
+
+import java.io.File;
+import javafx.stage.FileChooser;
 
 /**
  * This class represents the client login screen controller.
@@ -163,16 +167,45 @@ public class ClientLoginScreen {
             }
         );
     }
-	/**
-	 * Handles the QR code scanning button click event. (Functionality to be
-	 * implemented)
-	 * 
-	 * @param event The event triggered by clicking the QR code scanning button.
+    /**
+	 * Handles the "Scan QR" button click event.
+	 * Opens a file chooser to select an image file containing a QR code,
+	 * decodes the QR code, and attempts to log in the user using the decoded member ID.
+	 *
+	 * @param event The event triggered by clicking the button (used for screen switching and locating the root pane).
 	 */
-	@FXML
-	public void btnScanQR(Event event) {
-		BistroClientGUI.switchScreen(event, "staff/FullReleaseScreen", "QR Scan Error Message");
-	}
+    @FXML
+    public void btnScanQR(Event event) {
+        try {
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Select QR Code Image");
+            chooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg")
+            );
+
+            File file = chooser.showOpenDialog(btnScanQR.getScene().getWindow());
+            if (file == null) {
+                return; // user cancelled
+            }
+
+            String decoded = QRCodeDecoder.decodeFromFile(file);
+            if (decoded == null || decoded.isBlank()) {
+                BistroClientGUI.display(lblError, "QR code could not be decoded.", Color.RED);
+                return;
+            }
+
+            // Behave exactly like manual member login
+            txtMemberID.setText(decoded.trim());
+            btnSignIn(event);
+
+        } catch (com.google.zxing.NotFoundException nf) {
+            BistroClientGUI.display(lblError, "No QR code was found in the selected image.", Color.RED);
+        } catch (Exception e) {
+            e.printStackTrace();
+            BistroClientGUI.display(lblError, "Failed to read QR code image.", Color.RED);
+        }
+    }
+
 	
 	@FXML
 	public void lnkForgotMemberID(Event event) {
