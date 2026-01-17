@@ -6,22 +6,17 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import logic.BistroClientGUI;
 import java.util.HashMap;
 import java.util.Map;
 import common.InputCheck;
-import comms.Api;
-import javafx.application.Platform;
 import javafx.event.Event;
-import entities.*;
 import enums.UserType;
 
 /**
@@ -33,41 +28,32 @@ public class ClientLoginScreen {
 
 	@FXML
 	private Button btnGuest;
-
 	@FXML
 	private Button btnSignIn;
-
 	@FXML
 	private Button btnScanQR;
-	
 	@FXML
 	private Hyperlink lnkForgotMemberID;
-
 	@FXML
 	private Hyperlink lnkEmployee;
-
 	@FXML
 	private TextField txtMemberID;
-
 	@FXML
 	private TextField txtPhoneNumber;
-
 	@FXML
-	private TextField txtEmailAddress;
-	
+	private TextField txtEmailAddress;	
 	@FXML
-	private StackPane mainPane;
-	
+	private StackPane mainPane;	
 	@FXML
 	private StackPane modalOverlay; // Overlay pane for modals
 	
 	private Parent ForgotIDModalRoot;
 	
 	@FXML
-	private Label lblError;
-	
+	private Label lblError;	
 	@FXML
 	private BorderPane contentPane;
+	
 	// ******************************** Variables ********************************
 
 	private Map<String, Object> userLoginData; // holds received user login data

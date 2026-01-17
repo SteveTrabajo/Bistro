@@ -17,7 +17,7 @@
 <StackPane fx:id="rootPane" styleClass="mem-root" stylesheets="@../../gui/css/clientDashboardStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.ClientDashboardScreen">
 
     <children>
-      <ImageView fitHeight="720.0" fitWidth="1280.0" opacity="0.12">
+      <ImageView fitHeight="${rootPane.height}" fitWidth="${rootPane.width}" opacity="0.12" preserveRatio="false">
          <image>
             <Image url="@../../resources/images/image2.jpg" />
          </image>
@@ -62,175 +62,123 @@
 
                     <children>
 
-                        <!-- 6 cards grid -->
                         <GridPane fx:id="gridPane" alignment="CENTER" hgap="26" styleClass="mem-grid" vgap="26">
 
-                            <!-- Row 1 -->
-                            <Button fx:id="btnNewReservation" onAction="#NewReservation" styleClass="mem-card-button" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                                <graphic>
-                                    <VBox spacing="8" styleClass="mem-card-content">
-                                        <children>
-                                            <StackPane>
-                                                <children>
-                                                    <ImageView fitHeight="39.0" fitWidth="39.0" preserveRatio="true">
-                                                        <image>
-                                                            <Image url="@../../resources/icons/reservationIcon.png" />
-                                                        </image>
-                                                    </ImageView>
-                                                </children>
-                                    <styleClass>
-                                       <String fx:value="mem-blue" />
-                                       <String fx:value="mem-iconBox" />
-                                    </styleClass>
-                                            </StackPane>
-
-                                            <Label styleClass="mem-cardTitle" text="New Reservation" />
-                                            <Label styleClass="mem-cardDesc" text="Book a table" />
-                                        </children>
-                                    </VBox>
-                                </graphic>
-                            </Button>
-
-                            <Button fx:id="btnManageBooking" onAction="#ManageBooking" styleClass="mem-card-button" GridPane.columnIndex="2">
-                                <graphic>
-                                    <VBox spacing="8" styleClass="mem-card-content">
-                                        <children>
-                                            <StackPane>
-                                                <children>
-                                                    <ImageView fitHeight="38.0" fitWidth="38.0" preserveRatio="true">
-                                                        <image>
-                                                            <Image url="@../../resources/icons/editReservationIcon.png" />
-                                                        </image>
-                                                    </ImageView>
-                                                </children>
-                                    <styleClass>
-                                       <String fx:value="mem-purple" />
-                                       <String fx:value="mem-iconBox" />
-                                    </styleClass>
-                                            </StackPane>
-
-                                            <Label styleClass="mem-cardTitle" text="Manage My Bookings" />
-                                            <Label styleClass="mem-cardDesc" text="View and edit reservations" />
-                                        </children>
-                                    </VBox>
-                                </graphic>
-                            </Button>
-
-
-                            <Button fx:id="btnPayBill" onAction="#PayBill" styleClass="mem-card-button" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                                <graphic>
-                                    <VBox spacing="8" styleClass="mem-card-content">
-                                        <children>
-                                            <StackPane>
-                                                <children>
-                                                    <ImageView fitHeight="36.0" fitWidth="36.0" preserveRatio="true">
-                                                        <image>
-                                                            <Image url="@../../resources/icons/billpayIcon.png" />
-                                                        </image>
-                                                    </ImageView>
-                                                </children>
-                                    <styleClass>
-                                       <String fx:value="mem-green" />
-                                       <String fx:value="mem-iconBox" />
-                                    </styleClass>
-                                            </StackPane>
-
-                                            <Label styleClass="mem-cardTitle" text="Pay Bill" />
-                                            <Label styleClass="mem-cardDesc" text="Pay and checkout" />
-                                        </children>
-                                    </VBox>
-                                </graphic>
-                            </Button>
-
-                            <Button fx:id="btnCheckInForTable" onAction="#CheckInForTable" styleClass="mem-card-button" GridPane.rowIndex="1">
-                                <graphic>
-                                    <VBox spacing="8" styleClass="mem-card-content">
-                                        <children>
-                                            <StackPane>
-                                                <children>
-                                                    <ImageView fitHeight="51.0" fitWidth="51.0" preserveRatio="true">
-                                                        <image>
-                                                            <Image url="@../../resources/icons/getTableIcon.png" />
-                                                        </image>
-                                                    </ImageView>
-                                                </children>
-                                    <styleClass>
-                                       <String fx:value="mem-orange" />
-                                       <String fx:value="mem-iconBox" />
-                                    </styleClass>
-                                            </StackPane>
-
-                                            <Label styleClass="mem-cardTitle" text="Check-in for Table" />
-                                            <Label styleClass="mem-cardDesc" text="Get seated now" />
-                                        </children>
-                                    </VBox>
-                                </graphic>
-                            </Button>
-
-
-                            <!-- Row 2 -->
-                            <Button fx:id="btnEditPersonalDetails" onAction="#EditPersonalDetails" styleClass="mem-card-button" GridPane.columnIndex="2" GridPane.rowIndex="1">
-                                <graphic>
-                                    <VBox spacing="8" styleClass="mem-card-content">
-                                        <children>
-                                            <StackPane>
-                                                <children>
-                                                    <ImageView fitHeight="43.0" fitWidth="43.0" preserveRatio="true">
-                                                        <image>
-                                                            <Image url="@../../resources/icons/EditMemberIcon.png" />
-                                                        </image>
-                                                    </ImageView>
-                                                </children>
-                                    <styleClass>
-                                       <String fx:value="mem-indigo" />
-                                       <String fx:value="mem-iconBox" />
-                                    </styleClass>
-                                            </StackPane>
-
-                                            <Label styleClass="mem-cardTitle" text="Edit Personal Details" />
-                                            <Label styleClass="mem-cardDesc" text="Update your information" />
-                                        </children>
-                                    </VBox>
-                                </graphic>
-                            </Button>
-
-
-                            <Button fx:id="btnJoinWaitingList" onAction="#JoinWaitingList" styleClass="mem-card-button" GridPane.columnIndex="1">
-                                <graphic>
-                                    <VBox spacing="8" styleClass="mem-card-content">
-                                        <children>
-                                            <StackPane>
-                                                <children>
-                                                    <ImageView fitHeight="50.0" fitWidth="50.0" preserveRatio="true">
-                                                        <image>
-                                                            <Image url="@../../resources/icons/hourglass.png" />
-                                                        </image>
-                                                    </ImageView>
-                                                </children>
-                                    <styleClass>
-                                       <String fx:value="mem-red" />
-                                       <String fx:value="mem-iconBox" />
-                                    </styleClass>
-                                            </StackPane>
-
-                                            <Label styleClass="mem-cardTitle" text="Join Waiting List" />
-                                            <Label fx:id="LblButtonDescrip" styleClass="mem-cardDesc" text="Add to queue" />
-                                        </children>
-                                    </VBox>
-                                </graphic>
-                            </Button>
-                     <columnConstraints>
-                        <ColumnConstraints />
-                        <ColumnConstraints />
-                        <ColumnConstraints />
-                     </columnConstraints>
-                     <rowConstraints>
-                        <RowConstraints />
-                        <RowConstraints />
-                     </rowConstraints>
-
-
-                        </GridPane>
+						    <Button fx:id="btnNewReservation" prefWidth="360" maxWidth="360" onAction="#NewReservation" styleClass="mem-card-button" GridPane.columnIndex="0" GridPane.rowIndex="0">
+						        <graphic>
+						            <VBox alignment="CENTER" spacing="8" styleClass="mem-card-content">
+						                <children>
+						                    <StackPane>
+						                        <children>
+						                            <ImageView fitHeight="39.0" fitWidth="39.0" preserveRatio="true">
+						                                <image><Image url="@../../resources/icons/reservationIcon.png" /></image>
+						                            </ImageView>
+						                        </children>
+						                        <styleClass><String fx:value="mem-blue" /><String fx:value="mem-iconBox" /></styleClass>
+						                    </StackPane>
+						                    <Label styleClass="mem-cardTitle" text="New Reservation" />
+						                    <Label styleClass="mem-cardDesc" text="Book a table" />
+						                </children>
+						            </VBox>
+						        </graphic>
+						    </Button>
+						
+						    <Button fx:id="btnJoinWaitingList" prefWidth="360" maxWidth="360" onAction="#JoinWaitingList" styleClass="mem-card-button" GridPane.columnIndex="1" GridPane.rowIndex="0">
+						        <graphic>
+						            <VBox alignment="CENTER" spacing="8" styleClass="mem-card-content">
+						                <children>
+						                    <StackPane>
+						                        <children>
+						                            <ImageView fitHeight="50.0" fitWidth="50.0" preserveRatio="true">
+						                                <image><Image url="@../../resources/icons/hourglass.png" /></image>
+						                            </ImageView>
+						                        </children>
+						                        <styleClass><String fx:value="mem-red" /><String fx:value="mem-iconBox" /></styleClass>
+						                    </StackPane>
+						                    <Label fx:id="lblJoinListTitle" styleClass="mem-cardTitle" text="Join Waiting List" />
+						                    <Label fx:id="LblButtonDescrip" styleClass="mem-cardDesc" text="Add to queue" />
+						                </children>
+						            </VBox>
+						        </graphic>
+						    </Button>
+						
+						    <Button fx:id="btnManageBooking" prefWidth="360" maxWidth="360" onAction="#ManageBooking" styleClass="mem-card-button" GridPane.columnIndex="2" GridPane.rowIndex="0">
+						        <graphic>
+						            <VBox alignment="CENTER" spacing="8" styleClass="mem-card-content">
+						                <children>
+						                    <StackPane>
+						                        <children>
+						                            <ImageView fitHeight="38.0" fitWidth="38.0" preserveRatio="true">
+						                                <image><Image url="@../../resources/icons/editReservationIcon.png" /></image>
+						                            </ImageView>
+						                        </children>
+						                        <styleClass><String fx:value="mem-purple" /><String fx:value="mem-iconBox" /></styleClass>
+						                    </StackPane>
+						                    <Label styleClass="mem-cardTitle" text="Manage My Bookings" />
+						                    <Label styleClass="mem-cardDesc" text="View and edit reservations" />
+						                </children>
+						            </VBox>
+						        </graphic>
+						    </Button>
+						
+						    <Button fx:id="btnCheckInForTable" prefWidth="360" maxWidth="360" onAction="#CheckInForTable" styleClass="mem-card-button" GridPane.columnIndex="0" GridPane.rowIndex="1">
+						        <graphic>
+						            <VBox alignment="CENTER" spacing="8" styleClass="mem-card-content">
+						                <children>
+						                    <StackPane>
+						                        <children>
+						                            <ImageView fitHeight="51.0" fitWidth="51.0" preserveRatio="true">
+						                                <image><Image url="@../../resources/icons/getTableIcon.png" /></image>
+						                            </ImageView>
+						                        </children>
+						                        <styleClass><String fx:value="mem-orange" /><String fx:value="mem-iconBox" /></styleClass>
+						                    </StackPane>
+						                    <Label styleClass="mem-cardTitle" text="Check-in for Table" />
+						                    <Label styleClass="mem-cardDesc" text="Get seated now" />
+						                </children>
+						            </VBox>
+						        </graphic>
+						    </Button>
+						
+						    <Button fx:id="btnPayBill" prefWidth="360" maxWidth="360" onAction="#PayBill" styleClass="mem-card-button" GridPane.columnIndex="1" GridPane.rowIndex="1">
+						        <graphic>
+						            <VBox alignment="CENTER" spacing="8" styleClass="mem-card-content">
+						                <children>
+						                    <StackPane>
+						                        <children>
+						                            <ImageView fitHeight="36.0" fitWidth="36.0" preserveRatio="true">
+						                                <image><Image url="@../../resources/icons/billpayIcon.png" /></image>
+						                            </ImageView>
+						                        </children>
+						                        <styleClass><String fx:value="mem-green" /><String fx:value="mem-iconBox" /></styleClass>
+						                    </StackPane>
+						                    <Label styleClass="mem-cardTitle" text="Pay Bill" />
+						                    <Label styleClass="mem-cardDesc" text="Pay and checkout" />
+						                </children>
+						            </VBox>
+						        </graphic>
+						    </Button>
+						
+						    <Button fx:id="btnEditPersonalDetails" prefWidth="360" maxWidth="360" onAction="#EditPersonalDetails" styleClass="mem-card-button" GridPane.columnIndex="2" GridPane.rowIndex="1">
+						        <graphic>
+						            <VBox alignment="CENTER" spacing="8" styleClass="mem-card-content">
+						                <children>
+						                    <StackPane>
+						                        <children>
+						                            <ImageView fitHeight="43.0" fitWidth="43.0" preserveRatio="true">
+						                                <image><Image url="@../../resources/icons/EditMemberIcon.png" /></image>
+						                            </ImageView>
+						                        </children>
+						                        <styleClass><String fx:value="mem-indigo" /><String fx:value="mem-iconBox" /></styleClass>
+						                    </StackPane>
+						                    <Label styleClass="mem-cardTitle" text="Edit Personal Details" />
+						                    <Label styleClass="mem-cardDesc" text="Update your information" />
+						                </children>
+						            </VBox>
+						        </graphic>
+						    </Button>
+						
+						</GridPane>
 
                         <!-- Bottom stats bar -->
                         <HBox alignment="CENTER" spacing="0" styleClass="mem-statsBar">

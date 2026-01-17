@@ -13,6 +13,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
+<<<<<<< Updated upstream
 
 <StackPane xmlns="http://javafx.com/javafx/25"
 	xmlns:fx="http://javafx.com/fxml/1"
@@ -200,3 +201,165 @@
 			managed="false" styleClass="modal-overlay" />
 	</children>
 </StackPane>
+=======
+<StackPane prefWidth="1280" prefHeight="720" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.ClientLoginScreen">
+   <children>
+      <StackPane fx:id="mainPane" styleClass="loginD-root" stylesheets="@../../gui/css/clientLoginStyles.css">
+      	<children>
+      		<ImageView  fx:id="bgImage" managed="false" fitHeight="${mainPane.height}" fitWidth="${mainPane.width}" opacity="0.08" preserveRatio="false" styleClass="loginD-backgroundImage">
+      			<image>
+      				<Image url="@../../resources/images/image1.jpg" />
+      			</image>
+      		</ImageView>
+      		
+      		<BorderPane fx:id="contentPane" prefHeight="720" prefWidth="1280">
+      			
+      			<center>
+      				<VBox alignment="CENTER" spacing="30" BorderPane.alignment="CENTER">
+      					<children>
+      					
+      						<VBox alignment="CENTER" spacing="6">
+		      					<children>
+		      						<ImageView fitHeight="179.0" fitWidth="179.0">
+		      							<image>
+		      								<Image url="@../../resources/bistro_logo.png" />
+		      							</image>
+		      						</ImageView>
+		      						<Label styleClass="loginD-subtitle" text="Welcome to our Restaurant" />
+		      					</children>
+		      				</VBox>
+      					
+      						<HBox alignment="CENTER" spacing="28">
+		      					<padding>
+		      						<Insets bottom="0" left="0" right="0" top="0" />
+		      					</padding>
+		      					<children>
+		      						
+		      						<VBox alignment="CENTER" maxHeight="-Infinity" minHeight="485.0" prefHeight="485.0" spacing="14" styleClass="loginD-card">
+		      							<children>
+		      								<StackPane styleClass="loginD-iconCircle">
+		      									<children>
+		      										<ImageView fitHeight="28" fitWidth="28" preserveRatio="true">
+		      											<image>
+		      												<Image url="@../../resources/icons/PersonIcon.png" />
+		      											</image>
+		      										</ImageView>
+		      									</children>
+		      								</StackPane>
+		      								<Label styleClass="loginD-cardTitle" text="Member" />
+		      								<Label styleClass="loginD-cardHint" text="Welcome back!" />
+		      								<VBox spacing="6" styleClass="loginD-form">
+		      									<children>
+		      										<Label styleClass="loginD-label" text="Member ID:" />
+		      										<TextField id="txtUsername" fx:id="txtMemberID" promptText="Enter your member ID" styleClass="loginD-input" />
+		      									</children>
+		      								</VBox>
+		      								<Button fx:id="btnSignIn" maxWidth="414.0" minWidth="414.0" onAction="#btnSignIn" prefHeight="45.0" prefWidth="414.0" text="Sign In">
+		      									<styleClass>
+		      										<String fx:value="btn-wide" />
+		      										<String fx:value="btn-primary" />
+		      									</styleClass>
+		      								</Button>
+		      								<Hyperlink fx:id="lnkForgotMemberID" onAction="#lnkForgotMemberID" text="Forgot Member ID? click here" />
+		      								<HBox alignment="CENTER" spacing="10" styleClass="loginD-orRow">
+		      									<children>
+		      										<Label styleClass="loginD-orText" text="╾ or ╾" />
+		      									</children>
+		      								</HBox>
+		      								<Button fx:id="btnScanQR" maxHeight="45.0" maxWidth="414.0" minHeight="45.0" minWidth="414.0" onAction="#btnScanQR" prefHeight="45.0" prefWidth="414.0" text="Scan QR Code">
+		      									<styleClass>
+		      										<String fx:value="btn-wide" />
+		      										<String fx:value="btn-outline-soft" />
+		      									</styleClass>
+		      									<graphic>
+		      										<ImageView fitHeight="24.0" fitWidth="24.0">
+		      											<image>
+		      												<Image url="@../../resources/icons/QRBlack.png" />
+		      											</image>
+		      										</ImageView>
+		      									</graphic>
+		      								</Button>
+		      							</children>
+		      						</VBox>
+		      						
+		      						<VBox alignment="CENTER" maxHeight="-Infinity" spacing="14" styleClass="loginD-card">
+		      							<children>
+		      								<StackPane styleClass="loginD-iconCircle">
+		      									<children>
+		      										<ImageView fitHeight="28" fitWidth="28" preserveRatio="true">
+		      											<image>
+		      												<Image url="@../../resources/icons/EnterAsGuestIcon.png" />
+		      											</image>
+		      										</ImageView>
+		      									</children>
+		      								</StackPane>
+		      								<Label styleClass="loginD-cardTitle" text="Guest" />
+		      								<Label styleClass="loginD-cardHint" text="First time here? How can we contact you? (Fill at least one)" />
+		      								<VBox alignment="CENTER" spacing="12" styleClass="loginD-form">
+		      									<children>
+		      										<VBox spacing="6">
+		      											<children>
+		      												<Label styleClass="loginD-label" text="Phone Number:" />
+		      												<TextField fx:id="txtPhoneNumber" promptText="Enter phone number" styleClass="loginD-input" />
+		      											</children>
+		      										</VBox>
+		      										<VBox spacing="6">
+		      											<children>
+		      												<Label styleClass="loginD-label" text="Email:" />
+		      												<TextField fx:id="txtEmailAddress" promptText="Enter email address" styleClass="loginD-input" />
+		      											</children>
+		      										</VBox>
+		      									</children>
+		      								</VBox>
+		      								<Button fx:id="btnGuest" maxWidth="-Infinity" minWidth="414.0" onAction="#btnGuest" prefWidth="414.0" text="Continue as Guest">
+		      									<styleClass>
+		      										<String fx:value="btn-wide" />
+		      										<String fx:value="btn-primary" />
+		      									</styleClass>
+		      								</Button>
+		      							</children>
+		      						</VBox>
+		      						
+		      					</children>
+		      				</HBox>
+	      				</children>
+      				</VBox>
+      			</center>
+      			
+      			<bottom>
+      				<BorderPane BorderPane.alignment="CENTER">
+      					<left>
+      						<HBox alignment="BOTTOM_LEFT">
+      							<children>
+      								<Label styleClass="footer-label" text="© 2025 Bistro · All rights reserved · v1.0.0" textFill="WHITE" />
+      							</children>
+      							<padding>
+      								<Insets bottom="16" left="24" right="0" top="0" />
+      							</padding>
+      						</HBox>
+      					</left>
+      					<right>
+      						<HBox alignment="BOTTOM_RIGHT" spacing="8">
+      							<padding>
+      								<Insets bottom="16" left="0" right="32" top="0" />
+      							</padding>
+      							<children>
+      								<Hyperlink fx:id="lnkEmployee" onAction="#lnkEmployee" styleClass="loginD-link" text="Employee &amp; Manager Login" />
+      							</children>
+      						</HBox>
+      					</right>
+      					<center>
+      						<Label fx:id="lblError" textFill="RED" BorderPane.alignment="CENTER" />
+      					</center>
+      				</BorderPane>
+      			</bottom>
+      		</BorderPane>
+      	</children>
+      </StackPane>
+      <StackPane fx:id="modalOverlay"
+           visible="false"
+           managed="false"
+           styleClass="modal-overlay" />
+   </children>
+</StackPane>
+>>>>>>> Stashed changes

@@ -1,16 +1,13 @@
 package gui.logic;
 
-import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
-
 import entities.User;
 import enums.OrderStatus;
 import enums.UserType;
 import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
+import javafx.geometry.HPos;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
@@ -27,52 +24,38 @@ public class ClientDashboardScreen {
 	// ****************************** FXML Variables ******************************
 	@FXML
 	private VBox loyalpointVbox;
-
 	@FXML
 	private VBox discountVbox;
-
 	@FXML
 	private VBox statusVbox;
-
 	@FXML
 	private VBox becomeMemberVbox;
-	
 	@FXML
 	private GridPane gridPane;
-
 	@FXML
 	private Button btnNewReservation;
-
 	@FXML
 	private Button btnJoinWaitingList;
-
 	@FXML
 	private Button btnCheckInForTable;
-
 	@FXML
 	private Button btnManageBooking;
-
 	@FXML
 	private Button btnPayBill;
-
 	@FXML
 	private Button btnEditPersonalDetails;
-
 	@FXML
 	private Button btnSignOut;
-
 	@FXML
 	private Label lblWelcome;
-
 	@FXML
 	private Label lblClient;
-
 	@FXML
 	private Label lblError;
-	
+	@FXML
+	private Label lblJoinListTitle;
 	@FXML
 	private Label LblButtonDescrip;
-	
 	@FXML 
 	private StackPane rootPane;
 	
@@ -115,7 +98,9 @@ public class ClientDashboardScreen {
 			 BistroClientGUI.switchScreen("clientCheckInTableScreen", "Failed to load Client Check-In For Table Screen.");
 		}
 	    LblButtonDescrip.setText(isOnWaitingList ? "Waiting List Status" : "Add to queue");
-	    btnJoinWaitingList.setText(isOnWaitingList ? "View Status": "Join Waiting List");
+	    //btnJoinWaitingList.setText(isOnWaitingList ? "View Status": "Join Waiting List");
+	    lblJoinListTitle.setText(isOnWaitingList ? "View Status" : "Join Waiting List");
+	    btnJoinWaitingList.setText("");
 	    // Disable actions if an active reservation exists
 	    if (hasActiveSeatedReservation) {
 	        btnJoinWaitingList.setDisable(true);
@@ -140,6 +125,19 @@ public class ClientDashboardScreen {
 		}
 	}
 	
+	private void updateGridColumns(int numColumns) {
+	    gridPane.getColumnConstraints().clear();
+	    
+	    double percent = 100.0 / numColumns; // Calculates 50% or 33.3%
+	    
+	    for (int i = 0; i < numColumns; i++) {
+	        ColumnConstraints col = new ColumnConstraints();
+	        col.setPercentWidth(percent);
+	        col.setHalignment(HPos.CENTER); // Ensures the 280px button is centered in the column
+	        gridPane.getColumnConstraints().add(col);
+	    }
+	}
+	
 	/**
 	 * Method to set up the dashboard for a guest user.
 	 */
@@ -147,6 +145,7 @@ public class ClientDashboardScreen {
 	public void SetDashboardAsGuest() {
 	    lblWelcome.setText("Welcome, Guest!");
 	    lblClient.setText("How can we serve you today?");
+	    updateGridColumns(2);
 	    // Disable member-only features
 	    btnEditPersonalDetails.setVisible(false);
 	    btnEditPersonalDetails.setManaged(false);
@@ -173,6 +172,7 @@ public class ClientDashboardScreen {
 	public void SetDashboardAsMember(User member) {
 		lblWelcome.setText("Welcome, " + member.getFirstName() + " " + member.getLastName() + "!");
 		lblClient.setText("Member ID: " + member.getMemberCode());
+		updateGridColumns(3);
 		btnEditPersonalDetails.setVisible(true);
 		btnEditPersonalDetails.setManaged(true);
 		loyalpointVbox.setVisible(true);
