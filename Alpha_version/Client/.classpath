@@ -9,5 +9,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/javafx"/>
+	<classpathentry kind="lib" path="lib/core-3.5.2.jar"/>
+	<classpathentry kind="lib" path="lib/javase-3.5.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

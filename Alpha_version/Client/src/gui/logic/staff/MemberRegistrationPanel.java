@@ -8,8 +8,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import logic.BistroClientGUI;
+import logic.QRCodeGenerator;
 
 import java.net.URL;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
 import java.util.ArrayList;
@@ -67,7 +69,13 @@ public class MemberRegistrationPanel{
 			if(BistroClientGUI.client.getUserCTRL().getRegistrationSuccessFlag()) {
 				int memberCode = BistroClientGUI.client.getUserCTRL().getNewMemberID();
 			    showInfo("Registration Successful", "New member has been registered successfully."+
-			    		"\nMember Code: " + memberCode);
+			    		"\nMember Code: " + memberCode +
+			    		"\nA QR code has been generated for the member.");
+			    Path qrPath = QRCodeGenerator.generateAndSaveQRCode(String.valueOf(memberCode));
+
+			    if (qrPath != null) {
+			        System.out.println("QR saved: " + qrPath.toAbsolutePath());
+			    }
 			    clearForm();
 			}
         }
