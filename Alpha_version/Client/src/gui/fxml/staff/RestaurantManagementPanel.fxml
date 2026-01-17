@@ -124,7 +124,6 @@
             <!-- Table Management (full width) -->
             <VBox spacing="12" styleClass="op-card">
                 <Label styleClass="op-card-title" text="Table Management" />
-
                 <TableView fx:id="tablesTable" prefHeight="400.0" prefWidth="581.0" styleClass="op-table" VBox.vgrow="NEVER">
                     <columns>
                         <TableColumn fx:id="colTableId" text="Table ID" />
@@ -135,18 +134,14 @@
                 <HBox alignment="CENTER_LEFT" spacing="12">
                     <Button styleClass="op-btn-primary" text="Edit Selected Table" />
                 </HBox>
-
                 <Region styleClass="op-divider" />
-
                 <Label styleClass="op-section-title" text="Add New Table" />
-
                 <HBox alignment="CENTER_LEFT" spacing="12">
                     <TextField fx:id="txtTableID" prefWidth="220" promptText="Table ID (e.g., T13)" styleClass="op-field" />
                     <Spinner fx:id="spinDinersAmount" prefWidth="120" styleClass="op-spinner" />
                     <Button fx:id="btnAddTable" onAction="#btnAddTable" styleClass="op-btn-primary" text="➕  Add Table" />
                 </HBox>
             </VBox>
-
         </VBox>
     </content>
 </ScrollPane>

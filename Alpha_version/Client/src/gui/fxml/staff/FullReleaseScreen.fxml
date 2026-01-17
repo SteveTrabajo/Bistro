@@ -13,7 +13,6 @@
 
 <StackPane prefHeight="720" prefWidth="1280" stylesheets="@../../css/staff/clientEmployeeLoginStyle.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.staff.FullReleaseController">
     <BorderPane prefHeight="200.0" prefWidth="200.0" styleClass="background">
-        
         <top>
             <BorderPane>
                 <left>
@@ -29,10 +28,8 @@
                 </left>
             </BorderPane>
         </top>
-
         <center>
             <VBox alignment="CENTER" prefHeight="639.0" spacing="25" styleClass="login-card" BorderPane.alignment="CENTER">
-
                 <StackPane prefHeight="80.0" prefWidth="80.0">
                     <styleClass>
                         <String fx:value="icon-circle" />
@@ -46,19 +43,14 @@
                         </ImageView>
                     </children>
                 </StackPane>
-
                 <VBox alignment="CENTER" spacing="10">
                     <Label styleClass="title" text="Coming Soon" />
                     <Label styleClass="subtitle" text="This feature is locked." />
                 </VBox>
-
                 <Label styleClass="info-text" text="This content will be available in the Full Release version of Bistro Management Portal." textAlignment="CENTER" wrapText="true" maxWidth="320"/>
-
                 <Button fx:id="btnOk" onAction="#btnBack" prefHeight="48.0" prefWidth="221.0" styleClass="btn-primary" text="Got it" />
-
             </VBox>
         </center>
-
         <bottom>
             <BorderPane BorderPane.alignment="CENTER">
                 <left>

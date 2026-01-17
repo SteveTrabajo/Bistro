@@ -12,13 +12,9 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="467.0" prefWidth="836.0"
-	stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/21"
-	xmlns:fx="http://javafx.com/fxml/1"
-	fx:controller="gui.controllers.ServerConsoleController">
+<BorderPane prefHeight="467.0" prefWidth="836.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controllers.ServerConsoleController">
 	<center>
-		<TextArea fx:id="txtLog" editable="false" prefHeight="296.0"
-			prefWidth="724.0" wrapText="true" BorderPane.alignment="CENTER">
+		<TextArea fx:id="txtLog" editable="false" prefHeight="296.0" prefWidth="724.0" wrapText="true" BorderPane.alignment="CENTER">
 			<BorderPane.margin>
 				<Insets bottom="10" left="10" right="10" top="0" />
 			</BorderPane.margin>
@@ -27,51 +23,33 @@
 	<bottom>
 		<VBox BorderPane.alignment="CENTER">
 			<children>
-				<HBox alignment="BOTTOM_CENTER" prefHeight="40.0"
-					prefWidth="836.0" spacing="10" VBox.vgrow="ALWAYS">
+				<HBox alignment="BOTTOM_CENTER" prefHeight="40.0" prefWidth="836.0" spacing="10" VBox.vgrow="ALWAYS">
 					<padding>
 						<Insets bottom="10" left="10" right="10" top="0" />
 					</padding>
-					<TextField fx:id="txtCommand" prefHeight="20.0"
-						prefWidth="760.0"
-						promptText="Enter server command (e.g. &quot;/connections&quot;, &quot;/stop&quot;)"
-						HBox.hgrow="ALWAYS" />
-					<Button fx:id="btnSend" defaultButton="true"
-						onAction="#btnSend" prefHeight="25.0" prefWidth="46.0"
-						styleClass="button-secondary" text="Send" />
+					<TextField fx:id="txtCommand" prefHeight="20.0" prefWidth="760.0" promptText="Enter server command (e.g. &quot;/connections&quot;, &quot;/stop&quot;)" HBox.hgrow="ALWAYS" />
+					<Button fx:id="btnSend" defaultButton="true" onAction="#btnSend" prefHeight="25.0" prefWidth="46.0" styleClass="button-secondary" text="Send" />
 				</HBox>
 				<AnchorPane prefHeight="8.0" prefWidth="836.0">
 					<children>
-						<Label layoutX="451.0" layoutY="15.0"
-							text="© 2025 Bistro Management System – All rights reserved · v0.1 Prototype." />
+						<Label layoutX="451.0" layoutY="15.0" text="© 2025 Bistro Management System – All rights reserved · v0.1 Prototype." />
 					</children>
 				</AnchorPane>
 			</children>
 		</VBox>
 	</bottom>
 	<left>
-		<VBox alignment="TOP_CENTER" prefHeight="306.0" prefWidth="106.0"
-			spacing="20.0" BorderPane.alignment="CENTER">
+		<VBox alignment="TOP_CENTER" prefHeight="306.0" prefWidth="106.0" spacing="20.0" BorderPane.alignment="CENTER">
 			<children>
-				<Button fx:id="btnStart" onAction="#btnStart"
-					prefHeight="29.0" prefWidth="86.0" styleClass="button-secondary"
-					text="Start Server" />
-				<Button fx:id="btnStop" onAction="#btnStop" prefHeight="29.0"
-					prefWidth="86.0" styleClass="button-primary" text="Stop Server" />
-				<Button fx:id="btnClear" onAction="#btnClear"
-					prefHeight="29.0" prefWidth="86.0" styleClass="button-primary"
-					text="Clear Log" />
-				<Button fx:id="btnAddStaff" onAction="#btnAddStaff"
-        			prefHeight="29.0" prefWidth="86.0"
-        			styleClass="button-secondary"
-        			text="Add Staff" />
-				
+				<Button fx:id="btnStart" onAction="#btnStart" prefHeight="29.0" prefWidth="86.0" styleClass="button-secondary" text="Start Server" />
+				<Button fx:id="btnStop" onAction="#btnStop" prefHeight="29.0" prefWidth="86.0" styleClass="button-primary" text="Stop Server" />
+				<Button fx:id="btnClear" onAction="#btnClear" prefHeight="29.0" prefWidth="86.0" styleClass="button-primary" text="Clear Log" />
+				<Button fx:id="btnAddStaff" onAction="#btnAddStaff" prefHeight="29.0" prefWidth="86.0" styleClass="button-secondary" text="Add Staff" />
 			</children>
 		</VBox>
 	</left>
 	<top>
-		<ImageView fitHeight="89.0" fitWidth="89.0"
-			BorderPane.alignment="TOP_LEFT">
+		<ImageView fitHeight="89.0" fitWidth="89.0" BorderPane.alignment="TOP_LEFT">
 			<image>
 				<Image url="@/resources/bistroLogo.png" />
 			</image>
@@ -83,5 +61,4 @@
 	<BorderPane.margin>
 		<Insets left="9.0" />
 	</BorderPane.margin>
-
 </BorderPane>

@@ -13,10 +13,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane fitToWidth="true" hbarPolicy="NEVER"
-	vbarPolicy="AS_NEEDED" styleClass="ad-scroll"
-	xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
-	fx:controller="gui.logic.staff.AnalyticsPanel">
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="ad-scroll" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.staff.AnalyticsPanel">
 
 	<content>
 		<VBox spacing="16" styleClass="ad-root">
@@ -40,7 +37,6 @@
 
 			<!-- KPIs -->
 			<HBox spacing="14">
-
 				<VBox styleClass="ad-kpi" HBox.hgrow="ALWAYS">
 					<Label styleClass="ad-kpi-label" text="Total Reservations" />
 					<Label fx:id="totalReservationsLabel"
@@ -52,7 +48,6 @@
 					<Label fx:id="customersThisMonthLabel"
 						styleClass="ad-kpi-value" text="0" />
 				</VBox>
-
 			</HBox>
 
 			<!-- Bar Chart -->
@@ -93,10 +88,8 @@
 			</VBox>
 
 			<VBox spacing="6" styleClass="ad-card">
-				<Label fx:id="distributionTitleLabel"
-					styleClass="ad-card-title" text="Distribution" />
-				<Label fx:id="distributionSubtitleLabel"
-					styleClass="ad-card-subtitle" text="" />
+				<Label fx:id="distributionTitleLabel" styleClass="ad-card-title" text="Distribution" />
+				<Label fx:id="distributionSubtitleLabel" styleClass="ad-card-subtitle" text="" />
 				<VBox fx:id="peakTimesBox" spacing="8" />
 			</VBox>
 
