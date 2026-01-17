@@ -16,8 +16,15 @@ import logic.BistroClient;
 import logic.BistroClientGUI;
 import logic.api.ClientRouter;
 
+/**
+ * ClientOrderSubject handles order-related events
+ * for the BistroClient application.
+ */
 public class ClientOrderSubject {
 	
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
 	private ClientOrderSubject() {}
 	
 	public static void register(ClientRouter router) {
@@ -40,7 +47,7 @@ public class ClientOrderSubject {
 			BistroClientGUI.switchScreen("clientNewReservationCreatedScreen", "Failed to load Reservation Success Screen after creating reservation.");
 			});
 		});
-		
+		// Handler for reservation creation failure messages
 		router.on("orders","createReservation.fail", msg -> {
 			BistroClient.awaitResponse = false;
 			Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -48,7 +55,7 @@ public class ClientOrderSubject {
 			alert.setHeaderText("Could not create reservation");
 			alert.setContentText("An error occurred while creating your reservation. Please try again later.");
 		});
-		
+		// Handler for staff creating reservation on behalf of a client
 		router.on("orders", "createReservation.asStaff.ok", msg -> {
             BistroClient.awaitResponse = false;
             Order createdOrder = (Order) msg.getData();
@@ -63,7 +70,7 @@ public class ClientOrderSubject {
                 BistroClientGUI.switchScreen("staff/clientStaffDashboardScreen", "Error returning to Staff Dashboard.");
             });
         });
-
+		// Handler for staff reservation creation failure messages
         router.on("orders", "createReservation.asStaff.fail", msg -> {
             BistroClient.awaitResponse = false;
             String errorMessage = (String) msg.getData(); 
@@ -83,7 +90,7 @@ public class ClientOrderSubject {
             List<String> slots = (List<String>) msg.getData();
             Platform.runLater(() -> BistroClientGUI.client.getReservationCTRL().setAvailableTimeSlots(slots));  
         });
-		
+		// Handler for failure to retrieve available hours
 		router.on("orders", "getAvailableHours.fail", (msg) -> {
 			BistroClient.awaitResponse = false;
 			Platform.runLater(() -> {
@@ -94,17 +101,17 @@ public class ClientOrderSubject {
 				alert.showAndWait();
 			});
 		});
-		
+		// Handler for checking if an order exists for check-in
 		router.on("orders", "order.exists", msg -> {
             BistroClient.awaitResponse = false;
 			BistroClientGUI.client.getReservationCTRL().notifyCheckInResult(true, "Check-in successful!");
 		});
-		
+		// Handler for non-existing order during check-in
 		router.on("orders", "order.notExists", msg -> {
 			BistroClient.awaitResponse = false;
 			BistroClientGUI.client.getReservationCTRL().notifyCheckInResult(false, "Invalid confirmation code or reservation does not belong to you.");
 		});	
-		
+		// Handler for staff viewing reservations by date
 		router.on("orders", "getOrdersByDate.ok", msg -> {
 		    BistroClient.awaitResponse = false;
 		    @SuppressWarnings
@@ -115,20 +122,20 @@ public class ClientOrderSubject {
 		        BistroClientGUI.client.getReservationCTRL().receiveStaffReservations(orders);
 		    });
 		});
-		
+		// Handler for failure to retrieve reservations by date
 		router.on("orders", "getMemberActiveReservations.ok", msg -> {
 		    BistroClient.awaitResponse = false;
 		    @SuppressWarnings("unchecked")
 		    List<Order> orders = (List<Order>) msg.getData();
 		    BistroClientGUI.client.getReservationCTRL().handleMemberReservationsListResponse(orders);
 		});
-
+		// Handler for failure to retrieve member active reservations
 		router.on("orders", "getMemberActiveReservations.fail", msg -> {
 		    BistroClient.awaitResponse = false;
 		    BistroClientGUI.client.getReservationCTRL().handleMemberReservationsListResponse(new ArrayList<>());
 		});
 		
-
+		// Handler for failure to retrieve reservations by date
 		router.on("orders", "getAvailableDates.ok", msg -> {
 			BistroClient.awaitResponse = false;
 			// Retrieve the list of dates from the server message
@@ -136,12 +143,13 @@ public class ClientOrderSubject {
 			// Send it to the controller to update the GUI
 			BistroClientGUI.client.getReservationCTRL().setAvailableDates(dates);
 		});
+		// Handler for failure to retrieve available dates
 		router.on("orders", "getAvailableDates.fail", msg -> {
 			BistroClient.awaitResponse = false;
 			// Send an empty list or null to indicate failure/no dates
 			BistroClientGUI.client.getReservationCTRL().setAvailableDates(new ArrayList<>());
 		});
-
+		// Handler for seating a customer successfully
 		router.on("orders", "seatCustomer.ok", msg -> {
 			BistroClient.awaitResponse = false;
 		    int tableNum = (int) msg.getData();
@@ -162,7 +170,7 @@ public class ClientOrderSubject {
 		        }
 		    });
 		});
-
+		// Handler for seating a customer failure	
 		router.on("orders", "seatCustomer.fail", msg -> {
 			BistroClient.awaitResponse = false;
 			String failMsg = (String) msg.getData();
@@ -182,7 +190,7 @@ public class ClientOrderSubject {
 		    	}
 		    });
 		});
-		
+		// Handler for successful reservation cancellation
 		router.on("orders", "cancelReservation.ok", msg -> {
 			BistroClient.awaitResponse = false;
 			Platform.runLater(() -> {
@@ -195,7 +203,7 @@ public class ClientOrderSubject {
 				BistroClientGUI.client.getReservationCTRL().notifyCancelResult(true);
 			});
 		});
-		
+		// Handler for failed reservation cancellation
 		router.on("orders", "cancelReservation.fail", msg -> {
 			BistroClient.awaitResponse = false;
 			Platform.runLater(() -> {
@@ -206,17 +214,17 @@ public class ClientOrderSubject {
 				alert.show();
 			});
 		});
-		
+		// Handler for client viewing their own order history
 		router.on("orders", "getClientHistory.ok", msg -> {
 			BistroClient.awaitResponse = false;
 			@SuppressWarnings("unchecked")
 			List<Order> orders = (List<Order>) msg.getData();
 			
 			Platform.runLater(() -> {
-				//TODO maybe rename method to receiveOrderHistory
 				BistroClientGUI.client.getReservationCTRL().receiveStaffReservations(orders);
 			});
 		});
+		// Handler for failure to retrieve client order history
 		router.on("orders", "getClientHistory.fail", msg -> {
 			BistroClient.awaitResponse = false;
 			Platform.runLater(() -> {
@@ -240,6 +248,7 @@ public class ClientOrderSubject {
 			});
 		});
 		
+		// Handler for failure to retrieve member history
 		router.on("orders", "getMemberHistory.fail", msg -> {
 			BistroClient.awaitResponse = false;
 			Platform.runLater(() -> {
@@ -250,34 +259,31 @@ public class ClientOrderSubject {
 				alert.showAndWait();
 			});
 		});
+		// Handler for retrieving forgotten confirmation code
 		router.on("reservation", "forgotConfirmationCode.ok", msg -> {
 		    BistroClient.awaitResponse = false;
 
-		    // 1. Cast the data directly to String (since the server sends a single String)
+		    //Cast the data directly to String
 		    String confirmationCode = (String) msg.getData();
 
 		    Platform.runLater(() -> {
-		        // --- Create a Styled Dialog ---
+		        //Create a Styled Dialog
 		        Alert alert = new Alert(Alert.AlertType.INFORMATION);
 		        alert.setTitle("Code Retrieved");
 		        alert.setHeaderText(null);
 		        alert.setGraphic(null);
-
 		        // Create container
 		        VBox content = new VBox(15);
 		        content.setAlignment(Pos.CENTER);
 		        content.setPadding(new Insets(20));
-
 		        // Styled Title
 		        Label lblTitle = new Label("Your Confirmation Code is:");
 		        lblTitle.setStyle("-fx-font-size: 16px; -fx-text-fill: #555555;");
-
-		        // Styled Code Box (TextField is best for single codes)
+		        // Styled Code Box
 		        TextField codeField = new TextField(confirmationCode);
 		        codeField.setEditable(false); // Read-only
 		        codeField.setAlignment(Pos.CENTER);
-		        
-		        // CSS for a "Card/Badge" look
+		        // CSS
 		        codeField.setStyle(
 		            "-fx-font-size: 24px; " +
 		            "-fx-font-weight: bold; " +
@@ -287,19 +293,17 @@ public class ClientOrderSubject {
 		            "-fx-border-color: #d1d8e0; " +
 		            "-fx-border-radius: 8px;"
 		        );
-		        
 		        // Remove focus ring
 		        codeField.setFocusTraversable(false);
-
 		        content.getChildren().addAll(lblTitle, codeField);
 		        alert.getDialogPane().setContent(content);
-
 		        alert.showAndWait();
-
 		        // Pass the single code to the controller
 		        BistroClientGUI.client.getReservationCTRL().handleForgotConfirmationCodeResponse(confirmationCode);
 		    });
 		});
+		
+		// Handler for failure to retrieve forgotten confirmation code
 		router.on("reservation", "forgotConfirmationCode.fail", msg -> {
 			BistroClient.awaitResponse = false;
 			Platform.runLater(() -> {
@@ -311,30 +315,32 @@ public class ClientOrderSubject {
 			});
 		});
 		
+		//Handler for retrieving member seated reservations
 		router.on("orders", "getMemberSeatedReservations.ok", msg -> {
 		    BistroClient.awaitResponse = false;
 		    @SuppressWarnings("unchecked")
 		    List<Order> orders = (List<Order>) msg.getData();
 		    BistroClientGUI.client.getReservationCTRL().handleMemberSeatedListResponse(orders);
 		});
-
+		
+		// Handler for failure to retrieve member seated reservations
 		router.on("orders", "getMemberSeatedReservations.fail", msg -> {
 		    BistroClient.awaitResponse = false;
 		    BistroClientGUI.client.getReservationCTRL().handleMemberSeatedListResponse(new ArrayList<>());
 		});
 
-		// GUEST SEATED
+		//Handler for retrieving guest seated code
 		router.on("orders", "recoverGuestSeatedCode.ok", msg -> {
 		    BistroClient.awaitResponse = false;
 		    String code = (String) msg.getData();
 		    BistroClientGUI.client.getReservationCTRL().handleGuestSeatedCodeResponse(code);
 		});
 
+		// Handler for failure to retrieve guest seated code
 		router.on("orders", "recoverGuestSeatedCode.fail", msg -> {
 		    BistroClient.awaitResponse = false;
 		    BistroClientGUI.client.getReservationCTRL().handleGuestSeatedCodeResponse("NOT_FOUND");
-		});
-		
+		});	
 	}
-	
 }
+// End of ClientOrderSubject.java

@@ -3,9 +3,17 @@ package logic.api.subjects;
 import javafx.application.Platform;
 import logic.BistroClient;
 import logic.api.ClientRouter;
-
+/**
+ * ClientConnectionSubject handles connection and disconnection events
+ * for the BistroClient application.
+ */
 public class ClientConnectionSubject {
-
+	
+	/**
+	 * Registers event handlers for connection and disconnection events.
+	 *
+	 * @param router The ClientRouter to register the event handlers with.
+	 */
     public static void register(ClientRouter router) {
         router.on("connection", "connect.ok", msg -> {
             // Release any waiting request loops

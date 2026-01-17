@@ -13,26 +13,34 @@ import enums.UserType;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
-
+/**
+ * ClientUserSubject is responsible for handling user-related messages
+ * received from the server and updating the client GUI accordingly.
+ */
 public class ClientUserSubject {
-
+	/**
+	 * Registers message handlers for user-related events.
+	 *
+	 * @param router The ClientRouter to register the handlers with.
+	 * @param userController The UserController to update user state.
+	 */
 	public static void register(ClientRouter router, UserController userController) {
 		
 		// Login-Signout Customers responses:
 		for (UserType type : List.of(UserType.GUEST, UserType.MEMBER, UserType.EMPLOYEE, UserType.MANAGER)) {
 			String typeKey = type.name().toLowerCase();
-			
+			// Login responses:
 			router.on("login", typeKey + ".ok", msg -> {
 				BistroClient.awaitResponse = false;
 				User user = (User) msg.getData();
 				userController.setLoggedInUser(user);
 			});
-
+			// Signout responses:
 			router.on("signout", typeKey + ".ok", msg -> {
 				BistroClient.awaitResponse = false;
 				userController.setLoggedInUser(null);
 			});
-
+			// Login failure responses:
 			router.on("login", typeKey + ".notFound", msg -> {
 				BistroClient.awaitResponse = false;
 				Platform.runLater(() -> {
@@ -43,7 +51,7 @@ public class ClientUserSubject {
 				alert.showAndWait();
 				});
 			});
-
+			// Signout failure responses:
 			router.on("signout", typeKey + ".fail", msg -> {
 				BistroClient.awaitResponse = false;
 			});
@@ -64,7 +72,7 @@ public class ClientUserSubject {
 				});
 			}
 		});
-		
+		// Staff login failure responses:
 		router.on("login", "staff.invalidCredentials", msg -> {
 			BistroClient.awaitResponse = false;
 			Platform.runLater(() -> {
@@ -75,7 +83,7 @@ public class ClientUserSubject {
 				alert.showAndWait();
 			});
 		});
-		
+		// Staff account locked response:
 		router.on("login", "staff.accountLocked", msg -> {
 			BistroClient.awaitResponse = false;
 			Platform.runLater(() -> {
@@ -87,7 +95,7 @@ public class ClientUserSubject {
 				alert.showAndWait();
 			});
 		});
-		
+		// Forgot Member ID responses:
 		router.on("user", "forgotMemberID.ok", msg -> {
 			BistroClient.awaitResponse = false;
 			String memberID = (String) msg.getData();
@@ -105,18 +113,18 @@ public class ClientUserSubject {
 						"Failed to load Login Screen after retrieving Member ID.");
 			});
 		});
-		
+		// Forgot Member ID failure responses:
 		router.on("user", "forgotMemberID.fail", msg -> {
 			BistroClient.awaitResponse = false;
 			userController.handleForgotIDResponse("NOT_FOUND");
 		});
-		
+		// Recover Staff Password responses:
 		router.on("staff",  "recoverPassword.ok", msg -> {
 			BistroClient.awaitResponse = false;
 			String password = (String) msg.getData();
 			userController.handleStaffCredentialsResponse(password);
 		});
-		
+		// Recover Staff Password failure responses:
 		router.on("staff",  "recoverPassword.fail", msg -> {
 			BistroClient.awaitResponse = false;
 			userController.handleStaffCredentialsResponse("NOT_FOUND");
@@ -135,7 +143,7 @@ public class ClientUserSubject {
 			currentUser.setMemberCode(updatedUser.getMemberCode());
 			userController.setUserUpdateSuccessFlag(true);
 		});
-		
+		// Member info update failure responses:
 		router.on("member", "updateInfo.fail", msg -> {
 			BistroClient.awaitResponse = false;
 			userController.setUserUpdateSuccessFlag(false);
@@ -155,7 +163,7 @@ public class ClientUserSubject {
 		        userController.handleRegisterNewMemberOk(newMemberCode);
 		    });
 		});
-
+		// Member registration failure responses:
 		router.on("user", "registerNewMember.failed", msg -> {
 		    BistroClient.awaitResponse = false;
 
@@ -171,13 +179,13 @@ public class ClientUserSubject {
 		    });
 		});
 
-		
+		// Member registration stats responses:
 		router.on("member", "registerationStats.ok", msg -> {
 			BistroClient.awaitResponse = false;
 			ArrayList<Integer> count = (ArrayList<Integer>) msg.getData();
 			BistroClientGUI.client.getUserCTRL().setMemberRegistrationStats(count);
 		});
-		
+		// Member registration stats failure responses:
 		router.on("member", "registerationStats.fail", msg -> {
 			BistroClient.awaitResponse = false;
 		});
@@ -188,7 +196,7 @@ public class ClientUserSubject {
 			List<UserData> customersData = (List<UserData>) msg.getData();
 			BistroClientGUI.client.getUserCTRL().setCustomersData(customersData);
 		});
-
+		// Get all customers data failure responses:
 		router.on("customers", "getalldata.fail", msg -> {
 			BistroClient.awaitResponse = false;
 			BistroClientGUI.client.getUserCTRL().setCustomersData(new ArrayList<>());
@@ -206,28 +214,27 @@ public class ClientUserSubject {
 			BistroClientGUI.client.getUserCTRL().setStaffCreationSuccess(true);
 			BistroClientGUI.client.getUserCTRL().setStaffCreationErrorMessage(null);
 		});
-		
+		// Staff creation failure responses:
 		router.on("staff", "create.invalidData", msg -> {
 			BistroClient.awaitResponse = false;
 			BistroClientGUI.client.getUserCTRL().setStaffCreationSuccess(false);
 			BistroClientGUI.client.getUserCTRL()
 					.setStaffCreationErrorMessage("Invalid staff data provided. Please check all fields.");
 		});
-
+		// Username already exists response:
 		router.on("staff", "create.usernameExists", msg -> {
 			BistroClient.awaitResponse = false;
 			BistroClientGUI.client.getUserCTRL().setStaffCreationSuccess(false);
 			BistroClientGUI.client.getUserCTRL()
 					.setStaffCreationErrorMessage("Username already exists. Please choose a different username.");
 		});
-
+		// Username already exists response:
 		router.on("staff", "create.failed", msg -> {
 			BistroClient.awaitResponse = false;
 			BistroClientGUI.client.getUserCTRL().setStaffCreationSuccess(false);
 			BistroClientGUI.client.getUserCTRL()
 					.setStaffCreationErrorMessage("Failed to create staff account. Please try again.");
-		});
-		
-		
+		});	
 	}
 }
+// End of ClientUserSubject.java

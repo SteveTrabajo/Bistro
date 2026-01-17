@@ -5,16 +5,25 @@ import logic.BistroClient;
 import logic.BistroClientGUI;
 import logic.api.ClientRouter;
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
 
 import java.util.List;
 
 import entities.MonthlyReport;
-
+/**
+ * ClientMonthlyReportsSubject handles events related to monthly reports
+ * for the BistroClient application.
+ */
 public class ClientMonthlyReportsSubject {
-
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
     private ClientMonthlyReportsSubject() {}
 
+    /**
+	 * Registers event handlers for monthly report events.
+	 *
+	 * @param router The ClientRouter to register the event handlers with.
+	 */
     public static void register(ClientRouter router) {
 
         // New pipeline: reports.getOrGenerate.ok
@@ -37,6 +46,7 @@ public class ClientMonthlyReportsSubject {
             });
         });
         
+        // reports.listMonths.ok
         router.on("reports", "listMonths.ok", msg -> {
             @SuppressWarnings("unchecked")
             List<int[]> months = (List<int[]>) msg.getData();
@@ -44,7 +54,8 @@ public class ClientMonthlyReportsSubject {
             BistroClientGUI.client.getMonthlyReportsCTRL().setAvailableMonths(months);
             BistroClient.awaitResponse = false;
         });
-
+        
+        // reports.listMonths.fail
         router.on("reports", "listMonths.fail", msg -> {
             BistroClient.awaitResponse = false;
 
@@ -58,3 +69,4 @@ public class ClientMonthlyReportsSubject {
         });
     }
 }
+// End of ClientMonthlyReportsSubject.java

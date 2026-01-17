@@ -15,12 +15,23 @@ import logic.BistroClientGUI;
 import logic.TableController;
 import logic.WaitingListController;
 import logic.api.ClientRouter;
-
+/**
+ * ClientWaitListSubject is responsible for handling waiting list related
+ * messages between the client and server.
+ */
 public class ClientWaitListSubject {
-
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
 	private ClientWaitListSubject() {
 	}
-
+	/**
+	 * Registers the waiting list related message handlers with the provided router.
+	 *
+	 * @param router          The ClientRouter to register handlers with.
+	 * @param waitingListCTRL The WaitingListController to update based on messages.
+	 * @param tableCTRL       The TableController to update based on messages.
+	 */
 	public static void register(ClientRouter router, WaitingListController waitingListCTRL, TableController tableCTRL) {
 		// Staff: Get All Data
 		router.on("waitinglist", "getAll.ok", msg -> {
@@ -29,7 +40,7 @@ public class ClientWaitListSubject {
 			ArrayList<Order> list = (ArrayList<Order>) msg.getData();
 			waitingListCTRL.setWaitingList(list);
 		});
-		
+		//Handler for getAll.fail
 		router.on("waitinglist", "getAll.fail", msg -> {
 			BistroClient.awaitResponse = false;
 		});
@@ -45,7 +56,7 @@ public class ClientWaitListSubject {
 				BistroClientGUI.switchScreen("clientOnListScreen", "Client On List Screen error message");
 			});
 		});
-
+		//Handler for join.fail
 		router.on("waitinglist", "join.fail", msg -> {
 			BistroClient.awaitResponse = false;
 			waitingListCTRL.clearWaitingListController();
@@ -58,7 +69,7 @@ public class ClientWaitListSubject {
 				alert.showAndWait();
 			});
 		});
-
+		// Client/Staff: Join Skipped (Seated Immediately)
 		router.on("waitinglist", "join.skipped", msg -> {
 			BistroClient.awaitResponse = false;
 			@SuppressWarnings("unchecked")
@@ -101,6 +112,7 @@ public class ClientWaitListSubject {
 			System.out.println("Staff: Left waiting list successfully.");
 		});
 		
+		//Handler for leave.staff.fail
 		router.on("waitinglist","leave.staff.fail", msg -> {
 			BistroClient.awaitResponse = false;
 			Platform.runLater(() -> {
@@ -113,7 +125,7 @@ public class ClientWaitListSubject {
 			});
 		});
 		
-		
+		//Handler for leave.fail
 		router.on("waitinglist", "leave.fail", msg -> {
 			BistroClient.awaitResponse = false;
 			waitingListCTRL.setLeaveWaitingListSuccess(false);
@@ -134,12 +146,14 @@ public class ClientWaitListSubject {
 			waitingListCTRL.setOrderWaitListDTO((Order) msg.getData());
 		});
 
+		//Handler for isInWaitingList.no
 		router.on("waitinglist", "isInWaitingList.no", msg -> {
 			BistroClient.awaitResponse = false;
 			waitingListCTRL.setUserOnWaitingList(false);
 			waitingListCTRL.setOrderWaitListDTO(null);
 		});
 		
+		//Handler for isInWaitingList.fail
 		router.on("waitinglist", "isInWaitingList.fail", msg -> {
 			BistroClient.awaitResponse = false;
 			Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -166,6 +180,7 @@ public class ClientWaitListSubject {
 			});
 		});
 
+		//Handler for notified.failed
 		router.on("waitinglist", "notified.failed", msg -> {
 			BistroClient.awaitResponse = false;
 			Platform.runLater(() -> {
@@ -178,6 +193,7 @@ public class ClientWaitListSubject {
 			});
 		});
 
+		// Handler for addWalkIn.ok
 		router.on("waitinglist", "addWalkIn.ok", msg -> {
 		    BistroClient.awaitResponse = false;
 
@@ -242,8 +258,7 @@ public class ClientWaitListSubject {
 		    });
 		});
 
-
-
+		// Handler for addWalkIn.fail
 		router.on("waitinglist", "addWalkIn.fail", msg -> {
 			BistroClient.awaitResponse = false;
 			// Extract error message if the server sent one
@@ -258,12 +273,14 @@ public class ClientWaitListSubject {
 			});
 		});
 
+		//Handler for checkAvailability responses
 		router.on("waitinglist", "checkAvailability.ok", msg -> {
 			BistroClient.awaitResponse = false;
 			WaitListResponse dto = (WaitListResponse) msg.getData();
 			waitingListCTRL.setEstimatedWaitTimeMinutes(dto.getEstimatedWaitTimeMinutes());
 		});
 
+		//Handler for checkAvailability.skipped
 		router.on("waitinglist", "checkAvailability.skipped", msg -> {
 			BistroClient.awaitResponse = false;
 			Map<String, Object> data = (Map<String, Object>) msg.getData();
@@ -274,6 +291,7 @@ public class ClientWaitListSubject {
 					"Client Check-In Table Success error messege");
 		});
 
+		//Handler for checkAvailability.fail
 		router.on("waitinglist", "checkAvailability.fail", msg -> {
 			BistroClient.awaitResponse = false;
 			Platform.runLater(() -> {
@@ -285,3 +303,4 @@ public class ClientWaitListSubject {
 		});
 	}
 }
+// End of ClientWaitListSubject.java
