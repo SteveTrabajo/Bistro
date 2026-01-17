@@ -47,11 +47,7 @@
                     <padding>
                         <Insets bottom="30" left="24" right="24" top="26" />
                     </padding>
-
-                    <!-- ONE BIG WHITE CONTAINER (like screenshot) -->
                     <VBox spacing="22" styleClass="big-card">
-
-                        <!-- Title row: icon + "Member Information" -->
                         <HBox alignment="CENTER_LEFT" spacing="12">
                             <Label styleClass="big-title" text="Member Information">
                         <graphic>
@@ -63,7 +59,7 @@
                         </graphic></Label>
                         </HBox>
 
-                        <!-- Member ID panel (not a TextField) -->
+                        <!-- Member ID panel -->
                         <VBox prefHeight="104.0" prefWidth="486.0" spacing="6" styleClass="memberid-panel">
                             <Label styleClass="memberid-caption" text="Member ID" />
                             <Label fx:id="lblMemberID" styleClass="memberid-value" />
@@ -132,7 +128,7 @@
                             </VBox>
                         </VBox>
 
-                        <!-- Buttons row: Save centered wide, Cancel at right -->
+                        <!-- Buttons row -->
                         <Label fx:id="lblError" alignment="CENTER" textAlignment="CENTER" wrapText="true" maxWidth="Infinity"/>
                         <HBox alignment="CENTER" spacing="18" styleClass="buttons-row">
                             <Button fx:id="btnSave" onAction="#btnSave" text="Save Changes">

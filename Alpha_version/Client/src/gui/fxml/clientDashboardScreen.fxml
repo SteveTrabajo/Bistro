@@ -189,14 +189,14 @@
 
                                 <VBox fx:id="loyalpointVbox" prefHeight="74.0" prefWidth="99.0" styleClass="mem-statBlock" HBox.hgrow="ALWAYS">
                                     <children>
-                                        <Label fx:id="pointsLabel" styleClass="mem-statValue" text="Loyalty Points" />
+                                        <Label styleClass="mem-statValue" text="Loyalty Points" />
                                         <Label styleClass="mem-statLabel" text="Coming Soon!" />
                                     </children>
                                 </VBox>
 
                                 <VBox fx:id="discountVbox" styleClass="mem-statBlock" HBox.hgrow="ALWAYS">
                                     <children>
-                                        <Label fx:id="discountLabel" styleClass="mem-statValue" text="10%" />
+                                        <Label styleClass="mem-statValue" text="10%" />
                                         <Label styleClass="mem-statLabel" text="Current Discount" />
                                     </children>
                                 </VBox>
@@ -210,7 +210,7 @@
 
                                 <VBox fx:id="statusVbox" styleClass="mem-statBlock" HBox.hgrow="ALWAYS">
                                     <children>
-                                        <Label fx:id="statusLabel" styleClass="mem-statValue" text="Active" />
+                                        <Label styleClass="mem-statValue" text="Active" />
                                         <Label styleClass="mem-statLabel" text="Member Status" />
                                     </children>
                                 </VBox>

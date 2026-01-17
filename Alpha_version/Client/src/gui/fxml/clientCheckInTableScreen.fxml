@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane fx:id="mainPane" styleClass="checkin-root" stylesheets="@../../gui/css/clientCheckInTableStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.ClientCheckInTableScreen">
+<StackPane styleClass="checkin-root" stylesheets="@../../gui/css/clientCheckInTableStyles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.ClientCheckInTableScreen">
 
     <children>
         <BorderPane prefHeight="720" prefWidth="1280">
@@ -123,7 +123,7 @@
 
         </BorderPane>
         
-        <!-- Modal Overlay (hidden by default) -->
+        <!-- Modal Overlay -->
         <StackPane fx:id="modalOverlay" alignment="CENTER" managed="false" visible="false" 
                    style="-fx-background-color: rgba(0, 0, 0, 0.5);">
         </StackPane>

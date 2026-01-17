@@ -100,23 +100,16 @@
                 <!-- Holiday Exceptions -->
                 <VBox spacing="12" styleClass="op-card" HBox.hgrow="ALWAYS">
                     <Label styleClass="op-card-title" text="Holiday Exceptions" />
-
                     <VBox fx:id="holidaysListBox" spacing="12" />
-
                     <Region styleClass="op-divider" />
-
                     <Label styleClass="op-section-title" text="Add Holiday" />
-
                     <GridPane hgap="10" vgap="10">
                         <columnConstraints>
                             <ColumnConstraints hgrow="ALWAYS" />
                         </columnConstraints>
-
                         <DatePicker fx:id="dpHoliday" promptText="dd/mm/yyyy" styleClass="op-field" GridPane.rowIndex="0" />
                         <TextField fx:id="txtHolidayName" promptText="Holiday name" styleClass="op-field" GridPane.rowIndex="1" />
-
                         <CheckBox fx:id="holyShitCheck" styleClass="op-checkbox" text="Restaurant closed on this day" GridPane.rowIndex="2" />
-
                         <Button fx:id="btnAddHoliday" onAction="#btnAddHoliday" styleClass="op-btn-primary" text="➕  Add Holiday" GridPane.rowIndex="3" />
                   <rowConstraints>
                      <RowConstraints />
@@ -140,7 +133,7 @@
                 </TableView>
 
                 <HBox alignment="CENTER_LEFT" spacing="12">
-                    <Button fx:id="btnEditTable" onAction="#btnEditTable" styleClass="op-btn-primary" text="Edit Selected Table" />
+                    <Button styleClass="op-btn-primary" text="Edit Selected Table" />
                 </HBox>
 
                 <Region styleClass="op-divider" />

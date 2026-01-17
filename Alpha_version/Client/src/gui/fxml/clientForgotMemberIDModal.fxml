@@ -13,7 +13,6 @@
 <?import javafx.scene.layout.VBox?>
 
 <StackPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.logic.ClientForgotIDScreen" stylesheets="@../css/clientForgotStyles.css">
-  <!-- Card wrapper so we can pin the X to top-right -->
   <StackPane prefWidth="420" maxHeight="-Infinity" styleClass="fmid-card-wrap">
     <!-- Card -->
     <VBox spacing="14" styleClass="fmid-card">
@@ -42,14 +41,13 @@
       </GridPane>
       <!-- Hint -->
       <Label styleClass="fmid-hint" text="Tip: Fill at least one field (phone or email)." />
-      <!-- Actions (centered) -->
+      <!-- Actions -->
       <HBox alignment="CENTER" spacing="12">
         <Button fx:id="btnFindMemberID" onAction="#btnFindMemberID" styleClass="fmid-btn-primary" text="Find Member ID" />
         <Button fx:id="btnCancel" onAction="#btnCancel" styleClass="fmid-btn-secondary" text="Cancel" />
       </HBox>
          <Label fx:id="lblError" />
     </VBox>
-    <!-- X pinned to top-right -->
     <Button fx:id="btnClose" onAction="#btnClose" styleClass="fmid-close" text="✕" StackPane.alignment="TOP_RIGHT">
       <StackPane.margin>
         <Insets bottom="10" left="10" right="10" top="10" />

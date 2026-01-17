@@ -60,7 +60,7 @@
                   <VBox prefHeight="597.0" prefWidth="388.0" spacing="30.0">
                      <children>
       
-                                    <!-- RIGHT CARD -->
+                              <!-- RIGHT CARD -->
                               <VBox minHeight="193.0" prefHeight="193.0" spacing="14">
                                   <padding>
                                       <Insets bottom="18.0" left="18.0" right="18.0" top="18.0" />

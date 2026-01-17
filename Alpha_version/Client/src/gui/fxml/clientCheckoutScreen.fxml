@@ -56,10 +56,7 @@
                             <padding>
                                 <Insets bottom="28" left="28" right="28" top="10" />
                             </padding>
-
                             <children>
-
-                                <!-- LEFT BIG CARD: BILL DETAILS -->
                                 <VBox spacing="14">
 
                                     <!-- Header -->
@@ -151,16 +148,12 @@
                               <String fx:value="bill-card-left" />
                               <String fx:value="bill-card-pad" />
                            </styleClass>
-
                                 </VBox>
-
-                                <!-- RIGHT COLUMN -->
                                 <VBox spacing="16" styleClass="bill-right-col">
-
                                     <!-- Member Benefits -->
                                     <VBox spacing="12" styleClass="benefits-card">
                                         <children>
-                                            <Label fx:id="lblUserBenefits" styleClass="benefits-title" text="Member Benefits" />
+                                            <Label styleClass="benefits-title" text="Member Benefits" />
 
                                             <HBox alignment="CENTER" styleClass="benefits-pill">
                                                 <children>
@@ -169,7 +162,6 @@
                                             </HBox>
                                         </children>
                                     </VBox>
-
                                     <!-- Payment Summary (blue card) -->
                                     <VBox spacing="12" styleClass="summary-card">
                                         <children>
