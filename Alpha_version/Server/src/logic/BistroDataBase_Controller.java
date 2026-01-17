@@ -1688,6 +1688,79 @@ public class BistroDataBase_Controller {
 	        release(conn);
 	    }
 	}
+	
+	/**
+	 * For Members: Get list of SEATED orders for Today.
+	 */
+	public List<Order> getMemberSeatedReservationsForToday(int userId) {
+	    List<Order> orders = new ArrayList<>();
+	    String qry = "SELECT * FROM orders " +
+	                 "WHERE user_id = ? " +
+	                 "AND status = 'SEATED' " +
+	                 "AND order_date = CURRENT_DATE"; // Only care about active session today
+
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(qry)) {
+	            ps.setInt(1, userId);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                while (rs.next()) {
+	                    Order order = new Order();
+	                    order.setOrderNumber(rs.getInt("order_number"));
+	                    order.setConfirmationCode(rs.getString("confirmation_code"));
+	                    order.setDinersAmount(rs.getInt("number_of_guests"));
+	                    
+	                    Time t = rs.getTime("order_time");
+	                    if(t != null) order.setOrderHour(t.toLocalTime());
+	                    
+	                    orders.add(order);
+	                }
+	            }
+	        }
+	    } catch (SQLException ex) {
+	        ex.printStackTrace();
+	    } finally {
+	        release(conn);
+	    }
+	    return orders;
+	}
+
+	/**
+	 * For Guests: Recover code for a SEATED order Today using Email/Phone.
+	 */
+	public String recoverGuestSeatedCode(String email, String phone) {
+	    // Prevent empty string matching
+	    String sEmail = (email != null && !email.isBlank()) ? email : "NO_MATCH";
+	    String sPhone = (phone != null && !phone.isBlank()) ? phone : "NO_MATCH";
+
+	    String qry = "SELECT o.confirmation_code " +
+	                 "FROM orders o " +
+	                 "JOIN users u ON o.user_id = u.user_id " +
+	                 "WHERE (u.email = ? OR u.phoneNumber = ?) " +
+	                 "AND o.status = 'SEATED' " +
+	                 "AND o.order_date = CURRENT_DATE " +
+	                 "LIMIT 1";
+
+	    Connection conn = null;
+	    try {
+	        conn = borrow();
+	        try (PreparedStatement ps = conn.prepareStatement(qry)) {
+	            ps.setString(1, sEmail);
+	            ps.setString(2, sPhone);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                if (rs.next()) {
+	                    return rs.getString("confirmation_code");
+	                }
+	            }
+	        }
+	    } catch (SQLException ex) {
+	        ex.printStackTrace();
+	    } finally {
+	        release(conn);
+	    }
+	    return "NOT_FOUND";
+	}
 
 	//  ****************************** Waiting List Operations ******************************
 	

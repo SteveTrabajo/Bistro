@@ -62,6 +62,10 @@ public class OrdersService {
 		return this.tableSizes;
 	}
 	
+	public List<Order> getMemberSeatedReservations(int userId) {
+	    return dbController.getMemberSeatedReservationsForToday(userId);
+	}
+	
 	// ********************************Instance Methods ***********************************
 	
 	/**
@@ -256,6 +260,9 @@ public class OrdersService {
 		return false;
 	}
 	
+	public String recoverGuestSeatedCode(String email, String phone) {
+	    return dbController.recoverGuestSeatedCode(email, phone);
+	}
 	
 	
 	

@@ -332,5 +332,39 @@ public final class ServerOrdersSubject {
 				logger.log("[ERROR] Client: " + client + " failed to retrieve reservation confirmation codes.");
 			}
 		});
+		
+		router.on("orders", "getMemberSeatedReservations", (msg, client) -> {
+		    User sessionUser = (User) client.getInfo("user");
+		    if (sessionUser == null) {
+		        client.sendToClient(new Message(Api.REPLY_MEMBER_SEATED_RESERVATIONS_FAIL, null));
+		        return;
+		    }
+		    // Call DB Controller directly or via Service
+		    // Assuming you add getMemberSeatedReservationsForToday to OrdersService as well
+		    List<Order> orders = ordersService.getMemberSeatedReservations(sessionUser.getUserId());
+		    
+		    if (orders != null) {
+		        client.sendToClient(new Message(Api.REPLY_MEMBER_SEATED_RESERVATIONS_OK, orders));
+		    } else {
+		        client.sendToClient(new Message(Api.REPLY_MEMBER_SEATED_RESERVATIONS_FAIL, null));
+		    }
+		});
+
+		// Handler for Guest Seated Code
+		router.on("orders", "recoverGuestSeatedCode", (msg, client) -> {
+		    @SuppressWarnings("unchecked")
+		    Map<String, String> data = (Map<String, String>) msg.getData();
+		    String email = data.get("email");
+		    String phone = data.get("phone");
+		    
+		    // Call DB Controller directly or via Service
+		    String code = ordersService.recoverGuestSeatedCode(email, phone);
+		    
+		    if (code != null && !code.equals("NOT_FOUND")) {
+		        client.sendToClient(new Message(Api.REPLY_GUEST_SEATED_CODE_OK, code));
+		    } else {
+		        client.sendToClient(new Message(Api.REPLY_GUEST_SEATED_CODE_FAIL, null));
+		    }
+		});
 	}
 }

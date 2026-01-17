@@ -34,6 +34,8 @@ public class ReservationController {
     private Consumer<List<LocalDate>> datesUpdateCallback;
     private BiConsumer<Boolean, String> checkInCallback; //like "consumer" but with two parameters
     private Consumer<List<Order>> onMemberReservationsListListener;
+    private Consumer<List<Order>> onMemberSeatedListListener;
+    private Consumer<String> onGuestSeatedCodeListener;
 	
 	//******************************** Constructors ***********************************//
 	
@@ -119,6 +121,14 @@ public class ReservationController {
 	public void setWeeklyHours(List<WeeklyHour> weeklyHours) {
 		this.weeklyHours = weeklyHours;
 	}
+	
+	public void setOnMemberSeatedListListener(Consumer<List<Order>> listener) {
+        this.onMemberSeatedListListener = listener;
+    }
+	
+	public void setOnGuestSeatedCodeListener(Consumer<String> listener) {
+        this.onGuestSeatedCodeListener = listener;
+    }
 		
 	//******************************** Instance Methods ***********************************//
 	
@@ -308,5 +318,34 @@ public class ReservationController {
 	public void askWeeklyHours() {
 		client.handleMessageFromClientUI(new Message(Api.ASK_GET_WEEKLY_HOURS, null));
 	}
+	
+	public void askMemberSeatedReservations() {
+        client.handleMessageFromClientUI(new Message(Api.ASK_MEMBER_SEATED_RESERVATIONS, null));
+    }
+	
+	public void handleMemberSeatedListResponse(List<Order> orders) {
+        if (onMemberSeatedListListener != null) {
+            Platform.runLater(() -> {
+                onMemberSeatedListListener.accept(orders);
+                onMemberSeatedListListener = null;
+            });
+        }
+    }
+	
+	public void handleGuestSeatedCodeResponse(String code) {
+        if (onGuestSeatedCodeListener != null) {
+            Platform.runLater(() -> {
+                onGuestSeatedCodeListener.accept(code);
+                onGuestSeatedCodeListener = null;
+            });
+        }
+    }
+	
+	public void retrieveGuestSeatedCode(String email, String phone) {
+        Map<String, String> data = new HashMap<>();
+        data.put("email", email);
+        data.put("phone", phone);
+        client.handleMessageFromClientUI(new Message(Api.ASK_GUEST_SEATED_CODE, data));
+    }
 	
 }

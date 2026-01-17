@@ -100,6 +100,8 @@ public final class Api {
 	public static final String ASK_CLIENT_ORDER_HISTORY = "orders.getClientHistory";
 	public static final String ASK_MEMBER_ACTIVE_RESERVATIONS = "orders.getMemberActiveReservations";
 	public static final String ASK_GET_MEMBER_HISTORY = "orders.getMemberHistory";
+	public static final String ASK_MEMBER_SEATED_RESERVATIONS = "orders.getMemberSeatedReservations";
+	public static final String ASK_GUEST_SEATED_CODE = "orders.recoverGuestSeatedCode";
 
 	// Responses
 	public static final String REPLY_CREATE_RESERVATION_OK = "orders.createReservation.ok";
@@ -134,6 +136,10 @@ public final class Api {
 
 	public static final String REPLY_GET_MEMBER_HISTORY_OK = "orders.getMemberHistory.ok";
 	public static final String REPLY_GET_MEMBER_HISTORY_FAIL = "orders.getMemberHistory.fail";
+	public static final String REPLY_MEMBER_SEATED_RESERVATIONS_OK = "orders.getMemberSeatedReservations.ok";
+	public static final String REPLY_MEMBER_SEATED_RESERVATIONS_FAIL = "orders.getMemberSeatedReservations.fail";
+	public static final String REPLY_GUEST_SEATED_CODE_OK = "orders.recoverGuestSeatedCode.ok";
+	public static final String REPLY_GUEST_SEATED_CODE_FAIL = "orders.recoverGuestSeatedCode.fail";
 
 // == Restaurant Management subject == //
 

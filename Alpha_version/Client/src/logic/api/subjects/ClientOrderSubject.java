@@ -311,6 +311,30 @@ public class ClientOrderSubject {
 			});
 		});
 		
+		router.on("orders", "getMemberSeatedReservations.ok", msg -> {
+		    BistroClient.awaitResponse = false;
+		    @SuppressWarnings("unchecked")
+		    List<Order> orders = (List<Order>) msg.getData();
+		    BistroClientGUI.client.getReservationCTRL().handleMemberSeatedListResponse(orders);
+		});
+
+		router.on("orders", "getMemberSeatedReservations.fail", msg -> {
+		    BistroClient.awaitResponse = false;
+		    BistroClientGUI.client.getReservationCTRL().handleMemberSeatedListResponse(new ArrayList<>());
+		});
+
+		// GUEST SEATED
+		router.on("orders", "recoverGuestSeatedCode.ok", msg -> {
+		    BistroClient.awaitResponse = false;
+		    String code = (String) msg.getData();
+		    BistroClientGUI.client.getReservationCTRL().handleGuestSeatedCodeResponse(code);
+		});
+
+		router.on("orders", "recoverGuestSeatedCode.fail", msg -> {
+		    BistroClient.awaitResponse = false;
+		    BistroClientGUI.client.getReservationCTRL().handleGuestSeatedCodeResponse("NOT_FOUND");
+		});
+		
 	}
 	
 }
