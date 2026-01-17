@@ -183,29 +183,6 @@ public class TableService {
 			return tableStatusMap;
 		}
 		
-		/** Saves the provided weekly hours to the database.
-	     * @param hours A list of WeeklyHour objects representing the weekly hours to save.
-	     * @return true if the operation was successful, false otherwise.
-	     */
-		public boolean saveWeeklyHours(List<WeeklyHour> hours) {
-	        return dbController.updateWeeklyHours(hours);
-	    }
-
-		/** Adds a holiday to the database.
-	     * @param holiday The Holiday object to add.
-	     * @return true if the operation was successful, false otherwise.
-	     */
-	    public boolean addHoliday(Holiday holiday) {
-	        return dbController.addHoliday(holiday);
-	    }
-	    
-	    /** Removes a holiday from the database.
-	     * @param holiday The Holiday object to remove.
-	     * @return true if the operation was successful, false otherwise.
-	     */
-	    public boolean removeHoliday(Holiday holiday) {
-	        return dbController.removeHoliday(holiday);
-	    }
 	
 	    public boolean addNewTable(Table table) {
 	        return dbController.addTable(table);

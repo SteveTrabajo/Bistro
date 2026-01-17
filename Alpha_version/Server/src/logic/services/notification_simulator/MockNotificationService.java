@@ -46,7 +46,7 @@ public class MockNotificationService implements INotificationService {
      */
     private void printLog(String recipient, String message, NotificationType type, Channel channel) {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-        String prefix = (channel == Channel.SMS) ? "📱 [SMS]" : "📧 [EMAIL]";
+        String prefix = (channel == Channel.SMS) ? "[SMS]" : "[EMAIL]";
         String color = getColorByType(type);
 
         System.out.println("--------------------------------------------------");

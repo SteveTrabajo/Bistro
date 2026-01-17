@@ -72,7 +72,6 @@ public class NotificationService {
     /**
      * Checks for RESERVATION orders starting in approximately 2 hours and sends reminders.
      * Uses notified_at to avoid re-sending.
-     * Req Source: 30
      */
     private void checkPreArrivalReminders() {
         LocalDateTime now = LocalDateTime.now();

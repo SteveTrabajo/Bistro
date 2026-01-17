@@ -1,0 +1,38 @@
+package logic.api.subjects;
+
+import java.util.List;
+
+import comms.Api;
+import comms.Message;
+import dto.Holiday;
+import dto.WeeklyHour;
+import logic.ServerLogger;
+import logic.api.ServerRouter;
+import logic.services.RestaurantManagmentService;
+import logic.services.TableService;
+
+public class ServerRestaurantManageSubject {
+	
+	private ServerRestaurantManageSubject() {}
+	
+	public static void register(ServerRouter router, ServerLogger logger, RestaurantManagmentService restaurantService) {
+		 router.on("hours", "saveWeekly", (msg, client) -> {
+	        	@SuppressWarnings("unchecked")
+	        	List<WeeklyHour> hours = (List<WeeklyHour>) msg.getData();
+	        	restaurantService.saveWeeklyHours(hours);
+	        	client.sendToClient(new Message(Api.REPLY_SAVE_WEEKLY_HOURS_OK, null));
+	        });
+	        
+	        router.on("hours", "addHoliday", (msg, client) -> {
+				Holiday holiday = (Holiday) msg.getData();
+				restaurantService.addHoliday(holiday);
+				client.sendToClient(new Message(Api.REPLY_ADD_HOLIDAY_OK, null));
+			});
+	        
+	        router.on("hours", "removeHoliday", (msg, client) -> {
+	        	Holiday holiday = (Holiday) msg.getData();
+	        	restaurantService.removeHoliday(holiday);
+	        	client.sendToClient(new Message(Api.REPLY_REMOVE_HOLIDAY_OK, null));
+			});
+	}
+}

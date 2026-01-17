@@ -67,25 +67,6 @@ public class ServerTablesSubject {
             }
         });
         
-        router.on("hours", "saveWeekly", (msg, client) -> {
-        	@SuppressWarnings("unchecked")
-        	List<WeeklyHour> hours = (List<WeeklyHour>) msg.getData();
-        	tableService.saveWeeklyHours(hours);
-        	client.sendToClient(new Message(Api.REPLY_SAVE_WEEKLY_HOURS_OK, null));
-        });
-        
-        router.on("hours", "addHoliday", (msg, client) -> {
-			Holiday holiday = (Holiday) msg.getData();
-			tableService.addHoliday(holiday);
-			client.sendToClient(new Message(Api.REPLY_ADD_HOLIDAY_OK, null));
-		});
-        
-        router.on("hours", "removeHoliday", (msg, client) -> {
-        	Holiday holiday = (Holiday) msg.getData();
-        	tableService.removeHoliday(holiday);
-        	client.sendToClient(new Message(Api.REPLY_REMOVE_HOLIDAY_OK, null));
-		});
-        
     }
         
 }
