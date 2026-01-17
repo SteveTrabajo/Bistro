@@ -17,29 +17,56 @@ import enums.OrderType;
 import logic.BistroDataBase_Controller;
 import logic.ServerLogger;
 
+/**
+ * Manages table allocation, seating, and availability in the restaurant.
+ * Handles the flow of seating customers when they arrive, freeing tables when 
+ * they leave, and notifying waitlisted customers when tables become available.
+ */
 public class TableService {
-	  private final BistroDataBase_Controller dbController;
-	    private final ServerLogger logger;
-	    private final OrdersService orderService;
-	    private final NotificationService notificationService;
+	
+	/** Database controller for all DB operations */
+	private final BistroDataBase_Controller dbController;
+	
+	/** Logger for tracking service activity */
+	private final ServerLogger logger;
+	
+	/** Service for order-related operations */
+	private final OrdersService orderService;
+	
+	/** Service for sending notifications to users */
+	private final NotificationService notificationService;
 
-	    //******************************** Constructor ********************************//	
-	    public TableService(BistroDataBase_Controller dbController, ServerLogger logger,OrdersService orderService, NotificationService notificationService) {
-	        this.dbController = dbController;
-	        this.logger = logger;
+	//******************************** Constructor ********************************//
+	
+	/**
+	 * Creates a new TableService with required dependencies.
+	 * 
+	 * @param dbController database controller for DB access
+	 * @param logger server logger for logging events
+	 * @param orderService order management service
+	 * @param notificationService notification service for alerts
+	 */
+	public TableService(BistroDataBase_Controller dbController, ServerLogger logger,OrdersService orderService, NotificationService notificationService) {
+	    this.dbController = dbController;
+	    this.logger = logger;
 			this.orderService = orderService;
 	        this.notificationService = notificationService;
-	    }
+	}
 	    
-	    //********************************Instance  Methods ********************************//
-	   /**
-	    * Allocates a table for the given confirmation code if possible.
-	    * @param confirmationCode
-	    * @param now
-	    * @return
-	    */
-	    public int allocateTable(String confirmationCode, LocalDateTime now) {
-	        Order order = dbController.getOrderByConfirmationCodeInDB(confirmationCode);
+	//********************************Instance  Methods ********************************//
+	
+	/**
+	 * Allocates a table for an order when the customer arrives.
+	 * Creates a table session and updates the order status to SEATED.
+	 * For waitlist orders, only allows allocation if they've been notified first.
+	 * Includes rollback if status update fails after session creation.
+	 * 
+	 * @param confirmationCode the order's confirmation code
+	 * @param now current timestamp
+	 * @return the allocated table number, or -1 if allocation failed
+	 */
+	public int allocateTable(String confirmationCode, LocalDateTime now) {
+	    Order order = dbController.getOrderByConfirmationCodeInDB(confirmationCode);
 	        //case order not found
 	        if (order == null) {
 	            logger.log("[ERROR] Allocation failed: Order not found for " + confirmationCode);
@@ -76,13 +103,17 @@ public class TableService {
 	        }
 	        logger.log("[INFO] Allocated Table " + tableNum + " to Order " + confirmationCode);
 	        return tableNum;
-	    }
+	}
 
-	    /**
-	     * Handles logic when a table is freed.
-	     * @param tableNum The table number that was freed.
-	     */
-	    public boolean tableFreed(int tableNum) {
+	/**
+	 * Handles logic when a table is freed after payment.
+	 * Finds the next waitlist customer that fits the freed table's capacity,
+	 * checks for reservation conflicts, and notifies them if appropriate.
+	 * 
+	 * @param tableNum the table number that was freed
+	 * @return true if handled successfully
+	 */
+	public boolean tableFreed(int tableNum) {
 	    	 int capacity = dbController.getTableCapacity(tableNum);
 	    	    if (capacity <= 0) {
 	    	        logger.log("[ERROR] Invalid capacity for table " + tableNum);
@@ -124,11 +155,14 @@ public class TableService {
 	    
 	    
 	    /**
-	     * Checks if a waitlist user can be notified now without conflicting with existing reservations.
-	     * @param dinersAmount The number of diners in the waitlist order.
-	     * @return true if the waitlist user can be notified now, false otherwise.
+	     * Checks if a waitlist customer can be notified without conflicting
+	     * with upcoming reservations. Simulates the table load to ensure
+	     * there's still room for pending reservations.
+	     * 
+	     * @param dinersAmount party size of the waitlist order
+	     * @return true if safe to notify, false if it would cause conflicts
 	     */
-	    private boolean canNotifyWaitlistNow(int dinersAmount) {
+	private boolean canNotifyWaitlistNow(int dinersAmount) {
 	        LocalTime now = LocalTime.now();
 	        int duration = orderService.getReservationDurationMinutes();
 	        LocalTime end = now.plusMinutes(duration);
@@ -155,24 +189,31 @@ public class TableService {
 	        return orderService.canAssignAllDinersToTables(load, orderService.getTableSizes());
 	    }
 
-    
-		/**
-		 * Retrieves the table number associated with a given reservation confirmation code.
-		 * @param confirmationCode The reservation confirmation code.
-		 * @return The table number, or -1 if not found.
+	/**
+		 * Gets the table number for a given reservation.
+		 * 
+		 * @param confirmationCode the reservation's confirmation code
+		 * @return the table number, or -1 if not found
 		 */    
 		public int getTableNumberByReservationConfirmationCode(String confirmationCode) {
 			return dbController.getTableNumberByConfirmationCode(confirmationCode);
 		}
 		
 		/**
-		 * Retrieves all tables from the database.
-		 * @return A list of all Table entities.
+		 * Gets all tables in the restaurant.
+		 * 
+		 * @return list of all Table entities
 		 */
 		public List<Table> getAllTables() {
 			return dbController.getAllTablesFromDB();
 		}
 	
+		/**
+		 * Gets all tables with their current order status.
+		 * Maps each table to its active order's confirmation code (or null if free).
+		 * 
+		 * @return map of Table to confirmation code
+		 */
 		public HashMap<Table, String> getAllTablesMap() {
 			List<Table> tables = getAllTables();
 			HashMap<Table, String> tableStatusMap = new HashMap<>();
@@ -183,15 +224,32 @@ public class TableService {
 			return tableStatusMap;
 		}
 		
-	
+		/**
+		 * Adds a new table to the restaurant.
+		 * 
+		 * @param table the table to add
+		 * @return true if successful
+		 */
 	    public boolean addNewTable(Table table) {
 	        return dbController.addTable(table);
 	    }
 
+	    /**
+	     * Removes a table from the restaurant.
+	     * 
+	     * @param tableId the table ID to remove
+	     * @return true if successful
+	     */
 	    public boolean deleteTable(int tableId) {
 	        return dbController.removeTable(tableId);
 	    }
 
+	    /**
+	     * Gets a user's currently seated order (if any).
+	     * 
+	     * @param userId the user's ID
+	     * @return the seated Order, or null if not currently dining
+	     */
 		public Order getSeatedOrderForClient(int userId) {
 			return dbController.getSeatedOrderForUser(userId);
 		}

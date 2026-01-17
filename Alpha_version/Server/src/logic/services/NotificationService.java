@@ -17,19 +17,35 @@ import logic.services.notification_simulator.INotificationService;
 import logic.services.notification_simulator.MockNotificationService;
 
 /**
- * NotificationService handles sending notifications to users via Email and SMS.
- * It includes background tasks for pre-arrival reminders and payment reminders.
+ * Handles sending notifications to users via Email and SMS.
+ * Runs background tasks for pre-arrival reminders (2 hours before reservation)
+ * and payment reminders (when dining time exceeds 2 hours).
+ * 
+ * Currently uses a mock notification service for testing.
  */
 public class NotificationService {
 
+	/** Database controller for all DB operations */
     private final BistroDataBase_Controller dbController;
+    
+    /** Logger for tracking service activity */
     private final ServerLogger logger;
-    // removed "final" to allow shutdown and restart (might fix the thread issue)
+    
+    /** Scheduler for background notification polling (runs every 15 minutes) */
     private ScheduledExecutorService scheduler;
     
+    /** Mock notification service for testing (swap for real service in production) */
     private final INotificationService notificationSimulator;
+    
+    /** Flag to track if background tasks are running */
     private volatile boolean started = false;
 
+    /**
+     * Creates a new NotificationService with required dependencies.
+     * 
+     * @param dbController database controller for DB access
+     * @param logger server logger for logging events
+     */
     public NotificationService(BistroDataBase_Controller dbController, ServerLogger logger) {
         this.dbController = dbController;
         this.logger = logger;
@@ -39,6 +55,10 @@ public class NotificationService {
     }
 
 
+    /**
+     * Starts the background notification polling.
+     * Runs every 15 minutes to check for reminders that need to be sent.
+     */
     public synchronized void startBackgroundTasks() {
         if (started) return;
         // moved from constructor to allow restart after shutdown (might fix the thread issue)
@@ -58,6 +78,10 @@ public class NotificationService {
         }, 0, 15, TimeUnit.MINUTES);
     }
 
+    /**
+     * Stops the background notification tasks.
+     * Should be called when shutting down the server.
+     */
     public synchronized void stop() {
         if (!started) return;
         started = false;
@@ -70,8 +94,8 @@ public class NotificationService {
 
 
     /**
-     * Checks for RESERVATION orders starting in approximately 2 hours and sends reminders.
-     * Uses notified_at to avoid re-sending.
+     * Checks for reservations starting in about 2 hours and sends reminders.
+     * Uses notified_at column to avoid sending duplicate reminders.
      */
     private void checkPreArrivalReminders() {
         LocalDateTime now = LocalDateTime.now();
@@ -99,9 +123,8 @@ public class NotificationService {
     }
 
     /**
-     * Payment reminders (2 hours after start).
-     * NOTE: right now this can repeat every 15 minutes unless you add a dedicated DB flag/column.
-     * If you want, we can also add bill_reminded_at later.
+     * Checks for customers who have been seated for over 2 hours
+     * and sends payment reminders.
      */
     private void checkPaymentReminders() {
         LocalDateTime now = LocalDateTime.now();
@@ -122,7 +145,11 @@ public class NotificationService {
     }
 
     /**
-     * Waitlist/Table Ready notification (handled when table frees).
+     * Notifies a waitlist customer that their table is ready.
+     * Called by TableService when a table becomes available.
+     * The customer has 15 minutes to arrive or they'll be marked as no-show.
+     * 
+     * @param order the waitlist order to notify
      */
     public void notifyWaitlistUser(Order order) {
         User user = dbController.getUserById(order.getUserId());
@@ -134,6 +161,14 @@ public class NotificationService {
         }
     }
 
+    /**
+     * Sends a notification to the user via email and/or SMS.
+     * Uses whatever contact info is available.
+     * 
+     * @param user the user to notify
+     * @param message the notification message
+     * @param type the type of notification
+     */
     private void dispatchToSimulator(User user, String message, NotificationType type) {
         boolean hasEmail = user.getEmail() != null && !user.getEmail().isEmpty();
         boolean hasPhone = user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty();

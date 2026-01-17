@@ -13,6 +13,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import logic.BistroServerGUI;
+import javafx.application.Platform;
 
 /*
  * Controller class for the Server Port Frame.
@@ -76,32 +77,51 @@ public class ServerPortFrameController {
 	}
 	
 	
-	/*
-	 * Method to handle the Exit button click event.
-	 * Closes the application.
-	 */
 	@FXML
 	public void btnExit(Event event) {
-		Stage stage = (Stage) btnExit.getScene().getWindow();
-		stage.close();
+	    try {
+	        if (BistroServerGUI.server != null) {
+	            try {
+	                BistroServerGUI.server.close();
+	            } catch (Exception e) {
+	                e.printStackTrace();
+	            }
+	        }
+	    } finally {
+	        Platform.exit();
+	        System.exit(0);
+	    }
 	}
 	
-	/*
-	 * Method to start the Server Port Frame.
-	 * Sets up the stage and scene for the port selection interface.
-	 * 
-	 * @param primaryStage The primary stage for this application.
-	 */
 	public void start(Stage primaryStage) {
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/fxml/ServerPort.fxml"));
-		try {
-			primaryStage.setTitle("Bistro Server - Port Selection");
-			primaryStage.setScene(new Scene(loader.load()));
-			primaryStage.show();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	    FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/fxml/ServerPort.fxml"));
+	    try {
+	        primaryStage.setTitle("Bistro Server - Port Selection");
+	        primaryStage.setScene(new Scene(loader.load()));
+	        primaryStage.centerOnScreen();
+	        primaryStage.show();
+
+	        // Match client behavior: ensure server and JVM actually stop on window X
+	        primaryStage.setOnCloseRequest(_ -> {
+	            try {
+	                if (BistroServerGUI.server != null) {
+	                    try {
+	                        BistroServerGUI.server.close(); // stop listening + close connections
+	                    } catch (Exception e) {
+	                        e.printStackTrace();
+	                    }
+	                }
+	            } finally {
+	                Platform.exit();
+	                System.exit(0);
+	            }
+	        });
+
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
 	}
+
 	
 }
 // End of ServerPortFrameController.java

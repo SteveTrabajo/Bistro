@@ -12,26 +12,43 @@ import logic.PasswordUtil;
 import logic.ServerLogger;
 import common.InputCheck;
 import dto.UserData;
+
 /**
- * Service class for handling user-related operations such as login and account creation.
+ * Handles user-related operations including login, registration, and account management.
+ * Supports different user types: guests, members, employees, and managers.
+ * Includes password hashing for staff accounts and login attempt tracking for security.
  */
 public class UserService {
+	
 	//*************************Instance Variables*************************
+	
+	/** Database controller for all DB operations */
 	private final BistroDataBase_Controller dbController;
+	
+	/** Logger for tracking service activity */
 	private final ServerLogger logger;
+	
 	//************************* Constructor *************************
+	
+	/**
+	 * Creates a new UserService with required dependencies.
+	 * 
+	 * @param dbController database controller for DB access
+	 * @param logger server logger for logging events
+	 */
 	public UserService(BistroDataBase_Controller dbController, ServerLogger logger) {
 		this.dbController = dbController;
 		this.logger = logger;
 	}
+	
 	//************************* Instance Methods *************************
 	
 	/**
-	 * Registers a new member with the provided data.
+	 * Registers a new member in the system.
+	 * Generates a unique 6-digit member code for login.
 	 * 
-	 * @param newMemberData List of strings containing new member information
-	 * [0]: firstName, [1]: lastName, [2]: email, [3]: phoneNumber, [4]: address
-	 * @return true if registration was successful, false otherwise
+	 * @param newMemberData list containing: firstName, lastName, email, phoneNumber, address
+	 * @return the generated member code, or -1 if registration failed
 	 */
 	public int registerNewMember(List<String> newMemberData) {
 		int memberCode= dbController.registerNewMember(newMemberData);
@@ -45,10 +62,12 @@ public class UserService {
 	}
 	
 	/**
-	 * Creates a new staff account with password hashing and validation.
+	 * Creates a new staff account (employee or manager).
+	 * Validates all input fields and checks for duplicate usernames.
+	 * Password is hashed before storage.
 	 * 
-	 * @param staffData Map containing: username, password, email, phoneNumber, userType
-	 * @return The created User object, or null if creation failed
+	 * @param staffData map containing: username, password, email, phoneNumber, userType, firstName, lastName, address
+	 * @return the created User object, or null if creation failed
 	 */
 	public User createStaffAccount(Map<String, Object> staffData) {
 		// Validate input data
@@ -101,10 +120,12 @@ public class UserService {
 	}
 	
 	/**
-	 * Retrieves user information based on login data.
+	 * Handles login for all user types (guest, member, employee, manager).
+	 * For staff, checks if account is locked due to failed attempts.
+	 * For guests, creates a new user record if one doesn't exist.
 	 * 
-	 * @param loginData Map containing login credentials and user type
-	 * @return The User object if found, otherwise null
+	 * @param loginData map containing credentials based on user type
+	 * @return the User object if login successful, null otherwise
 	 */
 	public User getUserInfo(Map<String, Object> loginData) {
 		logger.log("[LOGIN] Received login data=" + loginData);
@@ -160,40 +181,53 @@ public class UserService {
 	}
 	
 	/**
-	 * Updates member information in the database.
+	 * Updates a member's profile information.
 	 * 
-	 * @param updatedUser UserData object containing updated member information
-	 * @return true if the update was successful, false otherwise
+	 * @param updatedUser UserData object with updated info
+	 * @return true if update was successful
 	 */
 	public boolean updateMemberInfo(UserData updatedUser) {
 		return dbController.setUpdatedMemberData(updatedUser);	
 	}
 	
 	/**
-	 * Checks if a staff username already exists in the database.
+	 * Checks if a staff username is already taken.
 	 * 
-	 * @param username The staff username to check
-	 * @return true if the username exists, false otherwise
+	 * @param username the username to check
+	 * @return true if username exists
 	 */
 	public boolean staffUsernameExists(String username) {
 	    return dbController.employeeUsernameExists(username);
 	}
 	
 	/**
-	 * Finds a staff user by username and password.
+	 * Authenticates a staff user by username and password.
 	 * 
-	 * @param username The staff username
-	 * @param password The staff password
-	 * @return The User object if found, otherwise null
+	 * @param username the staff username
+	 * @param password the staff password (will be hashed for comparison)
+	 * @return the User object if found, null otherwise
 	 */
 	public User findStaffUser(String username, String password) {
 	    return dbController.findEmployeeUser(username, password);
 	}
 
+	/**
+	 * Gets all customers (members and guests) in the system.
+	 * 
+	 * @return list of customer UserData objects
+	 */
 	public List<UserData> getAllCustomers() {
 		return dbController.getAllCustomers();
 	}
 
+	/**
+	 * Looks up a member's code by their email or phone number.
+	 * Useful for "forgot member code" functionality.
+	 * 
+	 * @param email member's email address
+	 * @param phoneNumber member's phone number
+	 * @return the member code as a string, or null if not found
+	 */
 	public String findMemberCode(String email, String phoneNumber) {
 		int memberCode = dbController.findMemberCodeByEmailOrPhone(email, phoneNumber);
 		if (memberCode > 0) {
