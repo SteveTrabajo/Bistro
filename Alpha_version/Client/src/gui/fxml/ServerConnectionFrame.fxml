@@ -68,7 +68,7 @@
                               <Label fx:id="lblError" />
                            </children>
                         </VBox>
-                        <Button fx:id="btnConnect" onAction="#btnConnect" prefHeight="45.0" prefWidth="418.0" text="Connect">
+                        <Button fx:id="btnConnect" onAction="#btnConnect" defaultButton="true" prefHeight="45.0" prefWidth="418.0" text="Connect">
                            <styleClass>
                               <String fx:value="btn-wide" />
                               <String fx:value="btn-primary" />
