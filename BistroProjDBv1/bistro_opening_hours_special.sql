@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: bistro
+-- Host: localhost    Database: bistro
 -- ------------------------------------------------------
 -- Server version	8.0.44
 
@@ -24,11 +24,11 @@ DROP TABLE IF EXISTS `opening_hours_special`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `opening_hours_special` (
   `special_date` date NOT NULL,
+  `holiday_name` varchar(100) NOT NULL,
   `is_closed` tinyint NOT NULL DEFAULT '0',
   `open_time` time DEFAULT NULL,
   `close_time` time DEFAULT NULL,
-  PRIMARY KEY (`special_date`),
-  CONSTRAINT `chk_spec_hours` CHECK ((((`is_closed` = 1) and (`open_time` is null) and (`close_time` is null)) or ((`is_closed` = 0) and (`open_time` is not null) and (`close_time` is not null) and (`open_time` < `close_time`))))
+  PRIMARY KEY (`special_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -38,6 +38,7 @@ CREATE TABLE `opening_hours_special` (
 
 LOCK TABLES `opening_hours_special` WRITE;
 /*!40000 ALTER TABLE `opening_hours_special` DISABLE KEYS */;
+INSERT INTO `opening_hours_special` VALUES ('2026-01-26','poop',1,NULL,NULL),('2026-05-19','JulianGPT',0,NULL,NULL);
 /*!40000 ALTER TABLE `opening_hours_special` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -50,4 +51,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-01-17 12:49:34
+-- Dump completed on 2026-01-18  0:09:58
