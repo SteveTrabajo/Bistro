@@ -23,6 +23,9 @@ public class TableController {
 	private int userAllocatedTable;
 	private int tablesAmount;
 	private Consumer<List<Table>> allTablesCallback;
+	private Consumer<List<WeeklyHour>> weeklyHoursCallback;
+	private Consumer<List<Holiday>> holidaysCallback;
+
 	
 	//******************************** Constructors ***********************************//
 	public TableController(BistroClient client) {
@@ -151,6 +154,7 @@ public class TableController {
     public void askGetHolidays() {
         client.handleMessageFromClientUI(new Message(Api.ASK_GET_HOLIDAYS, null));
     }
+    
 
 
 	public void askUserAllocatedSeatedOrder(int userID) {
@@ -158,5 +162,33 @@ public class TableController {
 		
 	}
 
+	public void setWeeklyHoursListener(Consumer<List<WeeklyHour>> callback) {
+	    this.weeklyHoursCallback = callback;
+	}
+
+	public void askGetWeeklyHours() {
+	    client.handleMessageFromClientUI(new Message(Api.ASK_GET_WEEKLY_HOURS, null));
+	}
+
+	public void setHolidaysListener(Consumer<List<Holiday>> callback) {
+	    this.holidaysCallback = callback;
+	}
+
+	public void setWeeklyHours(List<WeeklyHour> hours) {
+	    if (weeklyHoursCallback != null) {
+	        Platform.runLater(() -> weeklyHoursCallback.accept(hours));
+	    }
+	}
+
+	public void setHolidays(List<Holiday> holidays) {
+		System.out.println("TableController: Setting holidays: " + holidays);
+	    if (holidaysCallback != null) {
+	    	System.out.println("TableController: Calling holidays callback.");
+	        Platform.runLater(() -> holidaysCallback.accept(holidays));
+	    }
+	}
+
+
+	
 	
 }

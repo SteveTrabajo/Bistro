@@ -43,6 +43,11 @@ public class RestaurantManagmentService {
     public boolean removeHoliday(Holiday holiday) {
         return dbController.removeHoliday(holiday);
     }
+
+
+	public List<WeeklyHour> getWeeklyHours() {
+		return dbController.getWeeklyHours();
+	}
 	
 	
 }

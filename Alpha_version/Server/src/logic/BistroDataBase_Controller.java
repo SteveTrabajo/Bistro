@@ -3692,6 +3692,33 @@ public class BistroDataBase_Controller {
 	    return out;
 	}
 
+	public List<WeeklyHour> getWeeklyHours() {
+		String qry = "SELECT day_of_week, open_time, close_time FROM opening_hours_weekly";
+		List<WeeklyHour> hours = new ArrayList<>();
+		Connection conn = null;
+		try {
+			conn = borrow();
+			try (PreparedStatement ps = conn.prepareStatement(qry)) {
+				try (ResultSet rs = ps.executeQuery()) {
+					while (rs.next()) {
+						int dayOfWeek = rs.getInt("day_of_week");
+						Time openTimeSql = rs.getTime("open_time");
+						Time closeTimeSql = rs.getTime("close_time");
+						LocalTime openTime = openTimeSql != null ? openTimeSql.toLocalTime() : null;
+						LocalTime closeTime = closeTimeSql != null ? closeTimeSql.toLocalTime() : null;
+						hours.add(new WeeklyHour(dayOfWeek, openTime, closeTime));
+					}
+				}
+			}
+		} catch (SQLException ex) {
+			logger.log("[ERROR] SQLException in getWeeklyHours: " + ex.getMessage());
+			ex.printStackTrace();
+		} finally {
+			release(conn);
+		}
+		return hours;
+	}
+
 
 
 }

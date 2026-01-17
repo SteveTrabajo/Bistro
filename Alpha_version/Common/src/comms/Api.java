@@ -141,6 +141,7 @@ public final class Api {
 	public static final String ASK_MONTHLY_REPORT_DATA = "monthlyReports.getData";
 	
 	public static final String ASK_SAVE_WEEKLY_HOURS = "hours.saveWeekly";
+	public static final String ASK_GET_WEEKLY_HOURS = "hours.getWeeklyHours";
 	public static final String ASK_ADD_HOLIDAY      = "hours.addHoliday";
 	public static final String ASK_REMOVE_HOLIDAY   = "hours.removeHoliday";
 	public static final String ASK_GET_HOLIDAYS = "hours.getHolidays";
@@ -167,6 +168,8 @@ public final class Api {
 	
 	public static final String REPLY_SAVE_WEEKLY_HOURS_OK = "hours.saveWeeklyHours.ok";
 	public static final String REPLY_SAVE_WEEKLY_HOURS_FAIL = "hours.saveWeeklyHours.fail";
+	public static final String REPLY_GET_WEEKLY_HOURS_OK = "hours.getWeeklyHours.ok";
+	public static final String REPLY_GET_WEEKLY_HOURS_FAIL = "hours.getWeeklyHours.fail";
 	public static final String REPLY_ADD_HOLIDAY_OK = "hours.addHoliday.ok";
 	public static final String REPLY_ADD_HOLIDAY_FAIL = "hours.addHoliday.fail";
 	public static final String REPLY_GET_HOLIDAYS_OK = "hours.getHolidays.ok";
