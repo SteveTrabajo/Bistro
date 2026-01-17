@@ -19,44 +19,30 @@ import logic.services.notification_simulator.INotificationService;
 import logic.services.notification_simulator.MockNotificationService;
 
 /**
- * Detects and handles no-show reservations and waitlist orders.
+ * NoShowManager handles detection and management of no-show reservations and waitlist orders.
  * 
- * No-show rules:
- * - RESERVATION: If customer doesn't arrive within 15 minutes of reservation time, mark as NO_SHOW
- * - WAITLIST: If customer doesn't arrive within 15 minutes of being notified, mark as NO_SHOW
+ * Rules:
+ * - RESERVATION (PENDING): If not shown up within 15 minutes of reservation time, mark as NO_SHOW
+ * - WAITLIST (NOTIFIED): If not shown up within 15 minutes of notification time, mark as NO_SHOW
  * 
- * Runs a background task every 5 minutes to check for no-shows.
+ * Runs background task every 5 minutes to check for no-shows.
  */
 public class NoShowManager {
 	
 	//****************************** Instance variables ******************************//
 	
-	/** Database controller for all DB operations */
 	private final BistroDataBase_Controller dbController;
-	
-	/** Logger for tracking service activity */
 	private final ServerLogger logger;
-	
-	/** Scheduler for background no-show checking */
+	// removed "final" to allow shutdown and restart (might fix the thread issue)
 	private ScheduledExecutorService scheduler;
 	
-	/** Mock notification service for sending no-show alerts */
 	private final INotificationService notificationSimulator;
 	
-	/** Minutes after scheduled time before marking as no-show */
 	private static final int NO_SHOW_THRESHOLD_MINUTES = 15;
-	
-	/** How often to check for no-shows (in minutes) */
 	private static final int BACKGROUND_CHECK_INTERVAL_MINUTES = 5;
 	
 	//****************************** Constructor ******************************//
 	
-	/**
-	 * Creates a new NoShowManager with required dependencies.
-	 * 
-	 * @param dbController database controller for DB access
-	 * @param logger server logger for logging events
-	 */
 	public NoShowManager(BistroDataBase_Controller dbController, ServerLogger logger) {
 		this.dbController = dbController;
 		this.logger = logger;
@@ -68,8 +54,8 @@ public class NoShowManager {
 	//******************************* Public Methods *******************************//
 	
 	/**
-	 * Starts the background task that checks for no-shows.
-	 * Runs every 5 minutes to detect overdue orders.
+	 * Starts the background task to check for no-shows.
+	 * Runs every 5 minutes to detect orders that have exceeded the no-show threshold.
 	 */
 	public synchronized void startBackgroundTasks() {
 		// moved from constructor to allow restart after shutdown (might fix the thread issue)
@@ -88,8 +74,7 @@ public class NoShowManager {
 	}
 	
 	/**
-	 * Stops the background no-show checking task.
-	 * Should be called when shutting down the server.
+	 * Stops the background task.
 	 */
 	public synchronized void stop() {
 		if (scheduler != null && !scheduler.isShutdown()) {
@@ -101,7 +86,13 @@ public class NoShowManager {
 	//******************************* No-Show Detection Logic *******************************//
 	
 	/**
-	 * Main check method - looks for both reservation and waitlist no-shows.
+	 * Checks for orders that should be marked as NO_SHOW.
+	 * 
+	 * For RESERVATION orders (PENDING status):
+	 *   - If current time > reservation time + 15 minutes, mark as NO_SHOW
+	 * 
+	 * For WAITLIST orders (NOTIFIED status):
+	 *   - If current time > notification time + 15 minutes, mark as NO_SHOW
 	 */
 	private void checkForNoShows() {
 		LocalDateTime now = LocalDateTime.now();
@@ -114,9 +105,7 @@ public class NoShowManager {
 	}
 	
 	/**
-	 * Checks for PENDING reservations that are 15+ minutes past their scheduled time.
-	 * 
-	 * @param now current date/time
+	 * Checks PENDING reservations that have passed their reservation time by 15+ minutes.
 	 */
 	private void checkPendingReservations(LocalDateTime now) {
 		// Get all PENDING reservations for today
@@ -140,9 +129,7 @@ public class NoShowManager {
 	}
 	
 	/**
-	 * Checks for NOTIFIED waitlist orders that are 15+ minutes past notification time.
-	 * 
-	 * @param now current date/time
+	 * Checks NOTIFIED waitlist orders that have been waiting for 15+ minutes.
 	 */
 	private void checkNotifiedWaitlist(LocalDateTime now) {
 		// Get all NOTIFIED waitlist orders for today
@@ -169,11 +156,10 @@ public class NoShowManager {
 	}
 	
 	/**
-	 * Marks an order as NO_SHOW and handles cleanup.
-	 * Frees any associated table and logs the event.
+	 * Marks an order as NO_SHOW and notifies the user.
 	 * 
-	 * @param order the order to mark as no-show
-	 * @param reason explanation for logging purposes
+	 * @param order The order to mark as no-show
+	 * @param reason The reason for the no-show
 	 */
 	private void markAsNoShow(Order order, String reason) {
 		boolean updated = dbController.updateOrderStatusByUserId(order.getOrderNumber(), OrderStatus.NO_SHOW);

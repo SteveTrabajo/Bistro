@@ -15,35 +15,13 @@ import logic.ServerLogger;
 import logic.services.payment_simulator.MockPaymentGateway;
 import logic.services.payment_simulator.PaymentGateway;
 
-/**
- * Handles all payment-related operations for the restaurant.
- * Supports credit card and cash payments, applies member discounts,
- * calculates totals with tax, and manages the order completion flow.
- * 
- * Currently uses a mock payment gateway for testing purposes.
- */
 public class PaymentService {
 
-	/** Database controller for all DB operations */
     private final BistroDataBase_Controller dbController;
-    
-    /** Logger for tracking service activity */
     private final ServerLogger logger;
-    
-    /** Service for table operations (needed to free tables after payment) */
     private final TableService tableService;
-    
-    /** Payment gateway for processing credit card payments (currently mock) */
     private final PaymentGateway paymentGateway;
 
-    /**
-     * Creates a new PaymentService with required dependencies.
-     * Initializes with a mock payment gateway (swap for real one in production).
-     * 
-     * @param dbController database controller for DB access
-     * @param logger server logger for logging events
-     * @param tableService table service for freeing tables after payment
-     */
     public PaymentService(BistroDataBase_Controller dbController, ServerLogger logger,TableService tableService) {
         this.dbController = dbController;
         this.logger = logger;
@@ -54,12 +32,10 @@ public class PaymentService {
     }
 
     /**
-     * Calculates the total bill amount with member discount and tax.
-     * Members get 10% off, then 18% VAT is added to the total.
-     * 
-     * @param items list of ordered items
-     * @param requester the user requesting the bill (for discount check)
-     * @return the final total including tax
+     * Calculates the total bill amount including tax and discounts.
+     * @param items The list of items ordered.
+     * @param requester The user requesting the bill (for member discounts).
+     * @return The final total amount as a double.
      */
     public double calculateTotal(List<Item> items, User requester) {
         double total = 0.0;
@@ -78,13 +54,11 @@ public class PaymentService {
     }
 
     /**
-     * Processes a credit card payment through the payment gateway.
-     * Marks the bill as paid and completes the order if successful.
-     * 
-     * @param billId the bill ID to pay
-     * @param amount the amount to charge
-     * @param creditCardToken the payment token from the client
-     * @return true if payment succeeded, false otherwise
+     * Processes a credit card payment for a specific bill.
+     * @param billId The ID of the bill to pay.
+     * @param amount The amount to charge.
+     * @param creditCardToken The dummy token (or real token in the future).
+     * @return true if payment succeeded, false otherwise.
      */
     public boolean processCreditCardPayment(int billId, double amount, String creditCardToken) {
         Bill bill = dbController.getBillById(billId);
@@ -113,12 +87,7 @@ public class PaymentService {
 
 
     /**
-     * Processes a cash payment (no gateway needed, staff action).
-     * Marks the bill as paid and completes the order.
-     * 
-     * @param billId the bill ID to pay
-     * @param amount the cash amount received
-     * @return true if successful, false otherwise
+     * Processes a manual payment (Cash).
      */
     public boolean processCashPayment(int billId, double amount) {
         Bill bill = dbController.getBillById(billId);
@@ -136,10 +105,7 @@ public class PaymentService {
     }
 
     /**
-	 * Finalizes the order after payment - closes table session and updates status.
-	 * Called internally after successful payment processing.
-	 * 
-	 * @param billId the bill that was paid
+	 * Finalizes the order/session associated with a paid bill.
 	 */
     private void finalizeOrderPayment(int billId) {
         try {
@@ -157,20 +123,14 @@ public class PaymentService {
     
     
     /**
-     * Finds the bill ID linked to a specific order.
-     * 
-     * @param orderNumber the order number
-     * @return the bill ID, or null if not found
+     * Finds the bill ID linked to a specific Order Number.
      */
     public Integer getBillIdByOrderNumber(int orderNumber) {
         return dbController.getBillIdByOrderNumber(orderNumber);
     }
 
     /**
-     * Gets a bill by its ID.
-     * 
-     * @param billId the bill ID
-     * @return the Bill object, or null if not found
+     * Retrieves the full Bill object by its ID.
      */
     public Bill getBillById(Integer billId) {
         if (billId == null) return null;
@@ -178,21 +138,36 @@ public class PaymentService {
     }
 
     /**
-     * Gets all unpaid bills in the system.
-     * 
-     * @return list of pending bills
+     * Gets all UNPAID bills associated with a specific user.
      */
     public List<Bill> getPendingBillsForUser() {
         return dbController.getPendingBillsByUserId();
     }
+
+    
+	/**
+	 * method to be called when payment is completed for an order
+	 * 
+	 * @param orderNumber
+	 */
+    /*
+    public boolean onPaymentCompleted(int orderNumber) {
+    	//close table session when payment is completed
+        Integer tableNum = dbController.getActiveTableNumByOrderNumber(orderNumber);
+        dbController.closeTableSessionForOrder(orderNumber, EndTableSessionType.PAID);
+        dbController.updateOrderStatusByOrderNumber(orderNumber, OrderStatus.COMPLETED); //set order status to null after payment completion
+        //case no active table session found
+        if (tableNum == null) {
+            logger.log("[WARN] Payment completed but no active table session found for order " + orderNumber);
+            return false;
+        }	       
+        return tableService.tableFreed(tableNum); //when table is freed, try to seat WAITLIST/RESERVATION order if possible
+    }
+    */
     
     /**
-     * Called when payment is completed for an order.
-     * Closes the table session, marks order as COMPLETED,
-     * and notifies waitlist customers about the freed table.
-     * 
-     * @param orderNumber the order that was paid
-     * @return true if successful
+     * Method to be called when payment is completed for an order.
+     * Updates Order Status and Table Session.
      */
     public boolean onPaymentCompleted(int orderNumber) {
         Integer tableNum = dbController.getActiveTableNumByOrderNumber(orderNumber);
@@ -213,15 +188,7 @@ public class PaymentService {
    
 
 	
-	//***************************************** Checkout Items *****************************************//
-	
-	/**
-	 * Creates a random list of menu items for demo/testing.
-	 * Generates realistic orders based on party size.
-	 * 
-	 * @param dinersAmount number of people in the party
-	 * @return list of randomly selected items
-	 */
+	//***************************************** Checkout Items List for Bill ID *****************************************//
 	public List<Item> createRandomBillItems(int dinersAmount) {
 
 	    List<Item> items = new ArrayList<>();

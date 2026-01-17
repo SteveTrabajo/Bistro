@@ -10,49 +10,19 @@ import entities.ReportRequest;
 import logic.BistroDataBase_Controller;
 import logic.ServerLogger;
 
-/**
- * Handles generation and caching of monthly reports.
- * Supports two report types: MEMBERS (reservation/waitlist stats) and TIMES (arrival timing data).
- * Reports are serialized and cached in the database to avoid regenerating them each time.
- */
 public class ReportsService {
-	
-	/** Database controller for all DB operations */
     private final BistroDataBase_Controller db;
-    
-    /** Logger for tracking service activity */
     private final ServerLogger logger;
 
-    /**
-     * Creates a new ReportsService with required dependencies.
-     * 
-     * @param dbController database controller for DB access
-     * @param logger server logger for logging events
-     */
     public ReportsService(BistroDataBase_Controller dbController, ServerLogger logger) {
         this.db = dbController;
         this.logger = logger;
     }
 
-    /**
-     * Lists all months that have report data available for the given type.
-     * 
-     * @param reportType "MEMBERS" or "TIMES"
-     * @return list of [year, month] pairs that have data
-     */
     public List<int[]> listMonths(String reportType) {
         return db.listReportMonths(reportType);
     }
 
-    /**
-     * Gets an existing report from cache or generates a new one.
-     * If force=true in the request, always regenerates even if cached.
-     * 
-     * @param req the report request containing type, year, month, and force flag
-     * @return the generated or cached MonthlyReport
-     * @throws IllegalArgumentException if request is invalid
-     * @throws RuntimeException if report cannot be saved to database
-     */
     public MonthlyReport getOrGenerate(ReportRequest req) {
         if (req == null) throw new IllegalArgumentException("ReportRequest is null");
         if (req.getMonth() < 1 || req.getMonth() > 12) throw new IllegalArgumentException("Invalid month");
@@ -78,16 +48,6 @@ public class ReportsService {
         return generated;
     }
 
-    /**
-     * Generates a fresh report for the given type and time period.
-     * MEMBERS report: reservation counts, waitlist joins by day.
-     * TIMES report: late arrivals, on-time arrivals, overstay data.
-     * 
-     * @param type the report type
-     * @param year the year
-     * @param month the month (1-12)
-     * @return the generated report with all data populated
-     */
     private MonthlyReport generate(String type, int year, int month) {
         MonthlyReport r = new MonthlyReport();
         
@@ -133,9 +93,6 @@ public class ReportsService {
         return r;
     }
 
-    /**
-     * Serializes a MonthlyReport to bytes for database storage.
-     */
     private static byte[] serializeMonthlyReport(MonthlyReport r) {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
              ObjectOutputStream out = new ObjectOutputStream(bos)) {
@@ -147,10 +104,6 @@ public class ReportsService {
         }
     }
 
-    /**
-     * Deserializes a MonthlyReport from bytes.
-     * Returns null if deserialization fails (e.g., schema changed).
-     */
     private static MonthlyReport deserializeMonthlyReport(byte[] bytes) {
         try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
              ObjectInputStream in = new ObjectInputStream(bis)) {

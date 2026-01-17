@@ -20,50 +20,22 @@ import logic.BistroDataBase_Controller;
 import logic.BistroServer;
 import logic.ServerLogger;
 
-/**
- * Handles all order and reservation logic for the restaurant.
- * This includes creating reservations, calculating available time slots,
- * managing order statuses, and checking for no-shows.
- * 
- * The slot availability algorithm simulates overlapping reservations
- * and uses a greedy table assignment approach to maximize seating.
- */
 public class OrdersService {
 	
 	// ******************************** Instance variables ***********************************
-	
-	/** Server instance for communication */
 	private final BistroServer server;
-	
-	/** Database controller for all DB operations */
 	private final BistroDataBase_Controller dbController;
-	
-	/** Logger for tracking service activity */
 	private final ServerLogger logger;
-	
-	/** Service for table management - set after construction to avoid circular dependency */
 	private TableService tableService;
 	
-	/** List of all table capacities in the restaurant (e.g., [2,2,4,4,6,6,8]) */
-	private List<Integer> tableSizes;
-	
-	/** Time interval between reservation slots in minutes (default: 30) */
-	private int slotStepMinutes;
-	
-	/** How long each reservation lasts in minutes (default: 120) */
-	private int reservationDurationMinutes;
+	//Variables for reservation slots calculation:
+	private List<Integer> tableSizes; // [2,2,4,4,6,6,8]
+	private int slotStepMinutes; // 30
+	private int reservationDurationMinutes;// 120 
 
 	
 	// ******************************** Constructors***********************************
 	
-	/**
-	 * Creates a new OrdersService with default slot settings.
-	 * Slot step is 30 minutes, reservation duration is 2 hours.
-	 * 
-	 * @param server the server instance
-	 * @param dbController database controller for DB access
-	 * @param logger server logger for logging events
-	 */
 	public OrdersService(BistroServer server,BistroDataBase_Controller dbController, ServerLogger logger) {
 		this.dbController = dbController;
 		this.logger = logger;
@@ -94,12 +66,10 @@ public class OrdersService {
 	
 	/**
 	 * Creates a new Reservation in a thread-safe manner.
-	 * For reservations, it checks slot availability before insertion to avoid conflicts 
-	 * while handling concurrent requests (race condition prevention).
-	 * 
+	 * For reservations, it checks slot availability before insertion to avoid conflicts while handling concurrent requests.
 	 * @param data A list containing order details: [0]userId, [1]date, [2]dinersAmount, [3]time, [4]Code
-	 * @param orderType The type of order (RESERVATION or WAITLIST)
-	 * @return the created Order object, or null if slot was taken or creation failed
+	 * @param orderType The type of order (RESERVATION or WAITLIST).
+	 * @return true if the order was created successfully, false otherwise.
 	 */
 	public synchronized Order createNewOrder(List<Object> data, OrderType orderType) {
 		// data: [0]userId, [1]date, [2]dinersAmount, [3]time, [4]Code
@@ -130,21 +100,16 @@ public class OrdersService {
 		}
 	}
 	
-	/**
-	 * Helper method to build an Order DTO from individual fields.
-	 */
 	public Order createOrderDto(int userId, LocalDate date, int dinersAmount, LocalTime time, String confirmationCode, OrderType orderType, OrderStatus status) {
 		return new Order(userId, date, dinersAmount, time, confirmationCode, orderType, status);
 	}
 	
 	/**
-	 * Checks if a specific reservation slot is still available.
-	 * Used for last-second validation before inserting a reservation.
-	 * 
-	 * @param date the reservation date
-	 * @param targetTime the specific time slot to check
-	 * @param diners number of diners
-	 * @return true if slot is still free, false if taken
+	 * Checks if a specific reservation slot is still available for the given date, time, and diners amount.
+	 * @param date The date of the reservation.
+	 * @param targetTime The specific time slot to check.
+	 * @param diners The number of diners for the reservation.
+	 * @return true if the slot is available, false otherwise.
 	 */
 	private boolean checkSpecificSlotAvailability(LocalDate date, LocalTime targetTime, int diners) {
 		List<Order> existingReservations = dbController.getOrdersByDate(date);
@@ -157,34 +122,16 @@ public class OrdersService {
 		return availableSlots.contains(targetString);
 	}
 	
-	/**
-	 * Retrieves an order by its confirmation code.
-	 * 
-	 * @param confirmationCode the order's confirmation code
-	 * @return the Order entity, or null if not found
-	 */
 	public Order getOrderByConfirmationCode(String confirmationCode) {
 		return dbController.getOrderByConfirmationCodeInDB(confirmationCode);
 	}
 	
-	/**
-	 * Checks if an order exists in the database.
-	 * 
-	 * @param confirmationCode the confirmation code to check
-	 * @return true if order exists
-	 */
 	public boolean checkOrderExists(String confirmationCode) {
 		return dbController.checkOrderExistsInDB(confirmationCode);
 	}
 	
 	/**
-	 * Verifies that an order exists, belongs to the user, and is ready for check-in.
-	 * Only orders with NOTIFIED status can be checked in.
-	 * Logs security warnings if a user tries to check in with someone else's code.
-	 * 
-	 * @param confirmationCode the order's confirmation code
-	 * @param userId the user attempting to check in
-	 * @return true if the order is valid and belongs to this user
+	 * Verifies if an order exists, belongs to the specific user, and is active.
 	 */
 	public boolean checkOrderBelongsToUser(String confirmationCode, int userId) {
 		Order order = dbController.getOrderByConfirmationCodeInDB(confirmationCode);
@@ -204,23 +151,14 @@ public class OrdersService {
 		return true;
 	}
 	
-	/**
-	 * Gets all orders (history) for a specific user.
-	 * 
-	 * @param userId the user's ID
-	 * @return list of past and current orders
-	 */
 	public List<Order> getClientHistory(int userId) {
 		return dbController.getOrdersByUserId(userId);
 	}
 	
 	/**
-	 * Generates a unique confirmation code with a prefix (e.g., "R-123456" for reservations).
-	 * Retries up to 3 times if a collision is detected in the database.
-	 * 
-	 * @param prefix the code prefix ("R" for reservation, "W" for waitlist)
-	 * @return a unique confirmation code
-	 * @throws RuntimeException if unable to generate unique code after 3 attempts
+	 * Generates a unique 6-digit code with a prefix (e.g., "R-123456").
+	 * Verifies against the DB to ensure no duplicates exist.
+	 * @param prefix The prefix for the code (e.g., "R" for reservations).
 	 */
 	public String generateConfirmationCode(String prefix) {
 	    String code = null;
@@ -253,33 +191,34 @@ public class OrdersService {
 	}
 	
 	
+	//TODO : move to TableService?
 	/**
-	 * Gets the table number allocated to a reservation.
 	 * 
-	 * @param confirmationCode the reservation's confirmation code
-	 * @return the table number, or -1 if not found
+	 * Retrieves the allocated table number for a reservation based on its confirmation code.
+	 * 
+	 * @param confirmationCode The confirmation code of the reservation.
+	 * @return The allocated table number, or -1 if not found.
 	 */
 	public int getAllocatedTableForReservation(String confirmationCode) {
 		return tableService.getTableNumberByReservationConfirmationCode(confirmationCode);
 	}
 	
 	/**
-	 * Updates the status of an order.
 	 * 
-	 * @param confirmationCode the order's confirmation code
-	 * @param completed the new status
-	 * @return true if update was successful
+	 * Updates the status of an order in the database.
+	 * 
+	 * @param confirmationCode The confirmation code of the order.
+	 * @param completed The new status to set for the order.
+	 * @return true if the update was successful, false otherwise.
 	 */
 	public boolean updateOrderStatus(String confirmationCode, OrderStatus completed) {
 		return dbController.updateOrderStatusInDB(confirmationCode, completed);
 	}
 	
 	/**
-	 * Checks if a reservation is a no-show (15 minutes past reservation time).
-	 * Only marks as NO_SHOW if the order is still PENDING.
-	 * 
-	 * @param confirmationCode the reservation to check
-	 * @return true if marked as NO_SHOW, false otherwise
+	 * Scheduler method for 15 min no-show check for reservations.
+	 * @param confirmationCode The confirmation code of the reservation to check.
+	 * @return true if marked as NO_SHOW, false otherwise.
 	 */
 	public boolean checkReservationNoShow(String confirmationCode) {
 		if (dbController.getOrderStatusInDB(confirmationCode) == OrderStatus.PENDING) {
@@ -298,12 +237,11 @@ public class OrdersService {
 	// ******************************** Reservation Available Time Slots Calculation Methods ***********************************
 	
 	/**
-	 * Returns all available reservation time slots for a given date and party size.
-	 * Takes into account existing reservations and table availability.
-	 * If the date is today, excludes past times and adds a 1-hour buffer.
 	 * 
-	 * @param requestData map with "date" (LocalDate) and "dinersAmount" (int)
-	 * @return list of available times in "HH:mm" format
+	 * Returns a list of available reservation hours for a given date and diners amount.
+	 * 
+	 * @param requestData A map containing "date" (LocalDate) and "dinersAmount" (int).
+	 * @return A list of available reservation hours in "HH:mm" format.
 	 */
 	public List<String> getAvailableReservationHours(Map<String, Object> requestData) {
 		getTablesCapacity(); // Fetch table sizes from DB
@@ -330,8 +268,8 @@ public class OrdersService {
 		return computeAvailableSlots(effectiveOpeningTime, closingTime, dinersAmount, reservationsByDate);
 	}
 	
-	/**
-	 * Refreshes the table sizes list from the database.
+	/*
+	 * Fetches all table sizes from the database and stores them in the tableSizes list.
 	 */
 	public void getTablesCapacity() {
 		List<Table> tables = tableService.getAllTables();
@@ -343,16 +281,17 @@ public class OrdersService {
 	}
 	
 	
+	//TODO: add more comments to the methods below ---------------------------------------------
 	/**
-	 * Core algorithm that computes which time slots are available for a new reservation.
-	 * For each possible slot, it checks if adding this reservation would exceed table capacity
-	 * by simulating all overlapping reservations.
 	 * 
-	 * @param openingTime restaurant opening time
-	 * @param closingTime restaurant closing time
-	 * @param newDinersAmount party size for the new reservation
-	 * @param reservationsByDate existing reservations on that date
-	 * @return list of available time slots in "HH:mm" format
+	 * Computes available reservation slots within opening hours that can accommodate
+	 * the new diners amount, considering existing reservations.
+	 * 
+	 * @param openingTime The restaurant's opening time.
+	 * @param closingTime The restaurant's closing time.
+	 * @param newDinersAmount The number of diners for the new reservation.
+	 * @param reservationsByDate A list of existing reservations for the specified date.
+	 * @return A list of available reservation slots in "HH:mm" format.
 	 */
 	public List<String> computeAvailableSlots(LocalTime openingTime, LocalTime closingTime, int newDinersAmount,
 	        List<Order> reservationsByDate) {
@@ -395,12 +334,13 @@ public class OrdersService {
 	
 
 	/**
-	 * Builds all possible time slots from opening to closing time.
-	 * The last slot must allow for a full reservation duration before closing.
 	 * 
-	 * @param openingTime restaurant opening time
-	 * @param closingTime restaurant closing time
-	 * @return list of possible slot start times
+	 * Builds all possible time slots within opening hours that can accommodate
+	 * a full planning window.
+	 * 
+	 * @param openingTime The restaurant's opening time.
+	 * @param closingTime The restaurant's closing time.
+	 * @return A list of possible time slots.
 	 */
 	public List<LocalTime> buildPossibleTimeSlots(LocalTime openingTime, LocalTime closingTime) {
 		// The last possible time slot starts at closingTime minus reservationDuration
@@ -415,26 +355,25 @@ public class OrdersService {
 	}
 	
 	/**
-	 * Checks if two time intervals overlap.
-	 * Used to detect reservation conflicts.
 	 * 
-	 * @param slotStartTime start of first interval
-	 * @param slotEndTime end of first interval
-	 * @param orderStart start of second interval
-	 * @param orderEnd end of second interval
-	 * @return true if the intervals overlap
+	 * Checks if two time intervals overlap.
+	 * 
+	 * @param slotStartTime Start time of the time slot.
+	 * @param slotEndTime End time of the time slot.
+	 * @param orderStart Start time of the order.
+	 * @param orderEnd End time of the order.
+	 * @return true if the intervals overlap, false otherwise.
 	 */
     public boolean overlaps(LocalTime slotStartTime, LocalTime slotEndTime, LocalTime orderStart, LocalTime orderEnd) {
         return slotStartTime.isBefore(orderEnd) && orderStart.isBefore(slotEndTime);
     }
 
     /**
-	 * Greedy algorithm to check if all party sizes can be assigned to available tables.
-	 * Sorts parties by size (largest first) and assigns each to the smallest fitting table.
+	 * Checks if it is possible to assign all diners amounts to available tables.
 	 * 
-	 * @param overlappingDinersAmounts list of party sizes that need tables
-	 * @param tableSizes list of available table capacities
-	 * @return true if all parties can be seated, false if not enough tables
+	 * @param overlappingDinersAmounts A list of diners amounts that need to be seated.
+	 * @param tableSizes A list of available table sizes.
+	 * @return true if all diners amounts can be assigned to tables, false otherwise.
 	 */
 	public boolean canAssignAllDinersToTables(List<Integer> overlappingDinersAmounts, List<Integer> tableSizes) {
 		// Sort diners amounts in descending order:
@@ -467,26 +406,21 @@ public class OrdersService {
 	}
 	
 	/**
-	 * Formats a LocalTime as "HH:mm" string.
 	 * 
-	 * @param time the time to format
-	 * @return formatted time string
+	 * Converts a LocalTime object to a string in "HH:mm" format.
+	 * 
+	 * @param time
+	 * @return
 	 */
 	public String timeToString(LocalTime time) {
         // "HH:mm"
         return String.format("%02d:%02d", time.getHour(), time.getMinute());
     }
 
-	/**
-	 * Gets all reservations for a specific date (client view).
-	 */
 	public List<Order> getClientReservations(LocalDate date) {
         return dbController.getOrdersByDate(date);
     }
 	
-	/**
-	 * Gets all reservations for a specific date with full details (staff view).
-	 */
 	public List<Order> getStaffReservations(LocalDate date) {
         return dbController.getFullOrdersByDate(date);
     }
@@ -494,11 +428,10 @@ public class OrdersService {
 	// ******************************** New Method for Date Availability ***********************************
 	
 	/**
-	 * Returns all dates in the next 30 days that have at least one available slot
-	 * for the given party size.
-	 * 
-	 * @param diners number of people in the party
-	 * @return list of available dates
+	 * Returns a list of dates (starting from tomorrow up to 30 days ahead)
+	 * where there is at least one available time slot for the given number of diners.
+	 * * @param diners The number of diners.
+	 * @return List of available LocalDate objects.
 	 */
 	public List<LocalDate> getAvailableDates(int diners) {
 		getTablesCapacity(); // Refresh table sizes
@@ -530,12 +463,8 @@ public class OrdersService {
 	}
 
 	/**
-     * Cancels a reservation if it hasn't started yet.
-     * Only PENDING or NOTIFIED orders can be cancelled.
-     * Orders that are SEATED or COMPLETED cannot be cancelled.
-     * 
-     * @param confirmationCode the reservation to cancel
-     * @return true if cancellation was successful
+     * Cancels a reservation if it is currently PENDING or NOTIFIED.
+     * Prevents cancelling orders that are already SEATED or COMPLETED.
      */
     public boolean cancelReservation(String confirmationCode) {
         OrderStatus currentStatus = dbController.getOrderStatusInDB(confirmationCode);
@@ -552,14 +481,6 @@ public class OrdersService {
         return dbController.updateOrderStatusInDB(confirmationCode, OrderStatus.CANCELLED);
     }
 
-    /**
-     * Creates a reservation on behalf of a customer (staff action).
-     * Handles both member and guest customers.
-     * For guests, creates a new user record if needed.
-     * 
-     * @param data map with date, time, diners, customerType, identifier, and customerName
-     * @return the created Order, or null if creation failed
-     */
     public Order createReservationAsStaff(Map<String, Object> data) {
         if (data == null) return null;
         LocalDate date = (LocalDate) data.get("date");
@@ -597,12 +518,6 @@ public class OrdersService {
         return createNewOrder(orderData, OrderType.RESERVATION);
     }
 
-	/**
-	 * Gets all reservation confirmation codes for a user.
-	 * 
-	 * @param userId the user's ID
-	 * @return list of confirmation codes
-	 */
 	public List<String> getReservationCodesByUserId(int userId) {
 		List<Order> orders = dbController.getOrdersByUserId(userId);
 		if (orders != null) {
@@ -615,13 +530,6 @@ public class OrdersService {
 		return null;
 	}
 
-	/**
-	 * Gets the user's earliest upcoming reservation code.
-	 * Useful for quick check-in scenarios.
-	 * 
-	 * @param userId the user's ID
-	 * @return the earliest reservation code, or null if none found
-	 */
 	public String getEarlierReservationCodeByUserId(int userId) {
 		List<Order> orders = dbController.getOrdersByUserId(userId);
 		if (orders != null) {
