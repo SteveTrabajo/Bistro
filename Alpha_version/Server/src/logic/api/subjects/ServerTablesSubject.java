@@ -17,6 +17,12 @@ public class ServerTablesSubject {
 
     private ServerTablesSubject() {}
 
+    /**
+	 * Registers table-related API endpoints to the server router.
+	 * @param router The server router to register endpoints with.
+	 * @param tableService The service handling table operations.
+	 * @param logger The server logger for logging events.
+	 */
     public static void register(ServerRouter router, TableService tableService, ServerLogger logger) {
         
         // Handle request for table map status
@@ -33,6 +39,7 @@ public class ServerTablesSubject {
             }
         });
         
+        // Handle request for seated order by user ID
         router.on("tables", "askSeatedOrder", (msg, client) -> {
         	int userId = (int) msg.getData();
         	Order seatedOrder = tableService.getSeatedOrderForClient(userId);
@@ -44,11 +51,13 @@ public class ServerTablesSubject {
 		
 		});
         
+        // Handle request to get all tables
         router.on("tables", "getAll", (msg, client) -> {
             List<Table> tables = tableService.getAllTables();
             client.sendToClient(new Message(Api.REPLY_ALL_TABLES_OK, tables)); 
         });
 
+        // Handle request to add a new table
         router.on("tables", "add", (msg, client) -> {
             Table newTable = (Table) msg.getData();
             boolean success = tableService.addNewTable(newTable);
@@ -58,6 +67,7 @@ public class ServerTablesSubject {
             }
         });
 
+        // Handle request to remove a table
         router.on("tables", "remove", (msg, client) -> {
             int tableId = (int) msg.getData();
             boolean success = tableService.deleteTable(tableId);
@@ -67,6 +77,7 @@ public class ServerTablesSubject {
             }
         });
         
+        // Handle request to update table seats
         router.on("tables", "updateSeats", (msg, client) -> {
             int[] data = (int[]) msg.getData();
             int tableId = data[0];
@@ -81,7 +92,6 @@ public class ServerTablesSubject {
                 logger.log("[ERROR] Failed to update table T" + tableId);
             }
         });
-        
     }
-        
 }
+// End of ServerTablesSubject class

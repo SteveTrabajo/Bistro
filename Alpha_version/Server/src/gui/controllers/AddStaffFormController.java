@@ -9,6 +9,10 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import logic.BistroServer;
 
+/*
+ * Controller class for the Add Staff Form.
+ * Handles user interactions for creating new staff accounts.
+ */
 public class AddStaffFormController {
 
     @FXML private TextField txtUsername;
@@ -32,11 +36,20 @@ public class AddStaffFormController {
 
     private BistroServer server;
 
+    /*
+	 * Sets the BistroServer instance for this controller.
+	 * @param server The BistroServer instance to set.
+	 */
     public void setServer(BistroServer server) {
         this.server = server;
         System.out.println("[AddStaffForm] setServer called. server=" + (server != null));
     }
 
+    /*
+	 * Initializes the controller after the FXML elements have been injected.
+	 * Sets default states and clears messages.
+	 */
+    
     @FXML
     private void initialize() {
         System.out.println("[AddStaffForm] initialize() fired");
@@ -44,6 +57,11 @@ public class AddStaffFormController {
         clearMessages();
     }
 
+    /*
+     * Handles the Create button click event.
+     * Validates input, creates a new staff account, and provides feedback.
+     * @param event The event that triggered the button click.
+     */
     @FXML
     private void onCreate(ActionEvent event) {
         System.out.println("[AddStaffForm] onCreate() fired");
@@ -60,7 +78,7 @@ public class AddStaffFormController {
                 showError("Server instance is null. setServer(...) was not called.");
                 return;
             }
-
+            // Gather and trim inputs
             String username = safeTrim(txtUsername);
             String password = safeTrim(txtPassword);
             String email = safeTrim(txtEmail);
@@ -103,7 +121,6 @@ public class AddStaffFormController {
             showSuccess("Created " + userType + " account: " + username);
             clearForm();
 
-
         } catch (Exception ex) {
             ex.printStackTrace();
             showError("Error: " + ex.getMessage());
@@ -112,6 +129,11 @@ public class AddStaffFormController {
         }
     }
 
+    /*
+	 * Handles the Cancel button click event.
+	 * Closes the Add Staff Form window.
+	 * @param event The event that triggered the button click.
+	 */
     @FXML
     private void onCancel(ActionEvent event) {
         System.out.println("[AddStaffForm] onCancel() fired");
@@ -119,10 +141,18 @@ public class AddStaffFormController {
         stage.close();
     }
 
+    /*
+     * Safely trims the text from a TextInputControl.
+     * @param c The TextInputControl to trim.
+     * @return The trimmed text, or an empty string if null.
+     */
     private static String safeTrim(TextInputControl c) {
         return (c == null || c.getText() == null) ? "" : c.getText().trim();
     }
 
+    /*
+	 * Clears all input fields in the form.
+	 */
     private void clearForm() {
         if (txtUsername != null) txtUsername.clear();
         if (txtPassword != null) txtPassword.clear();
@@ -134,12 +164,18 @@ public class AddStaffFormController {
         if (rbEmployee != null) rbEmployee.setSelected(true);
     }
 
-
+    /*
+     * Clears error and success messages.
+     */
     private void clearMessages() {
         if (lblError != null) lblError.setText("");
         if (lblSuccess != null) lblSuccess.setText("");
     }
 
+    /*
+	 * Displays an error message to the user.
+	 * @param msg The error message to display.
+	 */
     private void showError(String msg) {
         String out = (msg == null || msg.isBlank()) ? "Invalid input (no message from validator)." : msg;
         lblError.setText(out);
@@ -147,6 +183,9 @@ public class AddStaffFormController {
         System.out.println("[AddStaffForm] ERROR: " + out);
     }
 
+    /*
+     * Displays a success message to the user.
+     */
     private void showSuccess(String msg) {
         lblSuccess.setText(msg);
         lblError.setText("");

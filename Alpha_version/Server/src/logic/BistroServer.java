@@ -26,8 +26,7 @@ import java.time.YearMonth;
 
 
 /**
- * BistroServer class that extends AbstractServer to handle client-server
- * communication for a Bistro application.
+ * BistroServer class that extends AbstractServer to handle client connections and API messages.
  */
 public class BistroServer extends AbstractServer {
 
@@ -53,15 +52,16 @@ public class BistroServer extends AbstractServer {
 	
 	// Scheduler for background tasks:
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-	/** Scheduler used to run monthly report generation checks once per day. */
+	// Scheduler used to run monthly report generation checks once per day.
 	private final ScheduledExecutorService monthlyReportsScheduler = Executors.newScheduledThreadPool(1);
 	
 	// ******************************** Constructors***********************************
 
 	/**
-	 * Constructor for BistroServer class
+	 * Private constructor for the BistroServer class.
 	 * 
-	 * @param port                    The port number for the server to listen on.
+	 * @param port The port number for the server to listen on.
+	 * 
 	 * @param serverConsoleController The controller for the server console UI.
 	 */
 	private BistroServer(int port, ServerConsoleController serverConsoleController) {
@@ -86,13 +86,13 @@ public class BistroServer extends AbstractServer {
 	}
 
 	/**
-	 * Static method to get the singleton instance of BistroServer.
+	 * Public method to get the singleton instance of the BistroServer.
 	 * 
 	 * @param port The port number for the server to listen on.
 	 * 
 	 * @param serverConsoleController The controller for the server console UI.
 	 * 
-	 * @return The singleton instance of BistroServer.
+	 * @return The singleton instance of the BistroServer.
 	 */
 	public static synchronized BistroServer getInstance(int port, ServerConsoleController serverConsoleController) {
 		if (serverInstance == null) {
@@ -149,8 +149,8 @@ public class BistroServer extends AbstractServer {
 		}
 	}
 
-	/*
-	 * Method called when the server starts listening for client connections.
+	/**
+	 * Method called when the server starts to open the database connection.
 	 */
 	protected void serverStarted() {
 		logger.log("Server started, listening for connections on port " + getPort());
@@ -213,6 +213,9 @@ public class BistroServer extends AbstractServer {
 	}
 	
 	// ******************************** Getters for Services ********************************
+	
+	/** Getters for various services used by the server.
+	*/
 	public OrdersService getOrdersService() {
 		return this.ordersService;
 	}
@@ -224,12 +227,9 @@ public class BistroServer extends AbstractServer {
 	public NotificationService getNotificationService() {
 		return this.notificationService;
 	}
-	/**
-	 * Starts a daily task (00:05 server time) that checks whether today is the first day of the month.
-	 * If yes, generates both required monthly reports (MEMBERS + TIMES) for the previous month.
-	 *
-	 * <p>Matches the project story: reports are generated automatically at the end of each month.</p>
-	 */
+
+	/** Scheduler to auto-generate monthly reports on the 1st of each month at 00:05.
+	*/
 	private void startMonthlyReportGenerationScheduler() {
 	    long initialDelaySec = secondsUntilNextRun(LocalTime.of(0, 5));
 	    long periodSec = TimeUnit.DAYS.toSeconds(1);

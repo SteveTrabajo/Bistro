@@ -20,6 +20,9 @@ import logic.BistroDataBase_Controller;
 import logic.BistroServer;
 import logic.ServerLogger;
 
+/**
+ * Service class for managing orders and reservations.
+ */
 public class OrdersService {
 	
 	// ******************************** Instance variables ***********************************
@@ -36,6 +39,13 @@ public class OrdersService {
 	
 	// ******************************** Constructors***********************************
 	
+	/**
+	 * Constructor for OrdersService.
+	 * 
+	 * @param server The BistroServer instance.
+	 * @param dbController The database controller for data access.
+	 * @param logger The server logger for logging events.
+	 */
 	public OrdersService(BistroServer server,BistroDataBase_Controller dbController, ServerLogger logger) {
 		this.dbController = dbController;
 		this.logger = logger;
@@ -46,22 +56,48 @@ public class OrdersService {
 	}
 	// ******************************* Getters and Setters ***********************************
 	
+	/**
+	 * Sets the TableService instance.
+	 * 
+	 * @param tableService The TableService instance to set.
+	 */
 	public void setTableService(TableService tableService) {
 		this.tableService = tableService;
 	}
 	
+	/**
+	 * Gets the slot step minutes.
+	 * 
+	 * @return The slot step minutes.
+	 */
 	public int getSlotStepMinutes() {
 		return slotStepMinutes;
 	}
 	
+	/**
+	 * Gets the reservation duration in minutes.
+	 * 
+	 * @return The reservation duration in minutes.
+	 */
 	public int getReservationDurationMinutes() {
 		return this.reservationDurationMinutes;
 	}
 	
+	/**
+	 * Gets the list of table sizes.
+	 * 
+	 * @return The list of table sizes.
+	 */
 	public List<Integer> getTableSizes(){
 		return this.tableSizes;
 	}
 	
+	/**
+	 * Retrieves the list of seated reservations for a member for today.
+	 * 
+	 * @param userId The user ID of the member.
+	 * @return A list of seated reservations for the member.
+	 */
 	public List<Order> getMemberSeatedReservations(int userId) {
 	    return dbController.getMemberSeatedReservationsForToday(userId);
 	}
@@ -69,11 +105,11 @@ public class OrdersService {
 	// ********************************Instance Methods ***********************************
 	
 	/**
-	 * Creates a new Reservation in a thread-safe manner.
-	 * For reservations, it checks slot availability before insertion to avoid conflicts while handling concurrent requests.
-	 * @param data A list containing order details: [0]userId, [1]date, [2]dinersAmount, [3]time, [4]Code
-	 * @param orderType The type of order (RESERVATION or WAITLIST).
-	 * @return true if the order was created successfully, false otherwise.
+	 * Creates a new order (reservation or waitlist) in a thread-safe manner.
+	 * 
+	 * @param data A list containing order details: [0]userId, [1]date, [2]dinersAmount, [3]time
+	 * @param orderType The type of the order (RESERVATION or WAITLIST).
+	 * @return The created Order object, or null if creation failed.
 	 */
 	public synchronized Order createNewOrder(List<Object> data, OrderType orderType) {
 		// data: [0]userId, [1]date, [2]dinersAmount, [3]time, [4]Code
@@ -90,6 +126,7 @@ public class OrdersService {
 				return null; 
 			}
 		}
+		// Generate unique confirmation code
 		String confirmationCode = generateConfirmationCode("R");
 		data.add(confirmationCode); 
 		boolean orderCreated = dbController.setNewOrder(data, orderType, OrderStatus.PENDING);
@@ -104,6 +141,18 @@ public class OrdersService {
 		}
 	}
 	
+	/**
+	 * Creates an Order DTO object.
+	 * 
+	 * @param userId The user ID associated with the order.
+	 * @param date The date of the order.
+	 * @param dinersAmount The number of diners for the order.
+	 * @param time The time of the order.
+	 * @param confirmationCode The confirmation code for the order.
+	 * @param orderType The type of the order (RESERVATION or WAITLIST).
+	 * @param status The status of the order.
+	 * @return The created Order object.
+	 */
 	public Order createOrderDto(int userId, LocalDate date, int dinersAmount, LocalTime time, String confirmationCode, OrderType orderType, OrderStatus status) {
 		return new Order(userId, date, dinersAmount, time, confirmationCode, orderType, status);
 	}
@@ -126,16 +175,32 @@ public class OrdersService {
 		return availableSlots.contains(targetString);
 	}
 	
+	/**
+	 * Retrieves an order by its confirmation code.
+	 * 
+	 * @param confirmationCode The confirmation code of the order.
+	 * @return The Order object if found, null otherwise.
+	 */
 	public Order getOrderByConfirmationCode(String confirmationCode) {
 		return dbController.getOrderByConfirmationCodeInDB(confirmationCode);
 	}
 	
+	/**
+	 * Checks if an order exists in the database by its confirmation code.
+	 * 
+	 * @param confirmationCode The confirmation code of the order.
+	 * @return true if the order exists, false otherwise.
+	 */
 	public boolean checkOrderExists(String confirmationCode) {
 		return dbController.checkOrderExistsInDB(confirmationCode);
 	}
 	
 	/**
-	 * Verifies if an order exists, belongs to the specific user, and is active.
+	 * Checks if an order belongs to a specific user and is eligible for check-in.
+	 * 
+	 * @param confirmationCode The confirmation code of the order.
+	 * @param userId The user ID to check against.
+	 * @return true if the order belongs to the user and is NOTIFIED, false otherwise.
 	 */
 	public boolean checkOrderBelongsToUser(String confirmationCode, int userId) {
 		Order order = dbController.getOrderByConfirmationCodeInDB(confirmationCode);
@@ -155,6 +220,12 @@ public class OrdersService {
 		return true;
 	}
 	
+	/**
+	 * Gets order history for a client using their user ID.
+	 * 
+	 * @param userId The user's ID
+	 * @return List of orders for the client
+	 */
 	public List<Order> getClientHistory(int userId) {
 		return dbController.getOrdersByUserId(userId);
 	}
@@ -173,6 +244,7 @@ public class OrdersService {
 			logger.log("[DEBUG] No member found with code: " + memberCode);
 			return null;
 		}
+		// Member found, retrieve order history
 		logger.log("[DEBUG] Found member: userId=" + member.getUserId() + ", name=" + member.getFirstName() + " " + member.getLastName() + ", memberCode=" + member.getMemberCode());
 		List<Order> orders = dbController.getOrdersByUserId(member.getUserId());
 		logger.log("[DEBUG] getOrdersByUserId(" + member.getUserId() + ") returned " + (orders == null ? "null" : orders.size() + " orders"));
@@ -188,6 +260,8 @@ public class OrdersService {
 	 * Generates a unique 6-digit code with a prefix (e.g., "R-123456").
 	 * Verifies against the DB to ensure no duplicates exist.
 	 * @param prefix The prefix for the code (e.g., "R" for reservations).
+	 * @return A unique confirmation code.
+	 * @throws RuntimeException if unable to generate a unique code after 3 attempts.
 	 */
 	public String generateConfirmationCode(String prefix) {
 	    String code = null;
@@ -220,9 +294,8 @@ public class OrdersService {
 	}
 	
 	
-	//TODO : move to TableService?
+	
 	/**
-	 * 
 	 * Retrieves the allocated table number for a reservation based on its confirmation code.
 	 * 
 	 * @param confirmationCode The confirmation code of the reservation.
@@ -233,7 +306,6 @@ public class OrdersService {
 	}
 	
 	/**
-	 * 
 	 * Updates the status of an order in the database.
 	 * 
 	 * @param confirmationCode The confirmation code of the order.
@@ -252,6 +324,7 @@ public class OrdersService {
 	public boolean checkReservationNoShow(String confirmationCode) {
 		if (dbController.getOrderStatusInDB(confirmationCode) == OrderStatus.PENDING) {
 			boolean noShow = dbController.updateOrderStatusInDB(confirmationCode,OrderStatus.NO_SHOW);
+			// Log the no-show event
 			if (noShow) {
 				logger.log("[WARN] RESERVATION NO_SHOW: " + confirmationCode);
 				return true;
@@ -260,16 +333,20 @@ public class OrdersService {
 		return false;
 	}
 	
+	/**
+	 * Recovers the seated code for a guest based on their email and phone number.
+	 * 
+	 * @param email The email of the guest.
+	 * @param phone The phone number of the guest.
+	 * @return The seated code if found, null otherwise.
+	 */
 	public String recoverGuestSeatedCode(String email, String phone) {
 	    return dbController.recoverGuestSeatedCode(email, phone);
 	}
 	
-	
-	
 	// ******************************** Reservation Available Time Slots Calculation Methods ***********************************
 	
 	/**
-	 * 
 	 * Returns a list of available reservation hours for a given date and diners amount.
 	 * 
 	 * @param requestData A map containing "date" (LocalDate) and "dinersAmount" (int).
@@ -278,20 +355,21 @@ public class OrdersService {
 	public List<String> getAvailableReservationHours(Map<String, Object> requestData) {
 	    getTablesCapacity();
 
+	    // Extract date and diners amount from requestData
 	    LocalDate date = (LocalDate) requestData.get("date");
 	    int dinersAmount = (int) requestData.get("dinersAmount");
 
-	    // IMPORTANT: use the date-aware hours
+	    // Fetch opening hours for the specified date
 	    List<LocalTime> openingHours = dbController.getOpeningHoursFromDB(date);
 
 	    // If closed (holiday closed) or missing hours - no slots
 	    if (openingHours == null || openingHours.size() < 2) {
 	        return new ArrayList<>();
 	    }
-
+	    // Extract opening and closing times
 	    LocalTime openingTime = openingHours.get(0);
 	    LocalTime closingTime = openingHours.get(1);
-
+	    // Adjust opening time if the date is today
 	    LocalTime effectiveOpeningTime = openingTime;
 	    if (date.equals(LocalDate.now())) {
 	        LocalTime now = LocalTime.now().plusHours(1);
@@ -303,13 +381,14 @@ public class OrdersService {
 	        }
 	    }
 
+	    // Fetch existing reservations for the date
 	    List<Order> reservationsByDate = dbController.getOrdersByDate(date);
 	    return computeAvailableSlots(effectiveOpeningTime, closingTime, dinersAmount, reservationsByDate);
 	}
 
 	
-	/*
-	 * Fetches all table sizes from the database and stores them in the tableSizes list.
+	/**
+	 * Retrieves the capacities of all tables and stores them in the tableSizes list.
 	 */
 	public void getTablesCapacity() {
 		List<Table> tables = tableService.getAllTables();
@@ -321,9 +400,7 @@ public class OrdersService {
 	}
 	
 	
-	//TODO: add more comments to the methods below ---------------------------------------------
 	/**
-	 * 
 	 * Computes available reservation slots within opening hours that can accommodate
 	 * the new diners amount, considering existing reservations.
 	 * 
@@ -335,17 +412,18 @@ public class OrdersService {
 	 */
 	public List<String> computeAvailableSlots(LocalTime openingTime, LocalTime closingTime, int newDinersAmount,
 	        List<Order> reservationsByDate) {
+		// Sanity check for table sizes
 	    if (this.tableSizes == null || this.tableSizes.isEmpty()) {
 	        System.err.println("ERROR: tableSizes is EMPTY! No tables to seat diners.");
 	        return new ArrayList<>();
 	    }
-
+	    // Build possible time slots within opening hours
 	    List<LocalTime> possibleTimeSlots = buildPossibleTimeSlots(openingTime, closingTime);
 	    Map<LocalTime, List<Integer>> tablesPerTime = new HashMap<>();
 	    for (LocalTime slot : possibleTimeSlots){
 	        tablesPerTime.put(slot, new ArrayList<>()); 
 	    }
-
+	    // Map existing reservations to overlapping time slots
 	    for (Order o : reservationsByDate) {
 	        LocalTime orderStart = o.getOrderHour();
 	        LocalTime orderEnd = orderStart.plusMinutes(reservationDurationMinutes);
@@ -357,7 +435,7 @@ public class OrdersService {
 	            }
 	        }
 	    }
-
+	    // Determine available slots for the new diners amount
 	    List<String> available = new ArrayList<>(); 
 	    for (LocalTime slot : possibleTimeSlots) {
 	        List<Integer> overlappingDinersAmounts = new ArrayList<>(tablesPerTime.get(slot));
@@ -370,17 +448,13 @@ public class OrdersService {
 	    }
 	    return available;
 	}
-	
-	
 
 	/**
-	 * 
-	 * Builds all possible time slots within opening hours that can accommodate
-	 * a full planning window.
+	 * Builds a list of possible reservation time slots between opening and closing times.
 	 * 
 	 * @param openingTime The restaurant's opening time.
 	 * @param closingTime The restaurant's closing time.
-	 * @return A list of possible time slots.
+	 * @return A list of possible reservation time slots as LocalTime objects.
 	 */
 	public List<LocalTime> buildPossibleTimeSlots(LocalTime openingTime, LocalTime closingTime) {
 		// The last possible time slot starts at closingTime minus reservationDuration
@@ -395,7 +469,6 @@ public class OrdersService {
 	}
 	
 	/**
-	 * 
 	 * Checks if two time intervals overlap.
 	 * 
 	 * @param slotStartTime Start time of the time slot.
@@ -435,6 +508,7 @@ public class OrdersService {
 			if (chosen == null) {
 				return false;
 			}
+			// Update table size counts:
 			int count = tableSizeCounts.get(chosen);
 			if (count == 1) {
 				tableSizeCounts.remove(chosen);
@@ -446,21 +520,30 @@ public class OrdersService {
 	}
 	
 	/**
-	 * 
 	 * Converts a LocalTime object to a string in "HH:mm" format.
 	 * 
-	 * @param time
-	 * @return
+	 * @param time The LocalTime object to convert.
+	 * @return The formatted time string.
 	 */
 	public String timeToString(LocalTime time) {
         // "HH:mm"
         return String.format("%02d:%02d", time.getHour(), time.getMinute());
     }
 
+	/**
+	 * Gets client reservations for a specific date.
+	 * @param date The date to retrieve reservations for.
+	 * @return A list of client reservations for the specified date.
+	 */
 	public List<Order> getClientReservations(LocalDate date) {
         return dbController.getOrdersByDate(date);
     }
 	
+	/**
+	 * Gets staff reservations for a specific date.
+	 * @param date The date to retrieve reservations for.
+	 * @return A list of staff reservations for the specified date.
+	 */
 	public List<Order> getStaffReservations(LocalDate date) {
         return dbController.getFullOrdersByDate(date);
     }
@@ -470,7 +553,7 @@ public class OrdersService {
 	/**
 	 * Returns a list of dates (starting from tomorrow up to 30 days ahead)
 	 * where there is at least one available time slot for the given number of diners.
-	 * * @param diners The number of diners.
+	 * @param diners The number of diners.
 	 * @return List of available LocalDate objects.
 	 */
 	public List<LocalDate> getAvailableDates(int diners) {
@@ -479,9 +562,10 @@ public class OrdersService {
 		if (openingHours == null || openingHours.size() < 2) {
 			return new ArrayList<>();
 		}
+		// Extract opening and closing times
 		LocalTime open = openingHours.get(0);
 		LocalTime close = openingHours.get(1);
-
+		// Prepare result list
 		List<LocalDate> resultDates = new ArrayList<>();
 		LocalDate startDate = LocalDate.now().plusDays(0); // Start checking from today
 		LocalDate endDate = startDate.plusDays(30); // Check for the next 30 days
@@ -491,11 +575,11 @@ public class OrdersService {
 
 		    List<LocalTime> hours = dbController.getOpeningHoursFromDB(date);
 
-		    // closed day / holiday closed => skip date completely
+		    // Skip if closed or missing hours
 		    if (hours == null || hours.size() < 2) {
 		        continue;
 		    }
-
+		    // Fetch existing reservations for the date
 		    List<Order> reservationsOnDate = dbController.getOrdersByDate(date);
 		    List<String> slots = computeAvailableSlots(open, close, diners, reservationsOnDate);
 
@@ -508,16 +592,17 @@ public class OrdersService {
 	}
 
 	/**
-     * Cancels a reservation if it is currently PENDING or NOTIFIED.
-     * Prevents cancelling orders that are already SEATED or COMPLETED.
-     */
+	 * Cancels a reservation if it is not already seated or completed.
+	 * @param confirmationCode The confirmation code of the reservation to cancel.
+	 * @return true if the reservation was successfully cancelled, false otherwise.
+	 */
     public boolean cancelReservation(String confirmationCode) {
         OrderStatus currentStatus = dbController.getOrderStatusInDB(confirmationCode);
-        
+        // Confirmation code does not exist
         if (currentStatus == null) {
             return false; 
         }
-        
+        // Cannot cancel if already seated or completed
         if (currentStatus == OrderStatus.SEATED || currentStatus == OrderStatus.COMPLETED) {
             logger.log("[WARN] Attempted to cancel an active/finished order: " + confirmationCode);
             return false;
@@ -526,6 +611,14 @@ public class OrdersService {
         return dbController.updateOrderStatusInDB(confirmationCode, OrderStatus.CANCELLED);
     }
 
+    /**
+	 * Creates a reservation on behalf of staff for a customer (member or guest).
+	 * @param data A map containing reservation details: "date" (LocalDate), "time" (LocalTime),
+	 *             "diners" (Integer), "customerType" (String: "MEMBER" or "GUEST"),
+	 *             "identifier" (String: member code for MEMBER, email/phone for GUEST),
+	 *             "customerName" (String: optional, for GUEST).
+	 * @return The created Order object, or null if creation failed.
+	 */
     public Order createReservationAsStaff(Map<String, Object> data) {
         if (data == null) return null;
         LocalDate date = (LocalDate) data.get("date");
@@ -534,7 +627,7 @@ public class OrdersService {
         String customerType = (String) data.get("customerType"); 
         String identifier = (String) data.get("identifier");
         String customerName = (String) data.get("customerName");
-
+        // Basic validation
         if (date == null || time == null || dinersObj == null || dinersObj <= 0) {
             logger.log("[WARN] createReservationAsStaff: invalid date/time/diners");
             return null;
@@ -543,6 +636,7 @@ public class OrdersService {
             logger.log("[WARN] createReservationAsStaff: missing customerType/identifier");
             return null;
         }
+        // Find or create user based on customer type
         String typeNorm = customerType.trim().toUpperCase();
         User user = null;
         if ("MEMBER".equals(typeNorm)) {
@@ -555,6 +649,7 @@ public class OrdersService {
         	logger.log("[WARN] createReservationAsStaff: user not found and could not be created. type=" + typeNorm + " identifier=" + identifier);
         	return null;            
         }
+        // Prepare order data and create reservation
         List<Object> orderData = new ArrayList<>();
         orderData.add(user.getUserId());
         orderData.add(date);
@@ -563,10 +658,21 @@ public class OrdersService {
         return createNewOrder(orderData, OrderType.RESERVATION);
     }
 
+    /**
+	 * Retrieves active reservations for a member for today.
+	 * 
+	 * @param userId The user ID of the member.
+	 * @return A list of active reservations for the member.
+	 */
     public List<Order> getMemberActiveReservations(int userId) {
         return dbController.getMemberActiveReservationsForToday(userId);
     }
     
+    /**
+     * Retrieves all reservation confirmation codes for a user by their user ID. 
+     * @param userId The user ID of the user.
+     * @return A list of reservation confirmation codes, or null if none found.
+     */
 	public List<String> getReservationCodesByUserId(int userId) {
 		List<Order> orders = dbController.getOrdersByUserId(userId);
 		if (orders != null) {
@@ -579,6 +685,11 @@ public class OrdersService {
 		return null;
 	}
 
+	/**
+	 * Retrieves the earliest upcoming reservation confirmation code for a user by their user ID.
+	 * @param userId The user ID of the user.
+	 * @return The earliest upcoming reservation confirmation code, or null if none found.
+	 */
 	public String getEarlierReservationCodeByUserId(int userId) {
 		List<Order> orders = dbController.getOrdersByUserId(userId);
 		if (orders != null) {
@@ -593,13 +704,12 @@ public class OrdersService {
 					}
 				}
 			}
+			// 
 			if (earliest != null) {
 				return earliest.getConfirmationCode();
 			}
 		}
 		return null;
 	}
-
-	
-
 }
+// End of OrdersService.java

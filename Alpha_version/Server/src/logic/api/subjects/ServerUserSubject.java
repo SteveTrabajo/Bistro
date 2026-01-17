@@ -135,6 +135,7 @@ public final class ServerUserSubject {
 			}
 		});
 		
+		// Request: "user.registerNewMember"s
 		router.on("user", "registerNewMember", (msg,client) -> {
 		    @SuppressWarnings("unchecked")
 		    List<String> newMemberData = (ArrayList<String>) msg.getData();
@@ -147,6 +148,7 @@ public final class ServerUserSubject {
 		        return;
 		    }
 
+		    // Registration failed - determine reason
 		    String reason;
 		    switch (code) {
 		        case -2:
@@ -167,7 +169,7 @@ public final class ServerUserSubject {
 		    client.sendToClient(new Message(Api.REPLY_REGISTER_NEW_MEMBER_FAILED, reason));
 		});
 
-
+		// Request: "user.forgotMemberID"
 		router.on("user", "forgotMemberID", (msg, client) -> {
 			@SuppressWarnings("unchecked")
 			Map<String, String> requestData = (Map<String, String>) msg.getData();
@@ -183,6 +185,7 @@ public final class ServerUserSubject {
 			}
 		});
 		
+		// Request: "staff.recoverPassword"
 		router.on("staff", "recoverPassword", (msg, client) -> {
 		    @SuppressWarnings("unchecked")
 		    Map<String, String> requestData = (Map<String, String>) msg.getData();
@@ -191,7 +194,7 @@ public final class ServerUserSubject {
 		    String phoneNumber = requestData.get("phoneNumber");
 		    
 		    String result = userService.recoverStaffLogin(email, phoneNumber);
-		    
+		    // Possible results: password string, "NOT_FOUND", "ERROR_DB"
 		    if (result != null && !result.equals("NOT_FOUND") && !result.equals("ERROR_DB")) {
 		        logger.log("[INFO] Staff credentials recovered for: " + email);
 		        client.sendToClient(new Message(Api.REPLY_RECOVER_STAFF_PASSWORD_OK, result));
@@ -200,8 +203,6 @@ public final class ServerUserSubject {
 		        client.sendToClient(new Message(Api.REPLY_RECOVER_STAFF_PASSWORD_FAIL, null));
 		    }
 		});
-		
-	
 
 		// Request: "staff.create"
 		router.on("staff", "create", (msg, client) -> {
@@ -219,6 +220,7 @@ public final class ServerUserSubject {
 		        client.sendToClient(new Message(Api.REPLY_STAFF_CREATE_UNAUTHORIZED, null));
 		        return;
 		    }
+		    // Validate input data
 		    String username = (String) staffData.get("username");
 		    String password = (String) staffData.get("password");
 		    String email = (String) staffData.get("email");
@@ -252,6 +254,7 @@ public final class ServerUserSubject {
 		    }
 		});
 		
+		// Request: "customers.getalldata"
 		router.on("customers", "getalldata", (msg,client)->{
 			List<UserData> allCustomers = userService.getAllCustomers();
 			if(allCustomers != null) {
@@ -264,5 +267,4 @@ public final class ServerUserSubject {
 		});
 	}
 }
-
-
+// End of ServerUserSubject.java

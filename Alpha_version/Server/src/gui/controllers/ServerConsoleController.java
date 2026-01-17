@@ -44,9 +44,8 @@ public class ServerConsoleController {
 	@FXML
 	private Button btnAddStaff; // Open add staff form button
 
-	/*
-	 * Method to handle the Start button click event. Starts the Bistro server and
-	 * begins listening for client connections.
+	/**
+	 * Method to handle the Start button click event. Starts the Bistro server.
 	 * 
 	 * @param event The event that triggered the button click.
 	 */
@@ -75,9 +74,8 @@ public class ServerConsoleController {
 		}
 	}
 
-	/*
-	 * Method to handle the Stop button click event. Stops the Bistro server and
-	 * disconnects all clients.
+	/**
+	 * Method to handle the Stop button click event. Stops the Bistro server.
 	 * 
 	 * @param event The event that triggered the button click.
 	 */
@@ -97,7 +95,7 @@ public class ServerConsoleController {
 		}
 	}
 
-	/*
+	/**
 	 * Method to handle the Clear button click event. Clears the console log area.
 	 * 
 	 * @param event The event that triggered the button click.
@@ -107,9 +105,9 @@ public class ServerConsoleController {
 		txtLog.clear();
 	}
 
-	/*
-	 * Method to handle the Send button click event. Processes commands entered in
-	 * the command input field.
+	/**
+	 * Method to handle the Send button click event. Processes the command entered
+	 * in the command input field.
 	 * 
 	 * @param event The event that triggered the button click.
 	 */
@@ -169,7 +167,11 @@ public class ServerConsoleController {
 		txtCommand.clear();
 	}
 
-	
+	/**
+	 * Method to handle the Add Staff button click event. Opens the Add Staff form.
+	 * 
+	 * @param event The event that triggered the button click.
+	 */
 	@FXML
 	public void btnAddStaff(Event event) {
 	    // Require a running server so DB connection is available
@@ -197,7 +199,7 @@ public class ServerConsoleController {
 	    }
 	}
 	
-	/*
+	/**
 	 * Method to display a message in the console log area.
 	 * 
 	 * @param message The message to be displayed.

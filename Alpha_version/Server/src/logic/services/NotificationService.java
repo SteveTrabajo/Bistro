@@ -19,9 +19,10 @@ import logic.services.notification_simulator.MockNotificationService;
 /**
  * NotificationService handles sending notifications to users via Email and SMS.
  * It includes background tasks for pre-arrival reminders and payment reminders.
+ * Notifications are simulated via the MockNotificationService.
  */
 public class NotificationService {
-
+	// final members
     private final BistroDataBase_Controller dbController;
     private final ServerLogger logger;
     // removed "final" to allow shutdown and restart (might fix the thread issue)
@@ -30,6 +31,12 @@ public class NotificationService {
     private final INotificationService notificationSimulator;
     private volatile boolean started = false;
 
+    /**
+	 * Constructor for NotificationService.
+	 *
+	 * @param dbController The database controller for accessing orders and users.
+	 * @param logger       The server logger for logging events.
+	 */
     public NotificationService(BistroDataBase_Controller dbController, ServerLogger logger) {
         this.dbController = dbController;
         this.logger = logger;
@@ -38,15 +45,20 @@ public class NotificationService {
         this.notificationSimulator = new MockNotificationService();
     }
 
-
+    /**
+	 * Starts the background tasks for sending notifications.
+	 * Polls every 15 minutes for pre-arrival and payment reminders.
+	 */
     public synchronized void startBackgroundTasks() {
         if (started) return;
         // moved from constructor to allow restart after shutdown (might fix the thread issue)
         if (scheduler == null || scheduler.isShutdown()) {
 			scheduler = Executors.newSingleThreadScheduledExecutor();
 		}
+        // set started flag
         started = true;
         logger.log("[NOTIFICATIONS] Background service started. Polling every 15 minutes.");
+        // schedule the periodic task
         scheduler.scheduleAtFixedRate(() -> {
             try {
                 checkPreArrivalReminders();
@@ -58,16 +70,19 @@ public class NotificationService {
         }, 0, 15, TimeUnit.MINUTES);
     }
 
+    /**
+     * Stops the background tasks for sending notifications.
+     * Shuts down the scheduler.
+     */
     public synchronized void stop() {
         if (!started) return;
         started = false;
-
+        // shutdown the scheduler
         if (scheduler != null && !scheduler.isShutdown()) {
         	// changed shutdown to shutdownNow to forcefully stop the thread (might fix the thread issue)
             scheduler.shutdownNow();
         }
     }
-
 
     /**
      * Checks for RESERVATION orders starting in approximately 2 hours and sends reminders.
@@ -80,13 +95,13 @@ public class NotificationService {
 
         // returns only RESERVATION + PENDING + notified_at IS NULL within window
         List<Order> upcomingOrders = dbController.getReservationsBetweenTimes(startWindow, endWindow, OrderStatus.PENDING);
-
+        // no orders found
         if (upcomingOrders == null || upcomingOrders.isEmpty()) return;
-
+        // send reminders
         for (Order order : upcomingOrders) {
             User user = dbController.getUserById(order.getUserId());
             if (user == null) continue;
-
+            // compose and send message
             String msg = "Reminder: Your reservation at Bistro is in 2 hours (" + order.getOrderHour() + ").";
             dispatchToSimulator(user, msg, NotificationType.RESERVATION_REMINDER);
 
@@ -99,33 +114,34 @@ public class NotificationService {
     }
 
     /**
-     * Payment reminders (2 hours after start).
-     * NOTE: right now this can repeat every 15 minutes unless you add a dedicated DB flag/column.
-     * If you want, we can also add bill_reminded_at later.
+     * Checks for SEATED orders that have exceeded 2 hours and sends payment reminders.
      */
     private void checkPaymentReminders() {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startWindow = now.minusMinutes(130);
         LocalDateTime endWindow   = now.minusMinutes(110);
-
+        // returns only SEATED orders within window
         List<Order> overstayingOrders = dbController.getSeatedOrdersBetweenTimes(startWindow, endWindow);
-
+		// no orders found
         if (overstayingOrders == null || overstayingOrders.isEmpty()) return;
-
+        // send payment reminders
         for (Order order : overstayingOrders) {
             User user = dbController.getUserById(order.getUserId());
             if (user == null) continue;
-
+            // compose and send message
             String msg = "Your 2-hour dining window has ended. Please proceed to payment.";
             dispatchToSimulator(user, msg, NotificationType.BILL_DETAILS);
         }
     }
 
     /**
-     * Waitlist/Table Ready notification (handled when table frees).
-     */
+	 * Notifies a user on the waitlist that their table is ready.
+	 *
+	 * @param order The order associated with the waitlist user.
+	 */
     public void notifyWaitlistUser(Order order) {
         User user = dbController.getUserById(order.getUserId());
+        // send notification if user exists
         if (user != null) {
             String msg = "Good news! Table is ready. Please arrive within 15 minutes.";
             dispatchToSimulator(user, msg, NotificationType.TABLE_READY);
@@ -134,15 +150,18 @@ public class NotificationService {
         }
     }
 
+    // Dispatches notification to the simulator for both Email and SMS channels.
     private void dispatchToSimulator(User user, String message, NotificationType type) {
         boolean hasEmail = user.getEmail() != null && !user.getEmail().isEmpty();
         boolean hasPhone = user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty();
-
+        // no valid contact info
         if (hasEmail) {
             notificationSimulator.sendNotification(user.getEmail(), message, type, Channel.EMAIL);
         }
+        // send SMS if phone number exists
         if (hasPhone) {
             notificationSimulator.sendNotification(user.getPhoneNumber(), message, type, Channel.SMS);
         }
     }
 }
+// End of NotificationService.java

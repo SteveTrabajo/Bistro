@@ -23,13 +23,11 @@ import logic.services.TableService;
  * API handlers related to orders.
  */
 public final class ServerOrdersSubject {
-	// ********************************
-	// Constructors***********************************
+	// ******************************** Constructors***********************************
 	private ServerOrdersSubject() {
 	}
 
-	// ******************************** Static
-	// Methods***********************************
+	// ******************************** Static Methods***********************************
 
 	/**
 	 * Registers all order related handlers.
@@ -67,7 +65,9 @@ public final class ServerOrdersSubject {
 			}
 		});
 
+		// New reservation order as staff
 		router.on("orders", "createReservation.asStaff", (msg, client) -> {
+			@SuppressWarnings("unchecked")
 			Map<String, Object> data = (Map<String, Object>) msg.getData();
 			Order createdOrder = ordersService.createReservationAsStaff(data);
 			if (createdOrder != null) {
@@ -104,7 +104,7 @@ public final class ServerOrdersSubject {
 				client.sendToClient(new Message(Api.REPLY_ORDER_NOT_EXISTS, null));
 				return;
 			}
-
+			// Security Check: Verify order belongs to user
 			boolean isValid = ordersService.checkOrderBelongsToUser(confirmationCode, sessionUser.getUserId());
 			if (isValid) {
 				client.sendToClient(new Message(Api.REPLY_ORDER_EXISTS, confirmationCode));
@@ -168,7 +168,7 @@ public final class ServerOrdersSubject {
 			List<Order> history = ordersService.getMemberHistoryByCode(memberCode);
 			logger.log(
 					"[DEBUG] Member history lookup result: " + (history == null ? "null" : history.size() + " orders"));
-
+			// Send response
 			if (history != null) {
 				client.sendToClient(new Message(Api.REPLY_GET_MEMBER_HISTORY_OK, history));
 				logger.log("[INFO] Staff " + sessionUser.getUserId() + " retrieved history for member code "
@@ -230,6 +230,7 @@ public final class ServerOrdersSubject {
 			}
 		});
 
+		// Send all reservations for a specific date (staff only)
 		router.on("orders", "getOrdersByDate", (msg, client) -> {
 			LocalDate date = (LocalDate) msg.getData();
 			List<Order> orders = ordersService.getStaffReservations(date);
@@ -249,7 +250,8 @@ public final class ServerOrdersSubject {
 				logger.log("[ERROR] Client: " + client + " failed to get available dates.");
 			}
 		});
-
+		
+		// Seat Customer Handler
 		router.on("orders", "seatCustomer", (msg, client) -> {
 			String confirmationCode = (String) msg.getData();
 			User sessionUser = (User) client.getInfo("user");
@@ -266,7 +268,7 @@ public final class ServerOrdersSubject {
 				logger.log("[WARN] Attempted to seat non-existent order " + confirmationCode);
 				return;
 			}
-
+			// Check permissions
 			boolean isStaff = (sessionUser.getUserType() == UserType.EMPLOYEE
 					|| sessionUser.getUserType() == UserType.MANAGER);
 			boolean isOrderOwner = order.getUserId() == sessionUser.getUserId();
@@ -303,6 +305,7 @@ public final class ServerOrdersSubject {
 			}
 		});
 
+		// Cancel Reservation Handler
 		router.on("orders", "cancelReservation", (msg, client) -> {
 			String confirmationCode = (String) msg.getData();
 			boolean success = ordersService.cancelReservation(confirmationCode);
@@ -315,6 +318,8 @@ public final class ServerOrdersSubject {
 				logger.log("[WARN] Failed to cancel order " + confirmationCode);
 			}
 		});
+		
+		// Forgot Confirmation Code Handler
 		router.on("reservation", "forgotConfirmationCode", (msg, client) -> {
 			User sessionUser = (User) client.getInfo("user");
 			if (sessionUser == null) {
@@ -333,6 +338,7 @@ public final class ServerOrdersSubject {
 			}
 		});
 		
+		// Handler for Member Seated Reservations
 		router.on("orders", "getMemberSeatedReservations", (msg, client) -> {
 		    User sessionUser = (User) client.getInfo("user");
 		    if (sessionUser == null) {
@@ -368,3 +374,4 @@ public final class ServerOrdersSubject {
 		});
 	}
 }
+// End of ServerOrdersSubject class

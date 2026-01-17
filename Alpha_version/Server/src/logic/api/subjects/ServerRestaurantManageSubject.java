@@ -11,13 +11,27 @@ import logic.api.ServerRouter;
 import logic.services.RestaurantManagmentService;
 import logic.services.TableService;
 
+/**
+ * ServerRestaurantManageSubject is responsible for handling restaurant
+ * management related API routes on the server side.
+ */
 public class ServerRestaurantManageSubject {
 
 	private ServerRestaurantManageSubject() {
 	}
 
+	/**
+	 * Registers the restaurant management related routes to the server router.
+	 *
+	 * @param router            The server router to register the routes to.
+	 * @param logger            The server logger for logging actions.
+	 * @param restaurantService The restaurant management service for handling
+	 *                          restaurant operations.
+	 */
 	public static void register(ServerRouter router, ServerLogger logger,
 			RestaurantManagmentService restaurantService) {
+		
+		// Route for saving weekly hours
 		router.on("hours", "saveWeekly", (msg, client) -> {
 			@SuppressWarnings("unchecked")
 			List<WeeklyHour> hours = (List<WeeklyHour>) msg.getData();
@@ -30,6 +44,7 @@ public class ServerRestaurantManageSubject {
 			}
 		});
 
+		// Route for adding a holiday
 		router.on("hours", "addHoliday", (msg, client) -> {
 			Holiday holiday = (Holiday) msg.getData();
 			if (restaurantService.addHoliday(holiday)) {
@@ -41,6 +56,7 @@ public class ServerRestaurantManageSubject {
 			}
 		});
 
+		// Route for removing a holiday
 		router.on("hours", "removeHoliday", (msg, client) -> {
 			Holiday holiday = (Holiday) msg.getData();
 			if (restaurantService.removeHoliday(holiday)) {
@@ -52,6 +68,7 @@ public class ServerRestaurantManageSubject {
 			}
 		});
 		
+		// Route for retrieving weekly hours
 		router.on("hours", "getWeeklyHours", (msg, client) -> {
 			List<WeeklyHour> hours = restaurantService.getWeeklyHours();
 			if (hours == null) {
@@ -62,6 +79,8 @@ public class ServerRestaurantManageSubject {
 			logger.log("Weekly hours retrieved: " + hours.toString());
 			client.sendToClient(new Message(Api.REPLY_GET_WEEKLY_HOURS_OK, hours));
 		});
+		
+		// Route for retrieving holidays
 		router.on("hours", "getHolidays", (msg, client) -> {
 		    List<Holiday> holidays = restaurantService.getHolidays();
 		    if (holidays == null) {
@@ -74,3 +93,4 @@ public class ServerRestaurantManageSubject {
 		});
 	}
 }
+// End of ServerRestaurantManageSubject.java

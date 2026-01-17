@@ -124,6 +124,7 @@ public class ServerWaitingListSubject {
 			}
 		});
 		
+		// 5. Leave Waiting List (Staff)
 		router.on("waitinglist","leave.staff", (msg, client) -> {
 			String confirmationCode = (String) msg.getData();
 			boolean success = waitingListService.removeFromWaitingList(confirmationCode);
@@ -134,10 +135,7 @@ public class ServerWaitingListSubject {
 			}
 		});
 		
-		
-		
-
-		
+		// 6. Get Current Waiting List (Staff)
 		router.on("waitinglist", "getAll", (msg, client) -> {
 			List<Order> waitingList = waitingListService.getCurrentQueue();
 			if (waitingList != null) {
@@ -149,17 +147,18 @@ public class ServerWaitingListSubject {
 			}
 		});
 		
+		// 7. Add Walk-In Customer to Waiting List (Staff)
 		router.on("waitinglist", "addWalkIn", (msg, client) -> {
 		    try {
 		        @SuppressWarnings("unchecked")
 		        Map<String, Object> data = (Map<String, Object>) msg.getData();
 
 		        int dinersAmount = ((Number) data.get("diners")).intValue();
-
+		        // customerType: "MEMBER" or "GUEST"
 		        String customerType = ((String) data.get("customerType")).trim().toUpperCase();
 		        String identifier   = ((String) data.get("identifier")).trim();
 		        String email = data.get("email") == null ? "" : ((String) data.get("email")).trim();
-
+		        // Find or Create User based on customerType
 		        User user = null;
 		        if ("MEMBER".equals(customerType)) {
 		        	int memberCode= Integer.parseInt(identifier);
@@ -171,7 +170,8 @@ public class ServerWaitingListSubject {
 		            client.sendToClient(new Message(Api.REPLY_WAITING_LIST_ADD_WALKIN_FAIL, "Invalid customerType"));
 		            return;
 		        }
-
+		        
+		        // Now add to waiting list
 		        Object response = waitingListService.checkAvailabilityAndSeat(dinersAmount, user.getUserId());
 
 		        client.sendToClient(new Message(Api.REPLY_WAITING_LIST_ADD_WALKIN_OK, response));

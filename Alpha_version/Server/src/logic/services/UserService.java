@@ -1,29 +1,32 @@
 package logic.services;
 
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Map;
-
 import entities.User;
 import enums.UserType;
 import logic.BistroDataBase_Controller;
 import logic.LoginAttemptTracker;
-import logic.PasswordUtil;
 import logic.ServerLogger;
 import common.InputCheck;
 import dto.UserData;
+
 /**
- * Service class for handling user-related operations such as login and account creation.
+ * Service class for managing user-related operations such as registration,
+ * login, and staff account creation.
  */
 public class UserService {
-	//*************************Instance Variables*************************
+	
+	//************************* Instance Variables *************************
 	private final BistroDataBase_Controller dbController;
 	private final ServerLogger logger;
+	
 	//************************* Constructor *************************
 	public UserService(BistroDataBase_Controller dbController, ServerLogger logger) {
 		this.dbController = dbController;
 		this.logger = logger;
 	}
+	
 	//************************* Instance Methods *************************
 	
 	/**
@@ -45,10 +48,10 @@ public class UserService {
 	}
 	
 	/**
-	 * Creates a new staff account with password hashing and validation.
+	 * Creates a new staff account (Employee or Manager) with the provided data.
 	 * 
-	 * @param staffData Map containing: username, password, email, phoneNumber, userType
-	 * @return The created User object, or null if creation failed
+	 * @param staffData Map containing staff account information
+	 * @return The created User object if successful, otherwise null
 	 */
 	public User createStaffAccount(Map<String, Object> staffData) {
 		// Validate input data
@@ -75,12 +78,14 @@ public class UserService {
 		// Validate user type
 		UserType userType;
 		try {
+			// Convert string to UserType enum and validate
 			userType = UserType.valueOf(userTypeStr);
 			if (userType != UserType.EMPLOYEE && userType != UserType.MANAGER) {
 				logger.log("[STAFF_CREATE] Invalid user type: " + userTypeStr);
 				return null;
 			}
 		} catch (IllegalArgumentException e) {
+			// Invalid user type string
 			logger.log("[STAFF_CREATE] Invalid user type: " + userTypeStr);
 			return null;
 		}
@@ -95,6 +100,7 @@ public class UserService {
 		        firstName, lastName, address
 		);
 		if (newUser != null) {
+			// Log successful creation
 			logger.log("[STAFF_CREATE] Successfully created new staff account: " + username);
 		}
 		return newUser;
@@ -102,7 +108,6 @@ public class UserService {
 	
 	/**
 	 * Retrieves user information based on login data.
-	 * 
 	 * @param loginData Map containing login credentials and user type
 	 * @return The User object if found, otherwise null
 	 */
@@ -111,26 +116,29 @@ public class UserService {
 		User userfound = null;
 		switch (String.valueOf(loginData.get("userType"))) {
 		case "GUEST": {
+			// Extract and sanitize phone number and email
 		    String phone = (String) loginData.get("phoneNumber");
 		    String email = (String) loginData.get("email");
-
+		    // Trim whitespace and handle null/empty values
 		    phone = (phone == null) ? null : phone.trim();
 		    email = (email == null) ? null : email.trim();
 		    if (phone != null && phone.isEmpty()) phone = null;
 		    if (email != null && email.isEmpty()) email = null;
-
+		    // Log the extracted values
 		    logger.log("[LOGIN][GUEST] keys=" + loginData.keySet());
 		    logger.log("[LOGIN][GUEST] phone=" + phone + " | email=" + email);
-
+		    // Find or create guest user
 		    userfound = dbController.findOrCreateGuestUser(phone, email);
 		    break;
 		}
 		case "MEMBER": {
+			// Extract and validate member code
 			Object raw = loginData.get("memberCode");
 			if (raw == null) {
 				logger.log("[LOGIN] MEMBER missing key 'memberCode'. Keys=" + loginData.keySet());
 				return null;
 			}
+			// Parse member code
 			int memberCode;
 			try {
 				memberCode = (raw instanceof Integer) ? (Integer) raw : Integer.parseInt(raw.toString().trim());
@@ -138,11 +146,13 @@ public class UserService {
 				logger.log("[LOGIN] MEMBER invalid memberCode value: " + raw);
 				return null;
 			}
+			// Find member user by code
 			userfound = dbController.findMemberUserByCode(memberCode);
 			System.out.println("Member login attempt: " + (userfound != null ? "Found member" : "Member not found"));
 			break;
 		}
 		case "EMPLOYEE", "MANAGER":
+			// Extract username and password
 			String username = String.valueOf(loginData.get("username"));
 			String password = String.valueOf(loginData.get("password"));
 			// Check if account is locked due to failed login attempts
@@ -150,6 +160,7 @@ public class UserService {
 				logger.log("[LOGIN] Account locked due to too many failed attempts: " + username);
 				return null; // Account is locked, return null to indicate failure
 			}
+			// Find employee user by username and password
 			userfound = dbController.findEmployeeUser(username, password);
 			break;
 		default:
@@ -190,10 +201,22 @@ public class UserService {
 	    return dbController.findEmployeeUser(username, password);
 	}
 
+	/**
+	 * Retrieves a list of all customers (members and guests) from the database.
+	 * 
+	 * @return List of UserData objects representing all customers
+	 */
 	public List<UserData> getAllCustomers() {
 		return dbController.getAllCustomers();
 	}
 
+	/**
+	 * Finds a member code by email or phone number.
+	 * 
+	 * @param email       Member email address (can be null/empty if phone provided)
+	 * @param phoneNumber Member phone number (can be null/empty if email provided)
+	 * @return Member code as a String if found, otherwise null
+	 */
 	public String findMemberCode(String email, String phoneNumber) {
 		int memberCode = dbController.findMemberCodeByEmailOrPhone(email, phoneNumber);
 		if (memberCode > 0) {
@@ -206,7 +229,7 @@ public class UserService {
 	/**
 	 * Looks up a staff member (Employee or Manager) by email or phone number.
 	 * Returns their credentials if found.
-	 * * @param email       Staff email address (can be null/empty if phone provided)
+	 * @param email       Staff email address (can be null/empty if phone provided)
 	 * @param phoneNumber Staff phone number (can be null/empty if email provided)
 	 * @return "username:password" if found, "NOT_FOUND" if not found, or "ERROR_DB" if error.
 	 */

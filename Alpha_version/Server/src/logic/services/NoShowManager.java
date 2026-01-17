@@ -43,6 +43,12 @@ public class NoShowManager {
 	
 	//****************************** Constructor ******************************//
 	
+	/**
+	 * Constructs a NoShowManager with the given database controller and logger.
+	 * 
+	 * @param dbController The database controller for accessing orders
+	 * @param logger The server logger for logging events
+	 */
 	public NoShowManager(BistroDataBase_Controller dbController, ServerLogger logger) {
 		this.dbController = dbController;
 		this.logger = logger;
@@ -62,6 +68,7 @@ public class NoShowManager {
 		if (scheduler == null || scheduler.isShutdown()) {
 			scheduler = Executors.newSingleThreadScheduledExecutor();
 		}
+		// Log the start of the background task
 		logger.log("[NO_SHOW] Background service started. Checking every " + BACKGROUND_CHECK_INTERVAL_MINUTES + " minutes.");
 		scheduler.scheduleAtFixedRate(() -> {
 			try {
@@ -94,6 +101,10 @@ public class NoShowManager {
 	 * For WAITLIST orders (NOTIFIED status):
 	 *   - If current time > notification time + 15 minutes, mark as NO_SHOW
 	 */
+	
+	/**
+	 * Main method to check for no-shows in both reservations and waitlist orders.
+	 */
 	private void checkForNoShows() {
 		LocalDateTime now = LocalDateTime.now();
 		
@@ -103,9 +114,9 @@ public class NoShowManager {
 		// Check NOTIFIED waitlist orders (15 minutes past notification time)
 		checkNotifiedWaitlist(now);
 	}
-	
+
 	/**
-	 * Checks PENDING reservations that have passed their reservation time by 15+ minutes.
+	 * Checks PENDING reservations that are 15+ minutes past their reservation time.
 	 */
 	private void checkPendingReservations(LocalDateTime now) {
 		// Get all PENDING reservations for today
@@ -115,7 +126,7 @@ public class NoShowManager {
 		if (pendingOrders == null || pendingOrders.isEmpty()) {
 			return;
 		}
-		
+		// Iterate through each pending reservation
 		for (Order order : pendingOrders) {
 			// Combine order date and hour to get full datetime
 			LocalDateTime reservationDateTime = LocalDateTime.of(order.getOrderDate(), order.getOrderHour());
@@ -129,7 +140,9 @@ public class NoShowManager {
 	}
 	
 	/**
-	 * Checks NOTIFIED waitlist orders that have been waiting for 15+ minutes.
+	 * Checks NOTIFIED waitlist orders that are 15+ minutes past their notification time.
+	 * 
+	 * @param now The current date and time
 	 */
 	private void checkNotifiedWaitlist(LocalDateTime now) {
 		// Get all NOTIFIED waitlist orders for today
@@ -178,3 +191,4 @@ public class NoShowManager {
 		}
 	}
 }
+// End of NoShowManager.java

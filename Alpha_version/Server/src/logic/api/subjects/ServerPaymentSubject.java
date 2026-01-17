@@ -21,12 +21,21 @@ public class ServerPaymentSubject {
     private ServerPaymentSubject() {
     }
 
+    // To track payment failures per user
     private static final int MAX_FAILURES = 5;
     private static Map<Integer, Integer> userFailureMap = new ConcurrentHashMap<>();
 
+    /**
+	 * Registers payment-related routes to the server router.
+	 *
+	 * @param router         The server router to register routes with.
+	 * @param tableService   The table service for managing table-related operations.
+	 * @param logger         The server logger for logging events and errors.
+	 * @param paymentService The payment service for handling payment operations.
+	 */
     public static void register(ServerRouter router, TableService tableService, ServerLogger logger, PaymentService paymentService) {
         
-    	
+    	// --- ROUTE: Get Bill Items List ---
     	router.on("payment",  "billItemsList", (msg, client) -> {
 			User requester = (User) client.getInfo("user");
 			// Client sends billId (int)
@@ -40,7 +49,7 @@ public class ServerPaymentSubject {
 		});
     	
     	
-    	
+    	// --- ROUTE: Complete Payment ---s
     	router.on("payment", "complete", (msg, client) -> {
     	    User requester = (User) client.getInfo("user");
     	    if (requester == null) {
@@ -48,6 +57,7 @@ public class ServerPaymentSubject {
     	        return;
     	    }
 
+    	    // Expecting List<Item> from client
     	    @SuppressWarnings("unchecked")
     	    List<Item> itemsFromClient = (List<Item>) msg.getData();
     	    if (itemsFromClient == null || itemsFromClient.isEmpty()) {
@@ -63,28 +73,28 @@ public class ServerPaymentSubject {
     	        }
 
     	        int orderNumber = seatedOrder.getOrderNumber();
-
+    	        // Retrieve bill ID associated with the order
     	        Integer billIdObj = paymentService.getBillIdByOrderNumber(orderNumber);
     	        if (billIdObj == null) {
     	            client.sendToClient(new Message(Api.REPLY_PAYMENT_COMPLETE_FAIL, "No bill found for active order."));
     	            return;
     	        }
     	        int billId = billIdObj;
-
+    	        // Calculate total amount from items
     	        double totalAmount = paymentService.calculateTotal(itemsFromClient, requester);
-
+    	        // Simulate obtaining a card token (in real scenario, this would come from client-side payment processing)
     	        String mockCardToken = "TOK_" + requester.getUserId() + "_" + System.currentTimeMillis();
-
+    	        // Process payment
     	        boolean paymentSuccess = paymentService.processCreditCardPayment(billId, totalAmount, mockCardToken);
-
+    	        // Handle payment result
     	        if (paymentSuccess) {
     	            paymentService.onPaymentCompleted(orderNumber);
-
+    	            // Reset failure count on success
     	            String successMessage =
     	                "Payment of ₪" + String.format("%.2f", totalAmount) + " completed successfully.\n" +
     	                "Bill ID: " + billId + "\n" +
     	                "Order Number: " + orderNumber + "\nThank you for dining with us!";
-
+    	            // Send success message to client
     	            client.sendToClient(new Message(Api.REPLY_PAYMENT_COMPLETE_OK, successMessage));
     	            userFailureMap.remove(requester.getUserId());
     	        } else {
@@ -118,17 +128,17 @@ public class ServerPaymentSubject {
                 client.sendToClient(new Message(Api.REPLY_PROCESS_PAYMENT_MANUALLY_FAIL, "Bill not found for Order: " + orderNumber));
                 return;
             }
-
+            // Retrieve the bill
             Bill bill = paymentService.getBillById(billId); 
             boolean isSuccessful;
-
+            // Process payment based on method
             if ("Credit Card".equalsIgnoreCase(method)) {
                 String manualToken = "MANUAL-CARD-" + System.currentTimeMillis();
                 isSuccessful = paymentService.processCreditCardPayment(billId, bill.getTotal(), manualToken);
             } else {
                 isSuccessful = paymentService.processCashPayment(billId, bill.getTotal());
             }
-            
+            // Send response to client
             if (isSuccessful) {
                 client.sendToClient(new Message(Api.REPLY_PROCESS_PAYMENT_MANUALLY_OK, "Manual Payment Successful"));
             } else {
@@ -144,8 +154,10 @@ public class ServerPaymentSubject {
                         "Only employees and managers can load pending bills."));
                 return; // Added return to prevent execution
             }
+            // Fetch pending bills
             List<Bill> pendingBills = paymentService.getPendingBillsForUser();
             client.sendToClient(new Message(Api.REPLY_LOAD_PENDING_BILLS_OK, pendingBills));
         });
     }
 }
+// End of ServerPaymentSubject.java

@@ -15,13 +15,24 @@ import logic.ServerLogger;
 import logic.services.payment_simulator.MockPaymentGateway;
 import logic.services.payment_simulator.PaymentGateway;
 
+/**
+ * Service class to handle payment processing and bill management.
+ */
 public class PaymentService {
 
+	/* Dependencies */
     private final BistroDataBase_Controller dbController;
     private final ServerLogger logger;
     private final TableService tableService;
     private final PaymentGateway paymentGateway;
 
+    /**
+	 * Constructor to initialize dependencies.
+	 * @param dbController The database controller for data operations.
+	 * @param logger The server logger for logging events.
+	 * @param tableService The table service for managing table sessions.
+	 * @param paymentGateway The payment gateway for processing payments.
+	 */
     public PaymentService(BistroDataBase_Controller dbController, ServerLogger logger,TableService tableService) {
         this.dbController = dbController;
         this.logger = logger;
@@ -43,7 +54,6 @@ public class PaymentService {
         	total += item.getPrice() * item.getQuantity();
         }
 
-        // TODO Do we want to calculate member discount before or after tax?
         // Apply 10% discount for MEMBERS
         if (requester.getUserType() == UserType.MEMBER) {
             total = total * 0.90; 
@@ -67,13 +77,16 @@ public class PaymentService {
             return false;
         }
 
+        // Check if already paid
         if ("PAID".equalsIgnoreCase(bill.getPaymentStatus())) {
             logger.log("[INFO] Bill " + billId + " is already paid.");
             return false;
         }
 
+        // Process payment via Payment Gateway
         String transactionId = paymentGateway.processPayment(amount, creditCardToken);
 
+        // If payment succeeded, update bill status
         if (transactionId != null) {
             dbController.markBillAsPaid(billId, "CREDIT", transactionId);
             finalizeOrderPayment(billId);
@@ -87,17 +100,21 @@ public class PaymentService {
 
 
     /**
-     * Processes a manual payment (Cash).
-     */
+	 * Processes a cash payment for a specific bill.
+	 * @param billId The ID of the bill to pay.
+	 * @param amount The amount paid in cash.
+	 * @return true if payment succeeded, false otherwise.
+	 */
     public boolean processCashPayment(int billId, double amount) {
         Bill bill = dbController.getBillById(billId);
         if (bill == null) return false;
 
+        // Check if already paid
         if ("PAID".equalsIgnoreCase(bill.getPaymentStatus())) {
             logger.log("[INFO] Bill " + billId + " is already paid.");
             return false;
         }
-
+        // Mark bill as paid in the database
         dbController.markBillAsPaid(billId, "CASH", null);
         finalizeOrderPayment(billId);
         logger.log("[SUCCESS] Bill " + billId + " paid via CASH.");
@@ -106,6 +123,7 @@ public class PaymentService {
 
     /**
 	 * Finalizes the order/session associated with a paid bill.
+	 * @param billId The ID of the paid bill.
 	 */
     private void finalizeOrderPayment(int billId) {
         try {
@@ -123,14 +141,18 @@ public class PaymentService {
     
     
     /**
-     * Finds the bill ID linked to a specific Order Number.
-     */
+	 * Retrieves the Bill ID associated with a specific order number.
+	 * @param orderNumber The order number to look up.
+	 * @return The Bill ID if found, null otherwise.
+	 */
     public Integer getBillIdByOrderNumber(int orderNumber) {
         return dbController.getBillIdByOrderNumber(orderNumber);
     }
 
     /**
-     * Retrieves the full Bill object by its ID.
+     * Retrieves a Bill by its ID.
+     * @param billId The ID of the bill to retrieve.
+     * @return The Bill object, or null if not found.
      */
     public Bill getBillById(Integer billId) {
         if (billId == null) return null;
@@ -138,47 +160,30 @@ public class PaymentService {
     }
 
     /**
-     * Gets all UNPAID bills associated with a specific user.
-     */
+	 * Retrieves all pending bills for the current user.
+	 * @return A list of pending Bill objects.
+	 */
     public List<Bill> getPendingBillsForUser() {
         return dbController.getPendingBillsByUserId();
     }
-
-    
-	/**
-	 * method to be called when payment is completed for an order
-	 * 
-	 * @param orderNumber
-	 */
-    /*
-    public boolean onPaymentCompleted(int orderNumber) {
-    	//close table session when payment is completed
-        Integer tableNum = dbController.getActiveTableNumByOrderNumber(orderNumber);
-        dbController.closeTableSessionForOrder(orderNumber, EndTableSessionType.PAID);
-        dbController.updateOrderStatusByOrderNumber(orderNumber, OrderStatus.COMPLETED); //set order status to null after payment completion
-        //case no active table session found
-        if (tableNum == null) {
-            logger.log("[WARN] Payment completed but no active table session found for order " + orderNumber);
-            return false;
-        }	       
-        return tableService.tableFreed(tableNum); //when table is freed, try to seat WAITLIST/RESERVATION order if possible
-    }
-    */
     
     /**
-     * Method to be called when payment is completed for an order.
-     * Updates Order Status and Table Session.
+     * Handles post-payment completion tasks such as closing table sessions.
+     * @param orderNumber The order number associated with the completed payment.
+     * @return true if successful, false otherwise.
      */
     public boolean onPaymentCompleted(int orderNumber) {
         Integer tableNum = dbController.getActiveTableNumByOrderNumber(orderNumber);
         dbController.closeTableSessionForOrder(orderNumber, EndTableSessionType.PAID);
         dbController.updateOrderStatusByOrderNumber(orderNumber, OrderStatus.COMPLETED); 
 
+        // If tableNum is null, it means the session was already closed.
         if (tableNum == null) {
             logger.log("[INFO] Payment completed, but table session was already closed or not found for order " + orderNumber);
             return true; 
         }          
         
+        // Notify TableService to free the table
         if (tableService != null) {
             tableService.tableFreed(tableNum);
         }
@@ -189,15 +194,21 @@ public class PaymentService {
 
 	
 	//***************************************** Checkout Items List for Bill ID *****************************************//
+    /**
+	 * Generates a random list of items for a bill based on the number of diners.
+	 * @param dinersAmount The number of diners to base item quantities on.
+	 * @return A list of randomly selected Item objects.
+	 */
 	public List<Item> createRandomBillItems(int dinersAmount) {
 
+		// Sample menu items
 	    List<Item> items = new ArrayList<>();
 	    Random random = new Random();
 
 	    if (dinersAmount <= 0) {
 	        dinersAmount = 1;
 	    }
-
+	    // Define a sample menu
 	    Item[] menu = {
 	        new Item(1, "Classic Burger", 55.0, 0),
 	        new Item(2, "Margherita Pizza", 45.0, 0),
@@ -218,6 +229,7 @@ public class PaymentService {
 	            items.add(orderedItem);
 	        }
 	    }
+	    // Ensure at least one item is ordered
 	    if (items.isEmpty()) { // Ensure at least one item is ordered
 	        Item fallback = menu[random.nextInt(menu.length)];
 	        items.add(new Item(
@@ -229,9 +241,5 @@ public class PaymentService {
 	    }
 	    return items;
 	}
-
-
-	
-	
-	
 }
+// End of PaymentService.java

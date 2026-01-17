@@ -76,9 +76,11 @@ public class ServerPortFrameController {
 	}
 	
 	
-	/*
+	/**
 	 * Method to handle the Exit button click event.
-	 * Closes the application.
+	 * Closes the application window.
+	 * 
+	 * @param event The event triggered by clicking the Exit button.
 	 */
 	@FXML
 	public void btnExit(Event event) {
@@ -86,9 +88,8 @@ public class ServerPortFrameController {
 		stage.close();
 	}
 	
-	/*
+	/**
 	 * Method to start the Server Port Frame.
-	 * Sets up the stage and scene for the port selection interface.
 	 * 
 	 * @param primaryStage The primary stage for this application.
 	 */
@@ -102,6 +103,5 @@ public class ServerPortFrameController {
 			e.printStackTrace();
 		}
 	}
-	
 }
 // End of ServerPortFrameController.java
