@@ -57,7 +57,7 @@ public class RestaurantManagementPanel {
     @FXML
     private Button btnAddTable;
     @FXML
-    private Button btnRemoveTable;
+    private Button btnEditTable;
 
     // --- Data Lists ---
     private final ObservableList<Table> tableList = FXCollections.observableArrayList();
@@ -126,7 +126,7 @@ public class RestaurantManagementPanel {
         if (holidays == null) return;
 
         for (Holiday h : holidays) {
-            Label lbl = new Label("â€¢ " + h.toString());
+            Label lbl = new Label("• " + h.toString());
             lbl.setStyle("-fx-font-size: 14px; -fx-text-fill: #334155;");
             holidaysListBox.getChildren().add(lbl);
         }
@@ -216,20 +216,48 @@ public class RestaurantManagementPanel {
     }
 
     @FXML
-    void btnRemoveTable(ActionEvent event) {
+    void btnEditTable(ActionEvent event) {
         Table selected = tablesTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            showAlertInfo("Selection Error", "Please select a table to remove.");
+            showAlertInfo("Selection Error", "Please select a table to edit.");
             return;
         }
 
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
-                "Delete Table T" + selected.getTableID() + "?",
-                ButtonType.YES, ButtonType.NO);
+        // Create a dialog to edit the number of seats
+        Dialog<Integer> dialog = new Dialog<>();
+        dialog.setTitle("Edit Table");
+        dialog.setHeaderText("Edit Table T" + selected.getTableID());
 
-        confirm.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.YES && BistroClientGUI.client != null) {
-                BistroClientGUI.client.getTableCTRL().askRemoveTable(selected.getTableID());
+        // Set up buttons
+        ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+
+        // Create content
+        VBox content = new VBox(10);
+        content.setPadding(new javafx.geometry.Insets(20));
+        
+        Label label = new Label("Number of Seats:");
+        Spinner<Integer> seatsSpinner = new Spinner<>(1, 20, selected.getCapacity());
+        seatsSpinner.setEditable(true);
+        seatsSpinner.setPrefWidth(100);
+        
+        content.getChildren().addAll(label, seatsSpinner);
+        dialog.getDialogPane().setContent(content);
+
+        // Convert result
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == saveButtonType) {
+                return seatsSpinner.getValue();
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(newSeats -> {
+            if (newSeats != selected.getCapacity()) {
+                // Update the table with new seat count
+                if (BistroClientGUI.client != null) {
+                    BistroClientGUI.client.getTableCTRL().askUpdateTableSeats(selected.getTableID(), newSeats);
+                }
             }
         });
     }

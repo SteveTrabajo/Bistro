@@ -67,6 +67,21 @@ public class ServerTablesSubject {
             }
         });
         
+        router.on("tables", "updateSeats", (msg, client) -> {
+            int[] data = (int[]) msg.getData();
+            int tableId = data[0];
+            int newSeats = data[1];
+            boolean success = tableService.updateTableSeats(tableId, newSeats);
+            if (success) {
+                List<Table> updatedList = tableService.getAllTables();
+                client.sendToClient(new Message(Api.REPLY_UPDATE_TABLE_SEATS_OK, updatedList));
+                logger.log("[INFO] Updated table T" + tableId + " to " + newSeats + " seats");
+            } else {
+                client.sendToClient(new Message(Api.REPLY_UPDATE_TABLE_SEATS_FAIL, "Failed to update table"));
+                logger.log("[ERROR] Failed to update table T" + tableId);
+            }
+        });
+        
     }
         
 }

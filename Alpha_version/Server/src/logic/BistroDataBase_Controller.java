@@ -1035,11 +1035,11 @@ public class BistroDataBase_Controller {
 	                        "    phoneNumber = COALESCE(?, phoneNumber) " +
 	                        "WHERE user_id = ?";
 
-	                try (PreparedStatement psUpgrade = conn.prepareStatement(upgradeSql)) {
-	                    psUpgrade.setString(1, email);
-	                    psUpgrade.setString(2, phoneNumber);
-	                    psUpgrade.setInt(3, userId);
-	                    psUpgrade.executeUpdate();
+	                try (PreparedStatement ps = conn.prepareStatement(upgradeSql)) {
+	                    ps.setString(1, email);
+	                    ps.setString(2, phoneNumber);
+	                    ps.setInt(3, userId);
+	                    ps.executeUpdate();
 	                }
 	            } else if ("MEMBER".equals(existingType)) {
 	                conn.rollback();
@@ -1585,7 +1585,7 @@ public class BistroDataBase_Controller {
 	 * 
 	 * @param confirmationCode The confirmation code of the order
 	 * @param status           The new OrderStatus to set
-	 * @return true if the update was successful, false otherwise
+	 * @return true if the update is successful, false otherwise
 	 */
 	public boolean updateOrderStatusInDB(String confirmationCode, OrderStatus status) {
 	    if (confirmationCode == null || confirmationCode.trim().isEmpty() || status == null) {
@@ -2542,13 +2542,27 @@ public class BistroDataBase_Controller {
 	                    o.setOrderNumber(rs.getInt("order_number"));
 	                    o.setUserId(rs.getInt("user_id"));
 	                    Date d = rs.getDate("order_date");
+	                    LocalDate orderDate = (d != null) ? d.toLocalDate() : null;
+
 	                    Time t = rs.getTime("order_time");
-	                    if (d != null) o.setOrderDate(d.toLocalDate());
-	                    if (t != null) o.setOrderHour(t.toLocalTime());
-	                    o.setDinersAmount(rs.getInt("number_of_guests"));
-	                    o.setConfirmationCode(rs.getString("confirmation_code"));
-	                    o.setStatus(OrderStatus.valueOf(rs.getString("status")));
-	                    o.setOrderType(OrderType.valueOf(rs.getString("order_type")));
+	                    LocalTime orderTime = (t != null) ? t.toLocalTime() : null;
+	                    int dinersAmount = rs.getInt("number_of_guests");
+	                    String confirmCode = rs.getString("confirmation_code");
+	                    OrderType type = OrderType.valueOf(rs.getString("order_type"));
+	                    OrderStatus orderStatus = OrderStatus.valueOf(rs.getString("status"));
+	                    Timestamp placingTs = rs.getTimestamp("date_of_placing_order");
+	                    LocalDateTime dateOfPlacing = placingTs != null ? placingTs.toLocalDateTime() : null;
+
+	                    o.setOrderNumber(rs.getInt("order_number"));
+	                    o.setUserId(rs.getInt("user_id"));
+	                    if (orderDate != null) o.setOrderDate(orderDate);
+	                    if (orderTime != null) o.setOrderHour(orderTime);
+	                    o.setDinersAmount(dinersAmount);
+	                    o.setConfirmationCode(confirmCode);
+	                    o.setStatus(orderStatus);
+	                    o.setOrderType(type);
+	                    o.setDateOfPlacingOrder(dateOfPlacing);
+
 	                    list.add(o);
 	                }
 	            }
@@ -2610,13 +2624,22 @@ public class BistroDataBase_Controller {
 	                    o.setOrderNumber(rs.getInt("order_number"));
 	                    o.setUserId(rs.getInt("user_id"));
 	                    Date d = rs.getDate("order_date");
+	                    LocalDate orderDate = (d != null) ? d.toLocalDate() : null;
+
 	                    Time t = rs.getTime("order_time");
-	                    if (d != null) o.setOrderDate(d.toLocalDate());
-	                    if (t != null) o.setOrderHour(t.toLocalTime());
-	                    o.setDinersAmount(rs.getInt("number_of_guests"));
-	                    o.setConfirmationCode(rs.getString("confirmation_code"));
+	                    LocalTime orderTime = (t != null) ? t.toLocalTime() : null;
+	                    int dinersAmount = rs.getInt("number_of_guests");
+	                    String confirmCode = rs.getString("confirmation_code");
 	                    o.setStatus(OrderStatus.valueOf(rs.getString("status")));
 	                    o.setOrderType(OrderType.valueOf(rs.getString("order_type")));
+	                    
+	                    o.setOrderNumber(rs.getInt("order_number"));
+	                    o.setUserId(rs.getInt("user_id"));
+	                    if (orderDate != null) o.setOrderDate(orderDate);
+	                    if (orderTime != null) o.setOrderHour(orderTime);
+	                    o.setDinersAmount(dinersAmount);
+	                    o.setConfirmationCode(confirmCode);
+
 	                    list.add(o);
 	                }
 	            }
@@ -3148,7 +3171,6 @@ public class BistroDataBase_Controller {
             release(conn);
         }
     }
-
 	
 	//TODO check these 2 methods and place them in the correct area
 	/**
@@ -3188,6 +3210,31 @@ public class BistroDataBase_Controller {
             }
         } catch (SQLException e) {
             logger.log("[ERROR] Error removing table: " + e.getMessage());
+            return false;
+        } finally {
+            release(conn);
+        }
+    }
+    
+    /**
+     * Updates the capacity (number of seats) for a table.
+     * @param tableId The table ID to update
+     * @param newCapacity The new number of seats
+     * @return true if update was successful, false otherwise
+     */
+    public boolean updateTableCapacity(int tableId, int newCapacity) {
+        String query = "UPDATE tables SET capacity = ? WHERE tableNum = ?";
+        Connection conn = null;
+        try {
+            conn = borrow();
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                ps.setInt(1, newCapacity);
+                ps.setInt(2, tableId);
+                int rows = ps.executeUpdate();
+                return rows > 0;
+            }
+        } catch (SQLException e) {
+            logger.log("[ERROR] Error updating table capacity: " + e.getMessage());
             return false;
         } finally {
             release(conn);
@@ -3355,7 +3402,6 @@ public class BistroDataBase_Controller {
 	    return 1;
 	}
 
-
 	public Integer getOrderNumberByBillId(int billId) {
 	    final String sql =
 	        "SELECT ts.order_number " +
@@ -3369,7 +3415,7 @@ public class BistroDataBase_Controller {
 	        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 	            ps.setInt(1, billId);
 	            try (ResultSet rs = ps.executeQuery()) {
-	                if (!rs.next()) return null;
+	            	if (!rs.next()) return null;
 	                return rs.getInt("order_number");
 	            }
 	        }

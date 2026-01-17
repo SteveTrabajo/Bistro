@@ -137,6 +137,11 @@ public class TableController {
 		client.handleMessageFromClientUI(new Message(Api.ASK_REMOVE_TABLE, tableNumber));
 	}
 	
+	public void askUpdateTableSeats(int tableId, int newSeats) {
+		int[] data = new int[] { tableId, newSeats };
+		client.handleMessageFromClientUI(new Message(Api.ASK_UPDATE_TABLE_SEATS, data));
+	}
+	
 	public void setAllTables(List<Table> tables) {
 		if (allTablesCallback != null) {
 			Platform.runLater(() -> allTablesCallback.accept(tables));
