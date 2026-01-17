@@ -71,7 +71,8 @@ public class MemberRegistrationPanel{
 			    showInfo("Registration Successful", "New member has been registered successfully."+
 			    		"\nMember Code: " + memberCode +
 			    		"\nA QR code has been generated for the member.");
-			    Path qrPath = QRCodeGenerator.generateAndSaveQRCode(String.valueOf(memberCode));
+			    String fullName = firstName + "_" + lastName;
+			    Path qrPath = QRCodeGenerator.generateAndSaveQRCode(String.valueOf(memberCode), fullName);
 
 			    if (qrPath != null) {
 			        System.out.println("QR saved: " + qrPath.toAbsolutePath());

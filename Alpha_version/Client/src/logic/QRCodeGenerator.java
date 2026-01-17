@@ -22,7 +22,7 @@ public class QRCodeGenerator {
      * @param memberCode the unique member code
      * @return the file path if successful, null otherwise
      */
-    public static Path generateAndSaveQRCode(String memberCode) {
+    public static Path generateAndSaveQRCode(String memberCode, String fullName) {
         try {
             Path folderPath = Paths.get(QR_FOLDER);
             if (!Files.exists(folderPath)) {
@@ -32,7 +32,7 @@ public class QRCodeGenerator {
             QRCodeWriter qrWriter = new QRCodeWriter();
             BitMatrix matrix = qrWriter.encode(memberCode, BarcodeFormat.QR_CODE, QR_SIZE, QR_SIZE);
 
-            Path filePath = folderPath.resolve("member_" + memberCode + ".png");
+            Path filePath = folderPath.resolve("member_" + memberCode + "_"+fullName+".png");
             MatrixToImageWriter.writeToPath(matrix, "PNG", filePath);
 
             return filePath;
