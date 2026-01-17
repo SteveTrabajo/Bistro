@@ -101,12 +101,12 @@
 
 /* Button card wrapper */
 .mem-card-button {
-    -fx-background-color: transparent; /* חשוב! שלא יהיה כפתור אפור */
-    -fx-padding: 0;                    /* שלא ישנה לנו מידות */
+    -fx-background-color: transparent; /* prevent grey buttons */
+    -fx-padding: 0;                 
     -fx-cursor: hand;
 }
 
-.mem-card-button .content { /* מבטל padding פנימי של Button */
+.mem-card-button .content { /* remove button's own padding */
     -fx-padding: 0;
 }
 
@@ -116,7 +116,7 @@
     -fx-faint-focus-color: transparent;
 }
 
-/* The “card” itself (הגרפיק שבתוך הכפתור) */
+/* The “card” itself */
 .mem-card-content {
     -fx-background-color: white;
     -fx-background-radius: 18px;
@@ -126,7 +126,6 @@
 
     -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.30), 18, 0.18, 0, 10);
 
-    /* חשוב לאנימציה */
     -fx-scale-x: 1;
     -fx-scale-y: 1;
 }

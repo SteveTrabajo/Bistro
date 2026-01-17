@@ -31,6 +31,12 @@ public class ReservationsPanel {
     private DatePicker dateFilter;
     @FXML 
     private TextField txtSearch;
+    @FXML
+    private TextField txtMemberId;
+    @FXML
+    private Button btnSearchMember;
+    @FXML
+    private Button btnClearMember;
     @FXML 
     private Button btnRefresh;
     @FXML 
@@ -63,6 +69,8 @@ public class ReservationsPanel {
 
     private ObservableList<Order> masterData = FXCollections.observableArrayList();
     private FilteredList<Order> filteredData;
+    private boolean viewingMemberHistory = false;
+    private int currentMemberCode = -1;
 
     @FXML
     public void initialize() {
@@ -193,13 +201,67 @@ public class ReservationsPanel {
 
     @FXML
     void onDateChanged(ActionEvent event) { 
+    	clearMemberHistoryMode();
     	loadData(); 
 	}
 
     @FXML
     void btnRefresh(ActionEvent event) { 
-    	loadData(); 
+    	if (viewingMemberHistory && currentMemberCode > 0) {
+    		loadMemberHistory(currentMemberCode);
+    	} else {
+    		loadData(); 
+    	}
 	}
+    
+    @FXML
+    void btnSearchMember(ActionEvent event) {
+    	String memberCodeText = txtMemberId.getText().trim();
+    	if (memberCodeText.isEmpty()) {
+    		showAlert("Invalid Input", "Please enter a Member Code to search.");
+    		return;
+    	}
+    	
+    	try {
+    		int memberCode = Integer.parseInt(memberCodeText);
+    		if (memberCode <= 0) {
+    			showAlert("Invalid Input", "Member Code must be a positive number.");
+    			return;
+    		}
+    		loadMemberHistory(memberCode);
+    	} catch (NumberFormatException e) {
+    		showAlert("Invalid Input", "Member Code must be a valid number.");
+    	}
+    }
+    
+    @FXML
+    void btnClearMember(ActionEvent event) {
+    	clearMemberHistoryMode();
+    	loadData();
+    }
+    
+    private void clearMemberHistoryMode() {
+    	viewingMemberHistory = false;
+    	currentMemberCode = -1;
+    	txtMemberId.clear();
+    	dateFilter.setDisable(false);
+    }
+    
+    private void loadMemberHistory(int memberCode) {
+    	System.out.println("[DEBUG] loadMemberHistory called with memberCode: " + memberCode);
+    	if (BistroClientGUI.client == null) {
+    		System.out.println("DEBUG: Preview Mode");
+    		return;
+    	}
+    	
+    	viewingMemberHistory = true;
+    	currentMemberCode = memberCode;
+    	dateFilter.setDisable(true); // Disable date filter when viewing member history
+    	
+    	BistroClientGUI.client.getReservationCTRL().setAllReservationsListener(this::updateTable);
+    	BistroClientGUI.client.getReservationCTRL().askMemberHistory(memberCode);
+    	System.out.println("[DEBUG] askMemberHistory request sent");
+    }
 
     private void loadData() {
         LocalDate date = dateFilter.getValue();
@@ -215,10 +277,12 @@ public class ReservationsPanel {
     }
     
     private void updateTable(List<Order> orders) {
+        System.out.println("[DEBUG] updateTable called with " + (orders == null ? "null" : orders.size() + " orders"));
         Platform.runLater(() -> {
             masterData.clear();
             if (orders != null) {
                 masterData.addAll(orders);
+                System.out.println("[DEBUG] masterData now has " + masterData.size() + " items");
             }
         });
     }

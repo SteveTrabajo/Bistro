@@ -115,6 +115,19 @@ public class ClientOrderSubject {
 		        BistroClientGUI.client.getReservationCTRL().receiveStaffReservations(orders);
 		    });
 		});
+		
+		router.on("orders", "getMemberActiveReservations.ok", msg -> {
+		    BistroClient.awaitResponse = false;
+		    @SuppressWarnings("unchecked")
+		    List<Order> orders = (List<Order>) msg.getData();
+		    BistroClientGUI.client.getReservationCTRL().handleMemberReservationsListResponse(orders);
+		});
+
+		router.on("orders", "getMemberActiveReservations.fail", msg -> {
+		    BistroClient.awaitResponse = false;
+		    BistroClientGUI.client.getReservationCTRL().handleMemberReservationsListResponse(new ArrayList<>());
+		});
+		
 
 		router.on("orders", "getAvailableDates.ok", msg -> {
 			BistroClient.awaitResponse = false;
@@ -211,6 +224,29 @@ public class ClientOrderSubject {
 				alert.setTitle("Error");
 				alert.setHeaderText("Could not retrieve order history");
 				alert.setContentText("An error occurred while fetching the order history. Please try again later.");
+				alert.showAndWait();
+			});
+		});
+		
+		// Handler for staff viewing member history
+		router.on("orders", "getMemberHistory.ok", msg -> {
+			BistroClient.awaitResponse = false;
+			@SuppressWarnings("unchecked")
+			List<Order> orders = (List<Order>) msg.getData();
+			System.out.println("[DEBUG] Received member history: " + (orders == null ? "null" : orders.size() + " orders"));
+			
+			Platform.runLater(() -> {
+				BistroClientGUI.client.getReservationCTRL().receiveStaffReservations(orders);
+			});
+		});
+		
+		router.on("orders", "getMemberHistory.fail", msg -> {
+			BistroClient.awaitResponse = false;
+			Platform.runLater(() -> {
+				Alert alert = new Alert(Alert.AlertType.WARNING);
+				alert.setTitle("Member Not Found");
+				alert.setHeaderText("Could not retrieve member history");
+				alert.setContentText("No history found for this member ID. Please verify the ID and try again.");
 				alert.showAndWait();
 			});
 		});

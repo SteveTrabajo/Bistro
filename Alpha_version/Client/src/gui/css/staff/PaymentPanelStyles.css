@@ -93,7 +93,7 @@
   -fx-border-color: transparent transparent #eef2f7 transparent;
 }
 .table-view .table-row-cell:filled:selected {
-  -fx-background-color: #0078D7;
+  -fx-background-color: #0078D7; /* blue */
 }
 
 /* Chips */

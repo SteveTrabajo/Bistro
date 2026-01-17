@@ -31,7 +31,7 @@
 /* hover */
 .scroll-bar:vertical .thumb:hover,
 .scroll-bar:horizontal .thumb:hover {
-    -fx-background-color: rgba(37, 99, 235, 0.8); /* כחול */
+    -fx-background-color: rgba(37, 99, 235, 0.8); /* blue */
 }
 
 /* when pressed */

@@ -94,39 +94,33 @@
 }
 
 
-/* ================= ScrollBar ================= */
 
 .scroll-bar {
     -fx-background-color: rgb(0, 0, 0);
 }
 
-/* המסילה (הרקע) */
 .scroll-bar:vertical .track,
 .scroll-bar:horizontal .track {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
 }
 
-/* הידית (החלק שנגרר) */
 .scroll-bar:vertical .thumb,
 .scroll-bar:horizontal .thumb {
     -fx-background-color: rgba(196, 196, 196, 0.6); /* slate */
     -fx-background-radius: 15px;
 }
 
-/* hover */
 .scroll-bar:vertical .thumb:hover,
 .scroll-bar:horizontal .thumb:hover {
-    -fx-background-color: rgba(37, 99, 235, 0.8); /* כחול */
+    -fx-background-color: rgba(37, 99, 235, 0.8); /* blue */
 }
 
-/* לחיצה */
 .scroll-bar:vertical .thumb:pressed,
 .scroll-bar:horizontal .thumb:pressed {
     -fx-background-color: #2563eb;
 }
 
-/* גודל ברירת מחדל */
 .scroll-bar:vertical {
     -fx-pref-width: 12px;
 }
@@ -135,7 +129,6 @@
     -fx-pref-height: 12px;
 }
 
-/* ביטול חיצים */
 .scroll-bar .increment-button,
 .scroll-bar .decrement-button {
     -fx-padding: 0;

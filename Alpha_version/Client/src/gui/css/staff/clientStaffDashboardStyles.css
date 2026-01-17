@@ -1,21 +1,14 @@
-/* =========================
-   Global
-========================= */
 .root {
     -fx-font-family: "Segoe UI", "Arial";
     -fx-font-smoothing-type: lcd;
 }
 
-/* =========================
-   Main content
-========================= */
+
 .mgmt-content-root {
     -fx-background-color: #e9edf2;
 }
 
-/* =========================
-   Sidebar
-========================= */
+
 .mgmt-sidebar {
     -fx-background-color: radial-gradient(
         center 50% 52.5%,
@@ -61,9 +54,6 @@
 .mgmt-chip-employee{ -fx-background-color: #16a34a; }
 
 
-/* =========================
-   Menu buttons
-========================= */
 .mgmt-sidebar-menu {
     -fx-background-color: transparent;
 }
@@ -90,7 +80,6 @@
     -fx-background-color: rgba(255,255,255,0.16);
 }
 
-/* Optional: "active" state */
 .mgmt-menu-button-active {
     -fx-background-color: rgba(255,255,255,0.14);
     -fx-border-color: rgba(255,255,255,0.25);
@@ -98,19 +87,15 @@
     -fx-border-radius: 10;
 }
 
-/* Make button graphics (ImageView) look consistent */
 .mgmt-menu-button .image-view {
     -fx-opacity: 0.95;
 }
 
-/* If some buttons are disabled */
 .mgmt-menu-button:disabled {
     -fx-opacity: 0.45;
 }
 
-/* =========================
-   Footer / Secondary buttons
-========================= */
+
 .mgmt-sidebar-footer {
     -fx-background-color: transparent;
 }
@@ -137,7 +122,6 @@
     -fx-background-color: rgba(255,255,255,0.12);
 }
 
-/* Optional: make logout slightly red on hover (נעים אבל לא אגרסיבי) */
 #btnLogout:hover {
     -fx-background-color: rgba(239, 68, 68, 0.18);
 }
