@@ -111,6 +111,17 @@ public class ClientUserSubject {
 			userController.handleForgotIDResponse("NOT_FOUND");
 		});
 		
+		router.on("staff",  "recoverPassword.ok", msg -> {
+			BistroClient.awaitResponse = false;
+			String password = (String) msg.getData();
+			userController.handleStaffCredentialsResponse(password);
+		});
+		
+		router.on("staff",  "recoverPassword.fail", msg -> {
+			BistroClient.awaitResponse = false;
+			userController.handleStaffCredentialsResponse("NOT_FOUND");
+		});
+		
 		// Member info update responses:
 		router.on("member", "updateInfo.ok", msg -> {
 			BistroClient.awaitResponse = false;

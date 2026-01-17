@@ -61,6 +61,7 @@ public final class Api {
 	public static final String ASK_REGISTER_NEW_MEMBER = "user.registerNewMember";
 	public static final String ASK_REGISTERATION_STATS = "member.registerationStats";
 	public static final String ASK_STAFF_CREATE = "staff.create";
+	public static final String ASK_RECOVER_STAFF_PASSWORD = "staff.recoverPassword";
 
 	// Responses
 	public static final String REPLY_MEMBER_UPDATE_INFO_OK = "member.updateInfo.ok";
@@ -78,6 +79,8 @@ public final class Api {
 	public static final String REPLY_STAFF_CREATE_USERNAME_EXISTS = "staff.create.usernameExists";
 	public static final String REPLY_STAFF_CREATE_INVALID_DATA = "staff.create.invalidData";
 	public static final String REPLY_STAFF_CREATE_UNAUTHORIZED = "staff.create.unauthorized";
+	public static final String REPLY_RECOVER_STAFF_PASSWORD_OK = "staff.recoverPassword.ok";
+	public static final String REPLY_RECOVER_STAFF_PASSWORD_FAIL = "staff.recoverPassword.fail";
 
 // == Orders subject == //
 

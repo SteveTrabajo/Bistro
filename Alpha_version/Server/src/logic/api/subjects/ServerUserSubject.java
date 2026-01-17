@@ -183,6 +183,23 @@ public final class ServerUserSubject {
 			}
 		});
 		
+		router.on("staff", "recoverPassword", (msg, client) -> {
+		    @SuppressWarnings("unchecked")
+		    Map<String, String> requestData = (Map<String, String>) msg.getData();
+		    
+		    String email = requestData.get("email");
+		    String phoneNumber = requestData.get("phoneNumber");
+		    
+		    String result = userService.recoverStaffLogin(email, phoneNumber);
+		    
+		    if (result != null && !result.equals("NOT_FOUND") && !result.equals("ERROR_DB")) {
+		        logger.log("[INFO] Staff credentials recovered for: " + email);
+		        client.sendToClient(new Message(Api.REPLY_RECOVER_STAFF_PASSWORD_OK, result));
+		    } else {
+		        logger.log("[WARN] Staff recovery failed (not found) for: " + email);
+		        client.sendToClient(new Message(Api.REPLY_RECOVER_STAFF_PASSWORD_FAIL, null));
+		    }
+		});
 		
 	
 

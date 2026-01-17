@@ -4,16 +4,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 import enums.UserType;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 import logic.BistroClientGUI;
 
 public class ClientEmployeeLoginScreen {
@@ -83,8 +91,114 @@ public class ClientEmployeeLoginScreen {
 	    }
 	}
 
-	public void btnForgotPassword(Event event) {
-		BistroClientGUI.switchScreen(event, "FullReleaseScreen", "employee forgot password error messege");
-	}
+	/**
+     * Opens a dialog to recover staff password using Email/Phone.
+     */
+    public void btnForgotPassword(Event event) {
+        // 1. Create the Custom Dialog
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Staff Credential Recovery");
+        dialog.setHeaderText("Please enter your registered details.");
+
+        // 2. Set the button types
+        ButtonType searchButtonType = new ButtonType("Find Credentials", ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(searchButtonType, ButtonType.CANCEL);
+
+        // 3. Create the UI Layout
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 50, 10, 10));
+
+        TextField emailField = new TextField();
+        emailField.setPromptText("Enter Email");
+        TextField phoneField = new TextField();
+        phoneField.setPromptText("Enter Phone Number");
+        
+        Label statusLabel = new Label();
+        statusLabel.setWrapText(true);
+        statusLabel.setMaxWidth(300);
+
+        grid.add(new Label("Email:"), 0, 0);
+        grid.add(emailField, 1, 0);
+        grid.add(new Label("Phone:"), 0, 1);
+        grid.add(phoneField, 1, 1);
+        grid.add(statusLabel, 0, 2, 2, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        // 4. Focus the email field by default
+        Platform.runLater(() -> emailField.requestFocus());
+
+        // 5. Handle the Search Button Action
+        final Button btSearch = (Button) dialog.getDialogPane().lookupButton(searchButtonType);
+        
+        // Use event filter to prevent the dialog from closing immediately when clicked
+        btSearch.addEventFilter(ActionEvent.ACTION, e -> {
+            e.consume(); // Stop the dialog from closing automatically
+
+            String email = emailField.getText().trim();
+            String phone = phoneField.getText().trim();
+
+            // Client-side validation
+            if (email.isEmpty() && phone.isEmpty()) {
+                statusLabel.setTextFill(Color.RED);
+                statusLabel.setText("Please fill at least one field.");
+                return;
+            }
+
+            statusLabel.setTextFill(Color.BLUE);
+            statusLabel.setText("Checking records...");
+            btSearch.setDisable(true); // Prevent double-clicks
+
+            BistroClientGUI.client.getUserCTRL().setOnStaffCredentialsListener(rawResult -> {
+                Platform.runLater(() -> {
+                    btSearch.setDisable(false);
+                    
+                    // Sanitize input (remove nulls and hidden characters)
+                    String cleanResult = (rawResult == null) ? "" : rawResult.replaceAll("\\p{Cntrl}", "").trim();
+
+                    if ("NOT_FOUND".equals(cleanResult) || cleanResult.isEmpty()) {
+                        statusLabel.setTextFill(Color.RED);
+                        statusLabel.setText("Information does not belong to any staff member.");
+                    } else {
+
+                        String[] parts = cleanResult.split(":"); 
+                        
+                        if (parts.length >= 2) {
+                            // Update UI to show credentials
+                            grid.getChildren().clear();
+                            
+                            Label lblSuccess = new Label("Credentials Found:");
+                            lblSuccess.setTextFill(Color.GREEN);
+                            lblSuccess.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+                            
+                            grid.add(lblSuccess, 0, 0, 2, 1);
+                            
+                            grid.add(new Label("Username:"), 0, 1);
+                            TextField txtUser = new TextField(parts[0]);
+                            txtUser.setEditable(false);
+                            grid.add(txtUser, 1, 1);
+
+                            grid.add(new Label("Password:"), 0, 2);
+                            TextField txtPass = new TextField(parts[1]);
+                            txtPass.setEditable(false);
+                            grid.add(txtPass, 1, 2);
+                            
+                            // Remove "Search" button, keep only "Close"
+                            dialog.getDialogPane().getButtonTypes().setAll(ButtonType.CLOSE);
+                            dialog.setHeaderText("Identity Verified");
+                        } else {
+                            statusLabel.setTextFill(Color.RED);
+                            statusLabel.setText("Error: Invalid data received from server.");
+                        }
+                    }
+                });
+            });
+            BistroClientGUI.client.getUserCTRL().recoverStaffPassword(email, phone);
+        });
+
+        dialog.showAndWait();
+    }
 
 }

@@ -25,6 +25,7 @@ public class UserController {
 	
 	// User registration related variables:
 	private Consumer<String> onMemberIDFoundListener; // Listener for forgot member ID responses
+	private Consumer<String> onStaffCredentialsFoundListener; // Listener for staff password recovery responses
 	private boolean registrationSuccessFlag = false;
 	private boolean userUpdateSuccessFlag = false;
 	private int newMemberID; //to store newly registered member ID
@@ -401,6 +402,18 @@ public class UserController {
 		this.staffCreationSuccessFlag = false;
 		this.staffCreationErrorMessage = null;
 	}
+	
+	public void recoverStaffPassword(String email, String phoneNumber) {
+		Map<String, String> staffContactInfo = new HashMap<>();
+		staffContactInfo.put("email", email);
+		staffContactInfo.put("phoneNumber", phoneNumber);
+		client.handleMessageFromClientUI(new Message(Api.ASK_RECOVER_STAFF_PASSWORD, staffContactInfo));
+		
+	}
+
+public void setOnStaffCredentialsListener(Consumer<String> listener) {
+		this.onStaffCredentialsFoundListener = listener;
+	}
 
 	//******************************** Event Listeners Methods ***********************************
 	public void setOnMemberIDFoundListener(Consumer<String> listener) {
@@ -413,6 +426,15 @@ public class UserController {
 				onMemberIDFoundListener.accept(result);
 				// Clear after use to prevent memory leaks
 				onMemberIDFoundListener = null;
+			});
+		}
+	}
+	
+	public void handleStaffCredentialsResponse(String result) {
+		if (onStaffCredentialsFoundListener != null) {
+			Platform.runLater(() -> {
+				onStaffCredentialsFoundListener.accept(result);
+				onStaffCredentialsFoundListener = null;
 			});
 		}
 	}

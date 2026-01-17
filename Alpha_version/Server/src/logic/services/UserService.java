@@ -201,5 +201,19 @@ public class UserService {
 		}
 		return null;
 	}
+	
+	
+	/**
+	 * Looks up a staff member (Employee or Manager) by email or phone number.
+	 * Returns their credentials if found.
+	 * * @param email       Staff email address (can be null/empty if phone provided)
+	 * @param phoneNumber Staff phone number (can be null/empty if email provided)
+	 * @return "username:password" if found, "NOT_FOUND" if not found, or "ERROR_DB" if error.
+	 */
+	public String recoverStaffLogin(String email, String phoneNumber) {
+		// Calls the lower-level database controller to execute the SQL query.
+		return dbController.recoverStaffLogin(email, phoneNumber);
+	}
+	
 }
 // End of UserService.java

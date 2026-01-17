@@ -588,6 +588,7 @@ public class BistroDataBase_Controller {
 			release(conn);
 		}
 	}
+	
 	// Returns user_id for an exact phone match, or null if not found
 	public Integer findUserIdByPhone(String phoneNumber) {
 	    phoneNumber = (phoneNumber == null) ? null : phoneNumber.trim();
@@ -834,7 +835,57 @@ public class BistroDataBase_Controller {
 	    }
 	}
 
-	
+	/**
+	 * Recovers staff credentials (username and password) based on email or phone.
+	 * * @param email       The staff member's email (can be null/empty)
+	 * @param phoneNumber The staff member's phone (can be null/empty)
+	 * @return A string in the format "username:password" if found, 
+	 * "NOT_FOUND" if no match, or "ERROR_DB" on failure.
+	 */
+	public String recoverStaffLogin(String email, String phoneNumber) {
+		// 1. Prepare search terms. 
+		// If input is null/empty, set to a dummy value that won't match anything in DB 
+		// to prevent accidental empty-string matches.
+		String searchEmail = (email != null && !email.trim().isEmpty()) ? email.trim() : "IMPOSSIBLE_EMAIL_XYZ";
+		String searchPhone = (phoneNumber != null && !phoneNumber.trim().isEmpty()) ? phoneNumber.trim() : "IMPOSSIBLE_PHONE_XYZ";
+
+		// 2. The Query
+		// Join users and staff_accounts. 
+		// Check that the user is an EMPLOYEE or MANAGER.
+		final String qry = 
+			"SELECT sa.username, sa.password " +
+			"FROM users u " +
+			"JOIN staff_accounts sa ON u.user_id = sa.user_id " +
+			"WHERE (u.email = ? OR u.phoneNumber = ?) " +
+			"AND u.type IN ('EMPLOYEE', 'MANAGER')";
+
+		Connection conn = null;
+		try {
+			conn = borrow();
+			try (PreparedStatement ps = conn.prepareStatement(qry)) {
+				ps.setString(1, searchEmail);
+				ps.setString(2, searchPhone);
+
+				try (ResultSet rs = ps.executeQuery()) {
+					if (rs.next()) {
+						String foundUser = rs.getString("username");
+						String foundPass = rs.getString("password");
+						
+						// Return in the format expected by the client
+						return foundUser + ":" + foundPass;
+					} else {
+						return "NOT_FOUND";
+					}
+				}
+			}
+		} catch (SQLException ex) {
+			logger.log("[ERROR] recoverStaffLogin: " + ex.getMessage());
+			ex.printStackTrace();
+			return "ERROR_DB";
+		} finally {
+			release(conn);
+		}
+	}
 	
 	/*
 	 * Retrieves all customers and converts them to DTOs for the client.
@@ -2844,7 +2895,8 @@ public class BistroDataBase_Controller {
 	
 	
 	public boolean updateOrderStatusByUserId(int userid, OrderStatus newStatus) {
-		String qry = "UPDATE orders SET status = ? WHERE confirmation_code = ?";
+		// TODO user_id or confirmation_code?
+		String qry = "UPDATE orders SET status = ? WHERE user_id = ?";
 		Connection conn = null;
 
 		try {
