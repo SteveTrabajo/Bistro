@@ -18,7 +18,6 @@ public final class Api {
 	// Requests
 	public static final String ASK_CONNECTION_CONNECT = "connection.connect";
 	public static final String ASK_CONNECTION_DISCONNECT = "connection.disconnect";
-	public static final String NOTIFY_CONNECTION = "connection.notifyConnection";
 
 	// Responses
 	public static final String REPLY_CONNECTION_CONNECT_OK = "connection.connect.ok";
@@ -72,8 +71,6 @@ public final class Api {
 	public static final String REPLY_FORGOT_CONFIRMATION_CODE_FAILED = "reservation.forgotConfirmationCode.failed";
 	public static final String REPLY_REGISTER_NEW_MEMBER_OK = "user.registerNewMember.ok";
 	public static final String REPLY_REGISTER_NEW_MEMBER_FAILED = "user.registerNewMember.failed";
-	public static final String REPLY_REGISTERATION_STATS_OK = "member.registerationStats.ok";
-	public static final String REPLY_REGISTERATION_STATS_FAILED = "member.registerationStats.failed";
 	public static final String REPLY_STAFF_CREATE_OK = "staff.create.ok";
 	public static final String REPLY_STAFF_CREATE_FAILED = "staff.create.failed";
 	public static final String REPLY_STAFF_CREATE_USERNAME_EXISTS = "staff.create.usernameExists";
@@ -91,8 +88,6 @@ public final class Api {
 	public static final String ASK_ORDER_AVAILABLE_HOURS = "orders.getAvailableHours";
 	public static final String ASK_GET_ORDER = "orders.getOrder";
 	public static final String ASK_CHECK_ORDER_EXISTS = "orders.checkOrderExists";
-	public static final String ASK_GET_ALLOCATED_TABLE = "orders.getAllocatedTable";// not used?
-	public static final String ASK_PAYMENT_UPDATE = "orders.paymentUpdate";// not used?
 	public static final String ASK_CANCEL_RESERVATION = "orders.cancelReservation";
 	public static final String ASK_UPDATE_RESERVATION = "orders.updateReservation";
 	public static final String ASK_GET_RESERVATIONS_BY_DATE = "orders.getOrdersByDate";
@@ -122,18 +117,12 @@ public final class Api {
 	public static final String REPLY_PAYMENT_UPDATE_FAIL = "Orders.paymentUpdate.fail";
 	public static final String REPLY_CANCEL_RESERVATION_OK = "orders.cancelReservation.ok";
 	public static final String REPLY_CANCEL_RESERVATION_FAIL = "orders.cancelReservation.fail";
-	public static final String REPLY_UPDATE_RESERVATION_OK = "orders.updateReservation.ok";
-	public static final String REPLY_UPDATE_RESERVATION_FAIL = "orders.updateReservation.fail";
 	public static final String REPLY_GET_RESERVATIONS_BY_DATE_OK = "orders.getOrdersByDate.ok";
-	public static final String REPLY_GET_RESERVATIONS_BY_DATE_FAIL = "orders.getOrdersByDate.fail";
 	public static final String REPLY_SEAT_CUSTOMER_OK = "orders.seatCustomer.ok";
 	public static final String REPLY_SEAT_CUSTOMER_FAIL = "orders.seatCustomer.fail";
 	public static final String REPLY_CLIENT_ORDER_HISTORY_OK = "orders.getClientHistory.ok";
-	public static final String REPLY_CLIENT_ORDER_HISTORY_FAIL = "orders.getClientHistory.fail";
-
 	public static final String REPLY_MEMBER_ACTIVE_RESERVATIONS_OK = "orders.getMemberActiveReservations.ok";
 	public static final String REPLY_MEMBER_ACTIVE_RESERVATIONS_FAIL = "orders.getMemberActiveReservations.fail";
-
 	public static final String REPLY_GET_MEMBER_HISTORY_OK = "orders.getMemberHistory.ok";
 	public static final String REPLY_GET_MEMBER_HISTORY_FAIL = "orders.getMemberHistory.fail";
 	public static final String REPLY_MEMBER_SEATED_RESERVATIONS_OK = "orders.getMemberSeatedReservations.ok";
@@ -153,36 +142,23 @@ public final class Api {
 	public static final String ASK_SEATED_ORDER = "tables.askSeatedOrder";
 	
 	public static final String ASK_LOAD_CUSTOMERS_DATA = "customers.getalldata";
-	public static final String ASK_MONTHLY_REPORT_DATA = "monthlyReports.getData";
 	
 	public static final String ASK_SAVE_WEEKLY_HOURS = "hours.saveWeekly";
 	public static final String ASK_GET_WEEKLY_HOURS = "hours.getWeeklyHours";
 	public static final String ASK_ADD_HOLIDAY      = "hours.addHoliday";
-	public static final String ASK_REMOVE_HOLIDAY   = "hours.removeHoliday";
+	public static final String ASK_REMOVE_HOLIDAY   = "hours.removeHoliday"; // not used?
 	public static final String ASK_GET_HOLIDAYS = "hours.getHolidays";
 
 	// Responses
 	public static final String REPLY_TABLE_STATUS_OK = "tables.getStatus.ok";
 	public static final String REPLY_TABLE_STATUS_FAIL = "tables.getStatus.fail";
 	public static final String REPLY_ALL_TABLES_OK = "tables.getAll.ok";
-	public static final String REPLY_ALL_TABLES_FAIL = "tables.getAll.fail";
-	public static final String REPLY_ADD_TABLE_OK = "tables.add.ok";
-	public static final String REPLY_ADD_TABLE_FAIL = "tables.add.fail";
-	public static final String REPLY_REMOVE_TABLE_OK = "tables.remove.ok";
-	public static final String REPLY_REMOVE_TABLE_FAIL = "tables.remove.fail";
 	public static final String REPLY_UPDATE_TABLE_SEATS_OK = "tables.updateSeats.ok";
 	public static final String REPLY_UPDATE_TABLE_SEATS_FAIL = "tables.updateSeats.fail";
-	public static final String REPLY_USER_ALLOCATED_TABLE_OK = "tables.getUserAllocatedTable.ok";
-	public static final String REPLY_USER_ALLOCATED_TABLE_FAIL = "tables.getUserAllocatedTable.fail";
 	public static final String REPLY_SEATED_ORDER_OK = "tables.askSeatedOrder.ok";
 	public static final String REPLY_SEATED_ORDER_FAIL = "tables.askSeatedOrder.fail";
-	
 	public static final String REPLY_LOAD_CUSTOMERS_DATA_OK = "customers.getalldata.ok";
 	public static final String REPLY_LOAD_CUSTOMERS_DATA_FAIL = "customers.getalldata.fail";
-	
-	public static final String REPLY_MONTHLY_REPORT_DATA_OK = "monthlyReports.getData.ok";
-	public static final String REPLY_MONTHLY_REPORT_DATA_FAIL = "monthlyReports.getData.fail";
-	
 	public static final String REPLY_SAVE_WEEKLY_HOURS_OK = "hours.saveWeeklyHours.ok";
 	public static final String REPLY_SAVE_WEEKLY_HOURS_FAIL = "hours.saveWeeklyHours.fail";
 	public static final String REPLY_GET_WEEKLY_HOURS_OK = "hours.getWeeklyHours.ok";
@@ -208,7 +184,6 @@ public final class Api {
 	// Responses
 	public static final String REPLY_WAITING_LIST_IS_IN_LIST = "waitinglist.isInWaitingList.yes";
 	public static final String REPLY_WAITING_LIST_IS_NOT_IN_LIST = "waitinglist.isInWaitingList.no";
-	public static final String REPLY_WAITING_LIST_IS_IN_LIST_FAIL = "waitinglist.isInWaitingList.fail";
 	public static final String REPLY_WAITING_LIST_CHECK_AVAILABILITY_OK = "waitinglist.checkAvailability.ok";
 	public static final String REPLY_WAITING_LIST_CHECK_AVALIBILTY_SKIPPED_TO_SEAT = "waitinglist.checkAvailability.skipped";
 	public static final String REPLY_WAITING_LIST_JOIN_OK = "waitinglist.join.ok";
@@ -217,8 +192,6 @@ public final class Api {
 	public static final String REPLY_WAITING_LIST_LEAVE_STAFF_OK = "waitinglist.leave.staff.ok";
 	public static final String REPLY_WAITING_LIST_LEAVE_FAIL = "waitinglist.leave.fail";
 	public static final String REPLY_WAITING_LIST_LEAVE_STAFF_FAIL = "waitinglist.leave.staff.fail";
-	public static final String REPLY_WAITING_LIST_NOTIFIED_OK = "waitinglist.notified.ok";
-	public static final String REPLY_WAITING_LIST_NOTIFIED_FAIL = "waitinglist.notified.fail";
 	public static final String REPLY_GET_WAITING_LIST_OK = "waitinglist.getAll.ok";
 	public static final String REPLY_GET_WAITING_LIST_FAIL = "waitinglist.getAll.fail";
 	public static final String REPLY_WAITING_LIST_ADD_WALKIN_OK = "waitinglist.addWalkIn.ok";
@@ -261,8 +234,6 @@ public final class Api {
 // == System responses == //
 
 	public static final String REPLY_UNKNOWN_COMMAND = "system.unknownCommand";
-	
-	
-	
 
 }
+// End of Api.java
