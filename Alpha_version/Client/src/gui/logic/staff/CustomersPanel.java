@@ -48,7 +48,6 @@ public class CustomersPanel {
 	public Button btnRefresh;
 	@FXML
 	public Label directoryTitleLabel;
-
 	@FXML
 	public TableView<UserData> customersTable;
 	@FXML
@@ -66,6 +65,9 @@ public class CustomersPanel {
 	private final ObservableList<UserData> masterData = FXCollections.observableArrayList();
 	private FilteredList<UserData> filteredData;
 
+	/** Initializes the controller class. This method is automatically called
+	 * after the fxml file has been loaded.
+	 */
 	@FXML
 	public void initialize() {
 		setupColumns();
@@ -75,7 +77,9 @@ public class CustomersPanel {
 
 	}
 
-// Send updated user data to server
+	/*
+	 * Setup Methods
+	 */
 	private void setupColumns() {
 		colFullName.setCellValueFactory(cellData -> {
 		    UserData u = cellData.getValue();
@@ -88,7 +92,9 @@ public class CustomersPanel {
 		colUserType.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getUserType()));
 	}
 
-	// Set up double-click listener on table rows
+	/*
+	 * Set up double-click listener on table rows
+	 */
 	private void setupRowListeners() {
 		customersTable.setRowFactory(tv -> {
 			TableRow<UserData> row = new TableRow<>();
@@ -102,49 +108,36 @@ public class CustomersPanel {
 		});
 	}
 
-	// Set up search functionality
+	/*
+	 * Set up search/filter logic
+	 */
 	private void setupSearchLogic() {
-		// Wrap master list in a filtered list
 		filteredData = new FilteredList<>(masterData, p -> true);
-
-		// Add listener to search field with YOUR specific fields
 		searchField.textProperty().addListener((observable, oldValue, newValue) -> {
 			filteredData.setPredicate(user -> {
 				// If filter text is empty, display all users
 				if (newValue == null || newValue.isEmpty()) {
 					return true;
 				}
-
 				String lowerCaseFilter = newValue.toLowerCase();
-
-				// Check Name
 				if (user.getFirstName() != null && user.getFirstName().toLowerCase().contains(lowerCaseFilter)) {
 					return true;
-				// Check Last Name
 				}
 				if (user.getLastName() != null && user.getLastName().toLowerCase().contains(lowerCaseFilter)) {
 					return true;
-				// Check Address
 				}
 				if (user.getAddress() != null && user.getAddress().toLowerCase().contains(lowerCaseFilter)) {
 				    return true;
 				}
-
-				// Check Email
 				if (user.getEmail() != null && user.getEmail().toLowerCase().contains(lowerCaseFilter)) {
 					return true;
 				}
-
-				// Check Phone
 				if (user.getPhone() != null && user.getPhone().contains(lowerCaseFilter)) {
 					return true;
 				}
-
-				// Check Member Code
 				if (user.getMemberCode() != null && user.getMemberCode().toLowerCase().contains(lowerCaseFilter)) {
 					return true;
 				}
-
 				return false; // Does not match
 			});
 		});
@@ -152,11 +145,12 @@ public class CustomersPanel {
 		// Wrap in a sorted list so column sorting still works
 		SortedList<UserData> sortedData = new SortedList<>(filteredData);
 		sortedData.comparatorProperty().bind(customersTable.comparatorProperty());
-
-		// Bind the Sorted List to the Table
 		customersTable.setItems(sortedData);
 	}
 
+	/*
+	 * Update Methods
+	 */
 	public void updateCustomers(List<UserData> customersData) {
 		if (customersData == null)
 			return;
@@ -175,12 +169,18 @@ public class CustomersPanel {
 		});
 	}
 	
+	/*
+	 * Button Event Handlers
+	 */
 	@FXML
 	public void btnRefresh() {
 		refreshdata();
 		searchField.clear();
 	}
 
+	/*
+	 * Helper Methods
+	 */
 	private void refreshdata() {
 		BistroClientGUI.client.getUserCTRL().clearCustomersData();
 		BistroClientGUI.client.getUserCTRL().loadCustomersData();
@@ -203,6 +203,9 @@ public class CustomersPanel {
 
 	}
 
+	/*
+	 * Handle double-click on a customer row to edit details
+	 */
 	private void handleCustomerDoubleClick(UserData editUser) {
 		// Check if the user is a Guest, remind the employee that Guest details cannot be edited as we do not store them
 		if (editUser.getUserType() == UserType.GUEST) {
@@ -219,11 +222,9 @@ public class CustomersPanel {
 		String titleName = editUser.getFirstName() != null ? editUser.getFirstName() : "Guest";
 		dialog.setTitle("Edit Customer: " + editUser.getFirstName());
 		dialog.setHeaderText("Update details for " + editUser.getFirstName());
-
 		// Set the button types (Save and Cancel)
 		ButtonType saveButtonType = new ButtonType("Save Changes", ButtonBar.ButtonData.OK_DONE);
 		dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
-
 		// Create the form fields
 		GridPane grid = new GridPane();
 		grid.setHgap(10);
@@ -251,30 +252,22 @@ public class CustomersPanel {
 
 		grid.add(new Label("First Name:"), 0, 0);
 		grid.add(nameField, 1, 0);
-		
 		grid.add(new Label("Last Name:"), 0, 1);
 		grid.add(lastNameField, 1, 1);
-		
 		grid.add(new Label("Address:"), 0, 2);
 		grid.add(addressField, 1, 2);
-
 		grid.add(new Label("Email:"), 0, 3);
 		grid.add(emailField, 1, 3);
-
 		grid.add(new Label("Phone:"), 0, 4);
 		grid.add(phoneField, 1, 4);
-
 		grid.add(new Label("Member Code:"), 0, 5);
-		grid.add(memberCodeField, 1, 5);
-		
+		grid.add(memberCodeField, 1, 5);		
 		grid.add(new Label("User Type:"), 0, 6);
 		grid.add(typeComboBox, 1, 6);
 
 		dialog.getDialogPane().setContent(grid);
 		Platform.runLater(nameField::requestFocus);
-
 		Node saveButton = dialog.getDialogPane().lookupButton(saveButtonType);
-
 		saveButton.disableProperty().bind(Bindings.createBooleanBinding(
 	            () -> {
 	            	String first = nameField.getText();
@@ -317,13 +310,11 @@ public class CustomersPanel {
 			Node rootNode = customersTable.getScene().getRoot();
 			rootNode.setDisable(true);
 			rootNode.setCursor(Cursor.WAIT);
-
 			Thread updateThread = new Thread(() -> {
 				try {
 					// Perform the update
 					BistroClientGUI.client.getUserCTRL().updateUserDetails(updatedUser);
 					boolean success = BistroClientGUI.client.getUserCTRL().getUserUpdateSuccessful();
-
 					Platform.runLater(() -> {
 						if (success) {
 							refreshdata();							
@@ -334,16 +325,15 @@ public class CustomersPanel {
 				} catch (Exception e) {
 					Platform.runLater(() -> new Alert(Alert.AlertType.ERROR, "Connection error: " + e.getMessage()).showAndWait());
 				} finally {
-					// ALWAYS unlock the UI, even if an error occurred
 					Platform.runLater(() -> {
 						rootNode.setDisable(false);
 						rootNode.setCursor(Cursor.DEFAULT);
 					});
 				}
 			});
-
 			updateThread.setDaemon(true);
 			updateThread.start();
 		});
 	}
 }
+// end of CustomersPanel.java

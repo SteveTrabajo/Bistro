@@ -22,14 +22,45 @@ public class StaffWaitAndRes extends Dialog<Map<String, Object>> {
     
     private final boolean isWaitlistMode; // TRUE = Waitlist (ask diners), FALSE = Reservation (identity only)
     
+    /**
+	 * Constructor for StaffWaitAndRes dialog.
+	 * This dialog collects customer information for either adding to the waitlist or making a reservation.
+	 * The dialog dynamically adjusts its fields based on whether it's in Waitlist mode or Reservation mode.
+	 * In Waitlist mode, it collects the number of diners along with customer details.
+	 * In Reservation mode, it focuses on identifying the customer without asking for diners.
+	 * The dialog supports two customer types: Guest and Member.
+	 * Guest customers provide phone number, name, and email.
+	 * Member customers provide their Member ID.
+	 * Input validation is performed to ensure required fields are filled correctly.
+	 * The result is returned as a Map containing the collected information.
+	 * The keys in the result map are:
+	 * - "customerType": "GUEST" or "MEMBER"
+	 * - "identifier": Phone number for Guests, Member ID for Members
+	 * - "name": Full name (only for Guests)
+	 * - "email": Email address (only for Guests)
+	 * - "diners": Number of diners (only in Waitlist mode)
+	 * 
+	 * @param isWaitlistMode true for Waitlist mode, false for Reservation mode.
+	 */
     public StaffWaitAndRes(boolean isWaitlistMode) {
         this.isWaitlistMode = isWaitlistMode;
         this.setTitle(isWaitlistMode ? "Add to Waitlist" : "New Reservation");
-        this.setHeaderText(isWaitlistMode ? "Enter walk-in details" : "Identify customer for booking");
-        
+        this.setHeaderText(isWaitlistMode ? "Enter walk-in details" : "Identify customer for booking");       
         buildUI();
     }
     
+    /*
+     * Builds the user interface for the dialog.
+     * This method sets up the layout, controls, and event handlers.
+     * It includes radio buttons for selecting customer type (Guest or Member),
+     * text fields for entering customer details, and a combo box for selecting the number of diners (in Waitlist mode).
+     * Input validation is performed when the user attempts to confirm their input.
+     * The result converter processes the input and constructs a result map to be returned when the dialog is confirmed.
+     * The layout is organized using a GridPane for a clean and structured appearance.
+     * The dialog's buttons are configured to reflect the mode (Waitlist or Reservation).
+     * The method also includes logic to dynamically show or hide fields based on the selected customer type.
+     * @return void
+     */
     private void buildUI() {
         ButtonType confirmType = new ButtonType(isWaitlistMode ? "Add" : "Next", ButtonBar.ButtonData.OK_DONE);
         this.getDialogPane().getButtonTypes().addAll(confirmType, ButtonType.CANCEL);
@@ -64,7 +95,6 @@ public class StaffWaitAndRes extends Dialog<Map<String, Object>> {
 
         // --- Layout ---
         int row = 0;
-
         grid.add(new Label("Customer Type:"), 0, row);
         grid.add(rbGuest, 1, row);
         grid.add(rbMember, 2, row);
@@ -78,11 +108,9 @@ public class StaffWaitAndRes extends Dialog<Map<String, Object>> {
         grid.add(lbl2, 0, row);
         grid.add(txtName, 1, row, 2, 1); // Name or Empty
         row++;
-
         grid.add(lbl1, 0, row);
         grid.add(txtPhone, 1, row, 2, 1); // Phone or MemberID
-        row++;
-        
+        row++;       
         grid.add(lbl3, 0, row);
         grid.add(txtEmail, 1, row, 2, 1); // Email or Empty
         row++;
@@ -93,7 +121,6 @@ public class StaffWaitAndRes extends Dialog<Map<String, Object>> {
             grid.add(new Label("Diners:"), 0, row);
             grid.add(cmbDiners, 1, row);
         }
-
         // --- Toggle Logic ---
         group.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
             grid.getChildren().removeAll(txtPhone, txtName, txtEmail, txtMemberId);
@@ -118,18 +145,14 @@ public class StaffWaitAndRes extends Dialog<Map<String, Object>> {
             }
             this.getDialogPane().getScene().getWindow().sizeToScene();
         });
-
         this.getDialogPane().setContent(grid);
-
-        // --- Validation ---
+        // Validation:
         Button btnOk = (Button) this.getDialogPane().lookupButton(confirmType);
         btnOk.addEventFilter(ActionEvent.ACTION, ae -> {
             boolean isMember = rbMember.isSelected();
             String id = txtMemberId.getText();
             String phone = txtPhone.getText();
             String email = txtEmail.getText();
-            
-            // USE INPUTCHECK
             String error = InputCheck.validateWalkIn(isMember, id, phone, email);
             if (!error.isEmpty()) {
                 ae.consume();
@@ -137,11 +160,9 @@ public class StaffWaitAndRes extends Dialog<Map<String, Object>> {
             }
         });
 
-        // --- Result Converter ---
         this.setResultConverter(dialogButton -> {
             if (dialogButton == confirmType) {
-                Map<String, Object> req = new HashMap<>();
-                
+                Map<String, Object> req = new HashMap<>();               
                 if (rbMember.isSelected()) {
                     req.put("customerType", "MEMBER");
                     req.put("identifier", txtMemberId.getText().trim());
@@ -150,19 +171,21 @@ public class StaffWaitAndRes extends Dialog<Map<String, Object>> {
                     req.put("identifier", txtPhone.getText().trim());
                     req.put("name", txtName.getText().trim());
                     req.put("email", txtEmail.getText().trim());
-                }
-                
+                }                
                 // Only pass diners if we asked for it
                 if (isWaitlistMode) {
                     req.put("diners", cmbDiners.getValue());
-                }
-                
+                }               
                 return req;
             }
             return null;
         });
     }
 
+    /*
+	 * Shows an alert dialog with the given message.
+	 * @param msg The message to display in the alert.
+	 */
     private void showAlert(String msg) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Invalid Input");
@@ -171,3 +194,4 @@ public class StaffWaitAndRes extends Dialog<Map<String, Object>> {
         alert.showAndWait();
     }
 }
+// end of StaffWaitAndRes.java

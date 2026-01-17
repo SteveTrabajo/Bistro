@@ -1,29 +1,18 @@
 package gui.logic.staff;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
-import common.InputCheck;
 import entities.*;
 import enums.*;
-import gui.logic.TaskRunner;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
 import logic.BistroClientGUI;
 
 public class WaitingListPanel {
@@ -46,7 +35,6 @@ public class WaitingListPanel {
 	private Button btnAddToWaitlist;
 	@FXML
 	private Button btnRefresh;
-
 	@FXML
 	private TableView<Order> waitingTable;
 	@FXML
@@ -64,6 +52,9 @@ public class WaitingListPanel {
 
 	private ObservableList<Order> waitingList = FXCollections.observableArrayList();
 
+	/** Initializes the controller class. This method is automatically called
+	 * after the fxml file has been loaded.
+	 */
 	@FXML
 	public void initialize() {
 		setupTable();
@@ -73,10 +64,12 @@ public class WaitingListPanel {
 		loadData();
 	}
 
+	/*
+	 * Setup Table Columns
+	 */
 	private void setupTable() {
 		colQueue.setCellValueFactory(new PropertyValueFactory<>("confirmationCode"));
 		colParty.setCellValueFactory(new PropertyValueFactory<>("dinersAmount"));
-
 		colJoined.setCellValueFactory(new PropertyValueFactory<>("dateOfPlacingOrder"));
 		colJoined.setCellFactory(column -> new TableCell<>() {
 			@Override
@@ -96,13 +89,11 @@ public class WaitingListPanel {
 			protected void updateItem(OrderStatus item, boolean empty) {
 				super.updateItem(item, empty);
 				getStyleClass().removeAll("wl-chip-waiting", "wl-chip-called");
-
 				if (empty || item == null) {
 					setText(null);
 					setGraphic(null);
 				} else {
 					setText(item.toString());
-
 					if (item == OrderStatus.NOTIFIED) {
 						getStyleClass().add("wl-chip-called"); // Orange~red
 					} else {
@@ -111,26 +102,27 @@ public class WaitingListPanel {
 				}
 			}
 		});
-
-		// Custom Factory for Member Type (Simulated based on ID for now)
 		colMember.setCellValueFactory(cellData -> {
-			// In a real app, you'd check cellData.getValue().getUserId() against cached users
 			return new SimpleStringProperty("Guest");
 		});
-
-		// Custom Factory for Name (Simulated)
 		colName.setCellValueFactory(cellData -> {
 			return new SimpleStringProperty("Customer " + cellData.getValue().getUserId());
 		});
-
 		waitingTable.setItems(waitingList);
 	}
 
+
+	/*
+	 * Refresh Button Event Handler
+	 */
 	@FXML
 	void btnRefresh(ActionEvent event) {
 		loadData();
 	}
 
+	/*
+	 * Load Data from Server
+	 */
 	private void loadData() {
 		waitingList.clear();
 		if (BistroClientGUI.client != null) {
@@ -140,12 +132,18 @@ public class WaitingListPanel {
 		updateStats();
 	}
 
+	/*
+	 * Update Queue Title
+	 */
 	private void updateQueueTitle() {
 		lblQueueTitleLabel.setText("Current Queue (" + waitingList.size() + ")");
 		lblTotalInQueueLabel.setText(String.valueOf(waitingList.size()));
 	}
-
-	// Called by Logic Controller when server sends update
+	
+	/*
+	 * Update List from Server
+	 * @param newList The new list of orders from the server.
+	 */
 	public void updateListFromServer(List<Order> newList) {
 		Platform.runLater(() -> {
 			waitingList.clear();
@@ -155,6 +153,10 @@ public class WaitingListPanel {
 		});
 	}
 
+	/*
+	 * Remove from Waitlist Button Event Handler
+	 * @param event The ActionEvent triggered by the button click.
+	 */
 	@FXML
 	private void btnRemoveFromWaitlist(ActionEvent event) {
 		Order selectedOrder = waitingTable.getSelectionModel().getSelectedItem();
@@ -167,7 +169,9 @@ public class WaitingListPanel {
 		}
 	}
 
-
+	/*
+	 * Update Statistics Labels
+	 */
 	private void updateStats() {
 		int waitingCount = 0;
 		int notifiedCount = 0;
@@ -188,6 +192,10 @@ public class WaitingListPanel {
 		}
 	}
 
+	/*
+	 * Add to Waitlist Button Event Handler
+	 * @param event The ActionEvent triggered by the button click.
+	 */
 	@FXML
 	void btnAddToWaitlist(ActionEvent event) {
 		StaffWaitAndRes dialog = new StaffWaitAndRes(true);
@@ -199,6 +207,11 @@ public class WaitingListPanel {
         });
 	}
 
+	/*
+	 * Shows an alert dialog with the given title and content.
+	 * @param title The title of the alert.
+	 * @param content The content message of the alert.
+	 */
 	private void showAlert(String title, String content) {
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
 		alert.setTitle(title);
@@ -206,5 +219,5 @@ public class WaitingListPanel {
 		alert.setContentText(content);
 		alert.showAndWait();
 	}
-
 }
+// end of WaitingListPanel.java

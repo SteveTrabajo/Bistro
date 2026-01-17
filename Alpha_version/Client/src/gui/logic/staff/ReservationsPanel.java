@@ -18,7 +18,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import logic.BistroClientGUI;
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -45,11 +44,8 @@ public class ReservationsPanel {
     private Button btnCancelRes;
     @FXML 
     private Button btnNewReservation;
-
     @FXML 
-    private TableView<Order> reservationsTable;
-    
-    // Columns
+    private TableView<Order> reservationsTable;   
     @FXML 
     private TableColumn<Order, LocalDate> colDate;
     @FXML 
@@ -72,43 +68,40 @@ public class ReservationsPanel {
     private boolean viewingMemberHistory = false;
     private int currentMemberCode = -1;
 
+    /** Initializes the controller class. This method is automatically called
+	 * after the fxml file has been loaded.
+	 */
     @FXML
     public void initialize() {
         setupColumns();
-
-        filteredData = new FilteredList<>(masterData, p -> true);
-        
+        filteredData = new FilteredList<>(masterData, p -> true);       
         txtSearch.textProperty().addListener((observable, oldValue, newValue) -> {
             filteredData.setPredicate(order -> {
                 if (newValue == null || newValue.isEmpty()) {
                     return true;
                 }
-
                 String lowerCaseFilter = newValue.toLowerCase();
-
                 if (String.valueOf(order.getOrderNumber()).contains(lowerCaseFilter)) return true;
                 if (order.getConfirmationCode() != null && order.getConfirmationCode().toLowerCase().contains(lowerCaseFilter)) return true;
                 if (String.valueOf(order.getUserId()).contains(lowerCaseFilter)) return true;
-
                 return false; 
             });
         });
-
         SortedList<Order> sortedData = new SortedList<>(filteredData);
         sortedData.comparatorProperty().bind(reservationsTable.comparatorProperty());
         reservationsTable.setItems(sortedData);
-        dateFilter.setValue(LocalDate.now());
-        
+        dateFilter.setValue(LocalDate.now());        
         if (BistroClientGUI.client != null) {
             BistroClientGUI.client.getReservationCTRL().setCancelListener(this::onCancellationComplete);
-        }
-        
+        }        
         loadData();
     }
 
+    /*
+     * Sets up the table columns with appropriate cell value factories and cell factories.
+     */
     private void setupColumns() {
-        colDate.setCellValueFactory(new PropertyValueFactory<>("orderDate"));
-        
+        colDate.setCellValueFactory(new PropertyValueFactory<>("orderDate"));        
         colTime.setCellValueFactory(new PropertyValueFactory<>("orderHour"));
         colTime.setCellFactory(col -> new TableCell<>() {
             @Override
@@ -165,16 +158,29 @@ public class ReservationsPanel {
                 } else {
                     setText(item.toString());
                     switch (item) {
-                        case SEATED: getStyleClass().add("status-seated"); break;
-                        case PENDING: getStyleClass().add("status-pending"); break;
-                        case CANCELLED: getStyleClass().add("status-cancelled"); break;
-                        case COMPLETED: getStyleClass().add("status-completed"); break;
+                        case SEATED: 
+                        	getStyleClass().add("status-seated"); 
+                        	break;
+                        case PENDING: 
+                        	getStyleClass().add("status-pending"); 
+                        	break;
+                        case CANCELLED: 
+                        	getStyleClass().add("status-cancelled"); 
+                        	break;
+                        case COMPLETED: 
+                        	getStyleClass().add("status-completed"); 
+                        	break;
+					default:
+							break;
                     }
                 }
             }
         });
     }
 
+    /*
+	 * Button Event Handlers
+	 */
     @FXML
     void btnNewReservation(ActionEvent event) {
     	StaffWaitAndRes dialog = new StaffWaitAndRes(false);
@@ -182,16 +188,13 @@ public class ReservationsPanel {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/fxml/ClientNewReservationScreen.fxml")
                 );
-                Parent root = loader.load();
-                
+                Parent root = loader.load();                
                 ClientNewReservationScreen controller = loader.getController();
-                controller.setBookingForCustomer(customerData);
-                
+                controller.setBookingForCustomer(customerData);                
                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                 Scene scene = new Scene(root);
                 stage.setScene(scene);
-                stage.show();
-                
+                stage.show();                
             } catch (IOException e) {
                 e.printStackTrace();
                 showAlert("Error", "Could not load reservation screen.");
@@ -199,12 +202,18 @@ public class ReservationsPanel {
         });
     }
 
+    /*
+     * Date Filter Changed Event Handler
+     */
     @FXML
     void onDateChanged(ActionEvent event) { 
     	clearMemberHistoryMode();
     	loadData(); 
 	}
 
+    /*
+	 * Refresh Button Event Handler
+	 */
     @FXML
     void btnRefresh(ActionEvent event) { 
     	if (viewingMemberHistory && currentMemberCode > 0) {
@@ -213,7 +222,10 @@ public class ReservationsPanel {
     		loadData(); 
     	}
 	}
-    
+ 
+    /*
+     * Search Member Button Event Handler
+     */
     @FXML
     void btnSearchMember(ActionEvent event) {
     	String memberCodeText = txtMemberId.getText().trim();
@@ -221,7 +233,7 @@ public class ReservationsPanel {
     		showAlert("Invalid Input", "Please enter a Member Code to search.");
     		return;
     	}
-    	
+    	// Validate member code is a positive integer
     	try {
     		int memberCode = Integer.parseInt(memberCodeText);
     		if (memberCode <= 0) {
@@ -234,12 +246,18 @@ public class ReservationsPanel {
     	}
     }
     
+    /*
+	 * Clear Member History Button Event Handler
+	 */
     @FXML
     void btnClearMember(ActionEvent event) {
     	clearMemberHistoryMode();
     	loadData();
     }
     
+    /*
+     * Clears the member history viewing mode and resets relevant fields.
+     */
     private void clearMemberHistoryMode() {
     	viewingMemberHistory = false;
     	currentMemberCode = -1;
@@ -247,35 +265,40 @@ public class ReservationsPanel {
     	dateFilter.setDisable(false);
     }
     
+    /*
+     * Loads reservation history for a specific member.
+     */
     private void loadMemberHistory(int memberCode) {
     	System.out.println("[DEBUG] loadMemberHistory called with memberCode: " + memberCode);
     	if (BistroClientGUI.client == null) {
     		System.out.println("DEBUG: Preview Mode");
     		return;
-    	}
-    	
+    	}    	
     	viewingMemberHistory = true;
     	currentMemberCode = memberCode;
-    	dateFilter.setDisable(true); // Disable date filter when viewing member history
-    	
+    	dateFilter.setDisable(true); // Disable date filter when viewing member history    	
     	BistroClientGUI.client.getReservationCTRL().setAllReservationsListener(this::updateTable);
     	BistroClientGUI.client.getReservationCTRL().askMemberHistory(memberCode);
     	System.out.println("[DEBUG] askMemberHistory request sent");
     }
 
+    /*
+     * Loads reservation data based on the selected date filter.
+     */
     private void loadData() {
         LocalDate date = dateFilter.getValue();
-        if (date == null) return;
-        
+        if (date == null) return;        
         if (BistroClientGUI.client == null) {
             System.out.println("DEBUG: Preview Mode");
             return; 
         }
-
         BistroClientGUI.client.getReservationCTRL().setAllReservationsListener(this::updateTable);
         BistroClientGUI.client.getReservationCTRL().askReservationsByDate(date);
     }
-    
+
+    /*
+	 * Updates the reservations table with new data.
+	 */
     private void updateTable(List<Order> orders) {
         System.out.println("[DEBUG] updateTable called with " + (orders == null ? "null" : orders.size() + " orders"));
         Platform.runLater(() -> {
@@ -287,7 +310,9 @@ public class ReservationsPanel {
         });
     }
 
-    
+    /*
+	 * Marks the selected reservation as "Seated".
+	 */
     @FXML
     void btnMarkSeated(ActionEvent event) {
         Order selected = reservationsTable.getSelectionModel().getSelectedItem();
@@ -302,33 +327,31 @@ public class ReservationsPanel {
         if (selected.getStatus() == OrderStatus.SEATED) {
             showAlert("Invalid Action", "This customer is already seated at a table");
             return;
-        }
-        
+        }        
         if (BistroClientGUI.client != null) {
-            //selected.setStatus(OrderStatus.SEATED);
             BistroClientGUI.client.getReservationCTRL().seatCustomer(selected.getConfirmationCode());
         }
         reservationsTable.refresh();
     }
 
-    
+    /*
+     * Cancels the selected reservation.
+     */
     @FXML
     void btnCancelRes(ActionEvent event) {
         Order selected = reservationsTable.getSelectionModel().getSelectedItem();
         if (selected == null) { 
         	showAlert("No Selection", "Please select a reservation."); 
         	return; 
-    	}
-        
-        if (selected.getStatus() == OrderStatus.SEATED || selected.getStatus() == OrderStatus.COMPLETED || selected.getStatus() == OrderStatus.CANCELLED) {
-                
+    	}        
+        if (selected.getStatus() == OrderStatus.SEATED || selected.getStatus() == OrderStatus.COMPLETED || selected.getStatus() == OrderStatus.CANCELLED) {                
             showAlert("Invalid Action", "Cannot cancel a reservation that is " + selected.getStatus() + ".");
             return;
         }
         
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, 
-        		"Are you sure you want to cancel reservation " + selected.getConfirmationCode() + "?", 
-                ButtonType.YES, ButtonType.NO);
+		Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+				"Are you sure you want to cancel reservation " + selected.getConfirmationCode() + "?", ButtonType.YES,
+				ButtonType.NO);
                 
         confirm.showAndWait().ifPresent(response -> {
             if (response == ButtonType.YES && BistroClientGUI.client != null) {
@@ -347,7 +370,9 @@ public class ReservationsPanel {
         }
     }
 
-
+    /*
+     * Shows an information alert with the given title and message.
+     */
     private void showAlert(String title, String msg) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
@@ -356,3 +381,4 @@ public class ReservationsPanel {
         alert.showAndWait();
     }
 }
+// End of ReservationsPanel.java

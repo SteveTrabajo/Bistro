@@ -48,6 +48,9 @@ public class PaymentPanel {
     private final ObservableList<Bill> masterData = FXCollections.observableArrayList();
     private FilteredList<Bill> filteredData;
 
+    /** Initializes the controller class. This method is automatically called
+	 * after the fxml file has been loaded.
+	 */
     @FXML
     public void initialize() {
         setupTableColumns();
@@ -55,25 +58,26 @@ public class PaymentPanel {
         refreshData();
     }
 
+    /*
+     * Setup Methods
+     */
     private void setupTableColumns() {
         colBillId.setCellValueFactory(new PropertyValueFactory<>("orderNumber"));
-        colCustomer.setCellValueFactory(new PropertyValueFactory<>("confirmationCode"));
-        
+        colCustomer.setCellValueFactory(new PropertyValueFactory<>("confirmationCode"));        
         colMember.setCellValueFactory(cell -> 
             new SimpleStringProperty(cell.getValue().getUserType() != null ? cell.getValue().getUserType().toString() : "GUEST"));
-
         colCreated.setCellValueFactory(cell -> 
             new SimpleStringProperty(cell.getValue().getDate() != null ? cell.getValue().getDate().toString() : "N/A"));
-
         colTotal.setCellValueFactory(cell -> 
             new SimpleStringProperty(String.format("₪%.2f", cell.getValue().getTotal())));
-
         colTable.setCellValueFactory(cell -> 
             new SimpleStringProperty("Table " + cell.getValue().getTableId()));
-
         billsTable.setPlaceholder(new Label("No occupied tables with pending bills."));
     }
 
+    /*
+     * Search and Filter Logic
+     */
     private void setupSearchLogic() {
         filteredData = new FilteredList<>(masterData, p -> true);
         searchField.textProperty().addListener((obs, old, newValue) -> {
@@ -91,10 +95,12 @@ public class PaymentPanel {
         billsTable.setItems(sortedData);
     }
 
+    /*
+     * Data Refresh and UI Update Methods
+     */
     private void refreshData() {
         BistroClientGUI.client.getPaymentCTRL().loadPendingBills();
         BistroClientGUI.client.getTableCTRL().requestTableStatus();
-
         if (BistroClientGUI.client.getPaymentCTRL().isBillsLoaded()) {
             updateUI(BistroClientGUI.client.getPaymentCTRL().getPendingBills());
         } else {
@@ -102,17 +108,16 @@ public class PaymentPanel {
         }
     }
 
+    /*
+	 * Updates the UI with the provided list of bills.
+	 */
     public void updateUI(List<Bill> allBills) {
         if (allBills == null) return;
-
-        List<Bill> activeBills = allBills.stream()
-                .filter(bill -> isTableOccupied(bill.getTableId()))
-                .collect(Collectors.toList());
-
+		List<Bill> activeBills = allBills.stream().filter(bill -> isTableOccupied(bill.getTableId()))
+				.collect(Collectors.toList());
         int count = activeBills.size();
         double totalRevenue = activeBills.stream().mapToDouble(Bill::getTotal).sum();
         double avg = count > 0 ? totalRevenue / count : 0;
-
         Platform.runLater(() -> {
             masterData.setAll(activeBills);
             lblPendingBills.setText(String.valueOf(count));
@@ -122,6 +127,9 @@ public class PaymentPanel {
         });
     }
 
+    /*
+	 * Button Event Handlers
+	 */
     @FXML
     void btnPaymentReservation(Event event) {
         Bill selectedBill = billsTable.getSelectionModel().getSelectedItem();
@@ -132,11 +140,13 @@ public class PaymentPanel {
         processManualPayment(selectedBill);
     }
 
+    /*
+     * Processes manual payment for the selected bill.
+     */
     private void processManualPayment(Bill bill) {
         Dialog<String> dialog = new Dialog<>();
         dialog.setTitle("Finalize Payment - Order #" + bill.getOrderNumber());
         dialog.setHeaderText("Processing payment for Order: " + bill.getConfirmationCode());
-
         ButtonType payButtonType = new ButtonType("Complete Payment", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(payButtonType, ButtonType.CANCEL);
 
@@ -181,21 +191,14 @@ public class PaymentPanel {
             try {
                 String method = paymentMethod.getValue();
                 String amountText = actualPaymentField.getText();
-                
                 if (amountText == null || amountText.isEmpty() || method == null) {
                     payButton.setDisable(true);
                     return;
                 }
-
                 double enteredAmount = Double.parseDouble(amountText);
                 boolean isAmountValid = enteredAmount >= bill.getTotal();
-                
-                // Button is enabled ONLY if amount is valid AND method is selected
                 payButton.setDisable(!isAmountValid);
-                
-                // Visual feedback
                 actualPaymentField.setStyle(!isAmountValid ? "-fx-border-color: red; -fx-text-fill: red;" : "");
-                
             } catch (NumberFormatException e) {
                 payButton.setDisable(true);
                 actualPaymentField.setStyle("-fx-border-color: red;");
@@ -204,20 +207,16 @@ public class PaymentPanel {
 
         actualPaymentField.textProperty().addListener((obs, oldVal, newVal) -> validateInput.run());
         paymentMethod.valueProperty().addListener((obs, oldVal, newVal) -> validateInput.run());
-        validateInput.run();
-        
+        validateInput.run();        
         dialog.setResultConverter(btn -> (btn == payButtonType) ? paymentMethod.getValue() : null);
-
         dialog.showAndWait().ifPresent(method -> {
             Parent rootNode = billsTable.getScene().getRoot();
             rootNode.setDisable(true);
             billsTable.setCursor(Cursor.WAIT);
-
             Thread updateThread = new Thread(() -> {
                 try {
                     BistroClientGUI.client.getPaymentCTRL().processPayment(bill.getOrderNumber(), method);
                     boolean success = BistroClientGUI.client.getPaymentCTRL().getIsPaymentManuallySuccessful();
-
                     Platform.runLater(() -> {
                         if (success) {
                             showAlert("Success", "Payment processed via " + method, Alert.AlertType.INFORMATION);
@@ -241,6 +240,9 @@ public class PaymentPanel {
         });
     }
 
+    /*
+	 * Utility Methods
+	 */
     private void showAlert(String title, String content, Alert.AlertType type) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
@@ -249,12 +251,18 @@ public class PaymentPanel {
         alert.showAndWait();
     }
 
+    /*
+	 * Checks if the table with the given ID is currently occupied.
+	 */
     private boolean isTableOccupied(int tableId) {
         if (BistroClientGUI.client.getTableCTRL().getTableStatuses() == null) return false;
         return BistroClientGUI.client.getTableCTRL().getTableStatuses().keySet().stream()
                 .anyMatch(t -> t.getTableID() == tableId && t.isOccupiedNow());
     }
 
+    /*
+     * Clears the statistics and table data.
+     */
     private void clearStats() {
         Platform.runLater(() -> {
             masterData.clear();
@@ -265,6 +273,12 @@ public class PaymentPanel {
         });
     }
 
+    /*
+     * Refresh Button Handler
+     */
     @FXML 
-    void btnRefreshList(Event event) { refreshData(); searchField.clear(); }
+    void btnRefreshList(Event event) { 
+    	refreshData(); searchField.clear();
+	}
 }
+// End of PaymentPanel.java
