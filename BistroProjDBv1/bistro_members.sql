@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
 --
--- Host: localhost    Database: bistro
+-- Host: 127.0.0.1    Database: bistro
 -- ------------------------------------------------------
 -- Server version	8.0.44
 
@@ -40,7 +40,7 @@ CREATE TABLE `members` (
 
 LOCK TABLES `members` WRITE;
 /*!40000 ALTER TABLE `members` DISABLE KEYS */;
-INSERT INTO `members` VALUES (410003,969693,'Yael','Shani','Hifa'),(410005,148050,'Yael','Peretz','Petah Tikva'),(410008,766563,'Tamar','Friedman','Jerusalem'),(410009,319684,'Yael','Biton','Haifa'),(410011,271339,'Lior','Azulay','Petah Tikva'),(410014,961722,'Ben','Friedman','Beer Sheva'),(410020,881177,'Eden','Bar','Petah Tikva'),(410026,260265,'Yael','Mizrahi','Beer Sheva'),(410033,905934,'Yael','Friedman','Haifa'),(410035,103402,'Niv','Halevi','Petah Tikva'),(410037,755674,'Itay','Amir','Rishon LeZion'),(410038,899550,'Noam','Bar','Tel Aviv'),(410039,612340,'Ben','Levi','Netanya'),(410042,189814,'Niv','Shavit','Haifa'),(410043,234628,'Yael','Shavit','Jerusalem');
+INSERT INTO `members` VALUES (31,100031,'Member31','Test','Israel'),(32,100032,'Member32','Test','Israel'),(33,100033,'Member33','Test','Israel'),(34,100034,'Member34','Test','Israel'),(35,100035,'Member35','Test','Israel'),(36,100036,'Member36','Test','Israel'),(37,100037,'Member37','Test','Israel'),(38,100038,'Member38','Test','Israel'),(39,100039,'Member39','Test','Israel'),(40,100040,'Member40','Test','Israel'),(41,100041,'Member41','Test','Israel'),(42,100042,'Member42','Test','Israel'),(43,100043,'Member43','Test','Israel'),(44,100044,'Member44','Test','Israel'),(45,100045,'Member45','Test','Israel'),(46,100046,'Member46','Test','Israel'),(47,100047,'Member47','Test','Israel'),(48,100048,'Member48','Test','Israel'),(49,100049,'Member49','Test','Israel'),(50,100050,'Member50','Test','Israel'),(51,196300,'natan','niemetz','blabla');
 /*!40000 ALTER TABLE `members` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -53,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-01-16 19:00:18
+-- Dump completed on 2026-01-17 12:49:34

@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
 --
--- Host: localhost    Database: bistro
+-- Host: 127.0.0.1    Database: bistro
 -- ------------------------------------------------------
 -- Server version	8.0.44
 
@@ -38,7 +38,7 @@ CREATE TABLE `staff_accounts` (
 
 LOCK TABLES `staff_accounts` WRITE;
 /*!40000 ALTER TABLE `staff_accounts` DISABLE KEYS */;
-INSERT INTO `staff_accounts` VALUES (410012,'manager1','hashed_manager_pw'),(410029,'employee1','hashed_employee_pw'),(410045,'ben','roAGdcK6xAY=:lt+sVJXYerimcfsHcj+gWFKxFlGLgADNrV95kiK6OxE=');
+INSERT INTO `staff_accounts` VALUES (51,'steve','z/xZizK5fWM=:S4GcgmkjM8FxCtKTOqY81fqw4DRcl24H9vFVOMcgGps=');
 /*!40000 ALTER TABLE `staff_accounts` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -51,4 +51,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-01-16 19:00:18
+-- Dump completed on 2026-01-17 12:49:37

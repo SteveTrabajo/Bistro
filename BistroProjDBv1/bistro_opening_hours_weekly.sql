@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
 --
--- Host: localhost    Database: bistro
+-- Host: 127.0.0.1    Database: bistro
 -- ------------------------------------------------------
 -- Server version	8.0.44
 
@@ -37,7 +37,6 @@ CREATE TABLE `opening_hours_weekly` (
 
 LOCK TABLES `opening_hours_weekly` WRITE;
 /*!40000 ALTER TABLE `opening_hours_weekly` DISABLE KEYS */;
-INSERT INTO `opening_hours_weekly` VALUES (1,'11:00:00','22:00:00'),(2,'11:00:00','22:00:00'),(3,'11:00:00','22:00:00'),(4,'11:00:00','22:00:00'),(5,'11:00:00','23:00:00'),(6,'12:00:00','23:00:00'),(7,'12:00:00','21:00:00');
 /*!40000 ALTER TABLE `opening_hours_weekly` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -50,4 +49,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-01-16 19:00:18
+-- Dump completed on 2026-01-17 12:49:36

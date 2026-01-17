@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
 --
--- Host: localhost    Database: bistro
+-- Host: 127.0.0.1    Database: bistro
 -- ------------------------------------------------------
 -- Server version	8.0.44
 
@@ -31,7 +31,7 @@ CREATE TABLE `users` (
   UNIQUE KEY `uq_users_phone` (`phoneNumber`),
   UNIQUE KEY `uq_users_email` (`email`),
   CONSTRAINT `chk_user_contact` CHECK (((`phoneNumber` is not null) or (`email` is not null)))
-) ENGINE=InnoDB AUTO_INCREMENT=410049 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,7 +40,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (410000,'0508707870','user0@example.com','GUEST'),(410001,'0553094235','user1@example.com','GUEST'),(410002,'0542322047','user2@example.com','GUEST'),(410003,'0555918715','user3@example.com','MEMBER'),(410004,'0554226067','user4@example.com','GUEST'),(410005,'0582166941','user5@example.com','MEMBER'),(410006,'0504905582','user6@example.com','GUEST'),(410007,'0507377459','user7@example.com','GUEST'),(410008,'0538606962','user8@example.com','MEMBER'),(410009,'0536960453','user9@example.com','MEMBER'),(410010,'0553871230','user10@example.com','GUEST'),(410011,'0555107245','user11@example.com','MEMBER'),(410012,'0584684531','user12@example.com','MANAGER'),(410013,'0586440561','user13@example.com','GUEST'),(410014,'0504842788','user14@example.com','MEMBER'),(410015,'0532110460','user15@example.com','GUEST'),(410016,'0526279418','user16@example.com','GUEST'),(410017,'0529375710','user17@example.com','GUEST'),(410018,'0548698256','user18@example.com','GUEST'),(410019,'0525443951','user19@example.com','GUEST'),(410020,'0525137722','user20@example.com','MEMBER'),(410021,'0588187926','user21@example.com','GUEST'),(410022,'0557700828','user22@example.com','GUEST'),(410023,'0534679591','user23@example.com','GUEST'),(410024,'0529548432','user24@example.com','GUEST'),(410025,'0542525206','user25@example.com','GUEST'),(410026,'0502839607','user26@example.com','MEMBER'),(410027,'0552065818','user27@example.com','GUEST'),(410028,'0547402509','user28@example.com','GUEST'),(410029,'0558852574','user29@example.com','EMPLOYEE'),(410030,'0555218028','user30@example.com','GUEST'),(410031,'0551192619','user31@example.com','GUEST'),(410032,'0582921859','user32@example.com','GUEST'),(410033,'0585476583','user33@example.com','MEMBER'),(410034,'0538294150','user34@example.com','GUEST'),(410035,'0528612220','user35@example.com','MEMBER'),(410036,'0553997281','user36@example.com','GUEST'),(410037,'0552785277','user37@example.com','MEMBER'),(410038,'0527273233','user38@example.com','MEMBER'),(410039,'0556438436','user39@example.com','MEMBER'),(410040,'0535017343','user40@example.com','GUEST'),(410041,'0505041154','user41@example.com','GUEST'),(410042,'0552321324','user42@example.com','MEMBER'),(410043,'0553109911','user43@example.com','MEMBER'),(410044,'0539852897','user44@example.com','GUEST'),(410045,'0505850700','benayaleib@gmail.com','MANAGER'),(410047,'0505850701',NULL,'GUEST'),(410048,'0505950700',NULL,'GUEST');
+INSERT INTO `users` VALUES (1,'0500000001','user1@mail.com','GUEST'),(2,'0500000002','user2@mail.com','GUEST'),(3,'0500000003','user3@mail.com','GUEST'),(4,'0500000004','user4@mail.com','GUEST'),(5,'0500000005','user5@mail.com','GUEST'),(6,'0500000006','user6@mail.com','GUEST'),(7,'0500000007','user7@mail.com','GUEST'),(8,'0500000008','user8@mail.com','GUEST'),(9,'0500000009','user9@mail.com','GUEST'),(10,'0500000010','user10@mail.com','GUEST'),(11,'0500000011','user11@mail.com','GUEST'),(12,'0500000012','user12@mail.com','GUEST'),(13,'0500000013','user13@mail.com','GUEST'),(14,'0500000014','user14@mail.com','GUEST'),(15,'0500000015','user15@mail.com','GUEST'),(16,'0500000016','user16@mail.com','GUEST'),(17,'0500000017','user17@mail.com','GUEST'),(18,'0500000018','user18@mail.com','GUEST'),(19,'0500000019','user19@mail.com','GUEST'),(20,'0500000020','user20@mail.com','GUEST'),(21,'0500000021','user21@mail.com','GUEST'),(22,'0500000022','user22@mail.com','GUEST'),(23,'0500000023','user23@mail.com','GUEST'),(24,'0500000024','user24@mail.com','GUEST'),(25,'0500000025','user25@mail.com','GUEST'),(26,'0500000026','user26@mail.com','GUEST'),(27,'0500000027','user27@mail.com','GUEST'),(28,'0500000028','user28@mail.com','GUEST'),(29,'0500000029','user29@mail.com','GUEST'),(30,'0500000030','user30@mail.com','GUEST'),(31,NULL,'member31@mail.com','MEMBER'),(32,NULL,'member32@mail.com','MEMBER'),(33,NULL,'member33@mail.com','MEMBER'),(34,NULL,'member34@mail.com','MEMBER'),(35,NULL,'member35@mail.com','MEMBER'),(36,NULL,'member36@mail.com','MEMBER'),(37,NULL,'member37@mail.com','MEMBER'),(38,NULL,'member38@mail.com','MEMBER'),(39,NULL,'member39@mail.com','MEMBER'),(40,NULL,'member40@mail.com','MEMBER'),(41,NULL,'member41@mail.com','MEMBER'),(42,NULL,'member42@mail.com','MEMBER'),(43,NULL,'member43@mail.com','MEMBER'),(44,NULL,'member44@mail.com','MEMBER'),(45,NULL,'member45@mail.com','MEMBER'),(46,NULL,'member46@mail.com','MEMBER'),(47,NULL,'member47@mail.com','MEMBER'),(48,NULL,'member48@mail.com','MEMBER'),(49,NULL,'member49@mail.com','MEMBER'),(50,NULL,'member50@mail.com','MEMBER'),(51,'0508562703','steve@admin.com','MANAGER');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -53,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-01-16 19:00:18
+-- Dump completed on 2026-01-17 12:49:36
