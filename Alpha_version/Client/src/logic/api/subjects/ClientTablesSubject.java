@@ -80,6 +80,34 @@ public class ClientTablesSubject {
 				BistroClientGUI.client.getTableCTRL().setUserAllocatedOrderForTable(null);
 			});
 		});
+		
+		router.on("tables", "remove.ok", msg -> {
+			BistroClient.awaitResponse = false;
+			Platform.runLater(() -> {
+				@SuppressWarnings("unchecked")
+				List<Table> tables = (List<Table>) msg.getData();
+				BistroClientGUI.client.getTableCTRL().fireAllTables(tables);
+				Platform.runLater(() -> {
+				Alert alert = new Alert(Alert.AlertType.INFORMATION);
+				alert.setTitle("Success");
+				alert.setHeaderText("Table removed successfully");
+				alert.setContentText("The table has been removed successfully.");
+				alert.showAndWait();
+				});
+			});
+		});
+		
+		router.on("tables", "remove.fail", msg -> {
+			BistroClient.awaitResponse = false;
+			Platform.runLater(() -> {
+			Alert alert = new Alert(Alert.AlertType.ERROR);
+			alert.setTitle("Error");
+			alert.setHeaderText("Could not remove table");
+			alert.setContentText("An error occurred while removing the table. Please try again later.");
+			alert.showAndWait();
+			});
+		});	
+		
 	}
 
 }
